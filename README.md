@@ -1,4 +1,4 @@
-# 🚀 Enterprise Default Project Template
+# 🚀 Enterprise Scaffold Project Template
 
 A production-ready, scalable project template designed to accelerate development of enterprise applications across multiple programming languages, incorporating industry best practices, design patterns, and modern development tools.
 
@@ -219,7 +219,7 @@ scaffold.py objetivo-migrate --file objetivo.yaml --no-auto
 ### Template Structure (Before Initialization)
 
 ```
-default-project/                 # Template repository
+scaffold-project/                 # Template repository
 ├── .copilot-rules.md           # Copilot rules (symlink to shared)
 ├── .copilot-git-rules.md       # Git rules (symlink to shared)
 ├── .copilot-strict-enforcement.md
@@ -248,7 +248,7 @@ default-project/                 # Template repository
 │   └── lib/                    # Python libraries
 ├── Makefile                    # 40+ automation commands
 ├── README.md                   # This file
-└── default-project.code-workspace
+└── scaffold-project.code-workspace
 ```
 
 ### After Initialization (`uv run scripts/scaffold.py`)
@@ -453,7 +453,7 @@ class IUserRepository(ABC):
 
 ```bash
 # 1. Clone este template
-git clone https://github.com/yvesmarinho/default-project.git meu-projeto
+git clone https://github.com/yvesmarinho/scaffold-project.git meu-projeto
 cd meu-projeto
 
 # 2. Executar o scaffold (interativo)
@@ -500,7 +500,7 @@ Key features:
 
 1. **Validates** project name (lowercase, hyphens allowed)
 2. **Configures symlinks** to shared Copilot rules
-3. **Replaces placeholders** (default-project → your-project)
+3. **Replaces placeholders** (scaffold-project → your-project)
 4. **Cleans** template-specific files
 5. **Reinitializes** Git with clean history
 6. **Runs** `make init` to create structure

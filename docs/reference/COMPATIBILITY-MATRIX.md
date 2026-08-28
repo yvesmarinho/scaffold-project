@@ -1,6 +1,6 @@
 # COMPATIBILITY-MATRIX — Perfis × Perfis
 
-> Matriz de compatibilidade entre todos os perfis do Enterprise Default Project Template.
+> Matriz de compatibilidade entre todos os perfis do Enterprise Scaffold Project Template.
 > Gerada automaticamente a partir dos campos `combines_with` e `excludes_with` dos descritores.
 >
 > **Atualizar** sempre que um novo perfil for adicionado ou a compatibilidade mudar.

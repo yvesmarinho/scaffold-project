@@ -20,7 +20,7 @@ Sistema de Deploy Automatizado para Plataforma Cloud
 ```
 ### Pasta do projeto
 ```
-/home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project/poc
+/home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project/poc
 ```
 
 ### Tipo de Iniciativa

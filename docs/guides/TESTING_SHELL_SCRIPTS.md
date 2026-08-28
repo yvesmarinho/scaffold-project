@@ -72,7 +72,7 @@ Criamos **smoke tests** (`tests/test_new_project_script.sh`) que validam:
 ### Executar os Testes
 
 ```bash
-cd /path/to/a-default-project
+cd /path/to/scaffold-project
 ./tests/test_new_project_script.sh
 ```
 

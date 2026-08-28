@@ -134,7 +134,7 @@ Cenário catastrófico:
 | `/memories/enterprise-ansible.md` | Deletar (outro projeto) | `memory delete` |
 | 37 arquivos `test-*.md` | Deletar via Python stdlib | `mcp_pylance_mcp_s_pylanceRunCodeSnippet` |
 | `/memories/repo/test-workspace*.md` | Deletar (dados obsoletos) | `memory delete` |
-| `/memories/a-default-project.md` | **Criar** com dados corretos | `memory create` |
+| `/memories/scaffold-project.md` | **Criar** com dados corretos | `memory create` |
 
 **Resultado esperado**: -3.420 tokens de ruído, +600 tokens de contexto correto
 
@@ -253,7 +253,7 @@ update-deps-safe      # Atualizar bandit, safety
 |---|------|------------|------------|-------|
 | **P0 — EXECUTAR IMEDIATAMENTE (< 24h)** |
 | 1 | Limpar memórias contaminadas | 🔴 P0 | 30 min | Agent |
-| 2 | Criar a-default-project.md | 🔴 P0 | 20 min | Agent |
+| 2 | Criar scaffold-project.md | 🔴 P0 | 20 min | Agent |
 | 3 | Test fixtures isolados | 🔴 P0 | 1h | Principal SE |
 | 4 | Passo 4.5 session-start | 🔴 P0 | 1h | SE: Architect |
 | 5 | Makefile update-deps-safe | 🔴 P0 | 30 min | DevOps |
@@ -304,7 +304,7 @@ update-deps-safe      # Atualizar bandit, safety
 **Checklist** (executar após Tasks 1-8):
 
 - [ ] Zero arquivos `test-*.md` em `.memory/memories/project/`
-- [ ] `/memories/a-default-project.md` existe e correto
+- [ ] `/memories/scaffold-project.md` existe e correto
 - [ ] `/memories/enterprise-ansible.md` NÃO existe
 - [ ] `pytest tests/` passa sem criar arquivos em `.memory/`
 - [ ] `make update-deps-safe` executa sem erros
@@ -325,7 +325,7 @@ update-deps-safe      # Atualizar bandit, safety
 2. ✅ Validar critérios de sucesso
 3. ✅ Commitar alterações:
    ```
-   feat(memory): Limpar contaminadas + criar a-default-project.md
+   feat(memory): Limpar contaminadas + criar scaffold-project.md
    feat(session-start): Adicionar Passo 4.5 deps check acionável
    test: Fixtures isolados para prevenir poluição
    feat(devops): Scripts memory-cleanup.py e validate-configs.py

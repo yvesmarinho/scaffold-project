@@ -65,7 +65,7 @@
   - **Estimate**: 30 min
   - **File**: docs/bugs/BUG-08-knowledge-harvester-missing-mcp-config.md
   - **Tasks**:
-    1. Copy .vscode/mcp.json from a-default-project
+    1. Copy .vscode/mcp.json from scaffold-project
     2. Update server paths to match workspace structure
     3. Restart VS Code to activate servers
     4. Test memory, sequential-thinking, GitHub, Pylance tools

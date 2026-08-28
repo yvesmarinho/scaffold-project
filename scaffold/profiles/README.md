@@ -1,6 +1,6 @@
 # Profile Descriptors
 
-Este diretório contém os descritores declarativos de cada perfil de domínio do Enterprise Default Project Template.
+Este diretório contém os descritores declarativos de cada perfil de domínio do Enterprise Scaffold Project Template.
 
 **Schema**: [docs/copilot/PROFILE-DESCRIPTOR-SCHEMA.md](../docs/copilot/PROFILE-DESCRIPTOR-SCHEMA.md)
 

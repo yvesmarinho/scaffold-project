@@ -1,6 +1,6 @@
 # Domínio: Infrastructure — Guia Humano
 
-> Documentação de referência para o domínio **infrastructure** do Enterprise Default Project Template.
+> Documentação de referência para o domínio **infrastructure** do Enterprise Scaffold Project Template.
 > Para o perfil machine-readable do Copilot, veja: [`.github/prompts/domain/devops-infrastructure.prompt.md`](../../.github/prompts/domain/devops-infrastructure.prompt.md)
 
 **Última atualização**: 2026-03-07

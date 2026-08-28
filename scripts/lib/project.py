@@ -1,7 +1,7 @@
 """
 lib/project.py — Criação de estrutura de pastas e arquivos base.
 
-Parte do scripts/scaffold.py — Enterprise Default Project Template.
+Parte do scripts/scaffold.py — Enterprise Scaffold Project Template.
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ from . import file_merge
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
-# Raiz do template (a-default-project/) deduzida a partir da localização deste módulo
+# Raiz do template (scaffold-project/) deduzida a partir da localização deste módulo
 _TEMPLATE_ROOT = Path(__file__).resolve().parent.parent.parent
 
 # ---------------------------------------------------------------------------
@@ -1072,7 +1072,7 @@ _PROJECT_CREATION_SUMMARY = """\
 **Projeto**: `{{PROJECT_NAME}}`
 **Título**: {{PROJECT_TITLE}}
 **Criado em**: {{CREATED_AT}}
-**Template**: Enterprise Default Project Template v1.0.0
+**Template**: Enterprise Scaffold Project Template v1.0.0
 
 ---
 
@@ -1362,7 +1362,7 @@ chmod +x .git/hooks/pre-commit
 
 ## 🎉 Projeto Pronto!
 
-Seu projeto foi criado com sucesso usando o **Enterprise Default Project Template v1.0.0**.
+Seu projeto foi criado com sucesso usando o **Enterprise Scaffold Project Template v1.0.0**.
 
 **Características principais:**
 - ✅ Estrutura completa de diretórios

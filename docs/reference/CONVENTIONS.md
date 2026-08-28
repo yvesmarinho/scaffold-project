@@ -1,6 +1,6 @@
 # Technical Conventions & Standards
 
-**Project Template**: Enterprise Default Project
+**Project Template**: Enterprise Scaffold Project
 **Version**: 1.3.0
 **Last Updated**: 2026-03-20
 

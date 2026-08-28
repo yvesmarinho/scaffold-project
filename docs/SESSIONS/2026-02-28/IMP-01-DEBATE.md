@@ -1,7 +1,7 @@
 # 🎭 IMP-01 — Debate de Funcionalidades: `scaffold.py`
 
 **Data**: 2026-02-28
-**Projeto**: Enterprise Default Project Template
+**Projeto**: Enterprise Scaffold Project Template
 **Issue**: IMP-01 — Criar `scripts/scaffold.py` — CLI Python (ponto único de entrada do projeto)
 **Status**: 🟠 Revisado (Tensão 2 resolvida — separação scaffold.py vs Makefile)
 **Referência de Decisões**: [DOMAIN-PROFILES-DECISIONS.md](../../copilot/DOMAIN-PROFILES-DECISIONS.md) — D-01, D-11, D-15, D-16, D-19

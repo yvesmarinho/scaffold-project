@@ -1,10 +1,10 @@
 # 📊 Session Report — 2026-03-01
 
 **Date**: 2026-03-01
-**Project**: Enterprise Default Project Template (`a-default-project`)
+**Project**: Enterprise Scaffold Project Template (`scaffold-project`)
 **Developer**: Yves Marinho
 **Branch**: `master`
-**Remote**: `https://github.com/yvesmarinho/default-project.git`
+**Remote**: `https://github.com/yvesmarinho/scaffold-project.git`
 
 ---
 
@@ -106,4 +106,4 @@
 
 ---
 
-*Session Report v1.0 | 2026-03-01 | a-default-project*
+*Session Report v1.0 | 2026-03-01 | scaffold-project*

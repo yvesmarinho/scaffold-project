@@ -1,7 +1,7 @@
 # Estrat\u00e9gia Universal de Merge para Arquivos JSON
 
 **Data**: 17 de maio de 2026
-**Projeto**: a-default-project (Enterprise Default Project Template)
+**Projeto**: scaffold-project (Enterprise Scaffold Project Template)
 **Status**: Implementado
 **Vers\u00e3o**: 2.0 (Arquitetural)
 

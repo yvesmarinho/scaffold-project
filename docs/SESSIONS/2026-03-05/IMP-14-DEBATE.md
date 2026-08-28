@@ -1,7 +1,7 @@
 # 🎭 IMP-14 — Debate: SpecKit no Projeto Filho + Novos Perfis de Conhecimento
 
 **Data**: 2026-03-05
-**Projeto**: Enterprise Default Project Template
+**Projeto**: Enterprise Scaffold Project Template
 **Issue**: IMP-14 — SpecKit instalado no projeto gerado + Novos Domain Profiles + Perfis Profissionais
 **Status**: 🟢 Completo — D-20..D-25 todas respondidas (2026-03-05)
 **Referência anterior**: [IMP-01-DEBATE.md](../2026-02-28/IMP-01-DEBATE.md) | [DOMAIN-PROFILES-DECISIONS.md](../../copilot/DOMAIN-PROFILES-DECISIONS.md) (D-01..D-19)
@@ -12,10 +12,10 @@
 
 ### O Problema Dual-Use
 
-O `a-default-project` tem **dois papéis simultâneos** que nunca foram separados explicitamente:
+O `scaffold-project` tem **dois papéis simultâneos** que nunca foram separados explicitamente:
 
 ```
-a-default-project/
+scaffold-project/
 │
 ├── [MODO META — Desenvolvimento do Template]
 │    Copilot + SpecKit ajudam a CONSTRUIR o template.
@@ -143,7 +143,7 @@ def copy_speckit(cfg: ProjectConfig) -> list[CreatedItem]:
     Copia agents, prompts e templates SpecKit do template para o projeto filho.
     Apenas o domain profile correspondente a cfg.domain é copiado.
     """
-    template_root = Path(__file__).parent.parent.parent  # raiz do a-default-project
+    template_root = Path(__file__).parent.parent.parent  # raiz do scaffold-project
     target = cfg.target_dir / cfg.project_name
     results = []
 
@@ -206,7 +206,7 @@ DOMAIN_PROFILE_MAP: dict[str, list[str]] = {
 
 **Decisão de arquitetura — `constitution.md` do template**:
 
-O template (`a-default-project`) tem sua própria `constitution.md` em `.specify/memory/constitution.md` com placeholders genéricos. Precisamos de dois documentos:
+O template (`scaffold-project`) tem sua própria `constitution.md` em `.specify/memory/constitution.md` com placeholders genéricos. Precisamos de dois documentos:
 
 | Arquivo | Escopo | Quem preenche |
 |---------|--------|--------------|
@@ -323,7 +323,7 @@ Template Source              → Destino no Filho
 
 #### FEATURE-12: `constitution.md` do Template Preenchida
 
-**Escopo**: Definir os princípios arquiteturais do próprio `a-default-project`
+**Escopo**: Definir os princípios arquiteturais do próprio `scaffold-project`
 
 **Princípios candidatos** (a validar com usuário):
 

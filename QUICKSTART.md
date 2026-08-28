@@ -1,4 +1,4 @@
-# QUICKSTART — Enterprise Default Project Template
+# QUICKSTART — Enterprise Scaffold Project Template
 
 > **3 minutos para o seu primeiro projeto.**
 > Guia direto ao ponto: pré-requisitos, primeiro uso e fluxos mais comuns.
@@ -11,8 +11,8 @@
 
 ```bash
 # Clone o template
-git clone <url-do-repositorio> a-default-project
-cd a-default-project
+git clone <url-do-repositorio> scaffold-project
+cd scaffold-project
 
 # Instalar comando global
 cp scripts/bin/new-project ~/.local/bin/new-project
@@ -94,8 +94,8 @@ echo $GITHUB_PERSONAL_ACCESS_TOKEN  # Deve mostrar seu token
 ## Passo 1 — Clonar o template
 
 ```bash
-git clone <url-do-repositorio> a-default-project
-cd a-default-project
+git clone <url-do-repositorio> scaffold-project
+cd scaffold-project
 ```
 
 ---
@@ -144,12 +144,12 @@ python scripts/scaffold.py --list-profiles --json
 > ```bash
 > # ✅ CORRETO — executar de /path/to/projetos/
 > cd /path/to/projetos/
-> python /path/to/a-default-project/scripts/scaffold.py --ci --name meu-projeto --domain programming --language python
+> python /path/to/scaffold-project/scripts/scaffold.py --ci --name meu-projeto --domain programming --language python
 > # Cria: /path/to/projetos/meu-projeto/
 >
 > # ❌ ERRADO — executar de /path/to/projetos/meu-projeto/
 > cd /path/to/projetos/meu-projeto/
-> python /path/to/a-default-project/scripts/scaffold.py --ci --name meu-projeto --domain programming --language python
+> python /path/to/scaffold-project/scripts/scaffold.py --ci --name meu-projeto --domain programming --language python
 > # Cria: /path/to/projetos/meu-projeto/meu-projeto/ (DUPLICADO!)
 > ```
 >
@@ -331,13 +331,13 @@ Para re-aplicar o template a um projeto já existente sem sobrescrever arquivos 
 
 ```bash
 cd /caminho/para/meu-projeto
-python /caminho/para/a-default-project/scripts/scaffold.py --upgrade
+python /caminho/para/scaffold-project/scripts/scaffold.py --upgrade
 ```
 
 Para forçar sobrescrita de arquivos com divergência:
 
 ```bash
-python /caminho/para/a-default-project/scripts/scaffold.py --upgrade --force
+python /caminho/para/scaffold-project/scripts/scaffold.py --upgrade --force
 ```
 
 ---

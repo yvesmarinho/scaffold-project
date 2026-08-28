@@ -14,7 +14,7 @@ Este guia orienta a adoção do sistema de documentação incremental de sessõe
 - ✅ Projetos existentes com histórico em `docs/SESSIONS/` ou similar
 - ✅ Times migrando de formato freeform para formato estruturado
 - ✅ Novos membros aprendendo o sistema de documentação
-- ✅ Projetos derivados do Enterprise Default Project Template
+- ✅ Projetos derivados do Enterprise Scaffold Project Template
 
 ---
 
@@ -46,7 +46,7 @@ yamllint --version
 | Prompts | `.github/prompts/session-*.prompt.md` | 🔵 Opcional |
 
 **Se algum arquivo estiver faltando:**
-- Copiar do Enterprise Default Project Template (versão mais recente)
+- Copiar do Enterprise Scaffold Project Template (versão mais recente)
 - Ou gerar via `scaffold.py --upgrade` (se disponível)
 
 ---

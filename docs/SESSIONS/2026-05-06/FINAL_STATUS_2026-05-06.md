@@ -5,7 +5,7 @@
 **Session Duration**: ~2.5h (09:00-11:30)
 **Session Type**: INFRASTRUCTURE + DOCUMENTATION
 **Last Commits**:
-- a-default-project: fd38dcb (session-manager agent update)
+- scaffold-project: fd38dcb (session-manager agent update)
 - enterprise-ansible: e64bf07 (VS Code modernization)
 
 ---
@@ -26,7 +26,7 @@
 5. ✅ Comprehensive documentation created for all changes
 
 ### Quality Metrics
-- **Commits**: 4 total (3 in a-default-project + 1 in enterprise-ansible)
+- **Commits**: 4 total (3 in scaffold-project + 1 in enterprise-ansible)
 - **Lines Added**: +2,524
 - **Lines Removed**: -188
 - **Net Change**: +2,336 lines
@@ -39,7 +39,7 @@
 
 ## 📊 Delivery Summary
 
-### Code Delivered (a-default-project)
+### Code Delivered (scaffold-project)
 
 | Category | Lines | Files | Status |
 |----------|-------|-------|--------|
@@ -58,7 +58,7 @@
 
 ### Commits Delivered
 
-#### a-default-project (Branch: 060-mini-engram-python)
+#### scaffold-project (Branch: 060-mini-engram-python)
 1. **f82a1ae** — feat(mcp): expandir servidores MCP de 2 para 4 por padrão
    - 11 files changed (+1263/-10)
    - MCP servers: memory, sequential-thinking, filesystem, github
@@ -115,7 +115,7 @@
 
 ## 🔄 Git Status at Session End
 
-### a-default-project
+### scaffold-project
 **Branch**: 060-mini-engram-python
 **Commits Ahead**: 3 (f82a1ae, 8796823, fd38dcb)
 **Commits Behind**: 0
@@ -125,7 +125,7 @@
 - Modified: docs/TODO.md (updated in this session end)
 - Modified: docs/SESSIONS/2026-05-06/DAILY_ACTIVITIES_2026-05-06.md (updated in this session end)
 - Modified: docs/SESSIONS/2026-05-06/FINAL_STATUS_2026-05-06.md (this file)
-- Modified: default-project.code-workspace (user edits)
+- Modified: scaffold-project.code-workspace (user edits)
 - Modified: docs/planning/lembrete.md (user edits)
 - Untracked: docs/GitHub Copilot.md (user created)
 
@@ -159,7 +159,7 @@
 
 **P2 MEDIUM**:
 1. **BUG-08: Knowledge-Harvester MCP Configuration** (30 min)
-   - Copy .vscode/mcp.json from a-default-project (now with 4 servers)
+   - Copy .vscode/mcp.json from scaffold-project (now with 4 servers)
    - Update server paths
    - Test all 4 MCP servers
    - **Note**: Project now benefits from expanded 4-server config

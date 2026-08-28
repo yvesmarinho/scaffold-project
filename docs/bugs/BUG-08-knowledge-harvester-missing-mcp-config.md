@@ -35,7 +35,7 @@ Sem a configuração MCP, o projeto não tem acesso a:
 
 ### 1. Criar `.vscode/mcp.json`
 
-Template mínimo baseado no a-default-project:
+Template mínimo baseado no scaffold-project:
 
 ```json
 {
@@ -103,7 +103,7 @@ code .  # Reabrir VS Code para carregar MCP
 
 ## 🔗 Referências
 
-- Template MCP: `a-default-project/.vscode/mcp.json`
+- Template MCP: `scaffold-project/.vscode/mcp.json`
 - Documentação MCP: [Model Context Protocol](https://modelcontextprotocol.io/)
 - Copilot instructions: `.github/copilot-instructions.md`
 

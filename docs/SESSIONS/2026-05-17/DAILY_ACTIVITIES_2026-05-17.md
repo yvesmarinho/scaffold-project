@@ -183,7 +183,7 @@
    ```
 
 **PR criado**:
-- **URL**: https://github.com/yvesmarinho/default-project/pull/21
+- **URL**: https://github.com/yvesmarinho/scaffold-project/pull/21
 - **Título**: 🚀 Recovery & GitHub Best Practices Implementation - 20 commits (P0+P1+P2)
 - **Descrição**: 200+ linhas com análise completa, commits, arquivos, segurança, rollback
 
@@ -253,7 +253,7 @@
      - Recomendação: ✅ APROVADO PARA MERGE
 
 3. **Comentário adicionado ao PR #21**:
-   - URL: https://github.com/yvesmarinho/default-project/pull/21#issuecomment-4472440836
+   - URL: https://github.com/yvesmarinho/scaffold-project/pull/21#issuecomment-4472440836
    - Explicação dos falsos positivos
    - Documentação das correções
    - Recomendação de aprovação
@@ -296,7 +296,7 @@
 - Auditoria de segurança GitGuardian
 
 **Artefatos principais**:
-1. ✅ PR #21 criado: https://github.com/yvesmarinho/default-project/pull/21
+1. ✅ PR #21 criado: https://github.com/yvesmarinho/scaffold-project/pull/21
 2. ✅ Tag backup: backup-before-pr-20260517-171024
 3. ✅ Documentação de segurança: SECURITY_AUDIT + SECURITY_REPORT_FINAL
 4. ✅ Correções de teste: 699/699 testes passando

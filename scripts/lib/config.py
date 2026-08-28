@@ -1,7 +1,7 @@
 """
 lib/config.py — ProjectConfig dataclass, constantes e paths.
 
-Parte do scripts/scaffold.py — Enterprise Default Project Template.
+Parte do scripts/scaffold.py — Enterprise Scaffold Project Template.
 """
 
 from __future__ import annotations

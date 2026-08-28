@@ -63,7 +63,7 @@
 
 **Decisions Made**:
 - Classification as Medium severity (not blocking but limits productivity)
-- Provided complete fix checklist and reference to a-default-project template
+- Provided complete fix checklist and reference to scaffold-project template
 
 ---
 

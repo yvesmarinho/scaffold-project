@@ -8,7 +8,7 @@
 
 ## 🎯 Objetivo
 
-Este guia define o estilo e as convenções para documentação incremental de sessões de desenvolvimento no Enterprise Default Project Template.
+Este guia define o estilo e as convenções para documentação incremental de sessões de desenvolvimento no Enterprise Scaffold Project Template.
 
 **Por que documentar incrementalmente?**
 - ✅ **Reprodutibilidade**: Qualquer pessoa pode reproduzir o trabalho seguindo os passos

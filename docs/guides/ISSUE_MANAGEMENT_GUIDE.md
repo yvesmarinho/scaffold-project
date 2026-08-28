@@ -1,6 +1,6 @@
 # 📋 Guia de Gestão de Issues e Features
 
-**Projeto**: Enterprise Default Project Template
+**Projeto**: Enterprise Scaffold Project Template
 **Criado em**: 2026-04-03
 **Público-alvo**: Desenvolvedores, DevOps, Mantenedores
 
@@ -377,4 +377,4 @@ Ao criar um Bug/Feature/Improvement:
 ---
 
 **Última atualização**: 2026-04-03
-**Mantenedor**: Enterprise Default Project Template Team
+**Mantenedor**: Enterprise Scaffold Project Template Team

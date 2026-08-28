@@ -3,7 +3,7 @@
 ## 📋 Session Overview
 
 **Date**: 2026-02-28
-**Project**: Enterprise Default Project Template (`a-default-project`)
+**Project**: Enterprise Scaffold Project Template (`scaffold-project`)
 **Branch**: master
 **Status**: ✅ Session Initialized
 **Session Type**: Recovery, Organização e Continuação
@@ -88,7 +88,7 @@
 
 ### Estado atual da raiz
 ```
-a-default-project/           ← Raiz LIMPA ✅
+scaffold-project/           ← Raiz LIMPA ✅
 ├── .copilot-rules.md        ← Regras Copilot (dotfile — permanece na raiz)
 ├── .git/                    ← Git (dotdir — permanece)
 ├── .github/                 ← GitHub agents/prompts (dotdir — permanece)
@@ -99,7 +99,7 @@ a-default-project/           ← Raiz LIMPA ✅
 ├── .vscode/                 ← VS Code config (dotdir — permanece)
 │   ├── mcp.json             ← MCP configurado
 │   └── settings.json
-├── default-project.code-workspace  ← VS Code workspace (permanece na raiz)
+├── scaffold-project.code-workspace  ← VS Code workspace (permanece na raiz)
 ├── docs/                    ← Toda documentação aqui
 ├── Makefile                 ← Build automation (permanece na raiz)
 ├── README.md                ← Documentação principal (permanece na raiz)

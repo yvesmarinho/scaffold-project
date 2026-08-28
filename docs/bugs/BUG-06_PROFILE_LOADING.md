@@ -106,7 +106,7 @@ O scaffold pode não estar comunicando corretamente qual profile usar para o Spe
 
 ### Estrutura de Arquivos Atual
 
-**Template** (a-default-project):
+**Template** (scaffold-project):
 ```
 .github/prompts/domain/
 ├── devops-programming.prompt.md      ✅ Existe

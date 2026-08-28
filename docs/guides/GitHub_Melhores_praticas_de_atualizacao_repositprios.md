@@ -543,6 +543,6 @@ Se você quiser, eu posso ir para o próximo nível e te entregar uma resposta b
 1. **plano de recuperação do repositório após perda de dados**
 2. **política de branching para o seu time**
 3. **passo a passo Git/GitHub para consolidar branches com segurança**
-4. **checklist de proteção do `main` no GitHub para o repositório `yvesmarinho/default-project`**
+4. **checklist de proteção do `main` no GitHub para o repositório `yvesmarinho/scaffold-project`**
 
 Se quiser, eu também posso montar um **playbook completo de incident response Git** em português.

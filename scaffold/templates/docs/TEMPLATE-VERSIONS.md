@@ -1,6 +1,6 @@
 # TEMPLATE-VERSIONS — Versionamento por Perfil
 
-> Rastreabilidade de versão, status e histórico de cada perfil do Enterprise Default Project Template.
+> Rastreabilidade de versão, status e histórico de cada perfil do Enterprise Scaffold Project Template.
 > Atualizar esta tabela sempre que um perfil receber nova versão ou mudar de status.
 
 **Schema de referência**: [docs/copilot/PROFILE-DESCRIPTOR-SCHEMA.md](copilot/PROFILE-DESCRIPTOR-SCHEMA.md)

@@ -1,7 +1,7 @@
 # 📅 Daily Activities — 28 de Fevereiro de 2026
 
 **Date**: 2026-02-28
-**Project**: Enterprise Default Project Template (`a-default-project`)
+**Project**: Enterprise Scaffold Project Template (`scaffold-project`)
 **Developer**: Yves Marinho
 **Branch**: master
 
@@ -151,7 +151,7 @@ Antes de implementar o `scaffold.py`, a estrutura dos arquivos que ele vai gerar
 ### Organização da Raiz
 
 ```
-a-default-project/           ← raiz limpa
+scaffold-project/           ← raiz limpa
 ├── .copilot-rules.md        ← atualizado (IMP-13) — arquivo único consolidado
 ├── .git/
 ├── .github/
@@ -161,7 +161,7 @@ a-default-project/           ← raiz limpa
 ├── .vscode/
 ├── Makefile
 ├── README.md
-├── default-project.code-workspace
+├── scaffold-project.code-workspace
 ├── docs/
 └── scripts/
 ```

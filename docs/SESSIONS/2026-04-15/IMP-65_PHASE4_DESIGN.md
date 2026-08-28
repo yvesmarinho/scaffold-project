@@ -446,7 +446,7 @@ patches:
 
 ## Benefits
 
-### For Template Maintainers (a-default-project)
+### For Template Maintainers (scaffold-project)
 - **Granular updates**: Update just "User Scenarios" block → all projects get it
 - **Reusability**: Share blocks across spec/plan/tasks templates
 - **Easier evolution**: Change small blocks, not massive files

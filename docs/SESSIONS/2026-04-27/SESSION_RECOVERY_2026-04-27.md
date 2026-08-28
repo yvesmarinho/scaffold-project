@@ -51,7 +51,7 @@
 - `poc/tst-python-fastapi` (removed)
 
 **Untracked**:
-- `default-project-structure.txt`
+- `scaffold-project-structure.txt`
 - `docs/Scaffold - projetos semelhantes.md`
 
 **Recent Commits** (git log --oneline -5):

@@ -1,7 +1,7 @@
 # Debate Consolidado: Remoção de Automações CI/CD
 
 **Data:** 2026-03-31
-**Projeto:** a-default-project — Enterprise Default Project Template
+**Projeto:** scaffold-project — Enterprise Scaffold Project Template
 **Decisão em debate:** Remover temporariamente automações (GitHub Actions workflows) durante fase de desenvolvimento
 
 ---

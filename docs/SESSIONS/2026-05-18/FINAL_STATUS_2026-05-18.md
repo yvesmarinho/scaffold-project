@@ -96,7 +96,7 @@
 
 ```
 4b154d5  docs(bugs): Adicionar BUG-001 scaffold objetivo-init issues
-795c22a  fix(build): Adicionar src/default_project para corrigir build Hatchling
+795c22a  fix(build): Adicionar src/scaffold_project para corrigir build Hatchling
 b115f4b  docs(session): Documentar correção workflow dependency-check
 c6c875b  fix(ci): Corrigir erros de sintaxe YAML no workflow dependency-check
 ea94335  docs(session): Atualizar DAILY_ACTIVITIES com ações recomendadas
@@ -148,7 +148,7 @@ bff780b  feat(memory,deps,tests): Implementar IMP-65 P0 — Limpeza + deps check
 ### P0 Tasks: 8/8 ✅ (100%)
 
 1. ✅ Deletar memórias contaminadas
-2. ✅ Criar /memories/a-default-project.md
+2. ✅ Criar /memories/scaffold-project.md
 3. ✅ Test fixtures isolados
 4. ✅ Passo 4.5 session-start (deps check)
 5. ✅ Makefile targets (update-deps-safe, etc)
@@ -207,7 +207,7 @@ bff780b  feat(memory,deps,tests): Implementar IMP-65 P0 — Limpeza + deps check
    - Detecta vulnerabilidades
    - Exit 1 se CVEs encontrados
 
-6. **src/default_project/__init__.py**
+6. **src/scaffold_project/__init__.py**
    - Fix para build Hatchling
    - Exporta __version__ e __author__
 
@@ -414,7 +414,7 @@ bff780b  feat(memory,deps,tests): Implementar IMP-65 P0 — Limpeza + deps check
 - [BUG-001](../bugs/BUG-001-scaffold-objetivo-init-issues.md)
 
 ### Projeto
-- Repositório: https://github.com/yvesmarinho/default-project
+- Repositório: https://github.com/yvesmarinho/scaffold-project
 - Branch: master
 - Versão: v1.6.0+
 - Última sessão: 2026-05-18

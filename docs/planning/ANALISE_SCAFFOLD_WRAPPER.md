@@ -22,8 +22,8 @@ Testes realizados:
 
 ```bash
 #!/bin/bash
-PYTHON_EXE="/home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project/.venv/bin/python"
-SCAFFOLD_PY="/home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project/scripts/scaffold.py"
+PYTHON_EXE="/home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project/.venv/bin/python"
+SCAFFOLD_PY="/home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project/scripts/scaffold.py"
 
 # Verificações e exec...
 exec "$PYTHON_EXE" "$SCAFFOLD_PY" "$@"
@@ -51,7 +51,7 @@ exec "$PYTHON_EXE" "$SCAFFOLD_PY" "$@"
 #!/bin/bash
 # scaffold wrapper v2.0 — usa uv run (mais robusto)
 
-TEMPLATE_ROOT="/home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project"
+TEMPLATE_ROOT="/home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project"
 SCAFFOLD_PY="$TEMPLATE_ROOT/scripts/scaffold.py"
 
 # Verificar uv
@@ -118,7 +118,7 @@ cd /home && scaffold-wrapper-v2.sh --help
 cp ~/.local/bin/scaffold ~/.local/bin/scaffold.v1.backup
 
 # Copiar nova versão
-cp /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project/tmp/scaffold-wrapper-v2.sh \
+cp /home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project/tmp/scaffold-wrapper-v2.sh \
    ~/.local/bin/scaffold
 
 # Dar permissão de execução

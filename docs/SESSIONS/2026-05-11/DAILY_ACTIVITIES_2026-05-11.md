@@ -2,7 +2,7 @@
 
 **Branch**: 060-mini-engram-python
 **Session Start**: 2026-05-11 (time tracking initiated)
-**Project**: Enterprise Default Project Template (a-default-project)
+**Project**: Enterprise Scaffold Project Template (scaffold-project)
 
 ---
 
@@ -23,7 +23,7 @@
 ### Pending from Previous Sessions
 - **IMP-65**: merge-template command needs debugging (not blocking other features)
 - **IMP-59**: Mini-Engram Memory System in progress (branch 060-mini-engram-python)
-- **Uncommitted**: default-project.code-workspace modified
+- **Uncommitted**: scaffold-project.code-workspace modified
 
 ### Tasks from lembrete.md
 1. **IMPORTANT**: Scaffold option selection - change to letters/numbers (not full text)
@@ -598,7 +598,7 @@ Usuário solicitou workflow explicando como o sistema de scaffold analisa arquiv
 **Context**:
 Usuário questionou linha 44 da documentação: "Template completo `.specify/templates/*.md`" e perguntou:
 1. Só estamos analisando templates do `.specify`?
-2. Demais templates do default-project não são analisados?
+2. Demais templates do scaffold-project não são analisados?
 3. `.copilot-rules*` não tem análise para identificar nova regra?
 
 **Discovery**:
@@ -639,7 +639,7 @@ Ao analisar código fonte (`scripts/lib/file_merge.py`, `scripts/lib/project.py`
    - **Solução proposta**: Pseudocódigo de implementação
 
 6. ✅ **Sistema de Feedback: Projeto → Template**
-   - Identificado gap: Não há fluxo reverso (projeto → default-project)
+   - Identificado gap: Não há fluxo reverso (projeto → scaffold-project)
    - Proposto comando `scaffold.py extract-rule`
    - Workflow de contribuição documentado
 
@@ -696,10 +696,10 @@ Ao analisar código fonte (`scripts/lib/file_merge.py`, `scripts/lib/project.py`
 **Time**: 13:45-14:15 BRT
 **Duration**: ~30 min
 **Type**: Analysis + Documentation
-**Objective**: Analisar TODOS os componentes gerados pelo default-project para identificar requisitos completos de merge
+**Objective**: Analisar TODOS os componentes gerados pelo scaffold-project para identificar requisitos completos de merge
 
 **Context**:
-Usuário identificou gap crítico: "em 'Implementação Priorizada:' ainda falta atualização do session.manager, analise demais componentes gerados por `default-project` para atualização no destino"
+Usuário identificou gap crítico: "em 'Implementação Priorizada:' ainda falta atualização do session.manager, analise demais componentes gerados por `scaffold-project` para atualização no destino"
 
 **Discovery - Análise de `scripts/lib/project.py`**:
 ```python
@@ -1687,7 +1687,7 @@ Usuário solicitou workflow completo de upgrade:
 
 4. ✅ **Complementação manual**
    - **Arquivo copiado**: pyproject.toml (2,552 bytes)
-   - **Source**: a-default-project/pyproject.toml
+   - **Source**: scaffold-project/pyproject.toml
    - **Destination**: teste_projetos/pyproject.toml
    - **Método**: Python shutil.copy2 (preserva metadata)
    - **Validação**: ✅ Arquivo presente, 100 linhas

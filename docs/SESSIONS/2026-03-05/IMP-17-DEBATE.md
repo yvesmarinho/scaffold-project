@@ -1,7 +1,7 @@
 # 🎭 IMP-17 — Debate: Issue Templates + Script MCP + VS Code Perfil/Workspace
 
 **Data**: 2026-03-05
-**Projeto**: Enterprise Default Project Template
+**Projeto**: Enterprise Scaffold Project Template
 **Issue**: IMP-17 — GitHub Issue Templates · Script de carga do MCP · Geração de perfil e workspace VS Code
 **Status**: 🔵 Em debate — D-26..D-34 abertas
 **Referência anterior**: [IMP-14-DEBATE.md](IMP-14-DEBATE.md) | [TODO.md](../../TODO.md)
@@ -21,7 +21,7 @@ O template gera um repositório GitHub funcional, mas sem `.github/ISSUE_TEMPLAT
 aberta no repositório filho é texto livre, sem estrutura. Resultado: reports de bug com informações
 insuficientes, pedidos de feature sem contexto de decisão.
 
-O template **em si** (a-default-project) também não tem Issue Templates — as IMPs são gerenciadas
+O template **em si** (scaffold-project) também não tem Issue Templates — as IMPs são gerenciadas
 manualmente em arquivos Markdown de sessão.
 
 #### Gap G2 — MCP precisa de configuração manual de ambiente
@@ -592,7 +592,7 @@ Prefixo `make:` é o padrão:
 
 ### SPEC-13 — Issue Templates em português ou inglês?
 
-O `a-default-project` é bilíngue na prática (README em PT-BR, código em EN).
+O `scaffold-project` é bilíngue na prática (README em PT-BR, código em EN).
 Issue Templates devem ser em **inglês** para maximizar colaboração e compatibilidade com
 integrações (GitHub Actions, Copilot Workspace, issue parsers).
 

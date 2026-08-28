@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the **Enterprise Default Project Template** will be documented in this file.
+All notable changes to the **Enterprise Scaffold Project Template** will be documented in this file.
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning follows [Semantic Versioning 2.0.0](https://semver.org/).
@@ -721,12 +721,12 @@ Impact:
 - `scripts/setup-project-links.sh` — gestão de symlinks `.copilot-*`
 - `scripts/check-project-links.sh` — verificação de symlinks
 - `docs/INDEX.md`, `docs/TODO.md` — documentação incremental
-- `default-project.code-workspace` — workspace VS Code
+- `scaffold-project.code-workspace` — workspace VS Code
 
 ---
 
-[Unreleased]: https://github.com/vyajobs/a-default-project/compare/v1.3.0...HEAD
-[1.3.0]: https://github.com/vyajobs/a-default-project/compare/v1.2.0...v1.3.0
-[1.2.0]: https://github.com/vyajobs/a-default-project/compare/v1.1.0...v1.2.0
-[1.1.0]: https://github.com/vyajobs/a-default-project/compare/v1.0.0...v1.1.0
-[1.0.0]: https://github.com/vyajobs/a-default-project/releases/tag/v1.0.0
+[Unreleased]: https://github.com/yvesmarinho/scaffold-project/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/yvesmarinho/scaffold-project/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/yvesmarinho/scaffold-project/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/yvesmarinho/scaffold-project/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/yvesmarinho/scaffold-project/releases/tag/v1.0.0

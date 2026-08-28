@@ -10,7 +10,7 @@
 
 ## 1. Visão Geral
 
-O `scaffold.py` é o **ponto único de entrada** para inicialização e scaffolding de projetos baseados no template `a-default-project`. Substitui três shell scripts (`init-new-project.sh`, `setup-project-links.sh`, `check-project-links.sh`) com uma implementação Python modular, interativa e testável.
+O `scaffold.py` é o **ponto único de entrada** para inicialização e scaffolding de projetos baseados no template `scaffold-project`. Substitui três shell scripts (`init-new-project.sh`, `setup-project-links.sh`, `check-project-links.sh`) com uma implementação Python modular, interativa e testável.
 
 ### 1.1 Objetivos
 

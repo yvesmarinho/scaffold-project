@@ -1,7 +1,7 @@
 # Plano de Ação: Correção de Bug de Duplicação em JSON Merge
 
 **Data de Criação**: 17 de maio de 2026
-**Projeto**: a-default-project
+**Projeto**: scaffold-project
 **Branch**: 061-recovery-017-correction (NÃO criar nova branch)
 **Bug**: Duplicação de arrays em `.vscode/extensions.json`
 **Debate Técnico**: [docs/debates/2026-05-17-json-merge-duplication-bug.md](../debates/2026-05-17-json-merge-duplication-bug.md)

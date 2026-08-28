@@ -1,7 +1,7 @@
 # Debate Técnico: Bug de Duplicação no Sistema de Merge JSON
 
 **Data**: 17 de maio de 2026
-**Projeto**: a-default-project (Enterprise Default Project Template)
+**Projeto**: scaffold-project (Enterprise Scaffold Project Template)
 **Branch**: 061-recovery-017-correction
 **Bug ID**: Duplicação de arrays em `.vscode/extensions.json`
 **Participantes**: Software Engineer Agent, Principal Software Engineer, DevOps Expert, Python MCP Server Expert

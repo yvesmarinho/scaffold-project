@@ -3,7 +3,7 @@
 # ==============================================================================
 # Script de Inicialização de Novo Projeto
 # ==============================================================================
-# Este script configura um novo projeto a partir do template default-project
+# Este script configura um novo projeto a partir do template scaffold-project
 #
 # Uso: ./scripts/init-new-project.sh <nome-do-projeto>
 # Exemplo: ./scripts/init-new-project.sh my-awesome-app
@@ -176,7 +176,7 @@ replace_placeholders() {
     local files_to_update=(
         "README.md"
         "setup.py"
-        "default-project.code-workspace"
+        "scaffold-project.code-workspace"
         ".env.example"
         "docker/Dockerfile"
         "docker-compose.yml"
@@ -189,18 +189,18 @@ replace_placeholders() {
             print_info "Atualizando: $file"
 
             # Substitui placeholders
-            sed -i "s/default-project/$project_name/g" "$file"
-            sed -i "s/DEFAULT_PROJECT/$project_name_upper/g" "$file"
-            sed -i "s/Default Project/$project_name_title/g" "$file"
-            sed -i "s/default_project/$project_name_snake/g" "$file"
+            sed -i "s/scaffold-project/$project_name/g" "$file"
+            sed -i "s/SCAFFOLD_PROJECT/$project_name_upper/g" "$file"
+            sed -i "s/Scaffold Project/$project_name_title/g" "$file"
+            sed -i "s/scaffold_project/$project_name_snake/g" "$file"
 
             print_success "Atualizado: $file"
         fi
     done
 
     # Renomeia workspace file
-    if [[ -f "default-project.code-workspace" ]]; then
-        mv "default-project.code-workspace" "$project_name.code-workspace"
+    if [[ -f "scaffold-project.code-workspace" ]]; then
+        mv "scaffold-project.code-workspace" "$project_name.code-workspace"
         print_success "Workspace renomeado: $project_name.code-workspace"
     fi
 }
@@ -259,7 +259,7 @@ reinitialize_git() {
     print_info "Inicializando novo repositório Git..."
     git init
     git add .
-    git commit -m "feat: Initial commit from default-project template
+    git commit -m "feat: Initial commit from scaffold-project template
 
 Created new project using enterprise default template
 - Configured shared Copilot rules via symlinks
@@ -343,7 +343,7 @@ main() {
     echo ""
     echo -e "${YELLOW}Atenção: Este script irá:${NC}"
     echo "  1. Configurar symlinks para arquivos compartilhados"
-    echo "  2. Substituir 'default-project' por '$project_name' em todos os arquivos"
+    echo "  2. Substituir 'scaffold-project' por '$project_name' em todos os arquivos"
     echo "  3. Remover histórico Git e criar novo repositório"
     echo "  4. Limpar arquivos específicos do template"
     echo ""

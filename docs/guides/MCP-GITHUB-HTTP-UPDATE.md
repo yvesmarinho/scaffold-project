@@ -390,5 +390,5 @@ cp .vscode/mcp.json.backup .vscode/mcp.json
 ---
 
 **Última atualização**: 2026-05-18
-**Autor**: Enterprise Default Project Template Team
+**Autor**: Enterprise Scaffold Project Template Team
 **Status**: ✅ PRODUCTION READY

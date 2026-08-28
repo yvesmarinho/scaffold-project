@@ -1,7 +1,7 @@
 # 🧪 Makefile Tests Report - 28 de Janeiro de 2026
 
 **Date**: 2026-01-28
-**Project**: Enterprise Default Project Template
+**Project**: Enterprise Scaffold Project Template
 **Test Duration**: ~30 minutes
 **Status**: ✅ PASSED (with 1 fix applied)
 
@@ -153,7 +153,7 @@ jobs:
 ## 📁 Complete File Structure Created
 
 ```
-a-default-project/
+scaffold-project/
 ├── .editorconfig          ✅ Created
 ├── .env.example           ✅ Created
 ├── .gitignore             ✅ Updated (added .secrets/)

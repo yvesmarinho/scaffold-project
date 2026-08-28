@@ -8,7 +8,7 @@
 
 ## Overview
 
-This guide covers **template validation** and **scaffold logging** for the Enterprise Default Project Template. These tools ensure templates are valid before scaffold and maintain a history of all projects created.
+This guide covers **template validation** and **scaffold logging** for the Enterprise Scaffold Project Template. These tools ensure templates are valid before scaffold and maintain a history of all projects created.
 
 **Components**:
 - `scripts/validate-templates.py` — Validate `.specify/templates/`
@@ -632,7 +632,7 @@ git clone git@github.com:user/new-project.git
 cd new-project
 
 # 3. Scaffold
-uv run ../a-default-project/scripts/scaffold.py new \
+uv run ../scaffold-project/scripts/scaffold.py new \
   --name=new-project \
   --domain=programming \
   --language=python
@@ -659,7 +659,7 @@ make help  # ✅ Should work
 mkdir new-project && cd new-project
 
 # 2. Scaffold
-uv run ../a-default-project/scripts/scaffold.py new
+uv run ../scaffold-project/scripts/scaffold.py new
 
 # 3. Push to GitHub
 git remote add origin git@github.com:user/new-project.git
@@ -680,7 +680,7 @@ git clone git@github.com:company/another-template.git my-project
 cd my-project
 
 # 2. Scaffold our template
-uv run ../a-default-project/scripts/scaffold.py new
+uv run ../scaffold-project/scripts/scaffold.py new
 
 # ✅ RESULT:
 # - Essential patterns MERGED (security)

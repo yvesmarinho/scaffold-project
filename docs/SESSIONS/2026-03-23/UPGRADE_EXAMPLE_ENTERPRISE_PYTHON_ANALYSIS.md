@@ -151,7 +151,7 @@ profiles_applied: []
 
 ```bash
 # Do diretório do template
-cd /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project
+cd /home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project
 
 # Executar upgrade
 python scripts/scaffold.py upgrade \
@@ -370,7 +370,7 @@ git commit -m "chore: remove deprecated session agents (migrated to session-mana
 
 ## 🎯 Conclusão
 
-O processo de upgrade do Enterprise Default Project Template foi projetado para ser:
+O processo de upgrade do Enterprise Scaffold Project Template foi projetado para ser:
 - **Seguro** — preserva customizações e histórico
 - **Gradual** — permite transição suave
 - **Versionado** — rastreável via `.scaffold-state.yaml`

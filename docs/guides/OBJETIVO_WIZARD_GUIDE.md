@@ -336,7 +336,7 @@ FileNotFoundError: Template not found: poc/objetivo-v2-template-base.md
 
 **Solução:**
 ```bash
-cd /path/to/a-default-project
+cd /path/to/scaffold-project
 scaffold.py objetivo-init
 ```
 

@@ -1,7 +1,7 @@
 """
 lib/links.py — Setup e verificação de symlinks .copilot-*.
 
-Parte do scripts/scaffold.py — Enterprise Default Project Template.
+Parte do scripts/scaffold.py — Enterprise Scaffold Project Template.
 """
 
 from __future__ import annotations

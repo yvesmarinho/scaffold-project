@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# new-project — Wrapper conveniente para Enterprise Default Project Template scaffold
+# new-project — Wrapper conveniente para Enterprise Scaffold Project Template scaffold
 #
 # Uso:
 #   new-project                          # Modo interativo
@@ -33,7 +33,7 @@ else
 fi
 
 # Caminho do template (ajustar conforme sua instalação)
-TEMPLATE_DIR="${HOME}/Documentos/DevOps/Vya-Jobs/a-default-project"
+TEMPLATE_DIR="${HOME}/Documentos/DevOps/Projetos/scaffold-project"
 SCAFFOLD_SCRIPT="${TEMPLATE_DIR}/scripts/scaffold.py"
 
 # Validar que o template existe

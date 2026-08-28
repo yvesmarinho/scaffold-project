@@ -194,10 +194,10 @@ O bug foi **100% corrigido**:
 
 ## 📝 PRÓXIMOS PASSOS
 
-### 1. Commit no Template (a-default-project)
+### 1. Commit no Template (scaffold-project)
 
 ```bash
-cd /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project
+cd /home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project
 
 git add scripts/lib/project.py scripts/lib/flows/upgrade.py
 

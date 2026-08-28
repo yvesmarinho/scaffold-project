@@ -858,7 +858,7 @@ Se quiser, eu também posso fazer os **3 em sequência**.
 
 ## Complemento — Resolução de lacunas (sessão /grill-me, 01/07/2026)
 
-Este documento foi originalmente escrito com exemplos específicos do projeto `portfolio-generator`. Como `a-default-project` é o scaffold genérico que gera outros projetos (via `objetivo-init-minimal.yaml`), as lacunas e ambiguidades abaixo foram interrogadas e resolvidas para que o conteúdo acima sirva de **framework mínimo reutilizável**, não apenas de estudo de caso.
+Este documento foi originalmente escrito com exemplos específicos do projeto `portfolio-generator`. Como `scaffold-project` é o scaffold genérico que gera outros projetos (via `objetivo-init-minimal.yaml`), as lacunas e ambiguidades abaixo foram interrogadas e resolvidas para que o conteúdo acima sirva de **framework mínimo reutilizável**, não apenas de estudo de caso.
 
 ### 1. Conflito: tratamento de erro (CLAUDE.md global x recomendação deste guia)
 

@@ -275,7 +275,7 @@ Complementa testes automatizados (test_scaffold_upgrade_merge_strategy.py) com c
 1. **Criação do projeto teste**:
    ```bash
    cd ~/Documentos/DevOps/Vya-Jobs/
-   ./a-default-project/scripts/scaffold.py --new bug16-manual-test
+   ./scaffold-project/scripts/scaffold.py --new bug16-manual-test
    ```
    - Resultado: 158 arquivos criados
 
@@ -296,7 +296,7 @@ Complementa testes automatizados (test_scaffold_upgrade_merge_strategy.py) com c
 3. **Execução do upgrade**:
    ```bash
    cd bug16-manual-test
-   ../a-default-project/scripts/scaffold.py upgrade --force --ci
+   ../scaffold-project/scripts/scaffold.py upgrade --force --ci
    ```
    - Output: "21 criado(s) | 125 pulado(s)"
    - Merges: settings.json, mcp.json, extensions.json, tasks.json, launch.json (todos com backups)

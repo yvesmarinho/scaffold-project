@@ -29,7 +29,7 @@ IMP-65 Template Synchronization System was validated through **8 comprehensive r
 
 **Pass Rate**: 100% (8/8)
 **Execution Time**: ~12h total (scenarios 1-5: 9h, scenarios 6-8: 3h)
-**Environment**: Production (a-default-project)
+**Environment**: Production (scaffold-project)
 
 ---
 

@@ -55,7 +55,7 @@ grep -n "Passo 6.5" test-workspace-fix/.github/prompts/session-start.prompt.md
 
 ### Comparação com Projeto Principal
 
-**Projeto principal** (`a-default-project`):
+**Projeto principal** (`scaffold-project`):
 - ✅ Passo 6.5 presente (~60 linhas de documentação)
 - ✅ Verificação de session-index
 - ✅ Inicialização automática do time-tracker
@@ -92,7 +92,7 @@ grep -n "Passo 6.5" test-workspace-fix/.github/prompts/session-start.prompt.md
    import shutil
    from pathlib import Path
 
-   src = Path("a-default-project/.github/prompts/session-start.prompt.md")
+   src = Path("scaffold-project/.github/prompts/session-start.prompt.md")
    dst = Path("test-workspace-fix/.github/prompts/session-start.prompt.md")
 
    shutil.copy2(src, dst)

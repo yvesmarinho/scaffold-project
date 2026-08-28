@@ -16,7 +16,7 @@
 - State file: `.scaffold-state.yaml` with version tracking
 - All templates at version 1.0.0
 
-**Upstream**: `a-default-project/.specify/templates/`
+**Upstream**: `scaffold-project/.specify/templates/`
 - Source templates for comparison
 - Version: 1.0.0 (matching local)
 
@@ -62,8 +62,8 @@ Template Drift Detection
 **Result**: ✅ **PASS**
 - Paths resolved correctly to absolute paths
 - No errors about missing templates
-- Upstream path: `/home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project/.specify/templates`
-- Local path: `/home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project/poc/tst-python-fastapi/.specify/templates`
+- Upstream path: `/home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project/.specify/templates`
+- Local path: `/home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project/poc/tst-python-fastapi/.specify/templates`
 
 **BUG-02 Fix Confirmed**: ✅ Path resolution works from any directory
 

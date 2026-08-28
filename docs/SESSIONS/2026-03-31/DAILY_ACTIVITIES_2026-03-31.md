@@ -1,6 +1,6 @@
 # Daily Activities — 2026-03-31
 
-**Project:** a-default-project — Enterprise Default Project Template
+**Project:** scaffold-project — Enterprise Scaffold Project Template
 **Session Date:** 2026-03-31 (Monday)
 **Start Time:** Session initialization
 **Branch:** master
@@ -105,11 +105,11 @@ Analisados **13 PRs** do Dependabot:
 **Ações executadas:**
 1. ✅ PR #12 (codeql-action v3→v4): Comentado e preparado para fechamento
    - Mudança já aplicada manualmente em commit 05165de
-   - [Comentário adicionado no PR](https://github.com/yvesmarinho/default-project/pull/12#issuecomment-4162582955)
+   - [Comentário adicionado no PR](https://github.com/yvesmarinho/scaffold-project/pull/12#issuecomment-4162582955)
 
 2. ❌ PR #9 (apache-airflow 2→3): Bloqueado com justificativa
    - Breaking changes críticos - requer plano de migração
-   - [Comentário detalhado no PR](https://github.com/yvesmarinho/default-project/pull/9#issuecomment-4162584615)
+   - [Comentário detalhado no PR](https://github.com/yvesmarinho/scaffold-project/pull/9#issuecomment-4162584615)
    - Issue de migração a ser criada: "Airflow 3.x Migration Plan"
 
 3. ✅ PRs #8, #10, #11, #13: Análise documentada

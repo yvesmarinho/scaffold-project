@@ -739,7 +739,7 @@ constrain:
 {
   "$id": "https://schema.enterprise-template.io/objetivo-v2.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Enterprise Default Project Template — Objetivo v2.0",
+  "title": "Enterprise Scaffold Project Template — Objetivo v2.0",
   "description": "Especificação de projeto para geração automática",
   "type": "object",
   "required": ["version", "project", "express"],
@@ -1622,7 +1622,7 @@ await api.users.create({ email: 'novo@empresa.com' });
 {
   "$id": "https://schema.enterprise-template.io/objetivo-v2.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Enterprise Default Project Template — Objetivo v2.0",
+  "title": "Enterprise Scaffold Project Template — Objetivo v2.0",
   "description": "Especificação de projeto para geração automática via scaffold.py + Copilot",
   "version": "2.0.0",
   "type": "object",

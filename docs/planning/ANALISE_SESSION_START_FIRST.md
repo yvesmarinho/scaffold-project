@@ -48,7 +48,7 @@
 | 16 | MCP servers iniciados | ⚠️ | **Instruído mas NÃO confirmado** — usuário precisa executar "MCP: Refresh Servers" |
 | 19 | Domínio declarado + Profile carregado | ⚠️ | **NÃO documentado** — falta Passo 10 do ritual |
 
-**Observação crítica**: Itens 13, 14, 15 são exatamente os bugs **BUG-11** e **BUG-12** que foram corrigidos em 2026-05-13 no projeto `a-default-project`. O projeto `test-workspace-fix` foi criado ANTES dessas correções (scaffold 2026-04-27), portanto **não possui os scripts** necessários.
+**Observação crítica**: Itens 13, 14, 15 são exatamente os bugs **BUG-11** e **BUG-12** que foram corrigidos em 2026-05-13 no projeto `scaffold-project`. O projeto `test-workspace-fix` foi criado ANTES dessas correções (scaffold 2026-04-27), portanto **não possui os scripts** necessários.
 
 ---
 

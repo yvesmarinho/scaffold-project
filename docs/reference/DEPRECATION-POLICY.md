@@ -1,4 +1,4 @@
-# Política de Depreciação — Enterprise Default Project Template
+# Política de Depreciação — Enterprise Scaffold Project Template
 
 > Este documento define os critérios, períodos de aviso e procedimentos para depreciar
 > perfis, campos de descriptor e artefatos de template.

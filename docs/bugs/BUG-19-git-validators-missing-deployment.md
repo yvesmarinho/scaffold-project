@@ -53,7 +53,7 @@ ModuleNotFoundError: No module named 'lib.git_validators'
 
 ### 2. Estado da Pasta scripts/lib/
 
-**Projeto principal** (`a-default-project`):
+**Projeto principal** (`scaffold-project`):
 ```bash
 scripts/lib/
 ├── __init__.py
@@ -114,7 +114,7 @@ from lib.git_validators import validate_branch_name, format_validation_errors
 import shutil
 from pathlib import Path
 
-src = Path("/home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project/scripts/lib/git_validators.py")
+src = Path("/home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project/scripts/lib/git_validators.py")
 dst = Path("/home/yves_marinho/DevOps/Projetos/test-workspace-fix/scripts/lib/git_validators.py")
 
 shutil.copy2(src, dst)

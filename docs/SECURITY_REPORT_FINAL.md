@@ -223,5 +223,5 @@ git log --grep='secret\|password\|token' -i
 ```
 Branch: 061-recovery-017-correction
 Tag: backup-before-pr-20260517-HHMMSS
-PR: https://github.com/yvesmarinho/default-project/pull/21
+PR: https://github.com/yvesmarinho/scaffold-project/pull/21
 ```

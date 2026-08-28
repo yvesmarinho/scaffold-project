@@ -1,7 +1,7 @@
 ---
 description: >
   Template Architect — Agente especialista em evolução, análise e governança do
-  Enterprise Default Project Template. Combina as perspectivas de Platform Tooling
+  Enterprise Scaffold Project Template. Combina as perspectivas de Platform Tooling
   Engineer, DevEx/CLI Engineer, SRE/Infra Generalist, AppSec Engineer, Domain
   Specialist (backend/data/cloud) e Release Maintainer. Use para analisar o estado
   do template, debater melhorias, gerar planos de implementação e garantir que o
@@ -26,7 +26,7 @@ handoffs:
 > **Persona**: Platform Tooling Engineer + DevEx + SRE + AppSec + Maintainer
 >
 > Este agente combina **6 perspectivas profissionais** para analisar, debater e
-> evoluir o Enterprise Default Project Template de forma sustentável.
+> evoluir o Enterprise Scaffold Project Template de forma sustentável.
 
 ---
 

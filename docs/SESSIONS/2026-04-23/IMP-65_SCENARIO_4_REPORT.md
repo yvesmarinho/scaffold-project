@@ -43,7 +43,7 @@ Validate that the template synchronization system can handle multiple templates 
 **Setup Actions**:
 
 ```bash
-cd /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project
+cd /home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project
 
 # 1. Reset spec-template to v2.0.0 for clean merge test
 # (already at v2.0.0 from Scenario 3)
@@ -79,7 +79,7 @@ python3 -c "update base versions for each template"
 ```
 Checking template drift...
 Comparing templates in:
-  Upstream: .../a-default-project/.specify/templates
+  Upstream: .../scaffold-project/.specify/templates
   Local: .../poc/tst-python-fastapi/.specify/templates
 
 ⚠️ Template Drift Detected: 3 template(s) need updates

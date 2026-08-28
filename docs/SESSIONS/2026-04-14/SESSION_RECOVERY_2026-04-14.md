@@ -1,6 +1,6 @@
 # 🔄 Session Recovery — 2026-04-14
 
-**Project**: Enterprise Default Project Template
+**Project**: Enterprise Scaffold Project Template
 **Branch**: master
 **Recovery Date**: 2026-04-14
 **Previous Session**: 2026-04-07 23:30 BRT

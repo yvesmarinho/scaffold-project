@@ -142,7 +142,7 @@ class SessionDocumentMigrator:
 
     CANONICAL_HEADER = """# 📝 Daily Activities — {date}
 
-**Project**: Enterprise Default Project Template
+**Project**: Enterprise Scaffold Project Template
 **Branch**: {branch}
 **Session**: {date} ({day_of_week})
 **Initial HEAD**: {head}

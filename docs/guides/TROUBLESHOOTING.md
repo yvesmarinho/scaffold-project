@@ -1,6 +1,6 @@
 # Troubleshooting Guide
 
-**Project Template**: Enterprise Default Project
+**Project Template**: Enterprise Scaffold Project
 **Version**: 1.3.0
 **Last Updated**: 2026-03-20
 
@@ -32,7 +32,7 @@ ModuleNotFoundError: No module named 'lib'
 **Solutions**:
 1. Ensure you're running from project root:
    ```bash
-   cd /path/to/a-default-project
+   cd /path/to/scaffold-project
    python scripts/scaffold.py --help
    ```
 

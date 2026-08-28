@@ -29,7 +29,7 @@
 ### Git Status Review
 
 **~09:05 — 🔵 Git status analysis** — found uncommitted changes and untracked files
-- Modified: `default-project.code-workspace`
+- Modified: `scaffold-project.code-workspace`
 - Modified: `scripts/lib/flows/__pycache__/new_project.cpython-312.pyc` (Python cache)
 - Untracked: `mcp-questions_v5.yaml`
 - Untracked: `objetivo_v3.yaml`
@@ -41,7 +41,7 @@
 ### Git State Cleanup
 
 **~09:15 — ✅ Git cleanup completed** — resolved all uncommitted/untracked files
-- Reverted: `default-project.code-workspace` (local workspace config)
+- Reverted: `scaffold-project.code-workspace` (local workspace config)
 - Removed from git tracking: 12 `__pycache__/*.pyc` files
 - Moved templates: `mcp-questions_v5.yaml` → `docs/templates/mcp-questions-template.yaml`
 - Moved templates: `objetivo_v3.yaml` → `docs/templates/objetivo-manifest-template.yaml`

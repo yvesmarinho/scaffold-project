@@ -92,7 +92,7 @@ project:
 ### Passo a Passo
 
 ```bash
-cd ~/Documentos/DevOps/Vya-Jobs/a-default-project
+cd ~/Documentos/DevOps/Projetos/scaffold-project
 
 # 1. Criar arquivo de respostas para teste
 cat > tmp/test-answers.json << 'EOF'

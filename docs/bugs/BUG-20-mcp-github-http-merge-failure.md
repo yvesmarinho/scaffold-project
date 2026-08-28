@@ -454,7 +454,7 @@ Command Palette → "MCP: Show Servers"
 
 1. **Analisar `file_merge.py`**:
    ```bash
-   # No projeto a-default-project
+   # No projeto scaffold-project
    code scripts/lib/file_merge.py
 
    # Procurar função _merge_json ou similar
@@ -783,5 +783,5 @@ A correção será considerada bem-sucedida quando:
 
 **Última atualização**: 2026-05-18 15:45 BRT
 **Responsável**: GitHub Copilot (Claude Sonnet 4.5)
-**Projeto**: a-default-project v1.6.0
+**Projeto**: scaffold-project v1.6.0
 **Prioridade**: 🔴 P0 CRÍTICA — Resolver em < 48h

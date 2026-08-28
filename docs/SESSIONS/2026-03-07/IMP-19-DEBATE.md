@@ -9,9 +9,9 @@
 
 ## 📋 Contexto e Motivação
 
-O documento-fonte analisado (`GitHub Copilot - Default Project Template Skills.md`) descreve os **6 perfis profissionais** necessários para evoluir um template agnóstico com capacidade de instanciação focada por domínio/linguagem/plataforma.
+O documento-fonte analisado (`GitHub Copilot - Scaffold Project Template Skills.md`) descreve os **6 perfis profissionais** necessários para evoluir um template agnóstico com capacidade de instanciação focada por domínio/linguagem/plataforma.
 
-Este debate avalia o **estado atual do projeto** (`a-default-project`) contra esse mapa de skills, identifica gaps e propõe o próximo ciclo de evolução.
+Este debate avalia o **estado atual do projeto** (`scaffold-project`) contra esse mapa de skills, identifica gaps e propõe o próximo ciclo de evolução.
 
 ---
 

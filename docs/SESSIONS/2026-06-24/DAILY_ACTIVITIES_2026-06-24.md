@@ -68,14 +68,14 @@ Modificado em: 24/06/2026 17:00
 
 **Objetivo**: `copy_speckit()` estava lendo agents e prompts de `.github/` do projeto padrão — os próprios arquivos de desenvolvimento. O template tinha de ser separado do código.
 
-**Contexto**: Ao criar `test-000-prog-py-claude`, os agents e prompts copiados vinham de `.github/agents/` e `.github/prompts/` do default project — mesclando DEV files com template. Decisão do usuário: "O template tem de ser separado. O código deve ser modular."
+**Contexto**: Ao criar `test-000-prog-py-claude`, os agents e prompts copiados vinham de `.github/agents/` e `.github/prompts/` do scaffold project — mesclando DEV files com template. Decisão do usuário: "O template tem de ser separado. O código deve ser modular."
 
 **Passos executados**:
 1. Criado `scaffold/templates/speckit/` via `git mv`:
    - `.github/agents/` → `scaffold/templates/speckit/agents/`
    - `.github/prompts/` → `scaffold/templates/speckit/prompts/`
    - `.specify/templates/` → `scaffold/templates/speckit/specify-templates/`
-2. Restaurado `.github/` do default project executando `specify init --here --force --integration claude` e `specify init --here --force --integration copilot`
+2. Restaurado `.github/` do scaffold project executando `specify init --here --force --integration claude` e `specify init --here --force --integration copilot`
 3. Adicionado `_SPECKIT_TEMPLATES` constant em `project.py` apontando para `scaffold/templates/speckit/`
 4. Adicionado `_AI_TO_SPECIFY` mapping: `claude→["claude"]`, `copilot→["copilot"]`, `both→["claude","copilot"]`, `none→[]`
 5. Adicionado `run_speckit_init(config)` que chama `specify init` via subprocess no projeto novo
@@ -83,7 +83,7 @@ Modificado em: 24/06/2026 17:00
 7. Atualizado `_copy_domain_profile()` para usar `_SPECKIT_TEMPLATES / "prompts" / "domain"`
 8. Atualizado `source:` nos 6 profile descriptors de domínio: `.github/prompts/domain/` → `scaffold/templates/speckit/prompts/domain/`
 
-**Resultado**: Projetos gerados usam arquivos do template separado; `.github/` do default project contém apenas os arquivos oficiais via `specify init`.
+**Resultado**: Projetos gerados usam arquivos do template separado; `.github/` do scaffold project contém apenas os arquivos oficiais via `specify init`.
 
 **Decisões técnicas**:
 - `specify init` (claude): instala `CLAUDE.md`, `.claude/skills/speckit-*/SKILL.md`, `.specify/` — NÃO instala `.github/agents/`

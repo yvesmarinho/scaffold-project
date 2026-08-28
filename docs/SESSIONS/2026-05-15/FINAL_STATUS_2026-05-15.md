@@ -2,7 +2,7 @@
 
 **Branch**: 017-bug-16-merge-strategy
 **Sessão**: Completa — Sprint 4 Concluído ✅
-**Projeto**: Enterprise Default Project Template (a-default-project)
+**Projeto**: Enterprise Scaffold Project Template (scaffold-project)
 **Testes Finais**: 178/178 passing (100%) ✅
 **Commits**: 3 commits (Sprint 4 + Test fix + P0 vscode fix)
 **Push**: ✅ Sincronizado com origin

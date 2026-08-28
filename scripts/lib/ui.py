@@ -1,7 +1,7 @@
 """
 lib/ui.py — Interface com usuário: prompts Rich, menus e validação.
 
-Parte do scripts/scaffold.py — Enterprise Default Project Template.
+Parte do scripts/scaffold.py — Enterprise Scaffold Project Template.
 """
 
 from __future__ import annotations
@@ -785,7 +785,7 @@ def confirm_summary(config: ProjectConfig) -> bool:
 
 
 
-# Diretório de logs da ferramenta scaffold (a-default-project/logs/).
+# Diretório de logs da ferramenta scaffold (scaffold-project/logs/).
 # Os logs da operação são gravados aqui além do projeto criado.
 _SCAFFOLD_LOGS_DIR = Path(__file__).resolve().parent.parent.parent / "logs"
 
@@ -837,7 +837,7 @@ def save_operation_log(items: list[CreatedItem | LinkStatus], project_path: Path
     """
     Salva log detalhado da operação em até três locais:
     1. Sempre em <projeto-criado>/logs/ (primary — retornado).
-    2. Sempre em <a-default-project>/logs/ (rastreio da ferramenta).
+    2. Sempre em <scaffold-project>/logs/ (rastreio da ferramenta).
     3. Em --log-dir customizado, se diferente dos anteriores.
 
     Args:
