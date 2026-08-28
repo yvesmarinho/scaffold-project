@@ -168,7 +168,7 @@ ls -la docs/SESSIONS/
 ### Commit das Alterações
 
 ```bash
-cd /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project
+cd /home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project
 
 # Verificar mudanças
 git status

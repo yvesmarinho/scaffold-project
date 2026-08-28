@@ -1,5 +1,6 @@
 """lib/flows — UI flow wrappers (argparse.Namespace → int) para scaffold.py."""
 
+from .adopt import flow_adopt
 from .check_links import flow_check_links
 from .check_templates import flow_check_templates
 from .compose import flow_compose_profiles
@@ -24,6 +25,7 @@ __all__ = [
     "flow_new_project",
     "flow_compose_profiles",
     "flow_upgrade",
+    "flow_adopt",
     "flow_dry_run",
     "flow_generate_infra",
     "flow_check_links",

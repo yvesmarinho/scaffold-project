@@ -1,9 +1,9 @@
-# Projeto Default Project
+# Projeto Scaffold Project
 # Relação das alterações/correções necessárias.
 
 <!--
 Criado em: 01/01/2026 00:00
-Modificado em: 26/06/2026 16:00
+Modificado em: 28/08/2026 11:07
 -->
 
 ---
@@ -14,6 +14,9 @@ Modificado em: 26/06/2026 16:00
 
 ## BUG/Correção
 
+- o log não exibe os detalhes exibidos no final do stdout. tmabém não exibe os drifts.
+- alterar nomenclatura do arquivo log para usar a data da maquina, já com timezone. está com UTC.
+- gitignore ignorar os arquivos gerados pelo copilot, claude e speckit. exceção para os arquivos que contem dados do projeto.
 
 ---
 

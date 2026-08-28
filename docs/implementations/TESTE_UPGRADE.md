@@ -1,7 +1,7 @@
 # Teste de Upgrade — Instruções
 
 **Data**: 2026-05-13
-**Template**: a-default-project (060-mini-engram-python)
+**Template**: scaffold-project (060-mini-engram-python)
 **Commit**: 4cf4470
 
 ---
@@ -41,7 +41,7 @@ cat .scaffold-state.yaml | grep "created_at\|updated_at"
 
 ```bash
 # Do diretório test-workspace-fix
-uv run /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project/scripts/scaffold.py upgrade
+uv run /home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project/scripts/scaffold.py upgrade
 ```
 
 **Observar logs esperados**:
@@ -212,7 +212,7 @@ python3 scripts/tmp/init_all_systems.py
 **Solução**:
 ```bash
 # Re-executar upgrade
-uv run /path/to/a-default-project/scripts/scaffold.py upgrade --force
+uv run /path/to/scaffold-project/scripts/scaffold.py upgrade --force
 ```
 
 ---

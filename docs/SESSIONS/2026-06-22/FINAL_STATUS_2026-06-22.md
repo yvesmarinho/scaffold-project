@@ -2,7 +2,7 @@
 
 **Session**: 2026-06-22 (início ~14:30 UTC)
 **Branch**: master
-**Project**: Enterprise Default Project Template
+**Project**: Enterprise Scaffold Project Template
 **Domain**: PROGRAMMING (devops-programming.prompt.md)
 
 ---
@@ -157,4 +157,4 @@ uv run pytest tests/test_scaffold_new.py tests/test_scaffold_upgrade.py tests/te
 
 ---
 
-*Session End Report | 2026-06-22 | Enterprise Default Project Template*
+*Session End Report | 2026-06-22 | Enterprise Scaffold Project Template*

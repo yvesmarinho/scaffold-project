@@ -1,7 +1,7 @@
 # Plano de Ação: Estratégia Universal de Merge JSON
 
 **Data de Criação**: 17 de maio de 2026 (v2.0 - Revisão Arquitetural)
-**Projeto**: a-default-project
+**Projeto**: scaffold-project
 **Branch**: 061-recovery-017-correction (NÃO criar nova branch)
 **Mudança**: De correção pontual → Mudança arquitetural universal
 **Debate Técnico**: [docs/debates/2026-05-17-json-merge-duplication-bug.md](../debates/2026-05-17-json-merge-duplication-bug.md)

@@ -1,6 +1,6 @@
 # 📊 Session Report — 2026-04-05
 
-**Project**: Enterprise Default Project Template
+**Project**: Enterprise Scaffold Project Template
 **Branch**: master
 **Session Duration**: Full day session
 **Initial HEAD**: `267e070` — docs(sessão): encerramento 2026-04-03

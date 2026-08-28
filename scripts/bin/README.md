@@ -4,7 +4,7 @@ Este diretório contém scripts utilitários que podem ser instalados globalment
 
 ## 🚀 new-project
 
-Script wrapper para criar projetos usando o Enterprise Default Project Template de qualquer diretório.
+Script wrapper para criar projetos usando o Enterprise Scaffold Project Template de qualquer diretório.
 
 ### Instalação
 

@@ -53,7 +53,7 @@ def flow_merge_template(args: argparse.Namespace) -> int:
     # 1. Validate paths
     # ---------------------------------------------------------------------------
 
-    # Find upstream template directory (a-default-project)
+    # Find upstream template directory (scaffold-project)
     # scripts/lib/flows -> scripts
     script_dir = Path(__file__).parent.parent.parent
     project_root = script_dir.parent

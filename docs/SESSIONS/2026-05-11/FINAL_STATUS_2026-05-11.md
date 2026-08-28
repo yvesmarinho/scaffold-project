@@ -2,7 +2,7 @@
 
 **Branch**: 060-mini-engram-python
 **Session Duration**: 09:00 - 18:30 BRT (~9.5 hours)
-**Project**: Enterprise Default Project Template (a-default-project)
+**Project**: Enterprise Scaffold Project Template (scaffold-project)
 
 ---
 

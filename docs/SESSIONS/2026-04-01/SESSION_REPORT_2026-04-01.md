@@ -1,6 +1,6 @@
 # 📊 Session Report — 2026-04-01
 
-**Project**: Enterprise Default Project Template
+**Project**: Enterprise Scaffold Project Template
 **Session Type**: Bug Investigation & Documentation
 **Duration**: ~1 hour
 **Branch**: master

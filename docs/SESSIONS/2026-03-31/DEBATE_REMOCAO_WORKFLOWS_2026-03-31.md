@@ -1,6 +1,6 @@
 # 📊 Debate: Remoção Temporária de Workflows GitHub Actions
 
-**Projeto:** a-default-project — Enterprise Default Project Template
+**Projeto:** scaffold-project — Enterprise Scaffold Project Template
 **Data:** 2026-03-31
 **Perspectiva:** Session Manager (organização, continuidade, rastreabilidade)
 **Status:** 🔴 ANÁLISE CRÍTICA

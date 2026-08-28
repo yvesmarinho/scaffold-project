@@ -23,7 +23,7 @@
 
 ## 📋 Sumário Executivo
 
-Este debate analisa **o momento ideal para integrar o Engram MCP** ao Enterprise Default Project Template, considerando:
+Este debate analisa **o momento ideal para integrar o Engram MCP** ao Enterprise Scaffold Project Template, considerando:
 
 1. **Timing**: IMP-51 (session search com SQLite + FTS5) foi concluído há 24h
 2. **Overlap funcional**: Engram oferece FTS5 similar ao sistema já implementado

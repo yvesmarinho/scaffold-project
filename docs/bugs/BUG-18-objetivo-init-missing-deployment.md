@@ -27,7 +27,7 @@ Os arquivos de template **objetivo-init.yaml** e **objetivo-init-minimal.yaml** 
 - ❌ `objetivo-init.yaml` (exemplo completo)
 - ❌ `objetivo-init-minimal.yaml` (exemplo mínimo)
 
-**Arquivos presentes no projeto principal** (`a-default-project`):
+**Arquivos presentes no projeto principal** (`scaffold-project`):
 - ✅ `/objetivo-init.yaml` (raiz do projeto)
 - ✅ `/objetivo-init-minimal.yaml` (raiz do projeto)
 - ✅ `/template-bases/examples/objetivo-init.yaml`
@@ -46,7 +46,7 @@ ls -l /home/yves_marinho/DevOps/Projetos/test-workspace-fix/objetivo-init*.yaml
 ls: cannot access 'objetivo-init*.yaml': No such file or directory
 
 # Projeto principal (PRESENTES) ✅
-ls -l /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project/objetivo-init*.yaml
+ls -l /home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project/objetivo-init*.yaml
 -rw-r--r-- 1 user user 15234 mai 15 14:30 objetivo-init.yaml
 -rw-r--r-- 1 user user  2341 mai 15 14:30 objetivo-init-minimal.yaml
 ```
@@ -131,7 +131,7 @@ scaffold.py objetivo-init --template-only
 import shutil
 from pathlib import Path
 
-src_root = Path("/home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project")
+src_root = Path("/home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project")
 dst_root = Path("/home/yves_marinho/DevOps/Projetos/test-workspace-fix")
 
 files_to_copy = [

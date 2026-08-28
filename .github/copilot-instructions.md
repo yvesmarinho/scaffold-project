@@ -4,7 +4,7 @@ applyTo: "**"
 
 # GitHub Copilot — Instruções do Projeto
 
-**Projeto**: `a-default-project` — Enterprise Default Project Template
+**Projeto**: `scaffold-project` — Enterprise Scaffold Project Template
 **Regras completas**: [`.copilot-rules.md`](../.copilot-rules.md) (7 seções)
 **Rituais de sessão**: `python scripts/session-manager.py start --json` | `python scripts/session-manager.py end --json`
 

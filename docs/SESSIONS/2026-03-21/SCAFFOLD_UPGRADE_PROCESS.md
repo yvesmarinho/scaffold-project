@@ -56,7 +56,7 @@ profiles_applied: []
 
 ```bash
 cd /path/to/projeto
-uv run /path/to/a-default-project/scripts/scaffold.py upgrade
+uv run /path/to/scaffold-project/scripts/scaffold.py upgrade
 ```
 
 ou especificar diretório:
@@ -324,7 +324,7 @@ ou
 
 ```bash
 cd enterprise-update-lab-n8n
-uv run ../a-default-project/scripts/scaffold.py upgrade
+uv run ../scaffold-project/scripts/scaffold.py upgrade
 ```
 
 **Resultado:**

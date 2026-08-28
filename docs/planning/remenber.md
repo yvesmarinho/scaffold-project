@@ -16,7 +16,7 @@
 | Decisão | Status | Prioridade |
 |---------|--------|------------|
 | **Limpar memórias contaminadas** | ✅ Aprovado | 🔴 P0 |
-| **Criar memória a-default-project.md** | ✅ Aprovado | 🔴 P0 |
+| **Criar memória scaffold-project.md** | ✅ Aprovado | 🔴 P0 |
 | **Passo 4.5 session-start (deps check acionável)** | ✅ Aprovado | 🔴 P0 |
 | **Test fixtures isolados** | ✅ Aprovado | 🔴 P0 |
 | **Scripts automation (cleanup, validate)** | ✅ Aprovado | 🔴 P0 |
@@ -37,7 +37,7 @@ Total: 8 tasks | Estimativa: ~7h
    - **Impacto**: -3.420 tokens de ruído eliminados
 
 2. ✅ **Criar memória do projeto atual** (20 min)
-   - Arquivo: `/memories/a-default-project.md`
+   - Arquivo: `/memories/scaffold-project.md`
    - Conteúdo: Estrutura, regras P0, comandos, status atual
    - **Impacto**: +600 tokens de contexto correto
 

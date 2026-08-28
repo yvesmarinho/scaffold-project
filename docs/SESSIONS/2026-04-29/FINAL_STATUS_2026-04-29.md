@@ -211,7 +211,7 @@ b6c3ec2 — fix(bug06): corrigir referências de prompt files em python-{fastapi
 
 1. **BUG-08 Resolution** (P2 MEDIUM, ~30 min)
    - Fix knowledge-harvester-library MCP configuration
-   - Copy `.vscode/mcp.json` from a-default-project
+   - Copy `.vscode/mcp.json` from scaffold-project
    - Validate all MCP servers activate correctly
    - Test memory, sequential-thinking, GitHub, Pylance tools
 

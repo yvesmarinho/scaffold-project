@@ -17,7 +17,7 @@
 5. **Stack**: TypeScript, Next.js 15, static export
 6. **Automação**: Scripts Python para Cloudflare API
 7. **Documentação**: Completa e passo a passo
-8. **Template**: Usar Enterprise Default Project Template + scaffold system
+8. **Template**: Usar Enterprise Scaffold Project Template + scaffold system
 
 ---
 
@@ -500,7 +500,7 @@ setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
 
 ### 🏛️ **Template Architect** (@template_arch)
 
-**Análise de conformidade com o Enterprise Default Project Template**.
+**Análise de conformidade com o Enterprise Scaffold Project Template**.
 
 **Scaffold system usado**:
 
@@ -828,7 +828,7 @@ describe('HomePage', () => {
 
 ## 🎓 LIÇÕES APRENDIDAS
 
-1. **Scaffold system validado**: Enterprise Default Project Template funciona como esperado
+1. **Scaffold system validado**: Enterprise Scaffold Project Template funciona como esperado
 2. **Profile composition**: Combinar `devops-programming` + `typescript-next` gera projeto completo
 3. **Documentação importa**: Guias passo a passo fazem diferença
 4. **Segurança desde o início**: Sempre configurar headers HTTP completos

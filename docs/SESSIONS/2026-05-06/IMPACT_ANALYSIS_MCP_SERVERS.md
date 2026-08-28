@@ -24,7 +24,7 @@
 
 ### Estado Atual
 
-**Projeto a-default-project** (`.vscode/mcp.json`):
+**Projeto scaffold-project** (`.vscode/mcp.json`):
 ```json
 {
   "servers": {
@@ -245,7 +245,7 @@ server_names = _MCP_BY_DOMAIN.get(config.domain,
 
 ### Fase 4: Validação (10 min)
 
-1. ✅ Testar no projeto atual (a-default-project)
+1. ✅ Testar no projeto atual (scaffold-project)
 2. ✅ Gerar projeto de teste com cada domínio (programming, infrastructure, analysis)
 3. ✅ Confirmar que servidor github falha graciosamente sem token
 4. ✅ Confirmar que filesystem funciona

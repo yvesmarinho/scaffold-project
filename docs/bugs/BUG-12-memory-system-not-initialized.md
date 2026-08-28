@@ -158,7 +158,7 @@ ls scripts/mem*.py scripts/create_memory_structure.py
 ### Antes da Correção
 - 🔴 **Memory system NÃO FUNCIONAL** em novos projetos
 - 🔴 Scripts `mem_*.py` ausentes
-- 🔴 Usuários precisam copiar manualmente de `a-default-project`
+- 🔴 Usuários precisam copiar manualmente de `scaffold-project`
 
 ### Depois da Correção
 - 🟢 **Memory system FUNCIONAL** desde primeira sessão

@@ -48,8 +48,8 @@ def flow_check_templates(args: argparse.Namespace) -> int:
     else:
         target_dir = Path.cwd().resolve()
 
-    # Diretório upstream (a-default-project)
-    # scaffold.py está em a-default-project/scripts/
+    # Diretório upstream (scaffold-project)
+    # scaffold.py está em scaffold-project/scripts/
     scaffold_root = Path(__file__).parent.parent.parent.parent
     upstream_dir = scaffold_root / ".specify" / "templates"
 

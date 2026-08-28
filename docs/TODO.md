@@ -1,14 +1,18 @@
-# ✅ TODO - Enterprise Default Project Template
+# ✅ TODO - Enterprise Scaffold Project Template
 
 **Last Updated**: 2026-07-15 — Pendências do TODO concluídas (suite verde, objetivo-init integrado, specify init validado) ✅
-**Project**: Enterprise Default Project Template
+**Project**: Enterprise Scaffold Project Template
 **Status**: 🟢 Active Development
 
 ---
 
 ## 🎯 Próxima Sessão (2026-07-15+)
 
-- [ ] **scaffold adopt para projetos legados** — decisão pendente do usuário
+- [x] ~~**scaffold adopt para projetos legados**~~: ✅ CONCLUÍDO (2026-07-15) — Opção A escolhida pelo usuário
+  - ✅ `scripts/lib/flows/adopt.py`: detecção de linguagem/domínio + state + delegação ao pipeline do upgrade
+  - ✅ CLI: `scaffold.py adopt [--target-dir PATH]` (subcomando + flag `--adopt`)
+  - ✅ `tests/test_flow_adopt.py` (16 testes) + validação manual end-to-end
+  - ✅ README: seção "Option 3: Adopt a Legacy Project"
 
 ---
 
@@ -230,7 +234,7 @@ _(Nenhuma regressão pendente)_
   - ✅ enterprise-ansible.md deletado (~800 tokens de ruído)
   - ✅ 37 arquivos test-*.md removidos de .memory/project/ (~2.300 tokens)
   - ✅ test-workspace*.md deletados (~320 tokens)
-  - ✅ a-default-project.md criado com dados corretos (~600 tokens contexto)
+  - ✅ scaffold-project.md criado com dados corretos (~600 tokens contexto)
   - ✅ **Total impacto**: -3.420 tokens de ruído, +600 tokens corretos
   - ✅ Documentação: docs/debates/DEBATE-001-memory-cleanup-and-session-start-improvements.md
   - ✅ Documentação: docs/planning/ACTION_PLAN-memory-cleanup-and-session-start.md
@@ -393,7 +397,7 @@ _(Nenhuma regressão pendente)_
 - [x] ~~**MCP GitHub Server HTTP Update**~~: ✅ IMPLEMENTADO (2026-05-18)
   - ✅ scripts/lib/vscode.py atualizado (commit 39ac165)
   - ✅ Documentação completa: MCP-GITHUB-HTTP-UPDATE.md (600+ linhas)
-  - ✅ Configuração HTTP testada e funcionando no a-default-project
+  - ✅ Configuração HTTP testada e funcionando no scaffold-project
   - ⚠️ **BUG-20 detectado**: Merge não aplicou update em test-workspace-fix
 
 - [x] ~~**Validação test-workspace-fix**~~: ✅ CONCLUÍDO (2026-05-18)
@@ -503,7 +507,7 @@ _(Nenhuma regressão pendente)_
   - **Estimativa**: 30 min
   - **Arquivo**: docs/bugs/BUG-08-knowledge-harvester-missing-mcp-config.md
   - **Tarefas**:
-    1. Copy .vscode/mcp.json from a-default-project
+    1. Copy .vscode/mcp.json from scaffold-project
     2. Update server paths to match workspace structure
     3. Restart VS Code to activate servers
     4. Test memory, sequential-thinking, GitHub, Pylance tools
@@ -537,7 +541,7 @@ _(Nenhuma regressão pendente)_
 - [x] **GitHub Best Practices - PR #21 Criado**
   - **Status**: ✅ COMPLETO (2026-05-17)
   - **Branch**: 061-recovery-017-correction
-  - **PR**: https://github.com/yvesmarinho/default-project/pull/21
+  - **PR**: https://github.com/yvesmarinho/scaffold-project/pull/21
   - **Commits**: 20 commits (P0+P1+P2 implementation)
   - **Deliverables**:
     - ✅ Correção de 5 testes falhando (699/699 passing)
@@ -2316,7 +2320,7 @@ _(Nenhuma regressão pendente)_
 - [x] **[IMP-07]** ✅ **CONCLUÍDO 2026-03-01** — Criar `.github/prompts/domain/devops-analysis.prompt.md` — Domain Profile análise
 - [x] **[IMP-08]** ✅ **CONCLUÍDO 2026-03-01** — Redefinir `make init` no `Makefile` — de executor para **redirect** para `uv run scripts/scaffold.py` (sem duplicar lógica)
 - [x] **[IMP-18]** ✅ **CONCLUÍDO 2026-03-07** — Criar `.github/copilot-instructions.md` — auto-injeção de regras P0/P1 em toda conversa Copilot
-  - [x] `.github/copilot-instructions.md` criado para `a-default-project` (regras P0/P1 compactas, `applyTo: "**"`)
+  - [x] `.github/copilot-instructions.md` criado para `scaffold-project` (regras P0/P1 compactas, `applyTo: "**"`)
   - [x] `scripts/lib/templates.py`: `generate_copilot_instructions()` adicionada (template com placeholders)
   - [x] `scripts/scaffold.py`: passo 3 atualizado (wired `generate_copilot_instructions(cfg)`)
   - [x] Zero erros de compilação verificados
@@ -2376,7 +2380,7 @@ _(Nenhuma regressão pendente)_
 - [x] Atualizar `docs/TODO.md` e `docs/INDEX.md`
 - [x] **[IMP-18]** Criar `.github/copilot-instructions.md` + `generate_copilot_instructions()` em `templates.py` + wiring em `scaffold.py`
 - [x] **[IMP-09]** Enriquecer template `.copilot-rules-[projeto].md` — smoke-test: 5 combos ✅
-- [x] **[IMP-19 — Debate]** Analisar `Default Project Template Skills.md` → criar agente `template-architect.agent.md` + debate IMP-19 + roadmap P0→P3
+- [x] **[IMP-19 — Debate]** Analisar `Scaffold Project Template Skills.md` → criar agente `template-architect.agent.md` + debate IMP-19 + roadmap P0→P3
 
 #### 2026-03-05 (Sessão encerrada)
 - [x] Iniciar sessão MCP (2026-03-05)

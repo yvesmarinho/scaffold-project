@@ -47,7 +47,7 @@
 | `docs/SESSIONS/2026-03-20/ACTION_PLAN_TO_10.md` | Plano de ação para alcançar 10/10 (1100+ linhas) |
 | `docs/INDEX.md` | Atualizado com agente e sessão 2026-03-20 |
 | `main.py` | Removido (placeholder file) |
-| `default-project.code-workspace` | Modificado (autosave) |
+| `scaffold-project.code-workspace` | Modificado (autosave) |
 
 **Commits**:
 - `dca6a3f` — feat(agent): create Session Manager agent for workflow automation (7 files, 622 insertions, 7 deletions)

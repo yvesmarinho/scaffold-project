@@ -190,7 +190,7 @@ def detect_drift(
 
     Args:
         local_templates: Templates from project's .specify/templates/
-        upstream_templates: Templates from a-default-project/.specify/templates/
+        upstream_templates: Templates from scaffold-project/.specify/templates/
 
     Returns:
         List of TemplateDrift objects for templates that are:

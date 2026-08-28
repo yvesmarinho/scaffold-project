@@ -1,9 +1,9 @@
-# 🗺️ Project Knowledge Map — Enterprise Default Project Template
+# 🗺️ Project Knowledge Map — Enterprise Scaffold Project Template
 
 **Versão**: 1.1
 **Gerado em**: 2026-03-01
 **Atualizado em**: 2026-03-01
-**Projeto**: `a-default-project`
+**Projeto**: `scaffold-project`
 **Propósito**: Referência consolidada de funcionalidades, menus e estruturas para validação de conhecimento
 
 ---
@@ -28,7 +28,7 @@
 ### 1.1 Raiz do Projeto
 
 ```
-a-default-project/
+scaffold-project/
 ├── .copilot-rules.md               ← Regras Copilot (único arquivo ativo, 193 linhas, 7 seções)
 ├── .gitignore                      ← Ignora .secrets/, *.key, *.pem, .env, etc.
 ├── .secrets/                       ← Arquivos sensíveis (git-ignored)
@@ -40,7 +40,7 @@ a-default-project/
 ├── .vscode/
 │   ├── mcp.json                   ← Configuração dos servidores MCP
 │   └── settings.json              ← Preferências do editor
-├── default-project.code-workspace ← Workspace VS Code
+├── scaffold-project.code-workspace ← Workspace VS Code
 ├── docs/                           ← Toda documentação humana
 ├── Makefile                        ← 40+ comandos de automação
 ├── README.md                       ← Documentação pública do template
@@ -192,7 +192,7 @@ pytest>=7.4.0, pytest-cov>=4.1.0, black>=23.11.0, flake8>=6.1.0, mypy>=1.7.0
 
 | Comando | Descrição |
 |---------|-----------|
-| `make docker-build` | `docker build -f docker/Dockerfile -t default-project:latest .` |
+| `make docker-build` | `docker build -f docker/Dockerfile -t scaffold-project:latest .` |
 | `make docker-up` | `docker-compose -f docker/docker-compose.yml up -d` |
 | `make docker-down` | `docker-compose -f docker/docker-compose.yml down` |
 
@@ -890,4 +890,4 @@ ci(escopo): mudanças no CI/CD
 
 ---
 
-*Gerado em 2026-03-01 | Projeto: `a-default-project` | Branch: master*
+*Gerado em 2026-03-01 | Projeto: `scaffold-project` | Branch: master*

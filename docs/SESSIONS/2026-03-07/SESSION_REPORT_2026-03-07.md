@@ -1,7 +1,7 @@
 # 📋 Session Report — 2026-03-07 (Sessão 2)
 
 **Data**: 2026-03-07
-**Project**: Enterprise Default Project Template
+**Project**: Enterprise Scaffold Project Template
 **Branch**: master
 
 ---

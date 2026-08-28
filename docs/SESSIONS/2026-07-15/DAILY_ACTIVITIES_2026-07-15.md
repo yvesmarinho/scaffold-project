@@ -40,3 +40,58 @@ Ritual de início apontou 5 pendências e o scan de segurança acusou 37 falsos 
 ### Arquivos modificados
 
 Ver diff do commit desta sessão (testes, hooks, agent objetivo-init, README, TODO.md, perfis YAML, snapshots).
+
+---
+
+## Feature: comando `scaffold adopt` para projetos legados (Opção A)
+
+**Horário**: 15/07/2026 10:10–14:40 · **Status**: ✅ Concluído
+**Branch**: `feature/067-scaffold-adopt` (stacked sobre `fix/pendencias-todo-sessao`)
+
+### Objetivo
+
+Implementar a Opção A da pendência "scaffold adopt": comando automático que adota projetos existentes (sem `.scaffold-state.yaml`) no scaffold.
+
+### Contexto
+
+Usuário escolheu a Opção A (comando automático) em vez da Opção B (guia manual). O `upgrade` já tinha o pipeline idempotente completo; faltava só o bootstrap do state para projetos legados.
+
+### Passos e Resultado
+
+1. `scripts/lib/flows/adopt.py`: `detect_language()` (pyproject/package.json/go.mod → python/typescript/go, precedência python>ts), `detect_domain()` (marcadores IaC → infrastructure), `_kebab()` para o slug, validações (alvo inexistente, state já existente → usar upgrade), confirmação interativa fora de `--ci`/`--json`, escrita do state e **delegação ao `flow_upgrade`** (reuso total do pipeline idempotente).
+2. CLI: subcomando `adopt` + flag `--adopt` registrados em `scaffold.py`.
+3. `tests/test_flow_adopt.py`: 16 testes (detecção, kebab, validações, delegação mockada, integração real preservando arquivos do legado). Suite completa: **1700 passed**.
+4. Validação manual end-to-end em projeto simulado: 118 arquivos criados, `pyproject.toml` preservado, re-adopt bloqueado.
+
+### Decisões
+
+- Adopt = bootstrap de state + delegação ao upgrade (zero duplicação de pipeline).
+- `touch` prévio do state garante modo in-place quando o nome do diretório não é kebab-case (bug pego pelos testes: `project_path` resolveria para subdiretório).
+- Detecção conservadora: default `programming`/`other`; overrides via `--name/--domain/--language/--ai`.
+
+---
+
+## BUG-26: `adopt --dry-run` executava de verdade + alias `--logdir`
+
+**Horário**: 15/07/2026 15:30–16:30 · **Status**: ✅ Concluído
+**Branch**: `feature/067-scaffold-adopt` (PR #27)
+
+### Objetivo
+
+Corrigir dois problemas relatados pelo usuário ao testar o adopt em projeto real.
+
+### Contexto
+
+Usuário executou `scaffold adopt --dry-run --logdir /var/log/scaffold` em `~/VyaJobs/enterprise-observability`: (1) `--logdir` era rejeitado (flag registrada era `--log-dir`); (2) o `--dry-run` foi ignorado e a adoção executou de verdade, criando `.scaffold-state.yaml` e aplicando o template.
+
+### Passos e Resultado
+
+1. **Alias `--logdir`** (`2158a3e`): aceito junto com `--log-dir`, mesmo dest.
+2. **BUG-26** (`c570c50`): `flow_adopt` agora trata `dry_run` internamente — exibe plano de detecção e retorna sem escrever nada (o dispatch avalia `--adopt` antes de `--dry-run`, então a flag era silenciosamente ignorada). 2 testes novos garantem que o diretório fica intocado; suite **1702 passed**.
+3. Relatório: `docs/bugs/BUG-26-adopt-dry-run-executa-de-verdade.md` (`acbd771`), com passos de recuperação via git para o projeto afetado.
+
+### Decisões
+
+- Dry-run do adopt mostra plano de alto nível (state + template idempotente); preview arquivo-a-arquivo fica como melhoria futura.
+- Limpeza do `enterprise-observability` deixada ao usuário (git restore/clean revisado) por ser destrutiva.
+

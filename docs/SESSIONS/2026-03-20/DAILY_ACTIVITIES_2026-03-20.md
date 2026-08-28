@@ -91,7 +91,7 @@
 - `.github/agents/session-manager.agent.md` (created)
 - `docs/SESSIONS/2026-03-20/*` (created)
 - `main.py` (deleted)
-- `default-project.code-workspace` (modified)
+- `scaffold-project.code-workspace` (modified)
 - `docs/INDEX.md` (updated)
 
 ---

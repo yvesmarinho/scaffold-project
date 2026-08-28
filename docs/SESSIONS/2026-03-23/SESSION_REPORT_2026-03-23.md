@@ -8,7 +8,7 @@
 
 ## Sumário Executivo
 
-Sessão de [DOMÍNIO A SER DECLARADO] no projeto Enterprise Default Project Template.
+Sessão de [DOMÍNIO A SER DECLARADO] no projeto Enterprise Scaffold Project Template.
 
 **Foco principal**: [A ser definido pelo usuário]
 

@@ -1,6 +1,6 @@
 # Domínio: Programming — Guia Humano
 
-> Documentação de referência para o domínio **programming** do Enterprise Default Project Template.
+> Documentação de referência para o domínio **programming** do Enterprise Scaffold Project Template.
 > Para o perfil machine-readable do Copilot, veja: [`.github/prompts/domain/devops-programming.prompt.md`](../../.github/prompts/domain/devops-programming.prompt.md)
 
 **Última atualização**: 2026-03-07

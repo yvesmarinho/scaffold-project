@@ -472,7 +472,7 @@ profiles_applied: []
 
 **Score Geral**: 9.4/10
 
-O projeto `enterprise-infra-docker` foi gerado com **excelente qualidade** pelo `scaffold.py`, demonstrando que o template `a-default-project` está funcionando conforme o planejado.
+O projeto `enterprise-infra-docker` foi gerado com **excelente qualidade** pelo `scaffold.py`, demonstrando que o template `scaffold-project` está funcionando conforme o planejado.
 
 ### Destaques Positivos ✅
 

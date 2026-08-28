@@ -64,7 +64,7 @@ template upgrade → merge automático → ✅ preserva customizações + adicio
 |---------|-----------|-------------------|
 | `*.code-workspace` | Merge folders + settings | Pastas abertas + configs + extensões |
 
-**Exemplo de merge**: `default-project.code-workspace`
+**Exemplo de merge**: `scaffold-project.code-workspace`
 ```json
 // Seu workspace
 {

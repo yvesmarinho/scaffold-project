@@ -1,6 +1,6 @@
 # 📘 Como Usar Este Template
 
-Este documento explica como usar o **default-project** como template para criar novos projetos rapidamente, mantendo todas as melhores práticas e configurações compartilhadas.
+Este documento explica como usar o **scaffold-project** como template para criar novos projetos rapidamente, mantendo todas as melhores práticas e configurações compartilhadas.
 
 ## 📋 Índice
 
@@ -153,7 +153,7 @@ git init
 
 ### Passo 3: Substitua Placeholders
 
-Edite os seguintes arquivos manualmente, substituindo `default-project` pelo nome do seu projeto:
+Edite os seguintes arquivos manualmente, substituindo `scaffold-project` pelo nome do seu projeto:
 
 - `README.md`
 - `setup.py`
@@ -167,7 +167,7 @@ Edite os seguintes arquivos manualmente, substituindo `default-project` pelo nom
 ```bash
 # Ou use sed (cuidado!)
 find . -type f -name "*.md" -o -name "*.py" -o -name "*.yml" | \
-  xargs sed -i 's/default-project/my-new-project/g'
+  xargs sed -i 's/scaffold-project/my-new-project/g'
 ```
 
 ### Passo 4: Limpe Arquivos do Template
@@ -190,7 +190,7 @@ find tests -name "test_example_*.py" -delete
 
 ```bash
 git add .
-git commit -m "feat: Initial commit from default-project template"
+git commit -m "feat: Initial commit from scaffold-project template"
 git remote add origin <url>
 git push -u origin main
 ```
@@ -221,10 +221,10 @@ O script substitui placeholders em vários formatos:
 
 | Placeholder | Exemplo | Onde é Usado |
 |------------|---------|--------------|
-| `default-project` | `my-app` | URLs, caminhos, imports |
-| `DEFAULT_PROJECT` | `MY_APP` | Variáveis de ambiente |
-| `Default Project` | `My App` | Títulos, descrições |
-| `default_project` | `my_app` | Python modules, funções |
+| `scaffold-project` | `my-app` | URLs, caminhos, imports |
+| `SCAFFOLD_PROJECT` | `MY_APP` | Variáveis de ambiente |
+| `Scaffold Project` | `My App` | Títulos, descrições |
+| `scaffold_project` | `my_app` | Python modules, funções |
 
 ### 3. Limpeza de Arquivos
 

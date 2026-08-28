@@ -25,7 +25,7 @@ Sistema de **three-way merge** para templates em `.specify/templates/*.md` usand
 
 ### **📊 Visão Geral da Cobertura**
 
-O `default-project` gera **~100 arquivos** distribuídos em 7 categorias. Cobertura atual de merge:
+O `scaffold-project` gera **~100 arquivos** distribuídos em 7 categorias. Cobertura atual de merge:
 
 | Categoria | Total Arquivos | Com Merge | Cobertura | Status |
 |-----------|----------------|-----------|-----------|--------|
@@ -1091,7 +1091,7 @@ O sistema atual tem **gaps importantes** em arquivos que deveriam ter merge mas 
 **Problema**:
 - São **gerados** pelo scaffold (`scripts/lib/templates.py`)
 - Mas **não têm merge** quando já existem no projeto
-- Novas regras do default-project não são propagadas
+- Novas regras do scaffold-project não são propagadas
 
 **Impacto**:
 - Projetos não recebem novas regras de Copilot do template upstream
@@ -1181,12 +1181,12 @@ class GitLeaksMerger:
 
 ### 🔄 **Sistema de Feedback: Projeto → Template**
 
-**Gap Identificado**: Não há sistema para **propagar melhorias do projeto para o default-project**
+**Gap Identificado**: Não há sistema para **propagar melhorias do projeto para o scaffold-project**
 
 **Cenário**:
 - Desenvolvedor adiciona nova regra útil em `.copilot-rules-[projeto].md`
 - Regra é específica mas genérica o suficiente para ser compartilhada
-- **Como incorporar de volta ao default-project?**
+- **Como incorporar de volta ao scaffold-project?**
 
 **Solução Proposta**:
 ```bash
@@ -1197,7 +1197,7 @@ scaffold.py extract-rule --file .copilot-rules-meu-projeto.md --section "Nova Re
 # ✅ Regra extraída para: /tmp/proposed-rule.md
 # 📝 Para contribuir:
 #    1. Review regra em /tmp/proposed-rule.md
-#    2. Abrir PR em a-default-project
+#    2. Abrir PR em scaffold-project
 #    3. Adicionar a .copilot-rules.md do template
 ```
 
@@ -1213,7 +1213,7 @@ scaffold.py extract-rule --file .copilot-rules-meu-projeto.md --section "Nova Re
 
 #### **Análise Completa de Componentes Gerados**
 
-O `default-project` gera **100+ arquivos** distribuídos em 7 categorias principais:
+O `scaffold-project` gera **100+ arquivos** distribuídos em 7 categorias principais:
 
 | Categoria | Quantidade | Tem Merge? | Gap Crítico? |
 |-----------|------------|------------|--------------|

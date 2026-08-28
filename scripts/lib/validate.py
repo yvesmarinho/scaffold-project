@@ -1,5 +1,5 @@
 """
-validate.py — Validação de profile-descriptors do Enterprise Default Project Template.
+validate.py — Validação de profile-descriptors do Enterprise Scaffold Project Template.
 
 Verifica por descriptor:
   1. Sintaxe YAML (parsável)

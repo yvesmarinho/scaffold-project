@@ -126,7 +126,7 @@
 - ✅ test-workspace*.md deletados (~320 tokens)
 - **Impacto**: -3.420 tokens de ruído
 
-**Task 2: Criar /memories/a-default-project.md**
+**Task 2: Criar /memories/scaffold-project.md**
 - ✅ User memory com dados corretos do projeto
 - **Impacto**: +600 tokens de contexto correto
 
@@ -191,7 +191,7 @@
 
 **Erro 1 (CRÍTICO): Hatchling build failure**
 - ❌ Problema: `ValueError: Unable to determine which files to ship inside the wheel`
-- ✅ Solução: Criado `src/default_project/__init__.py` + configurado pyproject.toml
+- ✅ Solução: Criado `src/scaffold_project/__init__.py` + configurado pyproject.toml
 - ✅ Impacto: `pip install -e ".[dev,security]"` agora funciona
 
 **Erro 2 (WARNING): Node.js 20 deprecated**
@@ -205,7 +205,7 @@
 - ✅ Impacto: Workflow YAML válido, scripts reutilizáveis
 
 **Commits**:
-- `795c22a`: fix(build): Adicionar src/default_project
+- `795c22a`: fix(build): Adicionar src/scaffold_project
 - `c6c875b`: fix(ci): Corrigir erros de sintaxe YAML
 
 **Limpeza**:
@@ -263,7 +263,7 @@
 3. `scripts/git-hooks/pre-commit` (memory validation)
 4. `.github/scripts/process_outdated.py` (pip list --outdated)
 5. `.github/scripts/process_audit.py` (pip-audit CVE scan)
-6. `src/default_project/__init__.py` (build fix)
+6. `src/scaffold_project/__init__.py` (build fix)
 
 ### Workflows (1 criado)
 1. `.github/workflows/dependency-check.yml` (CI/CD semanal)
@@ -288,7 +288,7 @@
 3. `Makefile` (6 novos targets)
 
 ### Memórias (3 modificados)
-1. `/memories/a-default-project.md` (criado, 600 tokens corretos)
+1. `/memories/scaffold-project.md` (criado, 600 tokens corretos)
 2. `/memories/enterprise-ansible.md` (deletado, -800 tokens ruído)
 3. `/memories/repo/test-workspace*.md` (deletados, -320 tokens obsoleto)
 

@@ -1,7 +1,7 @@
 """
 lib/session.py — Módulo de auto-documentação incremental de sessões.
 
-Parte do scripts/scaffold.py — Enterprise Default Project Template.
+Parte do scripts/scaffold.py — Enterprise Scaffold Project Template.
 
 Este módulo fornece funções para documentar atividades durante uma sessão de
 desenvolvimento de forma incremental, estruturada e segura.

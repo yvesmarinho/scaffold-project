@@ -17,6 +17,7 @@ Subcomandos (v1.1+ — preferido):
   scaffold.py dry-run --name X --domain Y --language Z [--json]
   scaffold.py compose PROFILES [--json]     # aplica perfis (CSV)
   scaffold.py upgrade [--force]             # re-aplica template
+  scaffold.py adopt [--target-dir PATH]     # adota projeto legado (sem state)
   scaffold.py publish [--output-dir PATH]   # gera tarball de release
   scaffold.py new-profile NAME [--profile-layer LAYER]
   scaffold.py infra                         # gera ci.yml, Dockerfile, RUNBOOK
@@ -55,6 +56,7 @@ from lib.flows import (
     flow_objetivo_validate,
     flow_publish,
     flow_release,
+    flow_adopt,
     flow_upgrade,
     flow_validate,
 )
@@ -83,6 +85,7 @@ _SUBCOMMAND_MAP: dict[str, list[str]] = {
     # next positional arg becomes the value
     "compose":       ["--compose"],
     "upgrade":       ["--upgrade"],
+    "adopt":         ["--adopt"],
     "publish":       ["--publish"],
     # next positional arg becomes the value
     "new-profile":   ["--new-profile"],
@@ -237,6 +240,15 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     action_group.add_argument(
+        "--adopt",
+        action="store_true",
+        help=(
+            "adota um projeto legado (sem .scaffold-state.yaml) no scaffold\n"
+            "  detecta linguagem/domínio (override: --language/--domain/--name/--ai)\n"
+            "  cria o state e re-aplica o template sem sobrescrever arquivos existentes"
+        ),
+    )
+    action_group.add_argument(
         "--force",
         action="store_true",
         help=(
@@ -335,6 +347,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     mode_group.add_argument(
         "--log-dir",
+        "--logdir",
         metavar="PATH",
         dest="log_dir",
         help="diretório para salvar logs (default: <projeto>/logs/)",
@@ -464,6 +477,7 @@ _LEGACY_FLAG_DEPRECATIONS: dict[str, str] = {
     "--dry-run":       "scaffold.py dry-run",
     "--compose":       "scaffold.py compose PROFILES",
     "--upgrade":       "scaffold.py upgrade",
+    "--adopt":         "scaffold.py adopt",
     "--publish":       "scaffold.py publish",
     "--new-profile":   "scaffold.py new-profile NAME",
     "--infra":         "scaffold.py infra",
@@ -540,6 +554,12 @@ def main() -> int:
         if not getattr(args, "json_output", False):
             show_banner()
         return flow_upgrade(args)
+
+    # --adopt: adota projeto legado sem .scaffold-state.yaml
+    if getattr(args, "adopt", False):
+        if not getattr(args, "json_output", False):
+            show_banner()
+        return flow_adopt(args)
 
     # --dry-run: simula criação sem escrever arquivos
     if getattr(args, "dry_run", False):

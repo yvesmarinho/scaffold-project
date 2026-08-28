@@ -1,9 +1,9 @@
 # 🔄 Session Recovery — 2026-03-07
 
 **Date**: 2026-03-07
-**Project**: Enterprise Default Project Template (`a-default-project`)
+**Project**: Enterprise Scaffold Project Template (`scaffold-project`)
 **Branch**: `master`
-**Remote**: `https://github.com/yvesmarinho/default-project.git`
+**Remote**: `https://github.com/yvesmarinho/scaffold-project.git`
 **Sessão anterior**: 2026-03-05
 
 ---
@@ -89,7 +89,7 @@ Padrões verificados: `.env*`, `*.key`, `*.pem`, `*.crt`, `*secret*`, `*password
 
 Estado verificado: raiz limpa — todos os arquivos na raiz são válidos:
 - `.copilot-rules.md`, `.git/`, `.github/`, `.gitignore`, `.secrets/`, `.specify/`, `.vscode/`
-- `Makefile`, `README.md`, `default-project.code-workspace`
+- `Makefile`, `README.md`, `scaffold-project.code-workspace`
 - `docs/`, `scripts/`
 
 **Ajuste em docs/**: `GitHub Copilot Recursos de Agents etc.md` renomeado para `GITHUB-COPILOT-AGENTS-RESOURCES.md` (violava convenção de nomenclatura — espaços no nome)

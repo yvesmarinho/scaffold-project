@@ -378,7 +378,7 @@ TEST_PROJECT=/tmp/imp-65-test-project
 
 ```bash
 # Navigate to template repo
-cd /path/to/a-default-project
+cd /path/to/scaffold-project
 
 # Create test project with python-fastapi profile
 python scripts/scaffold.py new \
@@ -477,11 +477,11 @@ Baseline for IMP-65 real-world test."
 
 #### Step 4: Simulate Upstream Updates (15 min)
 
-Create updated templates in upstream (a-default-project):
+Create updated templates in upstream (scaffold-project):
 
 **Update spec-template.md (v1.0.0 → v1.5.0)**:
 ```bash
-cd /path/to/a-default-project
+cd /path/to/scaffold-project
 
 # Update version in frontmatter
 sed -i 's/template_version: "1.0.0"/template_version: "1.5.0"/' \
@@ -565,7 +565,7 @@ Before running test, verify:
 cd "$TEST_PROJECT"
 
 # Step 1: Check for drift
-python /path/to/a-default-project/scripts/scaffold.py check-templates \
+python /path/to/scaffold-project/scripts/scaffold.py check-templates \
   --target-dir . \
   --json > /tmp/drift-check.json
 
@@ -598,7 +598,7 @@ echo $?  # → 1 (drift detected)
 
 ```bash
 # Step 2a: Diff spec-template (clean merge expected)
-python /path/to/a-default-project/scripts/scaffold.py diff-template spec-template \
+python /path/to/scaffold-project/scripts/scaffold.py diff-template spec-template \
   --target-dir . \
   --format markdown \
   --output /tmp/diff-spec.md
@@ -611,7 +611,7 @@ grep "Performance Criteria" /tmp/diff-spec.md  # → Found (new upstream section
 grep "Security Review Checklist" /tmp/diff-spec.md  # → Not in diff (local-only, preserved)
 
 # Step 2b: Diff plan-template (conflict expected)
-python /path/to/a-default-project/scripts/scaffold.py diff-template plan-template \
+python /path/to/scaffold-project/scripts/scaffold.py diff-template plan-template \
   --target-dir . \
   --output /tmp/diff-plan.txt
 
@@ -620,7 +620,7 @@ grep "Deployment" /tmp/diff-plan.txt  # → Shows conflict area
 grep "<<<<<<< LOCAL" /tmp/diff-plan.txt  # → May show conflict marker (depends on implementation)
 
 # Step 2c: Diff tasks-template (breaking change)
-python /path/to/a-default-project/scripts/scaffold.py diff-template tasks-template \
+python /path/to/scaffold-project/scripts/scaffold.py diff-template tasks-template \
   --target-dir . \
   --output /tmp/diff-tasks.txt
 
@@ -643,7 +643,7 @@ grep "Dependencies.*removed" /tmp/diff-tasks.txt  # → Shows removal
 date > /tmp/merge-start-spec.txt
 
 # Execute merge
-python /path/to/a-default-project/scripts/scaffold.py merge-template spec-template \
+python /path/to/scaffold-project/scripts/scaffold.py merge-template spec-template \
   --target-dir . \
   --auto
 
@@ -671,14 +671,14 @@ grep "spec-template.md: \"1.5.0\"" .scaffold-state.yaml  # → Updated ✅
 
 ```bash
 # Attempt auto-merge (should fail)
-python /path/to/a-default-project/scripts/scaffold.py merge-template plan-template \
+python /path/to/scaffold-project/scripts/scaffold.py merge-template plan-template \
   --target-dir . \
   --auto
 
 # Expected: exit code != 0, conflict detected
 
 # Try interactive mode
-python /path/to/a-default-project/scripts/scaffold.py merge-template plan-template \
+python /path/to/scaffold-project/scripts/scaffold.py merge-template plan-template \
   --target-dir . \
   --interactive
 
@@ -704,14 +704,14 @@ grep "<<<<<<< LOCAL" .specify/templates/plan-template.md  # → NOT found ✅
 
 ```bash
 # Attempt auto-merge (should block)
-python /path/to/a-default-project/scripts/scaffold.py merge-template tasks-template \
+python /path/to/scaffold-project/scripts/scaffold.py merge-template tasks-template \
   --target-dir . \
   --auto
 
 # Expected: Warning about breaking change, requires explicit flag
 
 # Apply with breaking change acknowledgment
-python /path/to/a-default-project/scripts/scaffold.py merge-template tasks-template \
+python /path/to/scaffold-project/scripts/scaffold.py merge-template tasks-template \
   --target-dir . \
   --auto \
   --breaking-ok  # or similar flag
@@ -766,7 +766,7 @@ cat .scaffold-state.yaml | grep template_versions -A5
 
 ```bash
 # Run full template drift check
-python /path/to/a-default-project/scripts/scaffold.py check-templates --target-dir .
+python /path/to/scaffold-project/scripts/scaffold.py check-templates --target-dir .
 
 # Expected: ✅ All templates up-to-date
 
@@ -801,7 +801,7 @@ cat "$BACKUP" | grep "Security Review Checklist"  # → Has customizations ✅
 git checkout HEAD -- .specify/templates/spec-template.md
 
 # Dry-run merge
-python /path/to/a-default-project/scripts/scaffold.py merge-template spec-template \
+python /path/to/scaffold-project/scripts/scaffold.py merge-template spec-template \
   --target-dir . \
   --auto \
   --dry-run > /tmp/dry-run.txt
@@ -817,7 +817,7 @@ cat /tmp/dry-run.txt | grep "Would apply"  # → Preview shown ✅
 
 ```bash
 # Apply merge
-python /path/to/a-default-project/scripts/scaffold.py merge-template spec-template \
+python /path/to/scaffold-project/scripts/scaffold.py merge-template spec-template \
   --target-dir . \
   --auto
 
@@ -825,7 +825,7 @@ python /path/to/a-default-project/scripts/scaffold.py merge-template spec-templa
 cp .specify/templates/spec-template.md /tmp/first-merge.md
 
 # Re-apply same merge
-python /path/to/a-default-project/scripts/scaffold.py merge-template spec-template \
+python /path/to/scaffold-project/scripts/scaffold.py merge-template spec-template \
   --target-dir . \
   --auto
 
@@ -841,7 +841,7 @@ diff /tmp/first-merge.md .specify/templates/spec-template.md
 sed -i '1,5d' .specify/templates/spec-template.md  # Remove frontmatter
 
 # Attempt merge
-python /path/to/a-default-project/scripts/scaffold.py merge-template spec-template \
+python /path/to/scaffold-project/scripts/scaffold.py merge-template spec-template \
   --target-dir . \
   --auto 2> /tmp/error.txt
 

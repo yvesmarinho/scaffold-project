@@ -1,4 +1,4 @@
-# Migration Guide — Enterprise Default Project Template
+# Migration Guide — Enterprise Scaffold Project Template
 
 > **Versão do documento**: 1.0.0
 > **Última actualização**: 2026-03-14

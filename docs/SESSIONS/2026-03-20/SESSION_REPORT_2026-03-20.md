@@ -76,7 +76,7 @@
 
 ### Modified
 - `docs/INDEX.md` — Added Copilot Agents section, updated session list, updated header
-- `default-project.code-workspace` — VS Code autosave
+- `scaffold-project.code-workspace` — VS Code autosave
 
 ### Deleted
 - `main.py` — Placeholder file removed via Pylance tool

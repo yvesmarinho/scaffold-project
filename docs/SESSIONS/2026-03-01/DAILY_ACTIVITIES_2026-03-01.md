@@ -1,7 +1,7 @@
 # 📅 Daily Activities — 1 de Março de 2026
 
 **Date**: 2026-03-01
-**Project**: Enterprise Default Project Template (`a-default-project`)
+**Project**: Enterprise Scaffold Project Template (`scaffold-project`)
 **Developer**: Yves Marinho
 **Branch**: master
 
@@ -212,7 +212,7 @@ Zero duplicidade. Zero ambiguidade. Conforme D-21.
 - `.secrets/` no `.gitignore` ✅
 
 ### Organização da Raiz
-- Raiz mantida limpa: `.copilot-rules.md`, `.git/`, `.github/`, `.gitignore`, `.secrets/`, `.specify/`, `.vscode/`, `Makefile`, `README.md`, `default-project.code-workspace`, `docs/`, `scripts/`
+- Raiz mantida limpa: `.copilot-rules.md`, `.git/`, `.github/`, `.gitignore`, `.secrets/`, `.specify/`, `.vscode/`, `Makefile`, `README.md`, `scaffold-project.code-workspace`, `docs/`, `scripts/`
 - Nenhum arquivo solto fora da estrutura definida
 
 ### Arquivos `.copilot-*`

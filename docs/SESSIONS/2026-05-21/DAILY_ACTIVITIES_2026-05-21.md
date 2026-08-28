@@ -1,7 +1,7 @@
 # DAILY ACTIVITIES - 2026-05-21
 
 **Session Started**: 2026-05-21 12:27:59 UTC
-**Project**: Enterprise Default Project Template
+**Project**: Enterprise Scaffold Project Template
 **Domain**: PROGRAMMING (devops-programming.prompt.md)
 **Tasks**: P1 HIGH - Objetivo-Init Pipeline Testing
 
@@ -267,7 +267,7 @@ Executar processo completo de release para versão 1.7.1, incluindo:
 **Release v1.7.1: PUBLICADA ✅**
 
 ```
-Repository: github.com/yvesmarinho/default-project
+Repository: github.com/yvesmarinho/scaffold-project
 Tag:        v1.7.1 (anotada)
 Commit:     af07136
 Tarball:    569 KB (351 arquivos)

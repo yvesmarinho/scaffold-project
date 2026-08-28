@@ -105,7 +105,7 @@ echo
 
 # Teste 6: Template directory detection
 echo "📋 Testes de Configuração"
-if [[ -f "${HOME}/Documentos/DevOps/Vya-Jobs/a-default-project/scripts/scaffold.py" ]]; then
+if [[ -f "${HOME}/Documentos/DevOps/Projetos/scaffold-project/scripts/scaffold.py" ]]; then
     test_command "Template directory exists" "true"
 else
     echo -e "  ${YELLOW}⚠ SKIP${NC}: Template not in default location"

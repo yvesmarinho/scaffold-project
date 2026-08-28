@@ -1,7 +1,7 @@
 # 📅 Daily Activities — 5 de Março de 2026
 
 **Date**: 2026-03-05
-**Project**: Enterprise Default Project Template (`a-default-project`)
+**Project**: Enterprise Scaffold Project Template (`scaffold-project`)
 **Developer**: Yves Marinho
 **Branch**: master
 

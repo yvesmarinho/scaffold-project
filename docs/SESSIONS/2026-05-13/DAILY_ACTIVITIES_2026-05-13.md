@@ -2,7 +2,7 @@
 
 **Branch**: 060-mini-engram-python
 **Session Start**: 2026-05-13
-**Project**: Enterprise Default Project Template (a-default-project)
+**Project**: Enterprise Scaffold Project Template (scaffold-project)
 
 ---
 

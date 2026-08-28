@@ -1,5 +1,5 @@
 """
-Default Project Template
+Scaffold Project Template
 
 Template empresarial para projetos Python/Node.js com scaffolding automático,
 validação de segurança e estrutura padronizada.

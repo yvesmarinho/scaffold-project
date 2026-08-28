@@ -13,7 +13,7 @@
 
 ```bash
 # Executar teste pytest
-cd /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project
+cd /home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project
 pytest tests/test_validate_test_workspace_fix.py -v
 
 # OU executar script standalone
@@ -86,7 +86,7 @@ Marque com `[x]` cada item conforme valida.
 
 ```bash
 # Re-executar scaffold upgrade forçado
-cd /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project
+cd /home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project
 python scripts/scaffold.py \
   --upgrade \
   --force \
@@ -306,7 +306,7 @@ python scripts/scaffold.py \
 
 **Solução**:
 ```bash
-cd /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project
+cd /home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project
 python scripts/scaffold.py \
   --upgrade \
   --force \

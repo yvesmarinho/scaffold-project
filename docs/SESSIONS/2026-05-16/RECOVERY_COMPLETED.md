@@ -172,7 +172,7 @@ $ git diff --stat c107731..HEAD | tail -1
 - ✅ `backup-before-revert-20260516-104057` (estado recuperado)
 
 **Backup do usuário**:
-- ✅ `~/backup_temp/default-project-backup-20260516_1156.zip` (25MB)
+- ✅ `~/backup_temp/scaffold-project-backup-20260516_1156.zip` (25MB)
 
 **Commits preservados** (podem ser recuperados se necessário):
 - 9a11dd7 — REVERT_LOG documentado

@@ -1,7 +1,7 @@
 # 🏁 Final Status — 2026-02-28
 
 **Data**: 2026-02-28
-**Projeto**: Enterprise Default Project Template (`a-default-project`)
+**Projeto**: Enterprise Scaffold Project Template (`scaffold-project`)
 **Branch**: master
 **Status**: ✅ Sessão encerrada com sucesso
 
@@ -84,7 +84,7 @@ IMP-01:     🟠 Próximo (P0)
 .vscode/            ✅
 Makefile            ✅
 README.md           ✅
-default-project.code-workspace  ✅
+scaffold-project.code-workspace  ✅
 docs/               ✅
 scripts/            ✅
 ```

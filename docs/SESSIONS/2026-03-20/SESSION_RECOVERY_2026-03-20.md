@@ -66,7 +66,7 @@
 ```
 On branch master
 Changes not staged for commit:
-  - modified: default-project.code-workspace
+  - modified: scaffold-project.code-workspace
 
 Untracked files:
   - .github/agents/session-manager.agent.md

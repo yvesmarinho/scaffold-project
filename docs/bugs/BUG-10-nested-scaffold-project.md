@@ -123,7 +123,7 @@ uv run scripts/scaffold.py upgrade     # SEM --target-dir
 
 **Uso**:
 ```bash
-cd /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project
+cd /home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project
 uv run scripts/tmp/fix_bug10_nested_scaffold.py
 ```
 
@@ -371,7 +371,7 @@ O comando `scaffold upgrade` atualiza o projeto ATUAL in-place.
 cd /path/to/my-project/
 
 # 2. Executar upgrade SEM parâmetros
-uv run /path/to/a-default-project/scripts/scaffold.py upgrade
+uv run /path/to/scaffold-project/scripts/scaffold.py upgrade
 ```
 
 ### O que acontece:

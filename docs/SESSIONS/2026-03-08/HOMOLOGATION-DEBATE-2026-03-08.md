@@ -1,4 +1,4 @@
-# Homologação — Enterprise Default Project Template
+# Homologação — Enterprise Scaffold Project Template
 **Data**: 2026-03-08
 **Contexto**: IMPs 01–32 concluídas. 410 testes passando. Debate de homologação por perspectiva profissional.
 **Referência do framework de skills**: [`docs/GitHub Copilot - Default Porject Template Skills.md`](../GitHub%20Copilot%20-%20Default%20Porject%20Template%20Skills.md)

@@ -49,7 +49,7 @@ The required function exists (`scripts/lib/template_version.py::save_all_templat
 
 ```bash
 # 1. Create new project
-cd a-default-project
+cd scaffold-project
 python3 scripts/scaffold.py compose \
   --ci \
   --project-name "test-bug03" \
@@ -63,7 +63,7 @@ cd ../test-bug03
 grep "template_bases" .scaffold-state.yaml  # ❌ Not found
 
 # 3. Try to merge a template
-python3 ../a-default-project/scripts/scaffold.py merge-template spec-template
+python3 ../scaffold-project/scripts/scaffold.py merge-template spec-template
 # ❌ Error: "No base template stored"
 ```
 
@@ -77,7 +77,7 @@ import sys
 from pathlib import Path
 
 # Add scripts to path
-sys.path.insert(0, str(Path("../a-default-project/scripts")))
+sys.path.insert(0, str(Path("../scaffold-project/scripts")))
 
 from scripts.lib import template_version
 

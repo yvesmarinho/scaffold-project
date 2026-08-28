@@ -1,6 +1,6 @@
 # Final Status — 2026-03-31
 
-**Project:** a-default-project — Enterprise Default Project Template
+**Project:** scaffold-project — Enterprise Scaffold Project Template
 **Session Date:** 2026-03-31 (Monday)
 **Initial HEAD:** 315f721
 **Final HEAD:** 33e40a3
@@ -213,7 +213,7 @@ git push origin master
   - 1 critical
   - 2 high
   - 3 moderate
-- **Dashboard:** https://github.com/yvesmarinho/default-project/security/dependabot
+- **Dashboard:** https://github.com/yvesmarinho/scaffold-project/security/dependabot
 - **Priority:** Review critical/high alerts next session
 
 ### Long-term Work

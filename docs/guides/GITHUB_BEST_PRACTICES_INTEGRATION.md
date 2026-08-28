@@ -1,6 +1,6 @@
 # Integração de Best Practices GitHub no Template
 
-Este documento descreve como as melhores práticas de Git/GitHub foram integradas no Enterprise Default Project Template.
+Este documento descreve como as melhores práticas de Git/GitHub foram integradas no Enterprise Scaffold Project Template.
 
 ## 📋 Visão Geral
 

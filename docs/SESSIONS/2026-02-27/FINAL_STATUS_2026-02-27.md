@@ -1,7 +1,7 @@
 # 🏁 Final Status — 2026-02-27
 
 **Date**: 2026-02-27
-**Project**: Enterprise Default Project Template (`a-default-project`)
+**Project**: Enterprise Scaffold Project Template (`scaffold-project`)
 **Branch**: master
 **Developer**: Yves Marinho
 **Encerrado**: 2026-02-27
@@ -60,7 +60,7 @@ Todos os objetivos da sessão foram alcançados. A arquitetura de Domain Profile
 ## 📁 Estado da Raiz do Projeto
 
 ```
-a-default-project/
+scaffold-project/
 ├── .copilot-file-rules.sh          ← symlink (compartilhado)
 ├── .copilot-git-rules.md           ← symlink (compartilhado)
 ├── .copilot-rules.md               ← symlink (compartilhado)
@@ -77,7 +77,7 @@ a-default-project/
 │   └── settings.json
 ├── Makefile
 ├── README.md
-├── default-project.code-workspace
+├── scaffold-project.code-workspace
 ├── docs/
 │   ├── INDEX.md                    ← atualizado
 │   ├── TODO.md                     ← atualizado

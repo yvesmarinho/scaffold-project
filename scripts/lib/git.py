@@ -1,7 +1,7 @@
 """
 lib/git.py — git init e git remote add.
 
-Parte do scripts/scaffold.py — Enterprise Default Project Template.
+Parte do scripts/scaffold.py — Enterprise Scaffold Project Template.
 """
 
 from __future__ import annotations
@@ -117,7 +117,7 @@ def create_initial_commit(config: ProjectConfig) -> CreatedItem:
         )
 
         # Commit inicial
-        commit_msg = f"chore: scaffold inicial do projeto {config.project_name}\n\nGerado pelo Enterprise Default Project Template v1.0.0"
+        commit_msg = f"chore: scaffold inicial do projeto {config.project_name}\n\nGerado pelo Enterprise Scaffold Project Template v1.0.0"
         subprocess.run(
             ["git", "commit", "-m", commit_msg],
             cwd=target,
@@ -174,7 +174,7 @@ def tag_scaffold(config: ProjectConfig, version: str = "1.0.0") -> CreatedItem:
 
     try:
         # Tag anotada com mensagem
-        tag_msg = f"Projeto criado com Enterprise Default Project Template v{version}"
+        tag_msg = f"Projeto criado com Enterprise Scaffold Project Template v{version}"
         subprocess.run(
             ["git", "tag", "-a", tag_name, "-m", tag_msg],
             cwd=target,

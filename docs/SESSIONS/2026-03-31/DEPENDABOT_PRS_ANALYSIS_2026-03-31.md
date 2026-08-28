@@ -1,4 +1,4 @@
-# Análise dos PRs do Dependabot — a-default-project
+# Análise dos PRs do Dependabot — scaffold-project
 
 **Data:** 2026-03-31
 **Total de PRs:** 13 abertos

@@ -27,7 +27,7 @@ Templates reviewed:
 Deferred TODOs: None. All fields resolved.
 -->
 
-# a-default-project Constitution
+# scaffold-project Constitution
 
 ## Core Principles
 
@@ -131,7 +131,7 @@ This table is normative. Changes require a D-nn decision record and a SPECKIT_SY
 ## Governance
 
 This constitution supersedes all other documented practices, ad-hoc conventions, and README-level
-guidelines within the **a-default-project** template repository. In the event of conflict, the
+guidelines within the **scaffold-project** template repository. In the event of conflict, the
 constitution takes precedence.
 
 **Amendment procedure:**

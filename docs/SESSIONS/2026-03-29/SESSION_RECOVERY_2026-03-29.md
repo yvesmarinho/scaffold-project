@@ -57,7 +57,7 @@
 ## ⚠️ Git Status Issues Found
 
 **Uncommitted Changes**:
-- `default-project.code-workspace` (modified)
+- `scaffold-project.code-workspace` (modified)
 - `scripts/lib/flows/__pycache__/new_project.cpython-312.pyc` (modified - should be in .gitignore)
 
 **Untracked Files**:

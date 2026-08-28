@@ -22,7 +22,7 @@
 
 ## Overview
 
-The Modular Templates System transforms how we manage template evolution and customization in the Enterprise Default Project Template.
+The Modular Templates System transforms how we manage template evolution and customization in the Enterprise Scaffold Project Template.
 
 ### Problems Solved
 
@@ -70,7 +70,7 @@ The Modular Templates System transforms how we manage template evolution and cus
 
 ### Install (Already Included)
 
-The modular templates system is built into the Enterprise Default Project Template. No installation needed!
+The modular templates system is built into the Enterprise Scaffold Project Template. No installation needed!
 
 ### 5-Minute Tutorial
 
@@ -950,7 +950,7 @@ compose-template templates/spec-custom.md .specify/
 
 ## Feedback and Contributions
 
-This system is part of the Enterprise Default Project Template.
+This system is part of the Enterprise Scaffold Project Template.
 
 **Questions?** See [docs/TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 **Issues?** Check [docs/ISSUE_MANAGEMENT_GUIDE.md](ISSUE_MANAGEMENT_GUIDE.md)

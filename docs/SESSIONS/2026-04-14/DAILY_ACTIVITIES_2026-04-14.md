@@ -1,6 +1,6 @@
 # 📋 Daily Activities Log — 2026-04-14
 
-**Project**: Enterprise Default Project Template
+**Project**: Enterprise Scaffold Project Template
 **Branch**: master
 **Session Start**: 2026-04-14 (horário a registrar)
 **Work Focus**: TBD (pendente decisão)

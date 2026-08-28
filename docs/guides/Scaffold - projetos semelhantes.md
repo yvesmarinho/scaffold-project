@@ -8,18 +8,18 @@ description: ""
 tags:
   - "clippings"
 ---
-[yvesmarinho/default-project](https://github.com/yvesmarinho/default-project)
+[yvesmarinho/scaffold-project](https://github.com/yvesmarinho/scaffold-project)
 
 existem projetos semelhantes ao meu?
 
 - [Seja Um Programador Melhor: 10 Repositórios SENSACIONAIS - Mediummedium.com
 	](https://medium.com/@FilipeDeschamps/seja-um-programador-melhor-10-reposit%C3%B3rios-sensacionais-no-github-tudo-open-source-136a0671b3c9)
 
-Sim, existem vários projetos **bem semelhantes em proposta** ao seu `yvesmarinho/default-project` (um **template/boilerplate** com “estrutura básica” e automações via **Python + Shell + Makefile**). A forma mais comum disso no ecossistema é: **templates de projeto**, **cookiecutters**, e repositórios “sample project”.
+Sim, existem vários projetos **bem semelhantes em proposta** ao seu `yvesmarinho/scaffold-project` (um **template/boilerplate** com “estrutura básica” e automações via **Python + Shell + Makefile**). A forma mais comum disso no ecossistema é: **templates de projeto**, **cookiecutters**, e repositórios “sample project”.
 
 Abaixo vai uma lista **curada** de referências e exemplos práticos (com foco em Python, mas muitos incluem Shell/Makefile e CI), e um método objetivo para você encontrar mais “iguais ao seu”.
 
-## 1) Templates bem próximos do conceito “default project”
+## 1) Templates bem próximos do conceito “scaffold project”
 
 ### cookiecutter/cookiecutter-pypackage
 
@@ -68,7 +68,7 @@ Se você me disser **qual é a “assinatura” do seu template** (ex.: você us
 
 ### Próxima pergunta (para eu refinar ao máximo)
 
-Seu `default-project` é mais para:
+Seu `scaffold-project` é mais para:
 
 1. **biblioteca Python**, 2) **CLI**, 3) **serviço**, ou 4) **template genérico multi-linguagem** (com pastas `scripts/`, `Makefile`, `docs/`, etc.)?
 
@@ -76,7 +76,7 @@ Seu `default-project` é mais para:
 
 Você está descrevendo um “ **project scaffolding platform** ” agnóstico (linguagem/stack), com **CLI guiada**, que embute **processos DevOps** + **IA (agents/spec kit/best practices)**. Existem projetos *bem próximos* disso — normalmente não como “um template só”, mas como **frameworks de geração** (scaffolders) + **catálogo de templates/plugins**. O que mais vai te agregar é estudar **arquitetura de extensões**, **modelagem de templates**, **contratos/specs**, e **fluxos de onboarding**.
 
-Abaixo deixo uma lista de projetos/linhas que são diretamente úteis para “roubar processos” e elevar seu `default-project`.
+Abaixo deixo uma lista de projetos/linhas que são diretamente úteis para “roubar processos” e elevar seu `scaffold-project`.
 
 ---
 
@@ -161,11 +161,11 @@ Esses conceitos você consegue “absorver” mesmo de projetos não-agnósticos
 ### 4.1 Arquitetura de extensões (plugins) — essencial para seu caso agnóstico
 
 - Seu CLI deveria suportar algo como:
-	- `default-project init` (core)
-		- `default-project add ci github-actions`
-		- `default-project add iac terraform`
-		- `default-project add ai agent-kit`
-		- `default-project add observability otel`
+	- `scaffold-project init` (core)
+		- `scaffold-project add ci github-actions`
+		- `scaffold-project add iac terraform`
+		- `scaffold-project add ai agent-kit`
+		- `scaffold-project add observability otel`
 - Isso é diretamente inspirado por Yeoman/Nx/Backstage (pluggability).
 
 ### 4.2 “Golden paths” por persona (iniciante → avançado)
@@ -180,13 +180,13 @@ Você disse que atende qualquer nível. Uma forma madura:
 
 Transforme “spec kit” em algo verificável:
 
-- um `project.spec.yaml` (ou `default-project.yml`) descrevendo:
+- um `project.spec.yaml` (ou `scaffold-project.yml`) descrevendo:
 	- stack (language/runtime)
 		- features (ci, iac, ai, docs)
 		- requisitos (lint, test, security gates)
 - A partir disso:
 	- gera estrutura
-		- valida conformidade (um `default-project check`)
+		- valida conformidade (um `scaffold-project check`)
 
 ---
 
@@ -273,7 +273,7 @@ Aqui é onde você parece estar **mais diferenciado** e onde existem equivalente
 
 ## 4) “Portal/Platform scaffolding” (golden paths) — similar ao seu lado DevOps/templates.github/\*
 
-Se parte do seu repositório é fornecer “default project template” com CI/CD, segurança, IaC e padrões (o `tree` mostra MUITO disso), então você está no território de **Platform Engineering** / **Golden Paths**.
+Se parte do seu repositório é fornecer “scaffold project template” com CI/CD, segurança, IaC e padrões (o `tree` mostra MUITO disso), então você está no território de **Platform Engineering** / **Golden Paths**.
 
 ### Backstage Scaffolder (Spotify Backstage Software Templates)
 

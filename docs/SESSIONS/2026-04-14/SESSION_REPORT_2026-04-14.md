@@ -1,6 +1,6 @@
 # 📊 Session Report — 2026-04-14
 
-**Project**: Enterprise Default Project Template
+**Project**: Enterprise Scaffold Project Template
 **Branch**: master
 **Session Date**: 2026-04-14
 **Work Focus**: TBD (pendente decisão)

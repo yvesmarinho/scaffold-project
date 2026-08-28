@@ -150,7 +150,7 @@ GitHub detectou **5 vulnerabilidades** no repositório:
 - 2 high severity
 - 3 moderate severity
 
-**URL**: https://github.com/yvesmarinho/default-project/security/dependabot
+**URL**: https://github.com/yvesmarinho/scaffold-project/security/dependabot
 
 **Ação recomendada**: Revisar e corrigir na próxima sessão (adicionar ao TODO P0)
 
