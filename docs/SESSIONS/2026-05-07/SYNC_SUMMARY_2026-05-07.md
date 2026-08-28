@@ -1,14 +1,14 @@
 # 📋 Resumo de Atualizações — Sincronização de Projetos
 
 **Data**: 2026-05-07
-**Projeto Base**: `a-default-project` (Enterprise Default Project Template)
+**Projeto Base**: `scaffold-project` (Enterprise Scaffold Project Template)
 **Projeto Destino**: `enterprise-update-lab-n8n`
 
 ---
 
 ## 🎯 Objetivo
 
-Sincronizar funcionalidades, agentes, prompts e configurações MCP entre os projetos `a-default-project` (template enterprise) e `enterprise-update-lab-n8n` (projeto específico de upgrade do n8n).
+Sincronizar funcionalidades, agentes, prompts e configurações MCP entre os projetos `scaffold-project` (template enterprise) e `enterprise-update-lab-n8n` (projeto específico de upgrade do n8n).
 
 ---
 
@@ -32,9 +32,9 @@ Sincronizar funcionalidades, agentes, prompts e configurações MCP entre os pro
 
 ---
 
-### 2. Novos Agents Adicionados ao a-default-project
+### 2. Novos Agents Adicionados ao scaffold-project
 
-Foram copiados **7 novos agents** do `enterprise-update-lab-n8n` para o `a-default-project`, expandindo as capacidades do template:
+Foram copiados **7 novos agents** do `enterprise-update-lab-n8n` para o `scaffold-project`, expandindo as capacidades do template:
 
 | Agent | Descrição | Uso Principal |
 |-------|-----------|---------------|
@@ -47,19 +47,19 @@ Foram copiados **7 novos agents** do `enterprise-update-lab-n8n` para o `a-defau
 | **test.engineer** | Estratégia de testes e validação | Definir e executar testes funcionais/regressão |
 
 **Arquivos criados**:
-- `/home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project/.github/agents/debian-linux-expert.agent.md`
-- `/home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project/.github/agents/debug.agent.md`
-- `/home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project/.github/agents/python-mcp-expert.agent.md`
-- `/home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project/.github/agents/implementation-plan.agent.md`
-- `/home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project/.github/agents/devops.automation-sdd.agent.md`
-- `/home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project/.github/agents/devops.engineer-sdd.agent.md`
-- `/home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project/.github/agents/test.engineer.agent.md`
+- `/home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project/.github/agents/debian-linux-expert.agent.md`
+- `/home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project/.github/agents/debug.agent.md`
+- `/home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project/.github/agents/python-mcp-expert.agent.md`
+- `/home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project/.github/agents/implementation-plan.agent.md`
+- `/home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project/.github/agents/devops.automation-sdd.agent.md`
+- `/home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project/.github/agents/devops.engineer-sdd.agent.md`
+- `/home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project/.github/agents/test.engineer.agent.md`
 
 ---
 
 ### 3. Prompts de Sessão Adicionados ao enterprise-update-lab-n8n
 
-Foram copiados **3 prompts essenciais** do `a-default-project` para o `enterprise-update-lab-n8n`, garantindo rituais padronizados de sessão:
+Foram copiados **3 prompts essenciais** do `scaffold-project` para o `enterprise-update-lab-n8n`, garantindo rituais padronizados de sessão:
 
 | Prompt | Descrição | Quando Usar |
 |--------|-----------|-------------|
@@ -85,7 +85,7 @@ Foram copiados **3 prompts essenciais** do `a-default-project` para o `enterpris
 
 ### Agents Compartilhados (ambos os projetos)
 
-| Agent | a-default-project | enterprise-update-lab-n8n |
+| Agent | scaffold-project | enterprise-update-lab-n8n |
 |-------|-------------------|---------------------------|
 | devops-expert | ✅ | ✅ |
 | principal-software-engineer | ✅ | ✅ |
@@ -101,7 +101,7 @@ Foram copiados **3 prompts essenciais** do `a-default-project` para o `enterpris
 | speckit.taskstoissues | ✅ | ✅ |
 | template-architect | ✅ | ✅ |
 
-### Agents Exclusivos do a-default-project (APÓS atualização)
+### Agents Exclusivos do scaffold-project (APÓS atualização)
 
 | Agent | Descrição |
 |-------|-----------|
@@ -134,7 +134,7 @@ Foram copiados **3 prompts essenciais** do `a-default-project` para o `enterpris
 
 Ambos os projetos mantêm suas regras específicas:
 
-### a-default-project
+### scaffold-project
 - **Genérico**: `.copilot-rules.md` (7 seções, P0-P2)
 - **Específico**: Gerado dinamicamente por projeto derivado
 
@@ -173,7 +173,7 @@ Ambos os projetos mantêm suas regras específicas:
    - `@python-mcp-expert` para criar/melhorar MCP servers
    - `@test.engineer` para estratégia de validação de upgrade
 
-### Para a-default-project
+### Para scaffold-project
 
 1. **Documentar novos agents**:
    - Atualizar `docs/INDEX.md` com links para novos agents
@@ -200,7 +200,7 @@ Ambos os projetos mantêm suas regras específicas:
 - `.github/prompts/session-end.prompt.md`
 - `.github/prompts/session-start-first.prompt.md`
 
-### a-default-project
+### scaffold-project
 
 **Criados**:
 - `.github/agents/debian-linux-expert.agent.md`
@@ -216,7 +216,7 @@ Ambos os projetos mantêm suas regras específicas:
 ## ✨ Benefícios da Sincronização
 
 1. **Padronização**: Ambos os projetos agora seguem os mesmos padrões de sessão e rituais
-2. **Expansão de Capacidades**: a-default-project ganhou 7 novos agents especializados
+2. **Expansão de Capacidades**: scaffold-project ganhou 7 novos agents especializados
 3. **Completude MCP**: enterprise-update-lab-n8n tem acesso completo aos 4 servidores MCP essenciais
 4. **Rastreabilidade**: Rituais de sessão garantem documentação consistente
 5. **Reutilização**: Agents desenvolvidos em projetos específicos podem ser promovidos ao template

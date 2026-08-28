@@ -7,7 +7,7 @@ Gera:
   - docker-compose.yml          (app + postgres/redis opcionais comentados)
   - docs/RUNBOOK.md             (runbook operacional template)
 
-Parte do scripts/scaffold.py — Enterprise Default Project Template.
+Parte do scripts/scaffold.py — Enterprise Scaffold Project Template.
 """
 
 from __future__ import annotations

@@ -36,7 +36,7 @@ Os workflows estavam **TOTALMENTE FUNCIONAIS** após correções P0/P1:
 
 ```bash
 # 1. Restaurar arquivos do commit dce227b
-cd /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project
+cd /home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project
 
 # 2. Checkout dos workflows corrigidos
 git checkout dce227b -- .github/workflows/
@@ -78,7 +78,7 @@ git push origin master
 
 ```bash
 # 1. Trigger manual dos workflows via GitHub UI
-# Acessar: https://github.com/yvesmarinho/default-project/actions
+# Acessar: https://github.com/yvesmarinho/scaffold-project/actions
 
 # 2. Ou fazer commit trivial para trigger automático
 echo "# Workflow restoration test" >> README.md
@@ -209,7 +209,7 @@ on:
 
 **Mitigação:**
 - Revisar manualmente todos PRs de segurança
-- Checar dashboard: https://github.com/yvesmarinho/default-project/security/dependabot
+- Checar dashboard: https://github.com/yvesmarinho/scaffold-project/security/dependabot
 
 ### 🟠 MÉDIO - Code Quality
 - **Testes não executados** automaticamente

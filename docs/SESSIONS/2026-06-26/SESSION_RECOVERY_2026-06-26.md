@@ -19,7 +19,7 @@ A sessão focou em 3 entregas principais:
 
 2. **validate-test-runs.py** — Script criado em `scripts/bin/` para validar automaticamente as pastas geradas pelo scaffold (264 checks, 12/12 projetos PASS).
 
-3. **Separação template/DEV** — `copy_speckit()` lia agents/prompts diretamente de `.github/` do default project. Solução: criado `scaffold/templates/speckit/` via `git mv` com agents, prompts e specify-templates separados do código de desenvolvimento.
+3. **Separação template/DEV** — `copy_speckit()` lia agents/prompts diretamente de `.github/` do scaffold project. Solução: criado `scaffold/templates/speckit/` via `git mv` com agents, prompts e specify-templates separados do código de desenvolvimento.
 
 ### Estado do git
 

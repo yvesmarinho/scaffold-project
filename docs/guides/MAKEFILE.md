@@ -287,7 +287,7 @@ make setup-node
 - `package.json`: Project metadata and scripts
   ```json
   {
-    "name": "default-project",
+    "name": "scaffold-project",
     "version": "1.0.0",
     "scripts": {
       "dev": "nodemon src/index.ts",
@@ -472,7 +472,7 @@ src/models/user.ts 150ms
 
 **What it does**:
 - Builds Docker image from Dockerfile
-- Tags image as `default-project:latest`
+- Tags image as `scaffold-project:latest`
 
 **Usage**:
 ```bash
@@ -481,7 +481,7 @@ make docker-build
 
 **Equivalent to**:
 ```bash
-docker build -f docker/Dockerfile -t default-project:latest .
+docker build -f docker/Dockerfile -t scaffold-project:latest .
 ```
 
 ---

@@ -1,7 +1,7 @@
 """
 lib/templates.py — Geração de .copilot-rules-[projeto].md e .github/copilot-instructions.md.
 
-Parte do scripts/scaffold.py — Enterprise Default Project Template.
+Parte do scripts/scaffold.py — Enterprise Scaffold Project Template.
 """
 
 from __future__ import annotations

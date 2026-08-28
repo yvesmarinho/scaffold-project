@@ -1,7 +1,7 @@
 # DEBATE: Remoção Temporária de Automações CI/CD
 
 **Data**: 2026-03-31
-**Projeto**: Enterprise Default Project Template (`a-default-project`)
+**Projeto**: Enterprise Scaffold Project Template (`scaffold-project`)
 **Decisão proposta**: Remover temporariamente workflows de GitHub Actions durante fase de desenvolvimento
 **Status**: 🔴 ANÁLISE CRÍTICA
 
@@ -96,8 +96,8 @@ SEM CI/CD:
 **2. Experiência para novos contribuidores**
 ```python
 # Cenário: novo desenvolvedor clona o repo
-$ git clone a-default-project
-$ cd a-default-project
+$ git clone scaffold-project
+$ cd scaffold-project
 $ ls .github/workflows/
 # (vazio ou desatualizado)
 

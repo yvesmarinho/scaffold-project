@@ -8,7 +8,7 @@
 
 ```bash
 # Opção 1: Modo não-interativo (RECOMENDADO)
-cd /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project && \
+cd /home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project && \
 python scripts/scaffold.py --upgrade --force --json \
   --target-dir /home/yves_marinho/Documentos/DevOps/Projetos/test-workspace-fix
 

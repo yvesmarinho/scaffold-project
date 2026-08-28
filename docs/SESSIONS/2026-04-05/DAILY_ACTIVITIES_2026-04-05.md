@@ -1,6 +1,6 @@
 # 📝 Daily Activities — 2026-04-05
 
-**Project**: Enterprise Default Project Template
+**Project**: Enterprise Scaffold Project Template
 **Branch**: master
 **Session Start**: 2026-04-05 (Saturday)
 **Initial HEAD**: `267e070` — docs(sessão): encerramento 2026-04-03

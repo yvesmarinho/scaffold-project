@@ -1,6 +1,6 @@
 # Final Status — 2026-03-30
 
-**Project:** a-default-project — Enterprise Default Project Template
+**Project:** scaffold-project — Enterprise Scaffold Project Template
 **Session Date:** 2026-03-30
 **Final Commit:** 9334817 (docs: session end)
 **Previous Commit:** ca1e58e (fix: security scanner exceptions)

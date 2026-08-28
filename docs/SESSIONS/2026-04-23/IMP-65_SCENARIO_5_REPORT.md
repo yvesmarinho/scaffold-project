@@ -56,7 +56,7 @@ Projects created before the BUG-03 fix (commit 697d141) did not store template b
 **Setup Actions**:
 
 ```bash
-cd /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project/poc/tst-python-fastapi
+cd /home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project/poc/tst-python-fastapi
 
 # 1. Backup current state
 cp .scaffold-state.yaml .scaffold-state.yaml.backup

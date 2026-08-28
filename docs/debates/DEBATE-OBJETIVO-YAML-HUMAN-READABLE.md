@@ -1793,7 +1793,7 @@ project_name: ""  # Nome do projeto (kebab-case)
 {
   "$id": "objetivo-v2-schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Enterprise Default Project Template — Objetivo v2.0",
+  "title": "Enterprise Scaffold Project Template — Objetivo v2.0",
   "description": "Especificação de projeto para geração automática via scaffold.py + Copilot",
   "type": "object",
   "properties": {

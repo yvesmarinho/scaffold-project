@@ -47,16 +47,16 @@ python3 scripts/scaffold.py new --name tst-imp65-s6 --domain programming --ci
 # Edited .specify/templates/spec-template.md
 
 # 3. Update upstream template (Privacy section)
-# Edited a-default-project/.specify/templates/spec-template.md
+# Edited scaffold-project/.specify/templates/spec-template.md
 # Bumped version 2.2.0 → 2.3.0
 
 # 4. Check for updates
 cd tst-imp65-s6
-python3 ../a-default-project/scripts/scaffold.py --diff-template spec-template
+python3 ../scaffold-project/scripts/scaffold.py --diff-template spec-template
 # Output: Detected v2.2.0 → v2.3.0, 21 lines modified, conflicts detected
 
 # 5. Merge with conflicts
-python3 ../a-default-project/scripts/scaffold.py --merge-template spec-template --force
+python3 ../scaffold-project/scripts/scaffold.py --merge-template spec-template --force
 # Created backup: spec-template.backup-20260423-144736.md
 # Applied merge with conflict markers
 
@@ -205,7 +205,7 @@ md5sum spec-template.md > /tmp/checksum-before.txt
 # Output: ed1b8ec6d5daf2942b1546334dd87fee
 
 # 3. Preview changes with diff
-python3 ../a-default-project/scripts/scaffold.py --diff-template spec-template
+python3 ../scaffold-project/scripts/scaffold.py --diff-template spec-template
 
 # Output showed:
 # ================================================================================
@@ -346,7 +346,7 @@ Fix argument parsing to support `--dry-run` with `--merge-template` in future se
 - `/tmp/dry-run-output.txt` — Dry-run output capture
 
 ### Modified Files (Reverted)
-- `a-default-project/.specify/templates/spec-template.md` — Temporarily added Privacy section for testing (reverted to v2.2.0)
+- `scaffold-project/.specify/templates/spec-template.md` — Temporarily added Privacy section for testing (reverted to v2.2.0)
 
 ### Evidence
 All validation commands and outputs documented in this report.

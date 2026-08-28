@@ -22,12 +22,12 @@ Valida:
 - Logs de scaffold upgrade
 
 Usage:
-    # Executar do diretório a-default-project
+    # Executar do diretório scaffold-project
     python scripts/validate-workspace-upgrade.py /home/yves_marinho/DevOps/Projetos/test-workspace-fix
 
     # Executar de dentro do test-workspace-fix
     cd /home/yves_marinho/DevOps/Projetos/test-workspace-fix
-    python /caminho/para/a-default-project/scripts/validate-workspace-upgrade.py .
+    python /caminho/para/scaffold-project/scripts/validate-workspace-upgrade.py .
 
     # Modo verbose
     python scripts/validate-workspace-upgrade.py /path/to/workspace --verbose

@@ -1,9 +1,9 @@
 # 🔄 Session Recovery — 2026-03-05
 
 **Date**: 2026-03-05
-**Project**: Enterprise Default Project Template (`a-default-project`)
+**Project**: Enterprise Scaffold Project Template (`scaffold-project`)
 **Branch**: `master`
-**Remote**: `https://github.com/yvesmarinho/default-project.git`
+**Remote**: `https://github.com/yvesmarinho/scaffold-project.git`
 **Sessão anterior**: 2026-03-01
 
 ---
@@ -70,7 +70,7 @@ Arquivos na raiz (todos válidos):
 | Arquivo | Justificativa |
 |---------|---------------|
 | `.copilot-rules.md` | Config copilot (dotfile) |
-| `default-project.code-workspace` | VS Code workspace |
+| `scaffold-project.code-workspace` | VS Code workspace |
 | `Makefile` | Build automation |
 | `README.md` | Documentação principal |
 | `.gitignore` | Config git |

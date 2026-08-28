@@ -405,7 +405,7 @@ All operations maintained expected performance:
 - No Pylance Python tools
 
 **Resolution**: 
-- Copy `.vscode/mcp.json` from a-default-project
+- Copy `.vscode/mcp.json` from scaffold-project
 - Update server paths to match workspace structure
 - Restart VS Code to activate servers
 
@@ -553,7 +553,7 @@ b6c3ec2 — fix(bug06): corrigir referências de prompt files em python-{fastapi
 ### Immediate (Next Session)
 1. **BUG-08 Resolution** (P2 MEDIUM, ~30 min)
    - Fix knowledge-harvester-library MCP configuration
-   - Copy `.vscode/mcp.json` from a-default-project
+   - Copy `.vscode/mcp.json` from scaffold-project
    - Validate servers activate correctly
 
 2. **Linting Cleanup** (P2 LOW, ~1h)

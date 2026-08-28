@@ -2,7 +2,7 @@
 
 **Branch**: 017-bug-16-merge-strategy
 **Session Start**: 2026-05-15
-**Project**: Enterprise Default Project Template (a-default-project)
+**Project**: Enterprise Scaffold Project Template (scaffold-project)
 
 ---
 

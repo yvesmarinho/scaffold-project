@@ -12,7 +12,7 @@
 ### Objetivos Primários (P0)
 
 1. **Eliminar poluição de memórias** (enterprise-ansible.md + 37 arquivos de teste)
-2. **Criar memória correta do projeto** (a-default-project.md com dados atualizados)
+2. **Criar memória correta do projeto** (scaffold-project.md com dados atualizados)
 3. **Implementar verificação de segurança de pacotes** no ritual session-start
 4. **Prevenir poluição futura** (test fixtures isolados + pre-commit hooks)
 5. **Validar configurações críticas** (detectar configs obsoletas como BUG-20)
@@ -118,7 +118,7 @@ ls -la .memory/memories/project/
 
 ### Task 2: Criar Memória do Projeto Atual
 
-**Objetivo**: Criar `/memories/a-default-project.md` com informações corretas
+**Objetivo**: Criar `/memories/scaffold-project.md` com informações corretas
 **Owner**: Agent
 **Estimativa**: 20 minutos
 **Dependências**: Task 1 concluída
@@ -126,13 +126,13 @@ ls -la .memory/memories/project/
 **Conteúdo**:
 
 ```markdown
-# Enterprise Default Project Template (a-default-project)
+# Enterprise Scaffold Project Template (scaffold-project)
 
 **Última atualização**: 2026-05-18
 **Versão**: 1.6.0
 **Tipo**: Template multi-linguagem (Python, Node.js, etc.)
 **Branch principal**: master
-**Repositório**: github.com/yvesmarinho/default-project
+**Repositório**: github.com/yvesmarinho/scaffold-project
 
 ---
 
@@ -293,12 +293,12 @@ python scripts/session-time-tracker.py stop
 **Ferramenta**: `memory create`
 **Validação**:
 ```bash
-memory view /memories/a-default-project.md
+memory view /memories/scaffold-project.md
 # Deve mostrar conteúdo completo e correto
 ```
 
 **Critérios de Aceitação**:
-- [x] Arquivo `/memories/a-default-project.md` criado
+- [x] Arquivo `/memories/scaffold-project.md` criado
 - [x] Contém estrutura do projeto atualizada
 - [x] Contém regras P0 resumidas
 - [x] Contém comandos principais
@@ -694,7 +694,7 @@ python scripts/validate-configs.py --check mcp.json
 - [x] ~~**Limpar memórias contaminadas**~~: ✅ CONCLUÍDO (2026-05-18)
   - ✅ enterprise-ansible.md deletado
   - ✅ 37 arquivos de teste removidos
-  - ✅ a-default-project.md criado com dados corretos
+  - ✅ scaffold-project.md criado com dados corretos
 
 - [x] ~~**Passo 4.5 Session-Start**~~: ✅ IMPLEMENTADO (2026-05-18)
   - ✅ Verificação de dependências acionável
@@ -876,7 +876,7 @@ python scripts/validate-configs.py --check mcp.json
 | Task | Owner | Estimativa | Status |
 |------|-------|------------|--------|
 | 1. Limpar memórias | Agent | 30 min | 🔵 Ready |
-| 2. Criar a-default-project.md | Agent | 20 min | 🔵 Ready |
+| 2. Criar scaffold-project.md | Agent | 20 min | 🔵 Ready |
 | 3. Test fixtures isolados | Principal SE | 1h | 🔵 Ready |
 | 4. Passo 4.5 session-start | SE: Architect | 1h | 🔵 Ready |
 | 5. Makefile update-deps-safe | DevOps | 30 min | 🔵 Ready |
@@ -923,7 +923,7 @@ python scripts/validate-configs.py --check mcp.json
 **Checklist de validação** (executar após Tasks 1-8):
 
 - [ ] Zero arquivos `test-*.md` em `.memory/memories/project/`
-- [ ] Arquivo `/memories/a-default-project.md` existe e está correto
+- [ ] Arquivo `/memories/scaffold-project.md` existe e está correto
 - [ ] Arquivo `/memories/enterprise-ansible.md` NÃO existe
 - [ ] `pytest tests/` passa sem criar arquivos em `.memory/`
 - [ ] `make update-deps-safe` executa sem erros
@@ -959,12 +959,12 @@ python scripts/validate-configs.py --check mcp.json
 ### Sprint P0 (2026-05-18)
 
 ```
-feat(memory): Limpar memórias contaminadas + criar a-default-project.md
+feat(memory): Limpar memórias contaminadas + criar scaffold-project.md
 
 - Deletar enterprise-ansible.md (outro projeto, 800 tokens ruído)
 - Deletar 37 arquivos test-*.md (.memory/project/)
 - Deletar test-workspace*.md (dados obsoletos)
-- Criar /memories/a-default-project.md com dados corretos
+- Criar /memories/scaffold-project.md com dados corretos
 
 Impacto: -3.420 tokens de ruído, +600 tokens de contexto correto
 

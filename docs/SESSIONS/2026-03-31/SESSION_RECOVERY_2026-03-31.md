@@ -1,6 +1,6 @@
 # Session Recovery — 2026-03-31
 
-**Project:** a-default-project — Enterprise Default Project Template
+**Project:** scaffold-project — Enterprise Scaffold Project Template
 **Session Date:** 2026-03-31 (Monday)
 **Recovery From:** 2026-03-30
 **Time:** Session start

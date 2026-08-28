@@ -19,7 +19,7 @@ vya-digital/
 ├─ api-notifications/   (FastAPI, Docker, K8s)
 ├─ api-analytics/       (FastAPI, Docker, K8s)
 ├─ ... (mais 44 serviços)
-└─ _template-central/   (a-default-project)
+└─ _template-central/   (scaffold-project)
 ```
 
 **Padrões compartilhados**:

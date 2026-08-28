@@ -104,7 +104,7 @@ Both servers configured and active. No manual intervention required.
 
 **Issues Found**:
 1. **Modified files** (not staged):
-   - `default-project.code-workspace` — workspace configuration change
+   - `scaffold-project.code-workspace` — workspace configuration change
    - `scripts/lib/flows/__pycache__/new_project.cpython-312.pyc` — Python cache (should be in .gitignore)
 
 2. **Untracked files**:
@@ -122,7 +122,7 @@ Both servers configured and active. No manual intervention required.
 **Status**: ✅ COMPLETED
 
 **Actions Taken**:
-1. Reverted local changes to `default-project.code-workspace` (workspace-specific config)
+1. Reverted local changes to `scaffold-project.code-workspace` (workspace-specific config)
 2. Removed 12 `__pycache__/*.pyc` files from git tracking (already in .gitignore but were committed)
 3. Organized YAML templates:
    - Moved `mcp-questions_v5.yaml` → `docs/templates/mcp-questions-template.yaml`

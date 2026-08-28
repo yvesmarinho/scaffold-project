@@ -1,4 +1,4 @@
-# Enterprise Default Project Template - Makefile
+# Enterprise Scaffold Project Template - Makefile
 # This Makefile automates the creation of the complete project structure
 # and provides common development tasks
 
@@ -17,7 +17,7 @@ NC := \033[0m # No Color
 ## help: Display this help message
 help:
 	@echo "$(BLUE)╔════════════════════════════════════════════════════════════╗$(NC)"
-	@echo "$(BLUE)║  Enterprise Default Project Template - Makefile Help      ║$(NC)"
+	@echo "$(BLUE)║  Enterprise Scaffold Project Template - Makefile Help      ║$(NC)"
 	@echo "$(BLUE)╚════════════════════════════════════════════════════════════╝$(NC)"
 	@echo ""
 	@echo "$(GREEN)Available targets:$(NC)"
@@ -364,7 +364,7 @@ create-speckit-config:
 		echo "{" > .specify/config.json; \
 		echo "  \"version\": \"2.0\"," >> .specify/config.json; \
 		echo "  \"organization\": \"your-org\"," >> .specify/config.json; \
-		echo "  \"project\": \"default-project\"," >> .specify/config.json; \
+		echo "  \"project\": \"scaffold-project\"," >> .specify/config.json; \
 		echo "  \"specs\": {" >> .specify/config.json; \
 		echo "    \"outputPath\": \"docs/api\"," >> .specify/config.json; \
 		echo "    \"format\": \"openapi-3.0\"" >> .specify/config.json; \
@@ -480,7 +480,7 @@ setup-python:
 		echo "from setuptools import setup, find_packages" > setup.py; \
 		echo "" >> setup.py; \
 		echo "setup(" >> setup.py; \
-		echo "    name='default-project'," >> setup.py; \
+		echo "    name='scaffold-project'," >> setup.py; \
 		echo "    version='0.1.0'," >> setup.py; \
 		echo "    packages=find_packages()," >> setup.py; \
 		echo "    install_requires=[" >> setup.py; \
@@ -496,9 +496,9 @@ setup-node:
 	@echo "$(BLUE)📘 Setting up Node.js project...$(NC)"
 	@if [ ! -f package.json ]; then \
 		echo "{" > package.json; \
-		echo "  \"name\": \"default-project\"," >> package.json; \
+		echo "  \"name\": \"scaffold-project\"," >> package.json; \
 		echo "  \"version\": \"1.0.0\"," >> package.json; \
-		echo "  \"description\": \"Enterprise Default Project Template\"," >> package.json; \
+		echo "  \"description\": \"Enterprise Scaffold Project Template\"," >> package.json; \
 		echo "  \"main\": \"dist/index.js\"," >> package.json; \
 		echo "  \"scripts\": {" >> package.json; \
 		echo "    \"dev\": \"nodemon src/index.ts\"," >> package.json; \
@@ -680,7 +680,7 @@ format:
 ## docker-build: Build Docker image
 docker-build:
 	@echo "$(BLUE)🐳 Building Docker image...$(NC)"
-	@docker build -f docker/Dockerfile -t default-project:latest .
+	@docker build -f docker/Dockerfile -t scaffold-project:latest .
 	@echo "$(GREEN)✅ Docker image built$(NC)"
 
 ## docker-up: Start Docker containers

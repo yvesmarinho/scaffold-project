@@ -16,7 +16,7 @@ trap "rm -rf '$TEST_DIR'" EXIT
 # Criar diretório de teste
 mkdir -p "$TEST_DIR/$PROJECT_NAME"
 
-cd /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project
+cd /home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project
 
 # Executar scaffold em modo CI
 python3 scripts/scaffold.py new --ci \

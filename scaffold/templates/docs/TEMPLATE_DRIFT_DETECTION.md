@@ -30,14 +30,14 @@ This allows detection of outdated templates through the `check-templates` comman
 
 ## Command: `scaffold.py check-templates`
 
-Scans your project's `.specify/templates/` directory and compares versions with the upstream a-default-project templates.
+Scans your project's `.specify/templates/` directory and compares versions with the upstream scaffold-project templates.
 
 ### Basic Usage
 
 ```bash
 # Check templates in current directory
 cd /path/to/your/project
-python /path/to/a-default-project/scripts/scaffold.py check-templates
+python /path/to/scaffold-project/scripts/scaffold.py check-templates
 
 # Check templates in specific directory
 python scripts/scaffold.py check-templates --target-dir /path/to/project
@@ -49,7 +49,7 @@ python scripts/scaffold.py check-templates --target-dir /path/to/project
 
 ```
 Template Drift Detection
-  Upstream: /home/user/a-default-project/.specify/templates
+  Upstream: /home/user/scaffold-project/.specify/templates
   Local:    /home/user/my-project/.specify/templates
   Templates scanned: 6 upstream, 6 local
 
@@ -210,10 +210,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Checkout a-default-project
+      - name: Checkout scaffold-project
         uses: actions/checkout@v3
         with:
-          repository: your-org/a-default-project
+          repository: your-org/scaffold-project
           path: upstream-template
       - name: Check drift
         run: |
@@ -481,7 +481,7 @@ The merge uses **git merge-file** to perform intelligent three-way merges:
 
 1. **Base**: Original template content at project creation (stored in `.scaffold-state.yaml`)
 2. **Local**: Current template with your customizations
-3. **Upstream**: Latest template from a-default-project
+3. **Upstream**: Latest template from scaffold-project
 
 This enables automatic merging of independent changes and intelligent conflict detection.
 
@@ -880,7 +880,7 @@ git --version
 
 ```bash
 diff -u .specify/templates/spec-template.md \
-  /path/to/a-default-project/plate: spec-template.md...
+  /path/to/scaffold-project/plate: spec-template.md...
 ...
 ⚠️  1 conflict(s) detected
 
@@ -1148,7 +1148,7 @@ git --version
 
 ```bash
 diff -u .specify/templates/spec-template.md \
-  /path/to/a-default-project/.specify/templates/spec-template.md
+  /path/to/scaffold-project/.specify/templates/spec-template.md
 ```
 
 ---
@@ -1198,7 +1198,7 @@ spec-template.md
 
 # Compare block with upstream
 diff .specify/blocks/user-scenarios-v1.0.md \
-  /path/to/a-default-project/.specify/blocks/user-scenarios-v2.0.md
+  /path/to/scaffold-project/.specify/blocks/user-scenarios-v2.0.md
 ```
 
 ### Detecting Block Version Changes

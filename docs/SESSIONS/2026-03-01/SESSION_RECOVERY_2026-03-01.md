@@ -1,7 +1,7 @@
 # 🔄 Session Recovery — 2026-03-01
 
 **Data**: 2026-03-01
-**Projeto**: Enterprise Default Project Template (`a-default-project`)
+**Projeto**: Enterprise Scaffold Project Template (`scaffold-project`)
 **Desenvolvedor**: Yves Marinho
 **Branch**: master
 **Status**: ✅ Sessão iniciada com sucesso
@@ -89,7 +89,7 @@
 ## 🗂️ Organização da Raiz
 
 ```
-a-default-project/
+scaffold-project/
 ├── .copilot-rules.md          ✅ (único arquivo copilot ativo)
 ├── .gitignore                 ✅
 ├── .secrets/                  ✅ (git-ignored)
@@ -97,7 +97,7 @@ a-default-project/
 ├── .vscode/                   ✅
 │   ├── mcp.json
 │   └── settings.json
-├── default-project.code-workspace  ✅
+├── scaffold-project.code-workspace  ✅
 ├── docs/                      ✅
 ├── Makefile                   ✅
 ├── README.md                  ✅

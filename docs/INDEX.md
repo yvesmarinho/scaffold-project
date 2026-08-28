@@ -1,4 +1,4 @@
-# 📑 Project Index - Enterprise Default Project Template
+# 📑 Project Index - Enterprise Scaffold Project Template
 
 **Last Updated**: 2026-07-02 — Agent objetivo-init agnóstico + session-end ✅
 **Project Status**: 🟢 Production — v1.7.1 Released + Objetivo-Init Evolution + Test Suite + Memory System
@@ -106,7 +106,7 @@
 >   - ✅ BUG-001 criado (scaffold objetivo-init — 3 bugs documentados)
 >   - ✅ MCP GitHub HTTP deployado (CLI → HTTP: -88% startup, -95% memória)
 > - **NEW FILES**:
->   - **Scripts (6)**: memory-cleanup.py, validate-configs.py, git-hooks/pre-commit, process_outdated.py, process_audit.py, src/default_project/__init__.py
+>   - **Scripts (6)**: memory-cleanup.py, validate-configs.py, git-hooks/pre-commit, process_outdated.py, process_audit.py, src/scaffold_project/__init__.py
 >   - **Workflow (1)**: .github/workflows/dependency-check.yml (semanal, pip-audit CVE scan)
 >   - **Docs (10+)**: MEMORY_SYSTEM.md (800 linhas), MCP-GITHUB-HTTP-UPDATE.md (600 linhas), DEBATE-001 (27k palavras), 5 BUG reports
 > - **IMPACT**:
@@ -116,7 +116,7 @@
 >   - Performance: MCP GitHub HTTP 88% mais rápido, 95% menos memória
 > - **COMMITS** (10):
 >   - `4b154d5`: docs(bugs): BUG-001 scaffold objetivo-init
->   - `795c22a`: fix(build): src/default_project para Hatchling
+>   - `795c22a`: fix(build): src/scaffold_project para Hatchling
 >   - `b115f4b`: docs(session): workflow dependency-check
 >   - `c6c875b`: fix(ci): YAML syntax errors
 >   - `ea94335`: docs(session): ações recomendadas
@@ -1190,7 +1190,7 @@ make init-new-project NAME=my-new-project
 ## 📁 Project Structure
 
 ```
-a-default-project/
+scaffold-project/
 ├── .copilot-rules.md               # Copilot rules — consolidado (7 seções, ~193 linhas)
 ├── .git/                           # Git repository
 ├── .github/                        # GitHub configurations
@@ -1251,7 +1251,7 @@ a-default-project/
 ├── tests/                          # Test suites
 ├── Makefile                        # Build automation (40+ commands)
 ├── README.md                       # Main documentation
-└── default-project.code-workspace # VS Code workspace
+└── scaffold-project.code-workspace # VS Code workspace
 ```
 
 ---

@@ -72,4 +72,4 @@ O git status mostra alterações inesperadas que precisam ser avaliadas:
 
 ---
 
-*Session Recovery | 2026-06-23 | Enterprise Default Project Template*
+*Session Recovery | 2026-06-23 | Enterprise Scaffold Project Template*

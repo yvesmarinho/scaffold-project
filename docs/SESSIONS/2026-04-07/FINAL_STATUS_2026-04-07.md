@@ -1,6 +1,6 @@
 # 🏁 Session Final Status — 2026-04-07
 
-**Project**: Enterprise Default Project Template
+**Project**: Enterprise Scaffold Project Template
 **Branch**: master
 **Session End**: 2026-04-07 23:30 BRT
 **Final HEAD**: 122b950 (feat(vscode): completar IMP-64 - setup .vscode/ customizado por domínio)

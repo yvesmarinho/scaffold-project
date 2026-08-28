@@ -1,6 +1,6 @@
-# 🧪 Enterprise Default Project Template - Test Suite
+# 🧪 Enterprise Scaffold Project Template - Test Suite
 
-Bateria completa de testes para validação do Enterprise Default Project Template.
+Bateria completa de testes para validação do Enterprise Scaffold Project Template.
 
 ## 📋 Índice
 

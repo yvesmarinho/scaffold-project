@@ -62,7 +62,7 @@ def _copy_file(src: Path, dst: Path, force: bool = False) -> CreatedItem:
 3. Executar upgrade:
    ```bash
    cd test-merge
-   python ../a-default-project/scripts/scaffold.py upgrade --force
+   python ../scaffold-project/scripts/scaffold.py upgrade --force
    ```
 
 4. **Resultado atual**:

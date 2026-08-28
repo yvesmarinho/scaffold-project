@@ -1,7 +1,7 @@
-# ✅ TODO - Enterprise Default Project Template
+# ✅ TODO - Enterprise Scaffold Project Template
 
 **Last Updated**: 2026-04-23 — Session Active: IMP-65 Scenarios 6-8 ✅ PASSED
-**Project**: Enterprise Default Project Template
+**Project**: Enterprise Scaffold Project Template
 **Status**: 🟡 Active Development (CI/CD disabled temporarily)
 
 ---
@@ -1400,7 +1400,7 @@
 - [x] **[IMP-07]** ✅ **CONCLUÍDO 2026-03-01** — Criar `.github/prompts/domain/devops-analysis.prompt.md` — Domain Profile análise
 - [x] **[IMP-08]** ✅ **CONCLUÍDO 2026-03-01** — Redefinir `make init` no `Makefile` — de executor para **redirect** para `uv run scripts/scaffold.py` (sem duplicar lógica)
 - [x] **[IMP-18]** ✅ **CONCLUÍDO 2026-03-07** — Criar `.github/copilot-instructions.md` — auto-injeção de regras P0/P1 em toda conversa Copilot
-  - [x] `.github/copilot-instructions.md` criado para `a-default-project` (regras P0/P1 compactas, `applyTo: "**"`)
+  - [x] `.github/copilot-instructions.md` criado para `scaffold-project` (regras P0/P1 compactas, `applyTo: "**"`)
   - [x] `scripts/lib/templates.py`: `generate_copilot_instructions()` adicionada (template com placeholders)
   - [x] `scripts/scaffold.py`: passo 3 atualizado (wired `generate_copilot_instructions(cfg)`)
   - [x] Zero erros de compilação verificados
@@ -1460,7 +1460,7 @@
 - [x] Atualizar `docs/TODO.md` e `docs/INDEX.md`
 - [x] **[IMP-18]** Criar `.github/copilot-instructions.md` + `generate_copilot_instructions()` em `templates.py` + wiring em `scaffold.py`
 - [x] **[IMP-09]** Enriquecer template `.copilot-rules-[projeto].md` — smoke-test: 5 combos ✅
-- [x] **[IMP-19 — Debate]** Analisar `Default Project Template Skills.md` → criar agente `template-architect.agent.md` + debate IMP-19 + roadmap P0→P3
+- [x] **[IMP-19 — Debate]** Analisar `Scaffold Project Template Skills.md` → criar agente `template-architect.agent.md` + debate IMP-19 + roadmap P0→P3
 
 #### 2026-03-05 (Sessão encerrada)
 - [x] Iniciar sessão MCP (2026-03-05)

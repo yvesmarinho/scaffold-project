@@ -72,7 +72,7 @@ python3 --version  # → 3.11 or higher
 git --version  # → 2.0 or higher
 
 # scaffold.py script
-ls /path/to/a-default-project/scripts/scaffold.py  # Should exist
+ls /path/to/scaffold-project/scripts/scaffold.py  # Should exist
 ```
 
 ### Create Backup
@@ -169,7 +169,7 @@ cp .scaffold-state.yaml .scaffold-state.yaml.pre-migration
 
 ```bash
 # Use scaffold.py to populate template_bases automatically
-python3 /path/to/a-default-project/scripts/scaffold.py --populate-template-bases
+python3 /path/to/scaffold-project/scripts/scaffold.py --populate-template-bases
 
 # Verify template_bases added
 grep -A10 "template_bases:" .scaffold-state.yaml
@@ -243,7 +243,7 @@ EOF
 # Expected: 3-8 templates depending on profiles
 
 # 3. Check drift detection works
-python3 /path/to/a-default-project/scripts/scaffold.py check-templates
+python3 /path/to/scaffold-project/scripts/scaffold.py check-templates
 # Expected: "✅ All templates up-to-date" OR "⚠️ X template(s) outdated"
 
 # 4. Git commit migration
@@ -261,10 +261,10 @@ Migration ref: IMP-65 P0-3"
 
 ```bash
 # Test that template updates now work
-python3 /path/to/a-default-project/scripts/scaffold.py check-templates --json
+python3 /path/to/scaffold-project/scripts/scaffold.py check-templates --json
 
 # If drift detected, test diff command
-python3 /path/to/a-default-project/scripts/scaffold.py diff-template spec-template
+python3 /path/to/scaffold-project/scripts/scaffold.py diff-template spec-template
 
 # SUCCESS if:
 # - check-templates runs without errors
@@ -305,7 +305,7 @@ EOF
 for template in .specify/templates/*.md; do
     name=$(basename "$template")
     # Compare with upstream (if available)
-    diff -u /path/to/a-default-project/.specify/templates/"$name" "$template" \
+    diff -u /path/to/scaffold-project/.specify/templates/"$name" "$template" \
         > "customization-${name}.diff" 2>/dev/null || true
 done
 ```
@@ -341,7 +341,7 @@ from pathlib import Path
 project = Path(".")
 state_file = project / ".scaffold-state.yaml"
 templates_dir = project / ".specify" / "templates"
-upstream_dir = Path("/path/to/a-default-project/.specify/templates")
+upstream_dir = Path("/path/to/scaffold-project/.specify/templates")
 
 # Load state
 with open(state_file) as f:
@@ -378,7 +378,7 @@ EOF
 
 ```bash
 # Test that customizations are preserved during merge
-python3 /path/to/a-default-project/scripts/scaffold.py diff-template spec-template
+python3 /path/to/scaffold-project/scripts/scaffold.py diff-template spec-template
 
 # Verify output shows:
 # - Your customizations highlighted
@@ -386,7 +386,7 @@ python3 /path/to/a-default-project/scripts/scaffold.py diff-template spec-templa
 # - Both can coexist
 
 # Test merge (dry-run)
-python3 /path/to/a-default-project/scripts/scaffold.py merge-template spec-template --dry-run
+python3 /path/to/scaffold-project/scripts/scaffold.py merge-template spec-template --dry-run
 
 # Review output carefully before proceeding
 ```
@@ -429,7 +429,7 @@ print(f"\nTotal templates: {len(state['template_bases'])}")
 EOF
 
 # 3. Validate
-python3 /path/to/a-default-project/scripts/scaffold.py check-templates
+python3 /path/to/scaffold-project/scripts/scaffold.py check-templates
 
 # Missing templates will be reported but won't block migration
 ```
@@ -457,11 +457,11 @@ print("✅ PASS: Counts match")
 EOF
 
 # ✅ 3. check-templates command works
-python3 /path/to/a-default-project/scripts/scaffold.py check-templates
+python3 /path/to/scaffold-project/scripts/scaffold.py check-templates
 echo "✅ PASS: check-templates runs"
 
 # ✅ 4. diff-template command works
-python3 /path/to/a-default-project/scripts/scaffold.py diff-template spec-template
+python3 /path/to/scaffold-project/scripts/scaffold.py diff-template spec-template
 echo "✅ PASS: diff-template runs"
 
 # ✅ 5. Git history clean
@@ -486,10 +486,10 @@ git commit -m "test: add test section for migration validation"
 
 # 3. Simulate upstream update (if available)
 # Copy updated template from upstream
-# cp /path/to/a-default-project/.specify/templates/spec-template.md /tmp/upstream-spec.md
+# cp /path/to/scaffold-project/.specify/templates/spec-template.md /tmp/upstream-spec.md
 
 # 4. Test merge preserves customizations
-# python3 /path/to/a-default-project/scripts/scaffold.py merge-template spec-template --auto
+# python3 /path/to/scaffold-project/scripts/scaffold.py merge-template spec-template --auto
 
 # 5. Verify test section still exists
 grep -q "Test Section (Migration Validation)" .specify/templates/spec-template.md \
@@ -606,10 +606,10 @@ EOF
 ```bash
 # This is expected if templates diverged significantly
 # Review conflicts carefully using interactive mode
-python3 /path/to/a-default-project/scripts/scaffold.py merge-template spec-template --interactive
+python3 /path/to/scaffold-project/scripts/scaffold.py merge-template spec-template --interactive
 
 # Or merge with --force to accept all upstream changes
-python3 /path/to/a-default-project/scripts/scaffold.py merge-template spec-template --force
+python3 /path/to/scaffold-project/scripts/scaffold.py merge-template spec-template --force
 ```
 
 ---
@@ -645,7 +645,7 @@ EOF
 
 **Weekly drift check** (5 min):
 ```bash
-python3 /path/to/a-default-project/scripts/scaffold.py check-templates
+python3 /path/to/scaffold-project/scripts/scaffold.py check-templates
 
 # If drift detected:
 # 1. Review changes: scaffold.py diff-template <name>

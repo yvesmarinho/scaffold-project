@@ -1,6 +1,6 @@
 # 📊 Session Report — 2026-04-03
 
-**Project**: Enterprise Default Project Template
+**Project**: Enterprise Scaffold Project Template
 **Branch**: master
 **Session**: 2026-04-03 (Thursday)
 **Initial HEAD**: `3d7f9c3` — chore: ajustes de formatação e teste manual BUG-01
@@ -231,10 +231,10 @@
 **Objective**: Organize misplaced files
 
 **Implementation**:
-- Identified `docs/modelo_docs/` directory in wrong project (a-default-project)
+- Identified `docs/modelo_docs/` directory in wrong project (scaffold-project)
 - Files belonged to enterprise-update-lab-n8n project
 - Moved files using Python stdlib (shutil) to correct location:
-  - Source: `a-default-project/docs/modelo_docs/`
+  - Source: `scaffold-project/docs/modelo_docs/`
   - Destination: `enterprise-update-lab-n8n/docs/copilot/`
 - Preserved file permissions and metadata
 

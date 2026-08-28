@@ -1,8 +1,8 @@
 .
 ├── CHANGELOG.md
 ├── .copilot-rules.md
-├── default-project.code-workspace
-├── default-project-structure.txt
+├── scaffold-project.code-workspace
+├── scaffold-project-structure.txt
 ├── docs
 │   ├── ANSIBLE_BEST_PRACTICES.md
 │   ├── ANSIBLE_PLAYBOOK_TEMPLATES.md

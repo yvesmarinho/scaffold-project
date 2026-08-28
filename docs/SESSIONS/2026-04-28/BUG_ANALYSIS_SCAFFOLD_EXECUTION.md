@@ -79,7 +79,7 @@ git clone git@github.com:user/new-project.git
 cd new-project
 
 # 3. Executar scaffold
-uv run ../a-default-project/scripts/scaffold.py new
+uv run ../scaffold-project/scripts/scaffold.py new
 
 # ❌ PROBLEMA: .gitignore do GitHub é preservado (sem .secrets/)
 # ❌ PROBLEMA: README.md do GitHub é preservado (template não aplicado)
@@ -95,7 +95,7 @@ mkdir new-project
 cd new-project
 
 # 2. Executar scaffold
-uv run ../a-default-project/scripts/scaffold.py new
+uv run ../scaffold-project/scripts/scaffold.py new
 
 # 3. Inicializar GitHub depois
 git remote add origin git@github.com:user/new-project.git
@@ -113,7 +113,7 @@ git clone git@github.com:company/another-template.git my-project
 cd my-project
 
 # 2. Executar scaffold para aplicar nosso template
-uv run ../a-default-project/scripts/scaffold.py new
+uv run ../scaffold-project/scripts/scaffold.py new
 
 # ❌ PROBLEMA: Arquivos do outro template são preservados
 # ❌ PROBLEMA: Nosso template NÃO é aplicado (conflito)
@@ -957,7 +957,7 @@ git clone git@github.com:user/new-repo.git
 cd new-repo
 # .gitignore existe (do GitHub) mas não tem .secrets/
 
-uv run ../a-default-project/scripts/scaffold.py new --ci \
+uv run ../scaffold-project/scripts/scaffold.py new --ci \
   --name=new-repo \
   --domain=programming \
   --language=python
@@ -969,7 +969,7 @@ grep ".secrets/" .gitignore
 # Usuário tem Makefile customizado com target "deploy"
 echo "deploy:\n\t./deploy.sh" > Makefile
 
-uv run ../a-default-project/scripts/scaffold.py new --ci \
+uv run ../scaffold-project/scripts/scaffold.py new --ci \
   --name=new-repo \
   --domain=programming \
   --language=python
@@ -983,7 +983,7 @@ cat README.md
 # # My Custom Project
 # This is my awesome project...
 
-uv run ../a-default-project/scripts/scaffold.py new --ci \
+uv run ../scaffold-project/scripts/scaffold.py new --ci \
   --name=new-repo \
   --domain=programming \
   --language=python
@@ -1439,7 +1439,7 @@ cd my-api
 # - Makefile (target customizado "deploy")
 
 # Scaffold é executado
-uv run ../a-default-project/scripts/scaffold.py new --ci \
+uv run ../scaffold-project/scripts/scaffold.py new --ci \
   --name=my-api --domain=programming --language=python
 
 # ❌ PROBLEMAS:
@@ -1459,7 +1459,7 @@ git clone git@github.com:user/my-api.git
 cd my-api
 
 # Scaffold com merge inteligente
-uv run ../a-default-project/scripts/scaffold.py new --ci \
+uv run ../scaffold-project/scripts/scaffold.py new --ci \
   --name=my-api --domain=programming --language=python
 
 # ✅ MERGE INTELIGENTE:

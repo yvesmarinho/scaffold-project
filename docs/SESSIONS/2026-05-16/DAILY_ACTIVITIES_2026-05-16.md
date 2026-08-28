@@ -281,7 +281,7 @@ ls -la docs/SESSIONS/2026-{04-15,05-14,05-15}/
    - Criado manifesto JSON com operações
 2. Execução da recuperação via Python (shutil)
    - Fase 1: Removido `README-KHL.md` (não existe em 060)
-   - Fase 2: Adicionados `template-bases/` e `default-project-structure.txt`
+   - Fase 2: Adicionados `template-bases/` e `scaffold-project-structure.txt`
    - Fase 3: Atualizados 32 itens (todos arquivos/pastas de 060)
    - Fase 4: Tratamento especial `docs/` (preservar sessão 2026-05-16)
 3. Validação da estrutura final
@@ -298,7 +298,7 @@ ls -la docs/SESSIONS/2026-{04-15,05-14,05-15}/
 - Backup em `tmp/session-2026-05-16-backup/` durante operação
 
 **Arquivos modificados/criados**:
-- Adicionados: `template-bases/` (dir), `default-project-structure.txt`
+- Adicionados: `template-bases/` (dir), `scaffold-project-structure.txt`
 - Removidos: `README-KHL.md`
 - Atualizados: 32 arquivos/pastas de 060
 - Preservados: 8 itens críticos + sessão atual

@@ -13,7 +13,7 @@
 Criado projeto limpo para verificar se bugs persistem:
 
 ```bash
-cd /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project
+cd /home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project
 python scripts/scaffold.py --new --ci \
   --name test-scaffold-bug \
   --title "Test Scaffold" \
@@ -427,7 +427,7 @@ cp -r /home/yves_marinho/DevOps/Projetos/yves-eti-br /tmp/yves-eti-br-backup
 rm -rf /home/yves_marinho/DevOps/Projetos/yves-eti-br
 
 # Recriar com scaffold
-cd /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project
+cd /home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project
 python scripts/scaffold.py --new --ci \
   --name yves-eti-br \
   --title "Yves Marinho - Portfolio" \
@@ -444,7 +444,7 @@ python scripts/scaffold.py --new --ci \
 
 **Opção B**: Completar estrutura manualmente
 ```bash
-cd /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project
+cd /home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project
 
 # Copiar .specify/
 cp -r .specify/ /home/yves_marinho/DevOps/Projetos/yves-eti-br/

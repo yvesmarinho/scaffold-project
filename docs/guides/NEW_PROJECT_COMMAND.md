@@ -1,6 +1,6 @@
 # 🚀 new-project — Comando Global
 
-Script conveniente instalado em `~/.local/bin/new-project` para criar projetos usando o Enterprise Default Project Template de qualquer lugar.
+Script conveniente instalado em `~/.local/bin/new-project` para criar projetos usando o Enterprise Scaffold Project Template de qualquer lugar.
 
 ## Instalação
 
@@ -164,7 +164,7 @@ new-project my-project  # ❌ Erro com mensagem clara
 
 O script aponta para:
 ```bash
-~/Documentos/DevOps/Vya-Jobs/a-default-project
+~/Documentos/DevOps/Projetos/scaffold-project
 ```
 
 Se você moveu o template, edite a variável `TEMPLATE_DIR` no início do script:
@@ -172,7 +172,7 @@ Se você moveu o template, edite a variável `TEMPLATE_DIR` no início do script
 ```bash
 nano ~/.local/bin/new-project
 # Ajuste a linha:
-# TEMPLATE_DIR="${HOME}/Seu/Caminho/a-default-project"
+# TEMPLATE_DIR="${HOME}/Seu/Caminho/scaffold-project"
 ```
 
 ## Troubleshooting
@@ -198,7 +198,7 @@ chmod +x ~/.local/bin/new-project
 
 ```bash
 # Verificar localização
-ls ~/Documentos/DevOps/Vya-Jobs/a-default-project/scripts/scaffold.py
+ls ~/Documentos/DevOps/Projetos/scaffold-project/scripts/scaffold.py
 
 # Ajustar caminho no script se necessário
 nano ~/.local/bin/new-project
@@ -206,7 +206,7 @@ nano ~/.local/bin/new-project
 
 ## Ver Também
 
-- Template principal: `~/Documentos/DevOps/Vya-Jobs/a-default-project`
-- Quick Start: `~/Documentos/DevOps/Vya-Jobs/a-default-project/QUICKSTART.md`
-- Regras Copilot: `~/Documentos/DevOps/Vya-Jobs/a-default-project/.copilot-rules.md`
+- Template principal: `~/Documentos/DevOps/Projetos/scaffold-project`
+- Quick Start: `~/Documentos/DevOps/Projetos/scaffold-project/QUICKSTART.md`
+- Regras Copilot: `~/Documentos/DevOps/Projetos/scaffold-project/.copilot-rules.md`
 - Perfis disponíveis: `new-project --list-profiles`

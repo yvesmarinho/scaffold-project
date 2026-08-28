@@ -1,4 +1,4 @@
-title = "Gitleaks Configuration for Default Project Template"
+title = "Gitleaks Configuration for Scaffold Project Template"
 
 [extend]
 useDefault = true

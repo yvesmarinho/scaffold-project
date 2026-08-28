@@ -19,7 +19,7 @@ Validar manualmente o sistema de merge do scaffold (BUG-16) através de um teste
 
 ```bash
 cd ~/Documentos/DevOps/Vya-Jobs/
-./a-default-project/scripts/scaffold.py --new bug16-manual-test
+./scaffold-project/scripts/scaffold.py --new bug16-manual-test
 ```
 
 **Resultado**: 158 arquivos criados com template padrão ✅
@@ -68,7 +68,7 @@ Criados arquivos para testar consolidação:
 
 ```bash
 cd bug16-manual-test
-../a-default-project/scripts/scaffold.py upgrade --force --ci
+../scaffold-project/scripts/scaffold.py upgrade --force --ci
 ```
 
 **Output**:

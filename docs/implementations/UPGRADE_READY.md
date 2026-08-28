@@ -124,7 +124,7 @@ d2afdba  feat(ritual): adicionar suporte a venv e scripts de diagnóstico
 cd /caminho/para/test-workspace-fix
 
 # 2. Executar scaffold upgrade
-uv run /caminho/para/a-default-project/scripts/scaffold.py upgrade
+uv run /caminho/para/scaffold-project/scripts/scaffold.py upgrade
 
 # 3. Verificar logs de upgrade
 # (scaffold mostrará quais arquivos foram atualizados)

@@ -20,7 +20,7 @@
 | Decisão | Consenso | Ação | Prioridade |
 |---------|----------|------|------------|
 | **Limpar memórias contaminadas** | ✅ Unânime | Deletar enterprise-ansible.md + 37 arquivos de teste | 🔴 P0 |
-| **Criar memória do projeto atual** | ✅ Unânime | Criar /memories/a-default-project.md | 🔴 P0 |
+| **Criar memória do projeto atual** | ✅ Unânime | Criar /memories/scaffold-project.md | 🔴 P0 |
 | **Adicionar verificação de pacotes** | ✅ Com modificações | Passo 4.5 acionável (não apenas informativo) | 🔴 P0 |
 | **Automação de cleanup** | ✅ Unânime | Script memory-cleanup.py com dry-run | 🔴 P0 |
 | **Pre-commit hooks** | ✅ Unânime | Bloquear commit de arquivos de teste | 🟡 P1 |
@@ -48,14 +48,14 @@
 
 3. **Memórias de test-workspace** incorretas:
    - Referem-se a `/home/yves_marinho/DevOps/Projetos/test-workspace-fix`
-   - Workspace atual: `...Vya-Jobs/a-default-project`
+   - Workspace atual: `...Projetos/scaffold-project`
    - Severidade: 🟠 ALTA (dados obsoletos)
 
 **Recomendações P0**:
 ```
 1. Deletar /memories/enterprise-ansible.md (memory tool)
 2. Deletar 37 arquivos de teste via Python stdlib
-3. Criar /memories/a-default-project.md com dados corretos
+3. Criar /memories/scaffold-project.md com dados corretos
 4. Deletar /memories/repo/test-workspace*.md
 ```
 
@@ -379,7 +379,7 @@ def validate_mcp_config():
 |---|---------|----------|------------|------------|-------|
 | 1 | Deletar `/memories/enterprise-ansible.md` | ✅ 3/3 | 🔴 P0 | 5 min | Agent |
 | 2 | Limpar 37 arquivos de teste (`.memory/project/`) | ✅ 3/3 | 🔴 P0 | 10 min | Agent |
-| 3 | Criar `/memories/a-default-project.md` | ✅ 3/3 | 🔴 P0 | 20 min | Agent |
+| 3 | Criar `/memories/scaffold-project.md` | ✅ 3/3 | 🔴 P0 | 20 min | Agent |
 | 4 | Deletar `/memories/repo/test-workspace*.md` | ✅ 3/3 | 🔴 P0 | 5 min | Agent |
 | 5 | Criar `scripts/memory-cleanup.py` | ✅ 3/3 | 🔴 P0 | 2h | DevOps |
 | 6 | Implementar Passo 4.5 (deps check acionável) | ✅ 3/3 | 🔴 P0 | 1h | Architect |
@@ -412,7 +412,7 @@ def validate_mcp_config():
 5. ✅ Implementar test fixtures isolados (item 8)
 
 **Commits esperados**:
-- `fix: Limpar memórias contaminadas + criar a-default-project.md`
+- `fix: Limpar memórias contaminadas + criar scaffold-project.md`
 - `feat(session-start): Adicionar Passo 4.5 deps check acionável`
 - `feat(devops): Script memory-cleanup.py com dry-run e backup`
 - `test: Fixtures isolados para evitar poluição de .memory/`
@@ -471,7 +471,7 @@ def validate_mcp_config():
 ### Após Implementação (Validar em 1 Semana)
 
 - ✅ Zero arquivos de teste em `.memory/`
-- ✅ Memória `a-default-project.md` presente e correta
+- ✅ Memória `scaffold-project.md` presente e correta
 - ✅ Passo 4.5 executando em <5s
 - ✅ Pre-commit hook bloqueando arquivos inválidos
 - ✅ CI/CD reportando vulnerabilidades semanalmente

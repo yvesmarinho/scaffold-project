@@ -3,7 +3,7 @@
 ## 📋 Session Overview
 
 **Date**: 2026-02-27
-**Project**: Enterprise Default Project Template
+**Project**: Enterprise Scaffold Project Template
 **Status**: ✅ Session Initialized
 **Session Type**: Recovery, Organization and MCP Setup
 **Developer**: Yves Marinho
@@ -76,13 +76,13 @@
 
 ### Before Cleanup
 ```
-a-default-project/       ← Raiz
+scaffold-project/       ← Raiz
 ├── .copilot-file-rules.sh       ✅ Dotfile (permanece na raiz)
 ├── .copilot-git-rules.md        ✅ Dotfile (permanece na raiz)
 ├── .copilot-rules.md            ✅ Dotfile (permanece na raiz)
 ├── .copilot-strict-enforcement.md ✅ Dotfile (permanece na raiz)
 ├── .copilot-strict-rules.md     ✅ Dotfile (permanece na raiz)
-├── default-project.code-workspace ✅ VS Code workspace (raiz)
+├── scaffold-project.code-workspace ✅ VS Code workspace (raiz)
 ├── .gitignore                   ✅ Config (permanece na raiz)
 ├── Makefile                     ✅ Build automation (raiz)
 ├── README.md                    ✅ Documentação principal (raiz)
@@ -91,14 +91,14 @@ a-default-project/       ← Raiz
 
 ### After Cleanup
 ```
-a-default-project/       ← Raiz limpa
+scaffold-project/       ← Raiz limpa
 ├── .copilot-file-rules.sh
 ├── .copilot-git-rules.md
 ├── .copilot-rules.md
 ├── .copilot-strict-enforcement.md
 ├── .copilot-strict-rules.md
 ├── .secrets/                    ✅ CRIADO com README de segurança
-├── default-project.code-workspace
+├── scaffold-project.code-workspace
 ├── .gitignore
 ├── Makefile
 └── README.md
@@ -109,7 +109,7 @@ a-default-project/       ← Raiz limpa
 ## 📁 Current Project Structure (2026-02-27)
 
 ```
-a-default-project/
+scaffold-project/
 ├── .copilot-*.md / .sh         # Regras e configuração do Copilot
 ├── .git/                       # Repositório Git
 ├── .github/                    # GitHub configurations

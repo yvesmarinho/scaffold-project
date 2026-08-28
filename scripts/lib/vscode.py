@@ -1,7 +1,7 @@
 """
 lib/vscode.py — Geração de arquivos VS Code personalizados por domínio/linguagem.
 
-Parte do scripts/scaffold.py — Enterprise Default Project Template.
+Parte do scripts/scaffold.py — Enterprise Scaffold Project Template.
 
 Gera:
   .vscode/settings.json   — configurações do editor por linguagem

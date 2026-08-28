@@ -27,7 +27,7 @@ Um **Profile Descriptor** é um arquivo YAML que descreve de forma declarativa t
 
 ```yaml
 # ============================================================
-# Profile Descriptor — Enterprise Default Project Template
+# Profile Descriptor — Enterprise Scaffold Project Template
 # Schema versão 1.0.0
 # ============================================================
 

@@ -54,7 +54,7 @@ def sample_canonical_content():
     """Sample canonical format content."""
     return """# 📝 Daily Activities — 2026-04-03
 
-**Project**: Enterprise Default Project Template
+**Project**: Enterprise Scaffold Project Template
 **Branch**: master
 **Session**: 2026-04-03 (Thursday)
 **Initial HEAD**: abc1234
@@ -114,7 +114,7 @@ def sample_very_old_content():
     return """# 📅 Today's Activities - January 28, 2026
 
 **Date**: 2026-01-28
-**Project**: Enterprise Default Project Template
+**Project**: Enterprise Scaffold Project Template
 **Status**: 🔄 In Progress
 
 ---

@@ -75,7 +75,7 @@ grep -n "copilot-instructions" scripts/lib/flows/new_project.py
 
 **Evidência**:
 - BUG-03 no lembrete.md: "Não foi gerado o .github/copilot-instructions.md com as instruções básicas existentes"
-- Arquivo existe no a-default-project mas não está integrado no workflow de cópia
+- Arquivo existe no scaffold-project mas não está integrado no workflow de cópia
 
 ---
 
@@ -119,7 +119,7 @@ Confirmar que `.copilot-rules.md` está ativo e suas regras P0 estão na memóri
 **Justificativa**: Nome oficial reconhecido automaticamente pelo VS Code Copilot.
 
 **Implementação**:
-- Mover arquivo no a-default-project
+- Mover arquivo no scaffold-project
 - Atualizar referências em documentação
 - Testar carregamento automático
 
@@ -211,7 +211,7 @@ read_file(.github/copilot-instructions.md, 1, 200)
 ### Teste 1: Renomear Arquivo
 
 ```bash
-# Renomear no a-default-project
+# Renomear no scaffold-project
 mv .github/.copilot-instructions.md .github/copilot-instructions.md
 
 # Verificar VS Code reconhece

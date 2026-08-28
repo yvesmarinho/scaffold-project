@@ -1,7 +1,7 @@
 # 📋 Session Report — 2026-02-28
 
 **Data**: 2026-02-28
-**Projeto**: Enterprise Default Project Template (`a-default-project`)
+**Projeto**: Enterprise Scaffold Project Template (`scaffold-project`)
 **Desenvolvedor**: Yves Marinho
 **Branch**: master
 **Status**: ✅ Sessão encerrada com sucesso

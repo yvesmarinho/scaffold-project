@@ -1,4 +1,4 @@
-# 📋 Relatório Completo de Pendências — Enterprise Default Project Template
+# 📋 Relatório Completo de Pendências — Enterprise Scaffold Project Template
 
 **Data**: 2026-04-23
 **Branch**: 060-mini-engram-python

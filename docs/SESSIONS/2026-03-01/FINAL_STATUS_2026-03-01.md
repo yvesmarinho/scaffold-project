@@ -1,9 +1,9 @@
 # 🏁 Final Status — 2026-03-01
 
 **Date**: 2026-03-01
-**Project**: Enterprise Default Project Template (`a-default-project`)
+**Project**: Enterprise Scaffold Project Template (`scaffold-project`)
 **Branch**: `master`
-**Remote**: `https://github.com/yvesmarinho/default-project.git`
+**Remote**: `https://github.com/yvesmarinho/scaffold-project.git`
 **Sessão**: Encerrada
 
 ---
@@ -95,7 +95,7 @@
 
 ## 🗄️ Git Status
 
-- **Remote**: `https://github.com/yvesmarinho/default-project.git`
+- **Remote**: `https://github.com/yvesmarinho/scaffold-project.git`
 - **Branch**: `master`
 - **Commits pendentes**: ~2 commits para push (indicador `⇡2` no prompt)
 - **Arquivos novos/modificados**: múltiplos desta sessão — commitar antes de encerrar
@@ -118,10 +118,10 @@
 
 Para retomar sem fricção:
 1. Ler este arquivo + `docs/TODO.md`
-2. Declarar modo: `Modo: PROGRAMMING. Projeto: a-default-project. Linguagem: python.`
+2. Declarar modo: `Modo: PROGRAMMING. Projeto: scaffold-project. Linguagem: python.`
 3. Carregar `.copilot-rules.md` + `.github/prompts/domain/devops-programming.prompt.md`
 4. Próximo IMP: IMP-09 — enriquecer `scripts/lib/templates.py`
 
 ---
 
-*Final Status v1.0 | 2026-03-01 | a-default-project*
+*Final Status v1.0 | 2026-03-01 | scaffold-project*

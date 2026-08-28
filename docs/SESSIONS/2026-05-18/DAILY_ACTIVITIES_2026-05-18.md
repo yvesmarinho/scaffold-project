@@ -115,10 +115,10 @@
 **Contexto**: Usuário criou backups de todas as branches em `retore/` (4 backups totais)
 
 **Verificação de backups**:
-- ✅ `default-project-017-bug-16-merge-strategy.zip` (2.8MB)
-- ✅ `default-project-053-business-objective-interview.zip` (1.7MB)
-- ✅ `default-project-060-mini-engram-python.zip` (2.7MB)
-- ✅ `default-project-061-recovery-017-correction.zip` (17MB)
+- ✅ `scaffold-project-017-bug-16-merge-strategy.zip` (2.8MB)
+- ✅ `scaffold-project-053-business-objective-interview.zip` (1.7MB)
+- ✅ `scaffold-project-060-mini-engram-python.zip` (2.7MB)
+- ✅ `scaffold-project-061-recovery-017-correction.zip` (17MB)
 
 **Branches locais deletadas** (4 total):
 1. `053-business-objective-interview` (commits únicos preservados em backup) ✅
@@ -246,7 +246,7 @@ Branches remotas: 1 (origin/master)
 2. **Deploy manual (Opção A)**:
    ```python
    # Python stdlib (shutil, pathlib, logging)
-   src_root = Path("a-default-project")
+   src_root = Path("scaffold-project")
    dst_root = Path("test-workspace-fix")
 
    files = ["objetivo-init.yaml", "objetivo-init-minimal.yaml"]
@@ -319,7 +319,7 @@ python scripts/manage.py objetivo validate objetivo-init.yaml
    ```
 
 2. **Verificação de Estado**:
-   - Arquivo existe: `a-default-project/scripts/lib/git_validators.py` (16443 bytes)
+   - Arquivo existe: `scaffold-project/scripts/lib/git_validators.py` (16443 bytes)
    - Test-workspace-fix/scripts/lib/ tinha apenas 4 arquivos
    - Scaffold pulou pasta existente → arquivos novos não copiados
 
@@ -328,7 +328,7 @@ python scripts/manage.py objetivo validate objetivo-init.yaml
    import shutil
    from pathlib import Path
 
-   src = Path(".../a-default-project/scripts/lib/git_validators.py")
+   src = Path(".../scaffold-project/scripts/lib/git_validators.py")
    dst = Path(".../test-workspace-fix/scripts/lib/git_validators.py")
    shutil.copy2(src, dst)
    # ✅ 16443 bytes copiados
@@ -588,7 +588,7 @@ Correção: Implementar deep merge recursivo em file_merge.py
 **Passos**:
 
 1. **Análise de Memórias (Principal Software Engineer)**:
-   - Leitura de `/memories/enterprise-ansible.md` → ❌ **Outro projeto** (Ansible, não a-default-project)
+   - Leitura de `/memories/enterprise-ansible.md` → ❌ **Outro projeto** (Ansible, não scaffold-project)
    - Listagem de `.memory/memories/project/` → ❌ **37 arquivos de teste duplicados**
    - Verificação de `/memories/repo/test-workspace*.md` → ❌ **Dados obsoletos**
    - **Total de ruído**: ~3.420 tokens de contexto incorreto
@@ -615,7 +615,7 @@ Correção: Implementar deep merge recursivo em file_merge.py
    - **Consenso alcançado**: 13/14 decisões aprovadas (93%)
    - **Decisões principais**:
      - ✅ Limpar memórias contaminadas (P0)
-     - ✅ Criar memória a-default-project.md (P0)
+     - ✅ Criar memória scaffold-project.md (P0)
      - ✅ Passo 4.5 acionável (bloqueia sessão se P0) (P0)
      - ✅ Test fixtures isolados (P0)
      - ✅ Scripts automation (cleanup, validate) (P0)
@@ -669,7 +669,7 @@ Correção: Implementar deep merge recursivo em file_merge.py
 
 **P0 (Executar < 24h)**:
 1. Deletar enterprise-ansible.md + 37 test-*.md + test-workspace*.md
-2. Criar /memories/a-default-project.md (dados corretos)
+2. Criar /memories/scaffold-project.md (dados corretos)
 3. Test fixtures isolados (tests/conftest.py)
 4. Passo 4.5 session-start (deps check acionável, exit 1 se P0)
 5. Makefile target update-deps-safe
@@ -731,7 +731,7 @@ Correção: Implementar deep merge recursivo em file_merge.py
 - ✅ 37 arquivos test-*.md removidos de .memory/project/ (~2.300 tokens)
 - **IMPACTO**: -3.420 tokens de ruído eliminados
 
-**Task 2: Criar /memories/a-default-project.md**
+**Task 2: Criar /memories/scaffold-project.md**
 - ✅ User memory criado com dados corretos do projeto
 - ✅ Estrutura, comandos, regras P0, status
 - **IMPACTO**: +600 tokens de contexto correto
@@ -1022,7 +1022,7 @@ Correção: Implementar deep merge recursivo em file_merge.py
 ```
 Enumerating objects: 83, done.
 Writing objects: 100% (59/59), 60.04 KiB | 8.58 MiB/s, done.
-To https://github.com/yvesmarinho/default-project.git
+To https://github.com/yvesmarinho/scaffold-project.git
    2434bb0..59ffae8  master -> master
 ```
 

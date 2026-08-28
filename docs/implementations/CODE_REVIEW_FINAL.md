@@ -164,7 +164,7 @@ uv run scripts/scaffold.py new \
 ### ⏳ Teste 2: Upgrade (EM EXECUÇÃO)
 ```bash
 cd /caminho/para/test-workspace-fix
-uv run /caminho/para/a-default-project/scripts/scaffold.py upgrade
+uv run /caminho/para/scaffold-project/scripts/scaffold.py upgrade
 ```
 
 **Resultado esperado**:

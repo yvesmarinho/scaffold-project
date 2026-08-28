@@ -42,7 +42,7 @@ Antes do teste do scaffold upgrade, foram aplicadas estas correções MANUAIS em
 ### Opção 1: Usando --json (Recomendado - Não Interativo)
 
 ```bash
-cd /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project
+cd /home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project
 
 python scripts/scaffold.py \
   --upgrade \
@@ -60,7 +60,7 @@ python scripts/scaffold.py \
 ```bash
 cd /home/yves_marinho/Documentos/DevOps/Projetos/test-workspace-fix
 
-python /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project/scripts/scaffold.py \
+python /home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project/scripts/scaffold.py \
   upgrade \
   --force
 ```
@@ -72,7 +72,7 @@ python /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project/scripts/s
 ### Opção 3: Modo Interativo (Responder "1")
 
 ```bash
-cd /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project
+cd /home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project
 
 python scripts/scaffold.py \
   --upgrade \
@@ -102,7 +102,7 @@ Quando aparecer o prompt:
 Após o scaffold upgrade, execute a validação:
 
 ```bash
-python /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project/scripts/validate-workspace-upgrade.py \
+python /home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project/scripts/validate-workspace-upgrade.py \
   /home/yves_marinho/Documentos/DevOps/Projetos/test-workspace-fix
 ```
 

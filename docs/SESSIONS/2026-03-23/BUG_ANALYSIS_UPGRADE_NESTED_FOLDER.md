@@ -356,7 +356,7 @@ if nested.exists():
 
 **OPÇÃO 1: Passar diretório PAI**
 ```bash
-cd /home/yves_marinho/Documentos/DevOps/Vya-Jobs/a-default-project
+cd /home/yves_marinho/Documentos/DevOps/Projetos/scaffold-project
 python scripts/scaffold.py upgrade \
   --target-dir /home/yves_marinho/Documentos/DevOps/Vya-Jobs
 # ❌ Mas isso não sabe qual projeto atualizar!
@@ -365,7 +365,7 @@ python scripts/scaffold.py upgrade \
 **OPÇÃO 2: Executar do dentro do projeto SEM --target-dir**
 ```bash
 cd /home/yves_marinho/Documentos/DevOps/Vya-Jobs/enterprise-python-analysis
-python ../a-default-project/scripts/scaffold.py upgrade
+python ../scaffold-project/scripts/scaffold.py upgrade
 # ✅ Usa Path.cwd() como target
 ```
 

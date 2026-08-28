@@ -1,6 +1,6 @@
 # 📝 Daily Activities — 2026-04-03
 
-**Project**: Enterprise Default Project Template
+**Project**: Enterprise Scaffold Project Template
 **Branch**: master
 **Session**: 2026-04-03 (Thursday)
 **Initial HEAD**: `3d7f9c3` — chore: ajustes de formatação e teste manual BUG-01
@@ -22,7 +22,7 @@
 **Objetivo**: Initialize work session for 2026-04-03 following session-manager protocol
 
 **Contexto**: Multi-folder workspace with two projects:
-- Enterprise Default Project Template (a-default-project)
+- Enterprise Scaffold Project Template (scaffold-project)
 - enterprise-update-lab-n8n
 
 **Passos executados**:
@@ -36,11 +36,11 @@
 **Resultado**: Session successfully initialized for both projects
 
 **Security Status**:
-- ✅ a-default-project: 🟢 LIMPO (no exposed credentials)
+- ✅ scaffold-project: 🟢 LIMPO (no exposed credentials)
 - ✅ enterprise-update-lab-n8n: 🟢 LIMPO (no exposed credentials)
 
 **Git Status**:
-- ✅ a-default-project: Clean, synced with origin/master (HEAD: 3d7f9c3)
+- ✅ scaffold-project: Clean, synced with origin/master (HEAD: 3d7f9c3)
 - ⚠️ enterprise-update-lab-n8n: Untracked session docs (2026-03-31/, 2026-04-02/) on branch 002-update-all-specs (HEAD: 55ddf91)
 
 **Arquivos criados**:
@@ -415,19 +415,19 @@
 **Objetivo**: Organize misplaced files to correct project location
 
 **Contexto**:
-- Directory `docs/modelo_docs/` found in a-default-project
+- Directory `docs/modelo_docs/` found in scaffold-project
 - Files actually belonged to enterprise-update-lab-n8n project
 - Need to move files to correct location
 
 **Passos executados**:
-1. Identified misplaced directory: `a-default-project/docs/modelo_docs/`
+1. Identified misplaced directory: `scaffold-project/docs/modelo_docs/`
 2. Determined correct location: `enterprise-update-lab-n8n/docs/copilot/`
 3. Moved files using Python stdlib (shutil.move):
    ```python
    import shutil
    from pathlib import Path
 
-   src = Path("a-default-project/docs/modelo_docs")
+   src = Path("scaffold-project/docs/modelo_docs")
    dst = Path("enterprise-update-lab-n8n/docs/copilot")
    dst.parent.mkdir(parents=True, exist_ok=True)
    shutil.move(str(src), str(dst))

@@ -2,7 +2,7 @@
 
 **Session**: 2026-05-21 12:27:59 UTC → 14:20 UTC (~2h)
 **Branch**: master
-**Project**: Enterprise Default Project Template
+**Project**: Enterprise Scaffold Project Template
 **Domain**: PROGRAMMING (devops-programming.prompt.md)
 
 ---
@@ -177,7 +177,7 @@
 
 ### Próximo Passo Imediato (Próxima Sessão)
 1. Executar ritual `session-start.prompt.md` (modo PROGRAMMING)
-2. Verificar GitHub releases page: https://github.com/yvesmarinho/default-project/releases
+2. Verificar GitHub releases page: https://github.com/yvesmarinho/scaffold-project/releases
 3. (Opcional) Criar GitHub Release visual a partir da tag v1.7.1
 4. Escolher próxima tarefa P1: BUG-08, Linting Cleanup, ou IMP-63
 
@@ -250,9 +250,9 @@ uv run pytest tests/test_scaffold_upgrade.py -v
 ```
 
 **Versão em Produção**: v1.7.1 ✅  
-**Repositório**: github.com/yvesmarinho/default-project  
+**Repositório**: github.com/yvesmarinho/scaffold-project  
 **Próxima Sessão**: Escolher entre BUG-08, Linting Cleanup, ou IMP-63 (P1)
 
 ---
 
-*Session End Report | 2026-05-21 14:20 UTC | Enterprise Default Project Template*
+*Session End Report | 2026-05-21 14:20 UTC | Enterprise Scaffold Project Template*

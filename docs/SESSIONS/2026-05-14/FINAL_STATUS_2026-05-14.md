@@ -2,7 +2,7 @@
 
 **Branch**: 017-bug-16-merge-strategy
 **Sessão**: 12:49:14 → 20:26:47 (7h37min33s)
-**Projeto**: Enterprise Default Project Template (a-default-project)
+**Projeto**: Enterprise Scaffold Project Template (scaffold-project)
 
 ---
 

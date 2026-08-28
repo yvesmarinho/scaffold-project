@@ -12,7 +12,7 @@
 
 ### Previous Session Summary (2026-05-07)
 - **Duration**: ~1h (sincronização rápida)
-- **Status**: ✅ CLOSED — Sincronização entre a-default-project e enterprise-update-lab-n8n
+- **Status**: ✅ CLOSED — Sincronização entre scaffold-project e enterprise-update-lab-n8n
 - **Main Achievement**: MCP expansion + agent synchronization across projects
 
 ### Key Deliverables from Previous Session
@@ -20,7 +20,7 @@
    - Adicionados servidores: filesystem + github (2 → 4 servidores)
    - Alinhado com template enterprise default
 
-2. **7 Novos Agents no a-default-project**:
+2. **7 Novos Agents no scaffold-project**:
    - debian-linux-expert, debug, python-mcp-expert
    - implementation-plan, devops.automation-sdd
    - devops.engineer-sdd, test.engineer
@@ -49,7 +49,7 @@
 - `.github/agents/speckit.*.agent.md` (9 arquivos)
 - `.github/copilot-instructions.md`
 - `.specify/*` (templates e scripts - 10 arquivos)
-- `default-project.code-workspace`
+- `scaffold-project.code-workspace`
 - `docs/SESSIONS/2026-05-06/*` (3 arquivos)
 - `docs/planning/lembrete.md`
 - `logs/scaffolds.yaml`
@@ -102,7 +102,7 @@ f82a1ae  feat(mcp): expandir servidores MCP de 2 para 4 por padrão
    - **Prioridade**: P2 MEDIUM (limits functionality but not blocking)
    - **Estimativa**: 30 min
    - **Tarefas**:
-     1. Copy .vscode/mcp.json from a-default-project
+     1. Copy .vscode/mcp.json from scaffold-project
      2. Update server paths to match workspace structure
      3. Restart VS Code to activate servers
      4. Test memory, sequential-thinking, GitHub, Pylance tools

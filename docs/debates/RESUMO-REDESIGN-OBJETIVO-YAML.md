@@ -335,7 +335,7 @@ Não se preocupe — você pode pular qualquer pergunta.
 ### Localização
 
 ```
-a-default-project/
+scaffold-project/
 ├── docs/
 │   └── debates/
 │       ├── DEBATE-OBJETIVO-YAML-HUMAN-READABLE-COMPLETO.md  # 5.4k linhas

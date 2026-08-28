@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # /// script
-# description = "Run complete test suite for Enterprise Default Project Template"
+# description = "Run complete test suite for Enterprise Scaffold Project Template"
 # ///
 #
 # tests/run_all_tests.sh
@@ -65,7 +65,7 @@ for arg in "$@"; do
 done
 
 echo -e "${CYAN}╔════════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║   Enterprise Default Project Template - Complete Test Suite   ║${NC}"
+echo -e "${CYAN}║   Enterprise Scaffold Project Template - Complete Test Suite   ║${NC}"
 echo -e "${CYAN}╚════════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
