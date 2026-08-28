@@ -135,3 +135,6 @@ uv.lock
 .continue/
 .claude/worktrees/
 
+
+# Saída gerada pelo graphify (AST/knowledge graph) — não versionar
+graphify-out/
