@@ -97,10 +97,11 @@ Thumbs.db
 # Project specific
 backups/
 *.backup
+*.zip
 .env.local
 .env.*.local
 .session-index/
-.memory/index/
+.memory/
 poc/
 
 # Logs
@@ -134,4 +135,7 @@ uv.lock
 # extensões IDE e ferramentas de desenvolvimento
 .continue/
 .claude/worktrees/
+
+# graphify (grafo de conhecimento gerado)
+graphify-out/
 
