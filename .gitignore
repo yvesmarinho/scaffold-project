@@ -97,10 +97,11 @@ Thumbs.db
 # Project specific
 backups/
 *.backup
+*.zip
 .env.local
 .env.*.local
 .session-index/
-.memory/index/
+.memory/
 poc/
 
 # Logs
@@ -135,6 +136,6 @@ uv.lock
 .continue/
 .claude/worktrees/
 
-
-# Saída gerada pelo graphify (AST/knowledge graph) — não versionar
+# graphify (grafo de conhecimento gerado)
 graphify-out/
+
