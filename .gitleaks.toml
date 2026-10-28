@@ -9,12 +9,12 @@ paths = [
     '''.env.example''',
     '''docs/''',
     '''README.md''',
-    '''**/test_*.py''',
-    '''**/conftest.py''',
-    '''tests/**''',
-    '''**/*_test.py''',
-    '''.github/templates/**''',
-    '''docs/templates/**''',
+    '''(^|/)test_[^/]*\.py$''',
+    '''(^|/)conftest\.py$''',
+    '''^tests/''',
+    '''_test\.py$''',
+    '''^\.github/templates/''',
+    '''^docs/templates/''',
     '''CHANGELOG.md''',
 ]
 
@@ -41,8 +41,11 @@ path = '''\.secrets/ssh/'''
 [[rules]]
 id = "env-credentials"
 description = "Credentials in .env files"
-regex = '''(PASSWORD|TOKEN|SECRET|KEY|API_KEY)=(?!.*example|.*sample|.*YOUR_)[^\s]+'''
+# RE2 (gitleaks) não suporta lookahead `(?!...)`: exemplos/placeholders vão no allowlist
+regex = '''(PASSWORD|TOKEN|SECRET|KEY|API_KEY)=[^\s]+'''
 path = '''\.secrets/\.env'''
+[rules.allowlist]
+regexes = ['''(?i)example|sample|YOUR_''']
 
 [[rules]]
 id = "aws-credentials"

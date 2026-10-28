@@ -6,13 +6,12 @@ version: 2
 # Paths to exclude from scanning
 paths-ignore:
   - tests/**
-  - **/test_*.py
-  - **/conftest.py
-  - **/*_test.py
+  - "**/test_*.py"
+  - "**/conftest.py"
+  - "**/*_test.py"
   - docs/**/*.md
   - docs/templates/**
   - docs/guides/**
-  - docs/SESSIONS/**
   - .github/templates/**
   - README.md
   - QUICKSTART.md
