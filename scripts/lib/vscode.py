@@ -226,12 +226,26 @@ _ALL_MCP_SERVERS: dict[str, dict] = {
             "BRAVE_API_KEY": "${env:BRAVE_API_KEY}",
         },
     },
+    # Vault Obsidian (claude_memory) — registro de sessão via Local REST API.
+    # Credenciais só por variável de ambiente; nunca valores no arquivo.
+    "obsidian-rest": {
+        "command": "uvx",
+        "args": ["--with", "mcp==1.1.0", "mcp-obsidian"],
+        "env": {
+            "OBSIDIAN_API_KEY": "${env:OBSIDIAN_API_KEY}",
+            "OBSIDIAN_HOST": "${env:OBSIDIAN_HOST}",
+            "OBSIDIAN_PROTOCOL": "https",
+            "OBSIDIAN_PORT": "27124",
+        },
+    },
 }
 
 _MCP_BY_DOMAIN: dict[str, list[str]] = {
-    "programming":    ["memory", "sequential-thinking", "filesystem", "github"],
-    "infrastructure": ["memory", "sequential-thinking", "filesystem", "github", "sqlite"],
-    "analysis":       ["memory", "sequential-thinking", "filesystem", "sqlite", "brave-search"],
+    "programming":    ["memory", "sequential-thinking", "obsidian-rest", "filesystem", "github"],
+    "infrastructure": ["memory", "sequential-thinking", "obsidian-rest", "filesystem", "github",
+                       "sqlite"],
+    "analysis":       ["memory", "sequential-thinking", "obsidian-rest", "filesystem", "sqlite",
+                       "brave-search"],
 }
 
 # Padrões que identificam servidores GitHub não-oficiais (via npx args)
@@ -398,7 +412,7 @@ def generate_mcp(config: ProjectConfig) -> CreatedItem:
     dest = config.project_path / ".vscode" / "mcp.json"
 
     server_names = _MCP_BY_DOMAIN.get(
-        config.domain, ["memory", "sequential-thinking", "filesystem", "github"])
+        config.domain, ["memory", "sequential-thinking", "obsidian-rest", "filesystem", "github"])
     servers = {name: _ALL_MCP_SERVERS[name]
                for name in server_names if name in _ALL_MCP_SERVERS}
 
@@ -649,7 +663,7 @@ def generate_workspace(config: ProjectConfig) -> CreatedItem:
 
     # Get MCP servers for this domain
     server_names = _MCP_BY_DOMAIN.get(
-        config.domain, ["memory", "sequential-thinking", "filesystem", "github"])
+        config.domain, ["memory", "sequential-thinking", "obsidian-rest", "filesystem", "github"])
     mcp_servers = {name: _ALL_MCP_SERVERS[name]
                    for name in server_names if name in _ALL_MCP_SERVERS}
 

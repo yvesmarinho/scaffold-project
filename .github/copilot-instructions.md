@@ -6,7 +6,7 @@ applyTo: "**"
 
 **Projeto**: `scaffold-project` — Enterprise Scaffold Project Template
 **Regras completas**: [`.copilot-rules.md`](../.copilot-rules.md) (7 seções)
-**Rituais de sessão**: `python scripts/session-manager.py start --json` | `python scripts/session-manager.py end --json`
+**Rituais de sessão**: `python scripts/session-manager.py --json start` | `python scripts/session-manager.py --json end` — registro da sessão no vault Obsidian `claude_memory` via MCP `obsidian-rest`
 
 ---
 
@@ -109,7 +109,7 @@ echo "feat(escopo): descrição" > /tmp/commit.txt
 
 | Tipo | Localização |
 |------|-------------|
-| Documentação de sessão | `docs/SESSIONS/YYYY-MM-DD/` |
+| Registro de sessão | vault Obsidian `claude_memory` → `projects/<projeto>/sessions/YYYY-MM-DD.md` (via MCP `obsidian-rest`) |
 | Documentação técnica | `docs/` |
 | Código Python source | `src/` |
 | Scripts Python/Shell | `scripts/` |
@@ -127,9 +127,8 @@ echo "feat(escopo): descrição" > /tmp/commit.txt
 | `README.md` | Atualizar seções; nunca apagar conteúdo anterior |
 | `docs/INDEX.md` | Adicionar entradas; manter histórico de sessões |
 | `docs/TODO.md` | Marcar `[x]`; adicionar itens; nunca remover itens |
-| `docs/SESSIONS/*/DAILY_ACTIVITIES_*.md` | Append de blocos `---` por atividade |
-| `docs/SESSIONS/*/SESSION_REPORT_*.md` | Append de seções; preservar relatórios anteriores |
-| `docs/SESSIONS/*/FINAL_STATUS_*.md` | Adicionar linhas; nunca remover linhas |
+| Vault `projects/<projeto>/sessions/YYYY-MM-DD.md` | Append via `obsidian_append_content` (MCP `obsidian-rest`) |
+| Vault `projects/<projeto>.md` | Edição pontual via `obsidian_patch_content`; nunca sobrescrever |
 
 **Regra prática**: em `replace_string_in_file`, substituir trecho **específico e localizado** — nunca o documento inteiro.
 
@@ -140,7 +139,7 @@ echo "feat(escopo): descrição" > /tmp/commit.txt
 | Tipo | Padrão | Exemplo |
 |------|--------|---------|
 | Python | `snake_case.py` | `project_config.py` |
-| Markdown | `SCREAMING_SNAKE.md` | `SESSION_REPORT.md` |
+| Markdown | `SCREAMING_SNAKE.md` | `CONTRIBUTING.md` |
 | JSON | `kebab-case.json` | `mcp-config.json` |
 | Shell | `kebab-case.sh` | `git-commit-with-file.sh` |
 | Branch feat | `NNN-nome-da-feature` | `018-copilot-instructions` |

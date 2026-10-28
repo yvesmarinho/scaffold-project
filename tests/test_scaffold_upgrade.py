@@ -5,7 +5,7 @@ P0 CRITICAL: Garantir que scaffold upgrade atualiza projetos corretamente.
 
 Testa:
 - Upgrade de projetos existentes via scaffold upgrade
-- Todas as 52 validações de validate-workspace-upgrade.py
+- Todas as 48 validações de validate-workspace-upgrade.py
 - BUG fixes (BUG-20, BUG-001, BUG-11, BUG-12, BUG-13, BUG-16, BUG-17, BUG-18, BUG-19)
 - Merge strategies (JSON, YAML, Markdown)
 - Backup creation
@@ -15,12 +15,12 @@ Estratégia:
 - Criar projeto base via scaffold new
 - Executar scaffold upgrade --force
 - Importar e executar todas as 11 suites de validação
-- Assertar que todas as 52 validações passam
+- Assertar que todas as 48 validações passam
 - Validar logs e backups
 
 Relacionado:
 - scripts/scaffold.py (flow_upgrade)
-- scripts/validate-workspace-upgrade.py (52 validações)
+- scripts/validate-workspace-upgrade.py (48 validações)
 - scripts/lib/flows/upgrade.py
 """
 
@@ -186,7 +186,7 @@ def test_scaffold_upgrade_basic(scaffold_script: Path, base_workspace: Path):
 
 def test_scaffold_upgrade_all_validations(scaffold_script: Path, base_workspace: Path):
     """
-    Teste CRITICAL: Todas as 52 validações passam após upgrade.
+    Teste CRITICAL: Todas as 48 validações passam após upgrade.
 
     Executa scaffold upgrade e depois roda todas as 11 suites de validação
     do validate-workspace-upgrade.py.
@@ -249,9 +249,9 @@ def test_scaffold_upgrade_all_validations(scaffold_script: Path, base_workspace:
             f"{''.join(error_details)}"
         )
 
-    # Assertar que todas as 52 validações passaram
+    # Assertar que todas as 48 validações passaram
     assert total_failed == 0, f"{total_failed} validações falharam"
-    assert total_passed == 52, f"Esperado 52 validações, encontrado {total_passed}"
+    assert total_passed == 48, f"Esperado 48 validações, encontrado {total_passed}"
 
 
 def test_scaffold_upgrade_bug20_mcp_http(scaffold_script: Path, base_workspace: Path):
@@ -537,7 +537,7 @@ def test_scaffold_upgrade_idempotent(scaffold_script: Path, base_workspace: Path
     Teste: scaffold upgrade é idempotente.
 
     Verifica que executar upgrade múltiplas vezes não quebra o projeto.
-    Todas as 52 validações devem passar após cada upgrade.
+    Todas as 48 validações devem passar após cada upgrade.
     """
     # Executar upgrade 3 vezes
     for i in range(3):

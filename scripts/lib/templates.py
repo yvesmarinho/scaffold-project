@@ -114,8 +114,7 @@ _FOLDER_STRUCTURE: dict[str, dict[str, str]] = {
 │   └── integration/
 ├── docs/
 │   ├── INDEX.md
-│   ├── TODO.md
-│   └── SESSIONS/
+│   └── TODO.md
 ├── scripts/               # Automação
 ├── .venv/                 # Virtual env (gitignored)
 ├── pyproject.toml
@@ -133,8 +132,7 @@ _FOLDER_STRUCTURE: dict[str, dict[str, str]] = {
 ├── dist/                  # Build (gitignored)
 ├── docs/
 │   ├── INDEX.md
-│   ├── TODO.md
-│   └── SESSIONS/
+│   └── TODO.md
 ├── package.json
 ├── tsconfig.json
 └── .vscode/""",
@@ -150,8 +148,7 @@ _FOLDER_STRUCTURE: dict[str, dict[str, str]] = {
 ├── tests/
 ├── docs/
 │   ├── INDEX.md
-│   ├── TODO.md
-│   └── SESSIONS/
+│   └── TODO.md
 ├── go.mod
 └── .vscode/""",
 
@@ -161,8 +158,7 @@ _FOLDER_STRUCTURE: dict[str, dict[str, str]] = {
 ├── tests/
 ├── docs/
 │   ├── INDEX.md
-│   ├── TODO.md
-│   └── SESSIONS/
+│   └── TODO.md
 ├── scripts/
 └── .vscode/""",
     },
@@ -189,9 +185,8 @@ _FOLDER_STRUCTURE: dict[str, dict[str, str]] = {
 ├── scripts/               # Scripts de automação de infra
 ├── docs/
 │   ├── INDEX.md
-│   ├── TODO.md
+│   └── TODO.md
 │   ├── RUNBOOK.md         # Procedures operacionais
-│   └── SESSIONS/
 └── .vscode/""",
     },
 
@@ -210,8 +205,7 @@ _FOLDER_STRUCTURE: dict[str, dict[str, str]] = {
 ├── tests/
 ├── docs/
 │   ├── INDEX.md
-│   ├── TODO.md
-│   └── SESSIONS/
+│   └── TODO.md
 ├── requirements.txt
 └── .vscode/""",
     },
@@ -400,7 +394,7 @@ echo "feat(escopo): descrição" > /tmp/commit.txt
 
 | Tipo | Localização |
 |------|-------------|
-| Docs de sessão | `docs/SESSIONS/YYYY-MM-DD/` |
+| Registro de sessão | vault Obsidian `claude_memory` via MCP `obsidian-rest` |
 | Docs técnicos | `docs/` |
 | Python source | `src/` |
 | Scripts | `scripts/` |
@@ -411,8 +405,8 @@ echo "feat(escopo): descrição" > /tmp/commit.txt
 
 ### 6. Documentos incrementais — nunca sobrescrever
 
-`README.md`, `docs/INDEX.md`, `docs/TODO.md`, `docs/SESSIONS/*/DAILY_ACTIVITIES_*.md`,
-`docs/SESSIONS/*/SESSION_REPORT_*.md`, `docs/SESSIONS/*/FINAL_STATUS_*.md` →
+`README.md`, `docs/INDEX.md`, `docs/TODO.md` e as notas de sessão no vault
+(`projects/<projeto>/sessions/YYYY-MM-DD.md`, via `obsidian_append_content`) →
 sempre **acrescentar**, nunca reescrever do zero.
 
 ---

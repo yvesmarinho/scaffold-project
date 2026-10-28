@@ -14,8 +14,8 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-REQUIRED_MCP_SERVERS = ("memory", "sequential-thinking")
-SESSION_DIR_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+VAULT_MCP_SERVER = "obsidian-rest"
+REQUIRED_MCP_SERVERS = ("memory", "sequential-thinking", VAULT_MCP_SERVER)
 PENDING_TODO_RE = re.compile(r"^\s*-\s*\[ \]\s+(.*)$")
 
 
@@ -49,7 +49,6 @@ class SessionPaths:
 
     root: Path
     docs_dir: Path
-    sessions_dir: Path
     todo_file: Path
     index_file: Path
     rules_file: Path
@@ -64,7 +63,6 @@ class SessionPaths:
         return cls(
             root=root_path,
             docs_dir=docs_dir,
-            sessions_dir=docs_dir / "SESSIONS",
             todo_file=docs_dir / "TODO.md",
             index_file=docs_dir / "INDEX.md",
             rules_file=root_path / ".copilot-rules.md",
@@ -140,45 +138,18 @@ def validate_mcp_config(paths: SessionPaths) -> McpConfigStatus:
     )
 
 
-def list_session_dates(paths: SessionPaths) -> list[str]:
-    """Lista pastas de sessão válidas em ordem crescente."""
+def build_vault_targets(paths: SessionPaths, session_date: str) -> dict[str, str]:
+    """Caminhos (relativos ao vault claude_memory) que o agente usa via MCP."""
 
-    if not paths.sessions_dir.exists():
-        return []
-
-    session_dates = [
-        path.name
-        for path in paths.sessions_dir.iterdir()
-        if path.is_dir() and SESSION_DIR_RE.match(path.name)
-    ]
-    return sorted(session_dates)
-
-
-def get_latest_session_dir(
-    paths: SessionPaths,
-    *,
-    before_date: str | None = None,
-) -> Path | None:
-    """Retorna a pasta da sessão mais recente, opcionalmente anterior a uma data."""
-
-    session_dates = list_session_dates(paths)
-    if before_date is not None:
-        session_dates = [item for item in session_dates if item < before_date]
-
-    if not session_dates:
-        return None
-
-    return paths.sessions_dir / session_dates[-1]
-
-
-def find_session_file(session_dir: Path | None, prefix: str) -> Path | None:
-    """Encontra o primeiro arquivo com prefixo conhecido dentro da sessão."""
-
-    if session_dir is None or not session_dir.exists():
-        return None
-
-    matches = sorted(session_dir.glob(f"{prefix}_*.md"))
-    return matches[0] if matches else None
+    project = paths.root.name
+    sessions_dir = f"projects/{project}/sessions/"
+    return {
+        "mcp_server": VAULT_MCP_SERVER,
+        "project": project,
+        "project_note": f"projects/{project}.md",
+        "sessions_dir": sessions_dir,
+        "session_note": f"{sessions_dir}{session_date}.md",
+    }
 
 
 def read_pending_todos(todo_file: Path, *, limit: int = 5) -> list[str]:
@@ -206,10 +177,6 @@ def recover_context(
     """Recupera contexto útil para início e encerramento de sessão."""
 
     today_iso = today or _today_iso()
-    latest_session_dir = get_latest_session_dir(paths, before_date=today_iso)
-    latest_daily = find_session_file(latest_session_dir, "DAILY_ACTIVITIES")
-    latest_final_status = find_session_file(latest_session_dir, "FINAL_STATUS")
-
     return {
         "today": today_iso,
         "todo_exists": paths.todo_file.exists(),
@@ -217,12 +184,5 @@ def recover_context(
         "rules_exists": paths.rules_file.exists(),
         "readme_exists": paths.readme_file.exists(),
         "pending_todos": read_pending_todos(paths.todo_file),
-        "latest_session_date": latest_session_dir.name if latest_session_dir else None,
-        "latest_daily_activities": str(latest_daily.relative_to(paths.root))
-        if latest_daily
-        else None,
-        "latest_final_status": str(latest_final_status.relative_to(paths.root))
-        if latest_final_status
-        else None,
         "todo_excerpt": _safe_read_text(paths.todo_file)[:400],
     }

@@ -187,32 +187,3 @@ def scan_workspace(paths: SessionPaths) -> dict[str, Any]:
     summary = _summarize_findings(findings)
     summary["gitignore_has_secrets"] = gitignore_has_secrets
     return summary
-
-
-def scan_session_documents(paths: SessionPaths) -> dict[str, Any]:
-    """Varre docs/SESSIONS em busca de padrões sensíveis comuns."""
-
-    findings: list[SecurityFinding] = []
-    if not paths.sessions_dir.exists():
-        return _summarize_findings([])
-
-    for markdown_file in sorted(paths.sessions_dir.glob("*/*.md")):
-        relative_path = markdown_file.relative_to(paths.root)
-        content = markdown_file.read_text(encoding="utf-8")
-        for line_number, line in enumerate(content.splitlines(), start=1):
-            if any(pattern.search(line) for pattern in SESSION_DOC_ALLOWLIST):
-                continue
-            for pattern_name, pattern in SESSION_DOC_PATTERNS.items():
-                match = pattern.search(line)
-                if not match:
-                    continue
-                findings.append(
-                    SecurityFinding(
-                        kind=f"session-doc-{pattern_name}",
-                        path=str(relative_path),
-                        detail=f"Linha {line_number}: {match.group(0)[:60]}",
-                        severity="high",
-                    ),
-                )
-
-    return _summarize_findings(findings)
