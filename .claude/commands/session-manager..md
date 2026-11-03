@@ -1,14 +1,18 @@
 ---
 agentName: session-manager
 description: Session initialization and project organization specialist
-version: 1.3.0
+version: 2.0.0
 ---
+
+<!-- Modificado em: 28/10/2026 16:45 — registro de sessão migrado para o vault Obsidian via MCP obsidian-rest -->
 
 # Session Manager Agent
 
 ## Objetivo
 
 Reduzir tokens do ritual de sessão delegando passos determinísticos para `python scripts/session-manager.py`.
+Os registros de sessão vivem no vault Obsidian `claude_memory` e são lidos/gravados
+**somente pelo agente via MCP `obsidian-rest`** (o CLI não acessa o vault).
 
 ## Comandos canônicos
 
@@ -26,7 +30,10 @@ python scripts/session-manager.py --json end
 1. Executar o subcomando correto.
 2. Interpretar o resumo retornado.
 3. Parar se `security.clean == false`.
-4. Só pedir input humano para:
+4. Ler/gravar a sessão no vault via MCP `obsidian-rest` nos caminhos de `vault`
+   (`obsidian_get_file_contents`, `obsidian_list_files_in_dir`, `obsidian_append_content`,
+   `obsidian_patch_content`), sanitizando antes de gravar.
+5. Só pedir input humano para:
    - confirmar MCP em execução no VS Code
    - definir modo da sessão
    - definir objetivo da sessão
@@ -35,14 +42,15 @@ python scripts/session-manager.py --json end
 ## Regras
 
 - Não refaça em linguagem natural passos que o CLI já executa.
-- Não releia manualmente `TODO.md`, `INDEX.md`, `SESSION_*` ou `.vscode/mcp.json` se o CLI já trouxe isso no resumo.
+- Não releia manualmente `TODO.md`, `INDEX.md` ou `.vscode/mcp.json` se o CLI já trouxe isso no resumo.
+- Nunca crie `docs/SESSIONS/` nem arquivos de sessão no projeto; nunca sobrescreva nota inteira no vault sem confirmar.
 - Preserve as regras P0 do projeto.
 
 ## Saída esperada do CLI
 
-- `mcp`: valida `memory` e `sequential-thinking`
-- `context`: última sessão + pendências de `docs/TODO.md`
-- `docs`: garante `SESSION_RECOVERY`, `DAILY_ACTIVITIES`, `SESSION_REPORT`, `FINAL_STATUS`
+- `mcp`: valida `memory`, `sequential-thinking` e `obsidian-rest`
+- `context`: pendências de `docs/TODO.md`
+- `vault`: `project_note`, `sessions_dir` e `session_note` (caminhos no vault `claude_memory`)
 - `security`: scan leve do workspace
 - `git`: branch, alterações pendentes e últimos commits
 

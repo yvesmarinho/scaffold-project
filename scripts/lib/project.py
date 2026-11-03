@@ -118,18 +118,6 @@ Para configurar proteção de branches no GitHub, consulte [docs/BRANCH_PROTECTI
 Consulte os [documentos de arquitetura](docs/) para detalhes.
 """
 
-_SESSION_DOCS_README = """\
-# Session Docs Workspace
-
-Esta pasta guarda artefatos de sessão criados sob demanda pelos scripts do projeto.
-
-## Regras
-
-- Não criar subpastas datadas durante o scaffold.
-- Os arquivos `DAILY_ACTIVITIES_YYYY-MM-DD.md` devem nascer apenas em sessões reais.
-- O fluxo canônico é `python scripts/session-manager.py --json start|start-first|end`.
-"""
-
 _DOCS_INDEX_MD = """\
 # 📚 Índice — {{PROJECT_TITLE}}
 
@@ -150,14 +138,9 @@ _DOCS_INDEX_MD = """\
 
 ## Sessões de Trabalho
 
-```
-SESSIONS/
-└── YYYY-MM-DD/
-    ├── SESSION_RECOVERY_YYYY-MM-DD.md
-    ├── DAILY_ACTIVITIES_YYYY-MM-DD.md
-    ├── SESSION_REPORT_YYYY-MM-DD.md
-    └── FINAL_STATUS_YYYY-MM-DD.md
-```
+Os registros de sessão não ficam no repositório: vivem no vault Obsidian
+`claude_memory`, em `projects/{{PROJECT_NAME}}/sessions/YYYY-MM-DD.md`, lidos e
+gravados pelo agente via MCP `obsidian-rest`.
 
 ---
 
@@ -274,8 +257,6 @@ tmp/*
 !tmp/README.md
 .memory/*
 !.memory/README.md
-.session-index/*
-!.session-index/README.md
 .session-time/*
 !.session-time/README.md
 """
@@ -920,7 +901,7 @@ Review ao final de projeto/feature grande
 ## 🔗 Ver também
 
 - [debates/](../debates/) — Decisões técnicas
-- [SESSIONS/](../SESSIONS/) — Atividades diárias
+- Atividades diárias — vault Obsidian `claude_memory` (MCP `obsidian-rest`)
 """
 
 _DOCS_ARCHITECTURE_README = """\
@@ -1121,8 +1102,6 @@ _PROJECT_CREATION_SUMMARY = """\
 │   ├── retrospectives/         # Post-mortems e sprints
 │   ├── templates/              # Templates reutilizáveis
 │   ├── copilot/                # Regras Copilot (.copilot-* symlinks)
-│   ├── SESSIONS/               # Diários de sessões de trabalho
-│   │   └── YYYY-MM-DD/
 │   ├── INDEX.md                # Índice principal
 │   ├── TODO.md                 # Tarefas pendentes
 │   └── TODAY_ACTIVITIES.md     # Atividades do dia
@@ -1817,17 +1796,16 @@ make clean
 ├── .github/            # CI/CD, agentes SpecKit
 ├── .secrets/           # Credenciais locais (não versionado, chmod 700)
 ├── .vscode/            # VS Code: settings, MCP, extensions
-├── docs/               # Documentação (INDEX, TODO, SESSIONS)
+├── docs/               # Documentação (INDEX, TODO)
 ├── scripts/            # Scripts de automação
 └── src/                # Código-fonte
 ```
 
 ## Sessões de Trabalho
 
-Documentar atividades em `docs/SESSIONS/YYYY-MM-DD/`:
-- `SESSION_RECOVERY_YYYY-MM-DD.md` — contexto inicial
-- `DAILY_ACTIVITIES_YYYY-MM-DD.md` — log incremental
-- `FINAL_STATUS_YYYY-MM-DD.md` — estado ao encerrar
+Registrar atividades no vault Obsidian `claude_memory` via MCP `obsidian-rest`:
+- `projects/{{PROJECT_NAME}}.md` — nota-resumo do projeto
+- `projects/{{PROJECT_NAME}}/sessions/YYYY-MM-DD.md` — log da sessão (append)
 
 ## Regras de Desenvolvimento
 
@@ -1959,46 +1937,6 @@ Configurado em `.vscode/mcp.json`:
 ```
 """
 
-_SESSION_INDEX_README = """\
-# Pasta .session-index/
-
-## Propósito
-SQLite FTS5 database para busca em documentação de sessões.
-
-## Estrutura
-```
-.session-index/
-├── README.md
-└── sessions.db     # SQLite database (FTS5)
-```
-
-## Database Schema
-- Tabela `sessions_fts`: full-text search
-- Índice BM25 ranking
-- Campos: date, filename, content, metadata
-
-## Uso
-```bash
-# Buscar em sessões
-python scripts/session-search.py \"IMP-65\"
-
-# Reconstruir índice
-python scripts/session-index.py --rebuild
-```
-
-## Performance
-- Queries: <0.01s (FTS5 otimizado)
-- Tamanho típico: ~5MB/100 sessões
-
-## Git Status
-Database não é versionado (`.gitignore`).
-Apenas README.md commitado.
-
-## Sistema Relacionado
-- IMP-51: Session Search System
-- Scripts: `session-search.py`, `session-index.py`
-"""
-
 _SESSION_TIME_README = """\
 # Pasta .session-time/
 
@@ -2053,7 +1991,6 @@ Apenas README.md commitado.
 # Diretórios base (presentes em todos os projetos, independente de AI)
 DIRS_BASE = [
     "docs",
-    ".session-docs",
     "docs/architecture",
     "docs/debates",
     "docs/decisions",
@@ -2073,7 +2010,6 @@ DIRS_BASE = [
     "logs",
     "tmp",
     ".memory",
-    ".session-index",
     ".session-time",
     ".claude",
     ".claude/commands",
@@ -2131,7 +2067,6 @@ FILES_BASE: list[tuple[str, str]] = [
     ("logs/README.md",             _LOGS_README),
     ("tmp/README.md",              _TMP_README),
     (".memory/README.md",          _MEMORY_README),
-    (".session-index/README.md",   _SESSION_INDEX_README),
     (".session-time/README.md",    _SESSION_TIME_README),
 ]
 
@@ -2548,9 +2483,6 @@ def setup_project_docs(config: ProjectConfig, is_upgrade: bool = False) -> list[
     Operações:
       1. objetivo-manifest-template.yaml → objetivo.yaml (raiz, com placeholders)
       2. mcp-questions-template.yaml → mcp-questions.yaml (raiz)
-      2b. SESSION_DOCS_STYLE_GUIDE.md → docs/guides/SESSION_DOCS_STYLE_GUIDE.md
-          (referenciado pelos rituais de sessão)
-      3. .session-docs/README.md → guia para criação lazy dos artefatos de sessão
 
     Substituições em objetivo.yaml:
       - CHANGE_ME (project.name) → config.project_name
@@ -2561,7 +2493,6 @@ def setup_project_docs(config: ProjectConfig, is_upgrade: bool = False) -> list[
     Arquivos já existentes são saltados (idempotente).
 
     UPGRADE: Se objetivo.yaml existe, verifica e adiciona campos ausentes (ex: docstyle).
-             Nenhuma pasta datada é criada automaticamente em `.session-docs`.
 
     Args:
         config: Configuração do projeto
@@ -2573,7 +2504,6 @@ def setup_project_docs(config: ProjectConfig, is_upgrade: bool = False) -> list[
     """
     results: list[CreatedItem] = []
     base = config.project_path
-    src_root = _TEMPLATE_ROOT
     src_templates = _TEMPLATE_ROOT / "scaffold" / "templates" / "docs"
 
     if not src_templates.is_dir():
@@ -2618,24 +2548,6 @@ def setup_project_docs(config: ProjectConfig, is_upgrade: bool = False) -> list[
     result = _copy_file(src_mcp, dst_mcp)
     results.append(result)
 
-    # 2b. SESSION_DOCS_STYLE_GUIDE.md → docs/guides/
-    # Referenciado pelos rituais de sessão para validar a documentação incremental.
-    src_style_guide = src_root / "docs" / "guides" / "SESSION_DOCS_STYLE_GUIDE.md"
-    dst_guides_dir = base / "docs" / "guides"
-    dst_style_guide = dst_guides_dir / "SESSION_DOCS_STYLE_GUIDE.md"
-    try:
-        dst_guides_dir.mkdir(parents=True, exist_ok=True)
-        result = _copy_file(src_style_guide, dst_style_guide)
-        results.append(result)
-    except OSError as exc:
-        log.warning("⚠️  erro ao criar docs/guides/SESSION_DOCS_STYLE_GUIDE.md: %s", exc)
-        results.append(CreatedItem(path=dst_style_guide,
-                       kind="file", status="error", message=str(exc)))
-
-    # 3. README em .session-docs para manter a pasta rastreável sem cristalizar data
-    session_docs_readme = base / ".session-docs" / "README.md"
-    results.append(_write_file(session_docs_readme, _SESSION_DOCS_README))
-
     return results
 
 
@@ -2649,16 +2561,13 @@ def copy_session_libs(config: ProjectConfig, force: bool = False) -> list[Create
 
     Módulos copiados:
       1. scripts/lib/__init__.py
-      2. scripts/lib/search.py (usado por session-index, session-search, session-chat)
-      3. scripts/lib/chat_capture.py (usado por session-chat)
-      4. scripts/lib/memory.py (usado por memory scripts)
-      5. scripts/lib/git_validators.py (usado por session-time-tracker, pre-commit hooks)
-      6. scripts/lib/sanitize.py (usado por mem_save para detectar/sanitizar secrets)
-      7. scripts/lib/session_context.py (usado por session-manager)
-      8. scripts/lib/session_docs.py (usado por session-manager)
-      9. scripts/lib/session_security.py (usado por session-manager)
-      10. scripts/lib/git_session.py (usado por session-manager)
-      11. scripts/lib/session_workflow.py (usado por session-manager)
+      2. scripts/lib/memory.py (usado por memory scripts)
+      3. scripts/lib/git_validators.py (usado por session-time-tracker, pre-commit hooks)
+      4. scripts/lib/sanitize.py (usado por mem_save para detectar/sanitizar secrets)
+      5. scripts/lib/session_context.py (usado por session-manager)
+      6. scripts/lib/session_security.py (usado por session-manager)
+      7. scripts/lib/git_session.py (usado por session-manager)
+      8. scripts/lib/session_workflow.py (usado por session-manager)
 
     Esses módulos são dependências dos scripts de sessão e memory system.
     Sem eles, os scripts falham com ModuleNotFoundError.
@@ -2681,13 +2590,10 @@ def copy_session_libs(config: ProjectConfig, force: bool = False) -> list[Create
 
     libs_to_copy = [
         "__init__.py",
-        "search.py",
-        "chat_capture.py",
         "memory.py",
         "git_validators.py",
         "sanitize.py",
         "session_context.py",
-        "session_docs.py",
         "session_security.py",
         "git_session.py",
         "session_workflow.py",
@@ -2712,19 +2618,12 @@ def copy_session_scripts(config: ProjectConfig, force: bool = False) -> list[Cre
 
     Scripts copiados:
       1. session-manager.py → scripts/session-manager.py
-      2. session-index.py → scripts/session-index.py
-      3. session-time-tracker.py → scripts/session-time-tracker.py
-      4. session-search.py → scripts/session-search.py
-      5. session-chat.py → scripts/session-chat.py
-      6. session-validate.py → scripts/session-validate.py
+      2. session-time-tracker.py → scripts/session-time-tracker.py
 
     Esses scripts são necessários para:
-      - Orquestrar rituais de sessão (session-manager.py)
-      - Indexar documentação de sessões (session-index.py)
+      - Orquestrar rituais de sessão (session-manager.py); o registro da
+        sessão é feito pelo agente no vault Obsidian via MCP obsidian-rest
       - Rastrear tempo de trabalho (session-time-tracker.py)
-      - Buscar em sessões indexadas (session-search.py)
-      - Chat interativo com sessões (session-chat.py)
-      - Validar estrutura de sessões (session-validate.py)
 
     Args:
         config: Configuração do projeto
@@ -2738,11 +2637,7 @@ def copy_session_scripts(config: ProjectConfig, force: bool = False) -> list[Cre
 
     scripts_to_copy = [
         "session-manager.py",
-        "session-index.py",
         "session-time-tracker.py",
-        "session-search.py",
-        "session-chat.py",
-        "session-validate.py",
     ]
 
     for script_name in scripts_to_copy:

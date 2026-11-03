@@ -695,59 +695,6 @@ docker-down:
 	@docker-compose -f docker/docker-compose.yml down
 	@echo "$(GREEN)✅ Containers stopped$(NC)"
 
-## session-index: Build or update session documentation search index
-session-index:
-	@echo "$(BLUE)📚 Indexing session documentation...$(NC)"
-	@python scripts/session-index.py
-	@echo "$(GREEN)✅ Session index updated$(NC)"
-
-## session-index-rebuild: Rebuild session index from scratch
-session-index-rebuild:
-	@echo "$(BLUE)📚 Rebuilding session documentation index...$(NC)"
-	@python scripts/session-index.py --rebuild
-	@echo "$(GREEN)✅ Session index rebuilt$(NC)"
-
-## session-search: Search session documentation (use QUERY="text")
-session-search:
-	@if [ -z "$(QUERY)" ]; then \
-		echo "$(RED)✗ Error: QUERY parameter is required$(NC)"; \
-		echo "$(YELLOW)Usage: make session-search QUERY=\"your search text\"$(NC)"; \
-		echo "$(YELLOW)Examples:$(NC)"; \
-		echo "  make session-search QUERY=\"IMP-50\""; \
-		echo "  make session-search QUERY=\"python AND fastapi\""; \
-		echo "  make session-search QUERY='\"bug fix\"'"; \
-		exit 1; \
-	fi
-	@python scripts/session-search.py "$(QUERY)"
-
-## session-index-stats: Show session index statistics
-session-index-stats:
-	@echo "$(BLUE)📊 Session Index Statistics$(NC)"
-	@python scripts/session-index.py --stats
-
-## chat-capture: Capture latest Copilot conversation to CHAT-*.md
-chat-capture:
-	@echo "$(BLUE)💬 Capturing latest conversation...$(NC)"
-	@python scripts/session-chat.py capture --latest
-	@echo "$(GREEN)✅ Chat captured$(NC)"
-
-## chat-list: List all captured CHAT-*.md files
-chat-list:
-	@echo "$(BLUE)📋 Captured Conversations$(NC)"
-	@python scripts/session-chat.py list
-
-## chat-search: Search in captured conversations (use QUERY="text")
-chat-search:
-	@if [ -z "$(QUERY)" ]; then \
-		echo "$(RED)✗ Error: QUERY parameter is required$(NC)"; \
-		echo "$(YELLOW)Usage: make chat-search QUERY=\"your search text\"$(NC)"; \
-		echo "$(YELLOW)Examples:$(NC)"; \
-		echo "  make chat-search QUERY=\"IMP-55\""; \
-		echo "  make chat-search QUERY=\"debugging\""; \
-		exit 1; \
-	fi
-	@python scripts/session-chat.py search "$(QUERY)"
-
 ##
 ## ═══════════════════════════════════════════════════════════════════════
 ## DEPENDENCY MANAGEMENT (IMP-65 P0)
@@ -911,71 +858,8 @@ memory-health:
 ## ═══════════════════════════════════════════════════════════════════════
 ##
 
-## session-log: Show recent session activity log
-session-log:
-	@echo "$(BLUE)📋 Recent Session Activity$(NC)"
-	@echo ""
-	@if [ -d "docs/SESSIONS" ]; then \
-		LATEST_SESSION=$$(find docs/SESSIONS -maxdepth 1 -type d -name "20*" | sort -r | head -1); \
-		if [ -n "$$LATEST_SESSION" ]; then \
-			SESSION_DATE=$$(basename $$LATEST_SESSION); \
-			echo "$(YELLOW)Session: $$SESSION_DATE$(NC)"; \
-			echo ""; \
-			if [ -f "$$LATEST_SESSION/DAILY_ACTIVITIES_$$SESSION_DATE.md" ]; then \
-				echo "$(GREEN)DAILY_ACTIVITIES:$(NC)"; \
-				tail -n 50 "$$LATEST_SESSION/DAILY_ACTIVITIES_$$SESSION_DATE.md"; \
-			else \
-				echo "$(YELLOW)⚠️  No DAILY_ACTIVITIES found for this session$(NC)"; \
-			fi; \
-		else \
-			echo "$(YELLOW)⚠️  No session directories found$(NC)"; \
-		fi; \
-	else \
-		echo "$(RED)❌ docs/SESSIONS/ directory not found$(NC)"; \
-	fi
-
-## session-validate: Validate session documentation format
-session-validate:
-	@echo "$(BLUE)🔍 Validating session documentation...$(NC)"
-	@echo ""
-	@if command -v python3 >/dev/null 2>&1; then \
-		python3 scripts/session-validate.py --all; \
-	else \
-		echo "$(RED)❌ python3 not found$(NC)"; \
-		exit 1; \
-	fi
-
-## session-sanitize: Scan session docs for sensitive data exposure
-session-sanitize:
-	@echo "$(BLUE)🛡️  Scanning session docs for sensitive data...$(NC)"
-	@echo ""
-	@if command -v gitleaks >/dev/null 2>&1; then \
-		if [ -d "docs/SESSIONS" ]; then \
-			gitleaks detect \
-				--config .gitleaks-session-docs.toml \
-				--source docs/SESSIONS/ \
-				--verbose \
-				--no-git; \
-			if [ $$? -eq 0 ]; then \
-				echo ""; \
-				echo "$(GREEN)✅ No sensitive data found$(NC)"; \
-			else \
-				echo ""; \
-				echo "$(RED)❌ Sensitive data detected - review and sanitize$(NC)"; \
-				echo "$(YELLOW)See session-end.prompt.md (Passo 6) for sanitization guidelines$(NC)"; \
-				exit 1; \
-			fi; \
-		else \
-			echo "$(YELLOW)⚠️  docs/SESSIONS/ directory not found$(NC)"; \
-		fi; \
-	else \
-		echo "$(YELLOW)⚠️  gitleaks not installed$(NC)"; \
-		echo ""; \
-		echo "Install gitleaks:"; \
-		echo "  macOS:  brew install gitleaks"; \
-		echo "  Linux:  wget https://github.com/gitleaks/gitleaks/releases/..."; \
-		exit 1; \
-	fi
+## Registros de sessão: vault Obsidian claude_memory via MCP obsidian-rest
+## (ver .claude/commands/session-*.md). Alvos legados movidos para tmp/.
 
 ##
 ## ═══════════════════════════════════════════════════════════════════════

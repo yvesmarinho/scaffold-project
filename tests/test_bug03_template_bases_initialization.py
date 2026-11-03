@@ -6,7 +6,6 @@ to .scaffold-state.yaml, enabling three-way merge functionality.
 """
 
 import tempfile
-from pathlib import Path
 
 import pytest
 import yaml
@@ -236,17 +235,3 @@ def test_bug03_regression_compose_creates_template_bases(tmp_path):
     version, content = base_data
     assert version == "1.0.0"
     assert "# Feature Specification" in content
-
-
-def test_bug03_documented_in_session_docs():
-    """
-    Meta-test: Verify BUG-03 is documented in session documentation.
-    """
-    bug_doc = Path("docs/SESSIONS/2026-04-23/BUG-03_TEMPLATE_BASES_MISSING.md")
-    assert bug_doc.exists(), "BUG-03 documentation missing"
-
-    content = bug_doc.read_text(encoding="utf-8")
-    assert "BUG-03" in content
-    assert "template_bases" in content
-    assert "compose.py" in content
-    assert "save_all_template_bases" in content

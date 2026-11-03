@@ -441,15 +441,7 @@ def validate_bug11_session_init(workspace: Path, verbose: bool = False) -> Valid
     """Validar correção do BUG-11: session systems initialization."""
     suite = ValidationSuite("BUG-11: Session Systems Initialization")
 
-    # Check 1: .session-index/index.db (OK se ausente, criado no primeiro session-start)
-    index_db = workspace / ".session-index" / "index.db"
-    suite.add(ValidationResult(
-        ".session-index/index.db exists",
-        index_db.exists() or True,  # Sempre PASS - criado apenas após session-start-first
-        f"{index_db.stat().st_size} bytes" if index_db.exists() else "Ausente (OK se não inicializado)"
-    ))
-
-    # Check 2: .session-time/history.csv (OK se ausente, criado no primeiro session-start)
+    # Check 1: .session-time/history.csv (OK se ausente, criado no primeiro session-start)
     history_csv = workspace / ".session-time" / "history.csv"
     suite.add(ValidationResult(
         ".session-time/history.csv exists",
@@ -457,13 +449,10 @@ def validate_bug11_session_init(workspace: Path, verbose: bool = False) -> Valid
         f"{history_csv.stat().st_size} bytes" if history_csv.exists() else "Ausente (OK se não inicializado)"
     ))
 
-    # Check 3-7: Scripts de sessão (5 arquivos)
+    # Check 2-3: Scripts de sessão (registros vivem no vault Obsidian via MCP)
     session_scripts = [
-        "session-index.py",
+        "session-manager.py",
         "session-time-tracker.py",
-        "session-search.py",
-        "session-chat.py",
-        "session-validate.py"
     ]
 
     for script_name in session_scripts:

@@ -129,12 +129,14 @@ def test_scaffold_new_basic(scaffold_script: Path, temp_workspace: Path):
     assert (temp_workspace / ".scaffold-state.yaml").is_file(), ".scaffold-state.yaml ausente"
     assert (temp_workspace / "README.md").is_file(), "README.md ausente"
     assert (temp_workspace / ".gitignore").is_file(), ".gitignore ausente"
-    assert (temp_workspace / ".session-docs" / "README.md").is_file(), ".session-docs/README.md ausente"
     # Note: pyproject.toml não é criado por padrão - depende do profile/language específico
     # assert (temp_workspace / "pyproject.toml").is_file(), "pyproject.toml ausente (Python)"
 
-    dated_session_dirs = [p for p in (temp_workspace / ".session-docs").iterdir() if p.is_dir()]
-    assert not dated_session_dirs, f".session-docs não deve nascer com pasta datada: {dated_session_dirs}"
+    # Registros de sessão vivem no vault Obsidian (MCP obsidian-rest), não no projeto
+    for legacy in (".session-docs", ".session-index", "docs/SESSIONS"):
+        assert not (temp_workspace / legacy).exists(), f"{legacy} não deve ser criado"
+    mcp = (temp_workspace / ".vscode" / "mcp.json").read_text(encoding="utf-8")
+    assert "obsidian-rest" in mcp, "mcp.json sem obsidian-rest"
 
     # Verificar Git initialization
     assert (temp_workspace / ".git").is_dir(), "Git não inicializado"

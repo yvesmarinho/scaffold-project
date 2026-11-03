@@ -40,16 +40,14 @@ def _print_human(payload: dict[str, Any]) -> int:
     mcp = payload.get("mcp")
     if mcp:
         if mcp["ok"]:
-            print("MCP: memory ✅ | sequential-thinking ✅")
+            print("MCP: memory ✅ | sequential-thinking ✅ | obsidian-rest ✅")
         else:
             missing = ", ".join(mcp.get("missing_servers", [])) or "desconhecido"
             print(f"MCP: atenção — faltando {missing}")
 
     context = payload.get("context")
     if context:
-        latest = context.get("latest_session_date") or "N/A"
         pending = context.get("pending_todos", [])
-        print(f"Última sessão: {latest}")
         print(f"Pendências: {len(pending)}")
 
     security = payload.get("security")
@@ -62,29 +60,14 @@ def _print_human(payload: dict[str, Any]) -> int:
         status = "🟢 LIMPO" if workspace_security["clean"] else "🔴 ATENÇÃO"
         print(f"Workspace: {status}")
 
-    session_docs_security = payload.get("session_docs_security")
-    if session_docs_security:
-        status = "🟢 PASSED" if session_docs_security["clean"] else "🔴 ATENÇÃO"
-        print(f"Session docs: {status}")
-
-    docs = payload.get("docs")
-    if docs:
-        statuses = docs.get("statuses", {})
-        if statuses:
-            summary = ", ".join(f"{name}={status}" for name, status in statuses.items())
-            print(f"Docs: {summary}")
+    vault = payload.get("vault")
+    if vault:
+        print(f"Vault ({vault['mcp_server']}): {vault['session_note']}")
 
     git = payload.get("git")
     if git and git.get("is_repo"):
         branch = git.get("branch") or "(sem branch)"
         print(f"Git: {branch} | alterações pendentes={len(git.get('status_lines', []))}")
-
-    daily_validation = payload.get("daily_validation")
-    if daily_validation:
-        print(
-            "DAILY_ACTIVITIES: "
-            + ("válido ✅" if daily_validation.get("valid") else "inválido ❌")
-        )
 
     if payload.get("ready") is not None:
         print("Pronto para trabalhar." if payload["ready"] else "Há pendências antes de iniciar.")

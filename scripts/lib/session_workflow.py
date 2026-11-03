@@ -1,5 +1,10 @@
 """
 lib/session_workflow.py — Orquestração unificada do workflow de sessão.
+
+Os docs de sessão vivem no vault Obsidian ``claude_memory`` e são lidos/gravados
+pelo agente via MCP ``obsidian-rest``. Este módulo só executa passos
+determinísticos (MCP, contexto, git, segurança) e devolve em ``vault`` os
+caminhos da nota do projeto e da nota da sessão no vault.
 """
 
 from __future__ import annotations
@@ -9,14 +14,13 @@ from pathlib import Path
 from typing import Any
 
 from .git_session import collect_git_state, commit_all, push_current_branch
-from .session_context import SessionPaths, recover_context, validate_mcp_config
-from .session_docs import (
-    build_session_files,
-    ensure_session_files,
-    validate_daily_file,
-    write_end_of_session_docs,
+from .session_context import (
+    SessionPaths,
+    build_vault_targets,
+    recover_context,
+    validate_mcp_config,
 )
-from .session_security import scan_session_documents, scan_workspace
+from .session_security import scan_workspace
 
 
 def _today_iso() -> str:
@@ -35,6 +39,7 @@ def _prepare_common_state(root: Path | str, *, today: str | None = None) -> dict
         "mcp": mcp,
         "context": context,
         "git": git_state,
+        "vault": build_vault_targets(paths, session_date),
     }
 
 
@@ -49,13 +54,6 @@ def run_start(
     state = _prepare_common_state(root, today=today)
     paths: SessionPaths = state["paths"]
     security = scan_workspace(paths)
-    docs = ensure_session_files(
-        paths,
-        state["session_date"],
-        state["context"],
-        branch=state["git"].get("branch"),
-        first_time=first_time,
-    )
     ready = bool(state["mcp"]["ok"] and security["clean"])
     return {
         "command": "start-first" if first_time else "start",
@@ -64,7 +62,7 @@ def run_start(
         "mcp": state["mcp"],
         "context": state["context"],
         "git": state["git"],
-        "docs": docs,
+        "vault": state["vault"],
         "security": security,
         "ready": ready,
     }
@@ -81,22 +79,20 @@ def run_recover(root: Path | str, *, today: str | None = None) -> dict[str, Any]
         "mcp": state["mcp"],
         "context": state["context"],
         "git": state["git"],
+        "vault": state["vault"],
     }
 
 
 def run_security_scan(root: Path | str) -> dict[str, Any]:
-    """Executa scans do workspace e dos docs de sessão."""
+    """Executa o scan de segurança do workspace."""
 
     paths = SessionPaths.from_root(root)
     workspace = scan_workspace(paths)
-    session_docs = scan_session_documents(paths)
-    clean = workspace["clean"] and session_docs["clean"]
     return {
         "command": "security-scan",
         "root": str(paths.root),
         "workspace": workspace,
-        "session_docs": session_docs,
-        "clean": clean,
+        "clean": workspace["clean"],
     }
 
 
@@ -104,10 +100,6 @@ def run_status(root: Path | str, *, today: str | None = None) -> dict[str, Any]:
     """Resume o estado atual da sessão."""
 
     state = _prepare_common_state(root, today=today)
-    files = build_session_files(state["paths"], state["session_date"])
-    daily_validation = (
-        validate_daily_file(files) if files.daily.exists() else {"valid": False, "errors": []}
-    )
     return {
         "command": "status",
         "root": str(state["paths"].root),
@@ -115,8 +107,7 @@ def run_status(root: Path | str, *, today: str | None = None) -> dict[str, Any]:
         "mcp": state["mcp"],
         "context": state["context"],
         "git": state["git"],
-        "session_files": files.as_dict(state["paths"].root),
-        "daily_validation": daily_validation,
+        "vault": state["vault"],
     }
 
 
@@ -127,48 +118,25 @@ def run_end(
     commit: bool = False,
     push: bool = False,
 ) -> dict[str, Any]:
-    """Executa encerramento de sessão com atualização de docs."""
+    """Executa encerramento de sessão (o registro no vault é feito pelo agente)."""
 
     state = _prepare_common_state(root, today=today)
     paths: SessionPaths = state["paths"]
-    docs = ensure_session_files(
-        paths,
-        state["session_date"],
-        state["context"],
-        branch=state["git"].get("branch"),
-    )
-    files = build_session_files(paths, state["session_date"])
     workspace_security = scan_workspace(paths)
-    session_docs_security = scan_session_documents(paths)
-    daily_validation = validate_daily_file(files)
-    doc_updates = write_end_of_session_docs(
-        paths,
-        state["session_date"],
-        context=state["context"],
-        git_summary=state["git"],
-        security_summary=workspace_security,
-        session_docs_security=session_docs_security,
-        daily_validation=daily_validation,
-    )
 
     commit_result: dict[str, Any] | None = None
     push_result: dict[str, Any] | None = None
     if commit:
         commit_result = commit_all(
             paths.root,
-            title=f"docs(sessao): encerramento {state['session_date']}",
+            title=f"chore(sessao): encerramento {state['session_date']}",
             body_lines=[
-                f"Sessão {state['session_date']} encerrada com resumo automático.",
-                f"Pendências capturadas: {len(state['context'].get('pending_todos', []))}",
+                f"Sessão {state['session_date']} encerrada.",
+                f"Registro da sessão no vault: {state['vault']['session_note']}",
                 (
                     "Segurança do workspace: LIMPO"
                     if workspace_security["clean"]
                     else "Segurança do workspace: ATENÇÃO"
-                ),
-                (
-                    "Session docs: PASSED"
-                    if session_docs_security["clean"]
-                    else "Session docs: ATENÇÃO"
                 ),
             ],
         )
@@ -182,14 +150,9 @@ def run_end(
         "mcp": state["mcp"],
         "context": state["context"],
         "git": collect_git_state(paths.root).to_dict(),
-        "docs": docs,
-        "doc_updates": doc_updates,
+        "vault": state["vault"],
         "workspace_security": workspace_security,
-        "session_docs_security": session_docs_security,
-        "daily_validation": daily_validation,
         "commit": commit_result,
         "push": push_result,
-        "ready_for_next_session": bool(
-            workspace_security["clean"] and session_docs_security["clean"]
-        ),
+        "ready_for_next_session": bool(workspace_security["clean"]),
     }
