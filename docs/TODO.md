@@ -34,7 +34,7 @@
 - [ ] Questionar prioridade do projeto em `objetivo-init.yaml`
 - [ ] Separar arquivos de template dos arquivos do projeto (distribuição)
 - [ ] `objetivo-init-V2.yaml`: seções `infrastructure`/`architecture` + padrões de nomenclatura (pastas, arquivos, objetos, classes, funções)
-- [ ] `docs/` sem sub-pastas `implementations` e `bugs`
+- [x] ~~`docs/` sem sub-pastas `implementations` e `bugs`~~: ✅ 09/11 — criadas nos projetos gerados, com README e entrada no INDEX
 - [ ] Integrar `specify init --here --force --integration copilot`
 - [ ] Analisar docs VS Code Copilot (instructions, skills, custom agents, MCP)
 
