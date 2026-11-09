@@ -1,8 +1,49 @@
 # ✅ TODO - Enterprise Scaffold Project Template
 
-**Last Updated**: 2026-07-15 — Pendências do TODO concluídas (suite verde, objetivo-init integrado, specify init validado) ✅
+**Last Updated**: 09/11/2026 14:57 — Pendências da sessão 28/10 + lembrete.md + remenber.md consolidados
 **Project**: Enterprise Scaffold Project Template
 **Status**: 🟢 Active Development
+
+---
+
+## 🎯 Próxima Sessão (2026-11-09+)
+
+### Pendências da sessão 28/10/2026 (feature/068)
+
+- [x] ~~Rotacionar credenciais de `ACTION_PLAN_TO_10.md`~~: verificado 09/11 — arquivo só em `tmp/legacy-session-docs/`, contém apenas mocks de teste (sem credencial real)
+- [ ] **GitGuardian sem assinatura**: substituir por validação local nesta máquina (gitleaks + `detect-private-key` no pre-commit; script `make secrets-scan`)
+- [ ] **Revalidar perfis `devops-*`** (`scaffold/profiles/devops-{analysis,infrastructure,programming,security}.yaml`)
+- [ ] **Corrigir ansible-lint** no pre-commit (v6.22.1, `files: \.(yaml|yml)$` pega YAMLs que não são Ansible)
+- [ ] **Sincronizar branch com master**: PR #32 e #34 já mergeados; commit `a3b8ff2` ficou fora do master → rebase + novo PR
+- [ ] **Remover `tmp/legacy-session-docs/`** após validar migração no vault
+- [x] ~~`obsidian_patch_content` erro 40084~~: aceito — usar append
+
+### Repositório GitHub (`yvesmarinho/scaffold-project`, público)
+
+- [ ] **Revisar o repo**: descrição, topics, settings, branch protection (hoje inexistente), Dependabot/secret scanning
+- [ ] **Revisar branches**: 3 branches remotas já mergeadas (`chore/declarar-deps-rich-pyyaml`, `chore/gitignore-graphify-out`, `feature/068-session-obsidian-mcp`) → apagar local + remoto
+- [ ] **Renomear `master` → `main`**: GitHub rename + atualizar referências em workflows (`ci-template.yml`, `scaffold-tests.yml`) e em `scripts/` (`git_validators.py`, `project.py`, `infra.py`, `templates.py`, `vscode.py`, `mem_context.py`) + docs/CLAUDE.md
+
+### Do `docs/planning/lembrete.md`
+
+- [ ] Log não exibe os detalhes do final do stdout nem os drifts
+- [ ] Nome do arquivo de log com data local (America/Sao_Paulo), hoje está em UTC
+- [ ] `.gitignore` ignorar arquivos gerados por copilot/claude/speckit (exceto os com dados do projeto)
+- [ ] Estrutura de branches main / dev / fases + validação antes de ir para main
+- [ ] Shell integration VS Code (zsh)
+- [ ] Questionar prioridade do projeto em `objetivo-init.yaml`
+- [ ] Separar arquivos de template dos arquivos do projeto (distribuição)
+- [ ] `objetivo-init-V2.yaml`: seções `infrastructure`/`architecture` + padrões de nomenclatura (pastas, arquivos, objetos, classes, funções)
+- [ ] `docs/` sem sub-pastas `implementations` e `bugs`
+- [ ] Integrar `specify init --here --force --integration copilot`
+- [ ] Analisar docs VS Code Copilot (instructions, skills, custom agents, MCP)
+
+### Do `docs/planning/remenber.md` (itens ainda abertos)
+
+- [ ] `scaffold-verifier.agent.md` (P0)
+- [ ] `security-auditor.agent.md` (P0)
+- [ ] `docs-structure-validator.agent.md` (P1)
+- [ ] `adr-reviewer.agent.md` (P2)
 
 ---
 

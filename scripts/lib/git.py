@@ -59,7 +59,7 @@ def init_repository(config: ProjectConfig) -> CreatedItem:
 
     try:
         subprocess.run(
-            ["git", "init"],
+            ["git", "init", "-b", "main"],
             cwd=target,
             check=True,
             capture_output=True,
