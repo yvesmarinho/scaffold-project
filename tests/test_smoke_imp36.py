@@ -218,17 +218,36 @@ class TestValidateDescriptorsIntegration:
         report = validate_descriptors(_DESCRIPTORS_DIR, stale_days_threshold=9999)
         assert report.stale_profiles == []
 
-    def test_threshold_1_perfis_antigos_stale(self):
-        """Com threshold=1, perfis testados em 2026-03-07 (7 dias atrás) ficam stale."""
-        report = validate_descriptors(_DESCRIPTORS_DIR, stale_days_threshold=1)
-        # 10 perfis têm last_tested=2026-03-07 (7 dias atrás) → stale com threshold=1
-        # 3 perfis novos (devops-*) têm last_tested=2026-03-14 (hoje) → não stale
+    @staticmethod
+    def _aged_descriptors(tmp_path: Path, days_ago: int = 30) -> Path:
+        """Cópia dos descriptors reais com last_tested fixado em `days_ago` dias atrás.
+
+        Evita depender da data real de revalidação dos perfis.
+        """
+        old = (date.today() - timedelta(days=days_ago)).isoformat()
+        dest = tmp_path / "descriptors"
+        dest.mkdir()
+        for src in _DESCRIPTORS_DIR.glob("*.yaml"):
+            lines = [
+                f'{line.split(":", 1)[0]}: "{old}"'
+                if line.startswith(("last_tested:", "LAST_TESTED_DATE:"))
+                else line
+                for line in src.read_text(encoding="utf-8").splitlines()
+            ]
+            (dest / src.name).write_text("\n".join(lines) + "\n", encoding="utf-8")
+        return dest
+
+    def test_threshold_1_perfis_antigos_stale(self, tmp_path: Path):
+        """Com threshold=1, perfis testados há 30 dias ficam stale."""
+        aged = self._aged_descriptors(tmp_path)
+        report = validate_descriptors(aged, stale_days_threshold=1)
         assert len(report.stale_profiles) >= 10
 
-    def test_stale_warnings_contados_em_total_warnings(self):
+    def test_stale_warnings_contados_em_total_warnings(self, tmp_path: Path):
         """Com threshold=1, total_warnings deve incluir os staleness warnings."""
-        report_stale = validate_descriptors(_DESCRIPTORS_DIR, stale_days_threshold=1)
-        report_ok = validate_descriptors(_DESCRIPTORS_DIR, stale_days_threshold=9999)
+        aged = self._aged_descriptors(tmp_path)
+        report_stale = validate_descriptors(aged, stale_days_threshold=1)
+        report_ok = validate_descriptors(aged, stale_days_threshold=9999)
         assert report_stale.total_warnings > report_ok.total_warnings
 
     def test_sem_novos_erros_com_threshold_normal(self):

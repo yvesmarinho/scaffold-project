@@ -3,7 +3,7 @@ schema_version: "1.0.0"
 name: k8s-helm
 layer: 3
 version: "1.0.0"
-last_tested: "2026-06-21"
+last_tested: "2026-11-09"
 status: stable
 
 description: >

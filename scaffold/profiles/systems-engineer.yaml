@@ -3,7 +3,7 @@ schema_version: "1.0.0"
 name: systems-engineer
 layer: 2
 version: "1.0.0"
-last_tested: "2026-07-15"
+last_tested: "2026-11-09"
 status: stable
 
 description: >
