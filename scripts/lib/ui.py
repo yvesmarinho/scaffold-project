@@ -10,6 +10,7 @@ import re
 import yaml
 from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from rich import box
 from rich.console import Console
@@ -788,6 +789,25 @@ def confirm_summary(config: ProjectConfig) -> bool:
 # Diretório de logs da ferramenta scaffold (scaffold-project/logs/).
 # Os logs da operação são gravados aqui além do projeto criado.
 _SCAFFOLD_LOGS_DIR = Path(__file__).resolve().parent.parent.parent / "logs"
+_LOG_TZ = ZoneInfo("America/Sao_Paulo")
+
+
+def _local(now: datetime) -> datetime:
+    if now.tzinfo is None:
+        raise ValueError("datetime sem timezone — use datetime.now(timezone.utc)")
+    return now.astimezone(_LOG_TZ)
+
+
+def log_timestamp(now: datetime) -> str:
+    """Timestamp do nome do log em America/Sao_Paulo (ex.: 2026-11-09_15-52-50)."""
+    return _local(now).strftime("%Y-%m-%d_%H-%M-%S")
+
+
+def _relative(path: Path, project_path: Path) -> str:
+    try:
+        return str(Path(path).relative_to(project_path))
+    except ValueError:
+        return str(path)
 
 
 def _write_log_to_dir(
@@ -795,15 +815,15 @@ def _write_log_to_dir(
     items: list[CreatedItem | LinkStatus],
     project_path: Path,
     operation: str,
-    timestamp: str,
+    now: datetime,
 ) -> Path | None:
     """Grava o arquivo de log em um diretório específico. Retorna o Path ou None."""
     try:
         logs_dir.mkdir(parents=True, exist_ok=True)
-        log_file = logs_dir / f"{operation}_{timestamp}.log"
+        log_file = logs_dir / f"{operation}_{log_timestamp(now)}.log"
         with log_file.open("w", encoding="utf-8") as f:
             f.write(f"# {operation.upper()} Operation Log\n")
-            f.write(f"# Timestamp: {timestamp}\n")
+            f.write(f"# Timestamp: {_local(now).isoformat(timespec='seconds')}\n")
             f.write(f"# Project: {project_path.name}\n")
             f.write(f"# Total items: {len(items)}\n\n")
 
@@ -816,6 +836,15 @@ def _write_log_to_dir(
             for s, count in stats.items():
                 if count > 0:
                     f.write(f"- {s}: {count}\n")
+
+            # Mesmas seções de atenção exibidas no final do stdout
+            for status, title in (("drift", "Drift"), ("error", "Errors")):
+                flagged = [i for i in items if isinstance(i, CreatedItem) and i.status == status]
+                if flagged:
+                    f.write(f"\n## {title} ({len(flagged)})\n")
+                    for item in flagged:
+                        line = f"- {_relative(item.path, project_path)}"
+                        f.write(f"{line} | {item.message}\n" if item.message else f"{line}\n")
             f.write("\n## Detailed Items\n\n")
 
             for item in items:
@@ -833,7 +862,7 @@ def _write_log_to_dir(
         return None
 
 
-def save_operation_log(items: list[CreatedItem | LinkStatus], project_path: Path, operation: str = "scaffold", log_dir: Path | None = None) -> Path | None:
+def save_operation_log(items: list[CreatedItem | LinkStatus], project_path: Path, operation: str = "scaffold", log_dir: Path | None = None, now: datetime | None = None) -> Path | None:
     """
     Salva log detalhado da operação em até três locais:
     1. Sempre em <projeto-criado>/logs/ (primary — retornado).
@@ -845,11 +874,13 @@ def save_operation_log(items: list[CreatedItem | LinkStatus], project_path: Path
         project_path: Caminho do projeto criado
         operation: Nome da operação (scaffold, upgrade, etc.)
         log_dir: Diretório adicional via --log-dir (opcional)
+        now: Instante da operação (timezone-aware); default agora. Nome e
+            cabeçalho usam America/Sao_Paulo.
 
     Returns:
         Path do arquivo de log em <projeto-criado>/logs/, ou None se falhar
     """
-    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d_%H-%M-%S")
+    timestamp = now or datetime.now(timezone.utc)
 
     # 1. Log sempre no projeto criado (project_path/logs/)
     project_logs_dir = project_path / "logs"

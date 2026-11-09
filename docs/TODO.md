@@ -15,7 +15,7 @@
 - [x] ~~**Revalidar perfis `devops-*`**~~: ✅ 09/11 — 22 perfis aplicados via `scaffold new` sem erro; `last_tested` → 2026-11-09; `--validate` 0 erros/0 warnings; testes imp36 independentes da data real
 - [x] ~~**Corrigir ansible-lint** no pre-commit~~: ✅ 09/11 — v26.10.1, escopo nos playbooks, python3.12 (`docs/bugs/BUG-ansible-lint-precommit-incompativel.md`)
 - [x] ~~**Sincronizar branch com master**~~: ✅ 09/11 — `a3b8ff2` já estava no master via merge do PR #34; nada a fazer
-- [ ] **Remover `tmp/legacy-session-docs/`** após validar migração no vault
+- [x] ~~**Remover `tmp/legacy-session-docs/`**~~: ✅ 09/11 — conteúdo conferido no vault e no git (`6d76e00~1`); pasta removida
 - [x] ~~`obsidian_patch_content` erro 40084~~: aceito — usar append
 
 ### Repositório GitHub (`yvesmarinho/scaffold-project`, público)
@@ -26,8 +26,8 @@
 
 ### Do `docs/planning/lembrete.md`
 
-- [ ] Log não exibe os detalhes do final do stdout nem os drifts
-- [ ] Nome do arquivo de log com data local (America/Sao_Paulo), hoje está em UTC
+- [x] ~~Log não exibe os detalhes do final do stdout nem os drifts~~: ✅ 09/11 — seções `## Drift`/`## Errors` no log (`docs/bugs/BUG-log-operacao-utc-e-sem-drift.md`)
+- [x] ~~Nome do arquivo de log com data local (America/Sao_Paulo)~~: ✅ 09/11 — nome e cabeçalho em America/Sao_Paulo
 - [ ] `.gitignore` ignorar arquivos gerados por copilot/claude/speckit (exceto os com dados do projeto)
 - [ ] Estrutura de branches main / dev / fases + validação antes de ir para main
 - [ ] Shell integration VS Code (zsh)
