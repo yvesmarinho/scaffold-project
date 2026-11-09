@@ -12,7 +12,7 @@ description: >
   dev/test/lint/audit/security.
 
 VERSION: "1.0.0"
-LAST_TESTED_DATE: "2026-06-21"
+LAST_TESTED_DATE: "2026-11-09"
 
 requires:
   - "python >= 3.11"

@@ -14,7 +14,7 @@ description: >
   ameaças e pre-commit. Não conflita com nenhum outro perfil.
 
 VERSION: "1.0.0"
-LAST_TESTED_DATE: "2026-06-21"
+LAST_TESTED_DATE: "2026-11-09"
 
 # ------------------------------------------------------------------
 # Dependências

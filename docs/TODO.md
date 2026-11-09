@@ -12,9 +12,9 @@
 
 - [x] ~~Rotacionar credenciais de `ACTION_PLAN_TO_10.md`~~: verificado 09/11 — arquivo só em `tmp/legacy-session-docs/`, contém apenas mocks de teste (sem credencial real)
 - [x] ~~**GitGuardian sem assinatura**~~: ✅ 09/11 — `scripts/secrets_scan.py` (gitleaks local, modos history/tree/staged), `make secrets-scan`, hook pre-commit atualizado
-- [ ] **Revalidar perfis `devops-*`** (`scaffold/profiles/devops-{analysis,infrastructure,programming,security}.yaml`)
+- [x] ~~**Revalidar perfis `devops-*`**~~: ✅ 09/11 — 22 perfis aplicados via `scaffold new` sem erro; `last_tested` → 2026-11-09; `--validate` 0 erros/0 warnings; testes imp36 independentes da data real
 - [x] ~~**Corrigir ansible-lint** no pre-commit~~: ✅ 09/11 — v26.10.1, escopo nos playbooks, python3.12 (`docs/bugs/BUG-ansible-lint-precommit-incompativel.md`)
-- [ ] **Sincronizar branch com master**: PR #32 e #34 já mergeados; commit `a3b8ff2` ficou fora do master → rebase + novo PR
+- [x] ~~**Sincronizar branch com master**~~: ✅ 09/11 — `a3b8ff2` já estava no master via merge do PR #34; nada a fazer
 - [ ] **Remover `tmp/legacy-session-docs/`** após validar migração no vault
 - [x] ~~`obsidian_patch_content` erro 40084~~: aceito — usar append
 
