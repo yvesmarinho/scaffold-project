@@ -1,7 +1,7 @@
 # Session Documentation Security Guide
 
 **Version**: 1.0.0
-**Last Updated**: 2026-04-03
+**Last Updated**: 09/11/2026 15:35
 **Part of**: IMP-50 — Sistema de documentação incremental — Docs + Migração
 
 ---
@@ -62,7 +62,7 @@ Este guia fornece exemplos práticos de **DO** e **DON'T** para documentação s
 #### ❌ DON'T
 ```markdown
 **Passos executados**:
-1. Configurar API key: `sk_live_51MwJx2KABcD3FgHiJ4KlMnO5PqRsT6UvWxY7Z0123456789`
+1. Configurar API key: `sk_live_EXEMPLO_FICTICIO`
 2. Testar autenticação
 ```
 
