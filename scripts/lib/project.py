@@ -1130,7 +1130,7 @@ _PROJECT_CREATION_SUMMARY = """\
 ✅ **Repositório Git criado**
 - Commit inicial: `chore: scaffold inicial do projeto {{PROJECT_NAME}}`
 - Tag: `scaffold-v1.0.0` (marca versão do template)
-- Branch: `master`{git_remote_section}
+- Branch: `main`{git_remote_section}
 
 ---
 
@@ -1182,7 +1182,7 @@ make test
 
 ```bash
 # Push inicial para GitHub
-git push -u origin master --tags
+git push -u origin main --tags
 
 # Configurar branch protection rules no GitHub:
 # - Settings → Branches → Add rule
