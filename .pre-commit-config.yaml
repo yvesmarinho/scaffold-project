@@ -30,12 +30,13 @@ repos:
         exclude: ^docs/SESSIONS/
 
   - repo: https://github.com/ansible/ansible-lint
-    rev: v6.22.1
+    rev: v26.10.1
     hooks:
       - id: ansible-lint
         name: Ansible Lint
-        files: \.(yaml|yml)$
-        exclude: ^(\.github/|\.vscode/)
+        files: ^scaffold/templates/project/ansible/.*\.ya?ml$
+        args: [scaffold/templates/project/ansible/]
+        language_version: python3.12
 
   - repo: https://github.com/psf/black
     rev: 23.12.1
