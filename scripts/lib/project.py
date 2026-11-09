@@ -136,6 +136,19 @@ _DOCS_INDEX_MD = """\
 | [TODO.md](TODO.md) | Tarefas pendentes |
 | [TODAY_ACTIVITIES.md](TODAY_ACTIVITIES.md) | Atividades do dia |
 
+## Sub-pastas
+
+| Pasta | Conteúdo |
+|-------|----------|
+| [docs/architecture/](architecture/) | Diagramas e visões do sistema |
+| [docs/decisions/](decisions/) | ADRs |
+| [docs/guides/](guides/) | Tutoriais e how-tos |
+| [docs/debates/](debates/) | Debates técnicos |
+| [docs/retrospectives/](retrospectives/) | Post-mortems e lições aprendidas |
+| [docs/bugs/](bugs/) | Relatórios de bugs/erros e correções |
+| [docs/implementations/](implementations/) | Registros de implementação de features |
+| [docs/templates/](templates/) | Templates reutilizáveis |
+
 ## Sessões de Trabalho
 
 Os registros de sessão não ficam no repositório: vivem no vault Obsidian
@@ -822,6 +835,68 @@ Como verificar que funcionou:
 - [templates/](../templates/) — Templates reutilizáveis
 """
 
+_DOCS_BUGS_README = """\
+# docs/bugs/ — Relatórios de Bugs e Correções
+
+Um arquivo por bug/erro relevante: o que falhou, por quê e como foi corrigido.
+
+## 📝 Nome do arquivo
+
+`BUG-<descricao-curta>.md` (ex.: `BUG-log-em-utc.md`)
+
+## 📋 Estrutura mínima
+
+```markdown
+# BUG — <título>
+
+**Status**: 🔴 Aberto | ✅ Corrigido em DD/MM/AAAA (branch/PR)
+
+## Sintoma
+O que se observa (mensagem de erro, comportamento).
+
+## Causa
+Raiz técnica.
+
+## Correção
+O que mudou.
+
+## Testes
+Teste que reproduz a falha (vermelho) e passa após a correção (verde).
+```
+
+## ✅ Boas práticas
+
+- Escrever o teste que reproduz o bug **antes** da correção
+- Nunca incluir tokens, senhas ou IPs internos
+- Linkar o PR/commit da correção
+"""
+
+_DOCS_IMPLEMENTATIONS_README = """\
+# docs/implementations/ — Registros de Implementação
+
+Notas de implementação de features: o que foi construído, como e com quais trade-offs.
+Complementa os ADRs (`docs/decisions/`), que registram **decisões**; aqui fica o **como**.
+
+## 📝 Nome do arquivo
+
+`NNN-nome-da-feature.md` (mesmo número da branch `feat NNN-nome-da-feature`)
+
+## 📋 Estrutura mínima
+
+```markdown
+# NNN — <feature>
+
+**Status**: 🚧 Em andamento | ✅ Concluída em DD/MM/AAAA
+**PR**: #N
+
+## Objetivo / Não-objetivo
+## Abordagem
+## Arquivos alterados
+## Testes
+## Riscos remanescentes / próximos passos
+```
+"""
+
 _DOCS_RETROSPECTIVES_README = """\
 # docs/retrospectives/ — Retrospectivas e Lições Aprendidas
 
@@ -1253,6 +1328,8 @@ python scripts/session-manager.py --json start
 - [docs/guides/](guides/) — Tutoriais e how-tos
 - [docs/debates/](debates/) — Debates técnicos documentados
 - [docs/retrospectives/](retrospectives/) — Post-mortems e lições aprendidas
+- [docs/bugs/](bugs/) — Relatórios de bugs/erros e suas correções
+- [docs/implementations/](implementations/) — Registros de implementação de features
 - [docs/templates/](templates/) — Templates reutilizáveis
 
 ### Agentes & Automação
@@ -1999,9 +2076,11 @@ Apenas README.md commitado.
 DIRS_BASE = [
     "docs",
     "docs/architecture",
+    "docs/bugs",
     "docs/debates",
     "docs/decisions",
     "docs/guides",
+    "docs/implementations",
     "docs/retrospectives",
     "docs/templates",
     ".github",
@@ -2063,6 +2142,8 @@ FILES_BASE: list[tuple[str, str]] = [
     ("docs/decisions/README.md",   _DOCS_DECISIONS_README),
     ("docs/guides/README.md",      _DOCS_GUIDES_README),
     ("docs/retrospectives/README.md", _DOCS_RETROSPECTIVES_README),
+    ("docs/bugs/README.md",        _DOCS_BUGS_README),
+    ("docs/implementations/README.md", _DOCS_IMPLEMENTATIONS_README),
     ("docs/templates/README.md",   _DOCS_TEMPLATES_README),
     (".gitignore",                 _GITIGNORE),
     (".secrets/README.md",         _SECRETS_README),
