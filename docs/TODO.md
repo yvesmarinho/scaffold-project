@@ -35,15 +35,15 @@
 - [ ] Separar arquivos de template dos arquivos do projeto (distribuição)
 - [x] ~~`objetivo-init-V2.yaml`: seções `infrastructure`/`architecture` + padrões de nomenclatura~~: ✅ 09/11 — seções 🔟 Arquitetura e 1️⃣1️⃣ Nomenclatura (default por linguagem, sobrescrevível); Infraestrutura já existia na seção 4
 - [x] ~~`docs/` sem sub-pastas `implementations` e `bugs`~~: ✅ 09/11 — criadas nos projetos gerados, com README e entrada no INDEX
-- [ ] Integrar `specify init --here --force --integration copilot`
+- [x] ~~Integrar `specify init --here --force --integration copilot`~~: ✅ já implementado em `run_speckit_init()` (validado 15/07)
 - [ ] Analisar docs VS Code Copilot (instructions, skills, custom agents, MCP)
 
 ### Do `docs/planning/remenber.md` (itens ainda abertos)
 
-- [ ] `scaffold-verifier.agent.md` (P0)
-- [ ] `security-auditor.agent.md` (P0)
-- [ ] `docs-structure-validator.agent.md` (P1)
-- [ ] `adr-reviewer.agent.md` (P2)
+- [x] ~~`scaffold-verifier.agent.md` (P0)~~: ✅ 09/11 — em `scaffold/templates/speckit/agents/`
+- [x] ~~`security-auditor.agent.md` (P0)~~: ✅ 09/11 — em `scaffold/templates/speckit/agents/`
+- [x] ~~`docs-structure-validator.agent.md` (P1)~~: ✅ 09/11 — em `scaffold/templates/speckit/agents/`
+- [x] ~~`adr-reviewer.agent.md` (P2)~~: ✅ 09/11 — em `scaffold/templates/speckit/agents/`
 
 ---
 
