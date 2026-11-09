@@ -237,8 +237,15 @@ npm-debug.log*
 !.vscode/mcp.json
 !.vscode/extensions.json
 
-# Claude Code
+# Claude Code — só estado local; CLAUDE.md, settings.json, commands/, agents/, skills/ são do projeto
 .claude/settings.local.json
+CLAUDE.local.md
+.claude/todos/
+.claude/projects/
+
+# Saídas geradas por IA (recriáveis)
+graphify-out/
+.specify/.cache/
 
 # OS
 .DS_Store
