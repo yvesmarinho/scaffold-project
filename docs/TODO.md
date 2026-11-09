@@ -11,7 +11,7 @@
 ### Pendências da sessão 28/10/2026 (feature/068)
 
 - [x] ~~Rotacionar credenciais de `ACTION_PLAN_TO_10.md`~~: verificado 09/11 — arquivo só em `tmp/legacy-session-docs/`, contém apenas mocks de teste (sem credencial real)
-- [ ] **GitGuardian sem assinatura**: substituir por validação local nesta máquina (gitleaks + `detect-private-key` no pre-commit; script `make secrets-scan`)
+- [x] ~~**GitGuardian sem assinatura**~~: ✅ 09/11 — `scripts/secrets_scan.py` (gitleaks local, modos history/tree/staged), `make secrets-scan`, hook pre-commit atualizado
 - [ ] **Revalidar perfis `devops-*`** (`scaffold/profiles/devops-{analysis,infrastructure,programming,security}.yaml`)
 - [ ] **Corrigir ansible-lint** no pre-commit (v6.22.1, `files: \.(yaml|yml)$` pega YAMLs que não são Ansible)
 - [ ] **Sincronizar branch com master**: PR #32 e #34 já mergeados; commit `a3b8ff2` ficou fora do master → rebase + novo PR

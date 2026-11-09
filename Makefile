@@ -737,6 +737,11 @@ memory-cleanup-force:
 config-validate:
 	@python scripts/validate-configs.py
 
+## secrets-scan: Varrer segredos no histórico git e nos arquivos atuais (gitleaks local)
+secrets-scan:
+	@uv run python -m scripts.secrets_scan --mode history
+	@uv run python -m scripts.secrets_scan --mode tree
+
 ## git-hooks-install: Instalar Git hooks (pre-commit, commit-msg)
 git-hooks-install:
 	@echo "$(BLUE)🪝 Instalando Git hooks...$(NC)"
