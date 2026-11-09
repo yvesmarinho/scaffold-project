@@ -28,7 +28,7 @@
 
 - [x] ~~Log não exibe os detalhes do final do stdout nem os drifts~~: ✅ 09/11 — seções `## Drift`/`## Errors` no log (`docs/bugs/BUG-log-operacao-utc-e-sem-drift.md`)
 - [x] ~~Nome do arquivo de log com data local (America/Sao_Paulo)~~: ✅ 09/11 — nome e cabeçalho em America/Sao_Paulo
-- [ ] `.gitignore` ignorar arquivos gerados por copilot/claude/speckit (exceto os com dados do projeto)
+- [x] ~~`.gitignore` ignorar arquivos gerados por copilot/claude/speckit~~: ✅ 09/11 — estado local do Claude, graphify-out e cache do speckit ignorados; `.github/agents/` e `prompts/` versionados (decisão do usuário)
 - [ ] Estrutura de branches main / dev / fases + validação antes de ir para main
 - [ ] Shell integration VS Code (zsh)
 - [ ] Questionar prioridade do projeto em `objetivo-init.yaml`
