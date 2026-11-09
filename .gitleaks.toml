@@ -16,6 +16,15 @@ paths = [
     '''^\.github/templates/''',
     '''^docs/templates/''',
     '''CHANGELOG.md''',
+    # fixtures intencionais da antiga pasta poc/ (removida; só no histórico)
+    '''^poc/test_data/''',
+    '''^poc/mem_poc\.py$''',
+    # saídas geradas/ignoradas pelo git
+    '''^graphify-out/''',
+    '''^\.venv/''',
+    '''(^|/)node_modules/''',
+    '''(^|/)__pycache__/''',
+    '''(^|/)\.(pytest|mypy|ruff)_cache/''',
 ]
 
 regexes = [
