@@ -42,6 +42,55 @@ DEFAULT_DOCSTYLE = (
     "OpenAPI/Swagger para documentação de API"
 )
 
+DEFAULT_ARCHITECTURE = """\
+**Estilo**: camadas com DDD leve e Ports/Adapters simplificado.
+
+- **Presentation** (CLI/UI) → sem regra de negócio
+- **Application** (casos de uso/orquestração) → depende de abstrações
+- **Domain** (entidades, value objects, regras) → sem dependência de frameworks
+- **Infrastructure** (filesystem, Git, APIs, parsers, exporters) → adapters
+
+**Decisões**: registrar em `docs/decisions/` (ADRs); visão geral em `docs/architecture/overview.md`."""
+
+_NAMING_COMMON = """\
+- **Pastas**: `kebab-case/` — código em `src/`, scripts em `scripts/`, testes em `tests/`, docs em `docs/`
+- **Markdown**: `SCREAMING_SNAKE.md` ou `kebab-case.md`
+- **JSON / Shell**: `kebab-case.json`, `kebab-case.sh`
+- **Branches**: `feat NNN-nome-da-feature`, `fix-descricao`, `docs-descricao`"""
+
+_NAMING_BY_LANGUAGE = {
+    "python": """\
+- **Arquivos/módulos**: `snake_case.py`; testes `test_<modulo>.py`
+- **Classes / exceções**: `PascalCase` (exceções com sufixo `Error`)
+- **Funções, métodos, variáveis**: `snake_case`
+- **Constantes**: `UPPER_SNAKE_CASE`
+- **Privados**: prefixo `_`""",
+    "typescript": """\
+- **Arquivos**: `kebab-case.ts`; componentes `PascalCase.tsx`; testes `*.test.ts`
+- **Classes, interfaces, types**: `PascalCase` (erros com sufixo `Error`)
+- **Funções, métodos, variáveis**: `camelCase`
+- **Constantes**: `UPPER_SNAKE_CASE`""",
+}
+
+
+def naming_conventions(language: str) -> str:
+    """
+    Padrão de nomenclatura (pastas, arquivos, classes, funções) para a linguagem.
+
+    :param language: Linguagem principal do projeto (case-insensitive).
+    :type language: str
+    :return: Bloco Markdown; linguagem desconhecida/inválida → só o padrão comum.
+    :rtype: str
+
+    :Example:
+
+    >>> "snake_case.py" in naming_conventions("Python")
+    True
+    """
+    key = language.strip().lower() if isinstance(language, str) else ""
+    specific = _NAMING_BY_LANGUAGE.get(key)
+    return f"{_NAMING_COMMON}\n{specific}" if specific else _NAMING_COMMON
+
 
 @dataclass
 class WizardQuestion:
@@ -416,6 +465,8 @@ class ObjetivoWizard:
             # BUG-001 Fix #2: NÃO incluir default para OUT_SCOPE (será removido se vazio)
             '{{FOLDER_STRUCTURE_CUSTOM}}': '',  # Empty for default structure
             '{{DOCSTYLE}}': DEFAULT_DOCSTYLE,  # BUG-001 Fix #1: Default quando não fornecido
+            '{{ARCHITECTURE}}': DEFAULT_ARCHITECTURE,
+            '{{NAMING_CONVENTIONS}}': naming_conventions(answers.project_language),
         }
 
         for placeholder, default_value in defaults.items():

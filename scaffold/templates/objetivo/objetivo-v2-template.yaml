@@ -123,3 +123,15 @@ projeto/
 {{WORKFLOW_OBJETIVO}}
 
 {{WORKFLOW_SPECIFY}}
+
+---
+
+## 🔟 Arquitetura <!-- P1 - Contextual -->
+
+{{ARCHITECTURE}}
+
+---
+
+## 1️⃣1️⃣ Padrões de Nomenclatura <!-- P1 - Contextual -->
+
+{{NAMING_CONVENTIONS}}
