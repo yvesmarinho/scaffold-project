@@ -1,6 +1,6 @@
 # ✅ TODO - Enterprise Scaffold Project Template
 
-**Last Updated**: 17/11/2026 17:05 — testes isolados de `.memory/` e `.session-time/`
+**Last Updated**: 17/11/2026 17:33 — timestamps do tracker e do manifesto em America/Sao_Paulo (ADR-002)
 **Project**: Enterprise Scaffold Project Template
 **Status**: 🟢 Active Development
 
@@ -10,14 +10,14 @@
 
 - [x] ~~**3 testes de snapshot falhando** (`tests/test_templates_snapshot.py`)~~: ✅ 17/11 — baseline desatualizado desde a migração da sessão para o vault (`6d76e00`); corrigida também a árvore `docs/` do perfil infra (`└── TODO.md` seguido de `RUNBOOK.md`) — `docs/bugs/BUG-snapshots-desatualizados-arvore-infra.md`
 - [x] ~~`ui._iso_now()` ainda em UTC → America/Sao_Paulo~~: ✅ 17/11 — `created_at` em ISO 8601 com offset (`-03:00`) — `docs/bugs/BUG-created-at-em-utc.md`
-- [ ] Outros timestamps ainda em UTC (`Z`): `scripts/session-time-tracker.py::_iso_now` e `scripts/lib/publish.py` (`created_at` do manifesto; `test_smoke_imp30` exige o `Z`)
+- [x] ~~Outros timestamps ainda em UTC (`Z`): `scripts/session-time-tracker.py::_iso_now` e `scripts/lib/publish.py` (`created_at` do manifesto; `test_smoke_imp30` exige o `Z`)~~: ✅ 17/11 — SP com offset nos dois, inclusive manifesto (decisão do usuário, `docs/adr/ADR-002-timestamps-america-sao-paulo.md`); `session_date` do tracker pela data local — `docs/bugs/BUG-tracker-e-manifesto-em-utc.md`
 - [ ] Ativar required status checks na branch protection quando houver CI rodando na `main`
 - [ ] Limpeza manual de `~/VyaJobs/enterprise-observability` (adoção acidental do BUG-26) — revisar `git status` antes de `git clean`
 - [x] ~~Testes gravam logs no `logs/` real da ferramenta (656 arquivos; disparam o `security-scan` do session-manager) — redirecionar para `tmp_path`~~: ✅ 17/11 — `SCAFFOLD_LOGS_DIR` isolado pelo conftest; 0 escritas em `logs/` na suíte — `docs/bugs/BUG-testes-poluem-logs-reais.md`
 - [x] ~~Logs antigos de teste em `logs/` (741 arquivos)~~: ✅ 17/11 — apagados; `scaffolds.yaml` preservado
 - [x] ~~`security-scan` com falsos positivos (`.mypy_cache`, `tmp/`, scanner de secrets, `scaffold/templates/`)~~: ✅ 17/11 — `SCAN_ALLOWLIST` + dirs excluídos; `session-manager start` volta a `clean: true` — `docs/bugs/BUG-security-scan-falsos-positivos.md`
 - [x] ~~Testes ainda escrevem em `.memory/` e `.session-time/history.csv` do repo (ambos no `.gitignore`) — isolar como foi feito com `logs/`~~: ✅ 17/11 — `SCAFFOLD_MEMORY_ROOT` / `SCAFFOLD_SESSION_TIME_DIR` isolados pelo conftest; 0 escritas na suíte — `docs/bugs/BUG-testes-poluem-memory-session-time.md`
-- [ ] Limpar entradas fictícias de testes já acumuladas em `.memory/memories/` (~27 arquivos) e `.session-time/history.csv` (~112 linhas de sessões de segundos) — revisar antes, pode haver dado real
+- [x] ~~Limpar entradas fictícias de testes já acumuladas em `.memory/memories/` (~27 arquivos) e `.session-time/history.csv` (~112 linhas de sessões de segundos) — revisar antes, pode haver dado real~~: ✅ 17/11 — revisado com o usuário (só dados de teste); 27 `.md` apagados, índice reconstruído, `history.csv` só com cabeçalho
 
 ---
 

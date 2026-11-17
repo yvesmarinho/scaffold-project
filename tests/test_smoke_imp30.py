@@ -41,6 +41,7 @@ import json
 import subprocess
 import sys
 import tarfile
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -263,7 +264,8 @@ class TestPublishCLI:
         proc = self._run("--publish", "--json", "--output-dir", str(tmp_path))
         data = json.loads(proc.stdout)
         created_at = data.get("created_at", "")
-        assert "T" in created_at and "Z" in created_at, f"created_at inválido: {created_at}"
+        # America/Sao_Paulo com offset (ISO 8601), não mais UTC com "Z"
+        assert datetime.fromisoformat(created_at).utcoffset() is not None, f"created_at inválido: {created_at}"
 
     def test_publish_output_dir_flag(self, tmp_path: Path) -> None:
         custom_dir = tmp_path / "my-releases"

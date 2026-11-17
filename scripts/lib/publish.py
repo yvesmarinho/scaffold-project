@@ -26,8 +26,11 @@ import tarfile
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from .config import SCAFFOLD_VERSION
+
+_LOCAL_TZ = ZoneInfo("America/Sao_Paulo")
 
 # ---------------------------------------------------------------------------
 # Padrões de inclusão (glob sobre project_root)
@@ -129,6 +132,7 @@ def publish_template(
     output_dir: Path,
     project_root: Path,
     version: str = SCAFFOLD_VERSION,
+    now: datetime | None = None,
 ) -> PublishResult:
     """
     Cria um tarball de release do template e um manifesto JSON.
@@ -144,15 +148,19 @@ def publish_template(
         output_dir:   Diretório de saída (criado se não existir).
         project_root: Raiz do projeto template.
         version:      Versão do release (default: SCAFFOLD_VERSION).
+        now:          Instante do release (timezone-aware); default agora.
+                      created_at e a data dos nomes usam America/Sao_Paulo.
 
     Returns:
         PublishResult com metadados do release gerado.
     """
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    now = datetime.now(timezone.utc)
-    created_at = now.strftime("%Y-%m-%dT%H:%M:%SZ")
-    date_slug = now.strftime("%Y%m%d")
+    if now is not None and now.tzinfo is None:
+        raise ValueError("datetime sem timezone — use datetime.now(timezone.utc)")
+    local = (now or datetime.now(timezone.utc)).astimezone(_LOCAL_TZ)
+    created_at = local.isoformat(timespec="seconds")
+    date_slug = local.strftime("%Y%m%d")
     base_name = f"enterprise-template-v{version}-{date_slug}"
 
     tarball_path = output_dir / f"{base_name}.tar.gz"

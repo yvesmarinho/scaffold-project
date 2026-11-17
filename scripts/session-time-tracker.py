@@ -33,9 +33,10 @@ import json
 import os
 import subprocess
 import sys
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 # Local imports
 sys.path.insert(0, str(Path(__file__).parent))
@@ -81,9 +82,29 @@ def _get_current_branch() -> str | None:
         return None
 
 
-def _iso_now() -> str:
-    """Retorna timestamp ISO 8601 UTC."""
-    return datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+_LOCAL_TZ = ZoneInfo("America/Sao_Paulo")
+
+
+def _now_local(now: datetime | None = None) -> datetime:
+    """Instante em America/Sao_Paulo; ``now`` precisa ter timezone."""
+    if now is not None and now.tzinfo is None:
+        raise ValueError("datetime sem timezone — use datetime.now(timezone.utc)")
+    return (now or datetime.now(UTC)).astimezone(_LOCAL_TZ)
+
+
+def _iso_now(now: datetime | None = None) -> str:
+    """Retorna timestamp ISO 8601 com offset de São Paulo (ex.: ``-03:00``)."""
+    return _now_local(now).isoformat(timespec="seconds")
+
+
+def _today(now: datetime | None = None) -> str:
+    """Data local (YYYY-MM-DD) usada em ``session_date`` e na detecção de órfãs."""
+    return _now_local(now).strftime("%Y-%m-%d")
+
+
+def _hhmmss(iso: str) -> str:
+    """Hora ``HH:MM:SS`` de um timestamp ISO (aceita ``Z`` legado e offset)."""
+    return iso.split("T")[1][:8]
 
 
 def _format_duration(seconds: float) -> str:
@@ -139,7 +160,7 @@ def cmd_start():
         with open(STATE_FILE, "r", encoding="utf-8") as f:
             state = json.load(f)
 
-        current_date = datetime.utcnow().strftime("%Y-%m-%d")
+        current_date = _today()
         session_date = state.get("session_date", "")
 
         # Detectar sessão órfã (de outro dia)
@@ -188,7 +209,7 @@ def cmd_start():
             print("")  # linha em branco
 
     now = _iso_now()
-    date = datetime.utcnow().strftime("%Y-%m-%d")
+    date = _today()
 
     state = {
         "session_date": date,
@@ -394,8 +415,8 @@ def _print_stats_rich(sessions: list[dict], date_filter: str | None):
     for s in sessions:
         table.add_row(
             s["session_date"],
-            s["start_time"].split("T")[1].replace("Z", ""),
-            s["end_time"].split("T")[1].replace("Z", ""),
+            _hhmmss(s["start_time"]),
+            _hhmmss(s["end_time"]),
             s["total_duration"],
             s["pause_duration"],
             s["net_duration"],
@@ -446,7 +467,7 @@ def cmd_status():
     with open(STATE_FILE, "r", encoding="utf-8") as f:
         state = json.load(f)
 
-    current_date = datetime.utcnow().strftime("%Y-%m-%d")
+    current_date = _today()
     session_date = state.get("session_date", "unknown")
     is_orphan = session_date != current_date
 
@@ -494,7 +515,7 @@ def cmd_cleanup(force: bool = False):
     with open(STATE_FILE, "r", encoding="utf-8") as f:
         state = json.load(f)
 
-    current_date = datetime.utcnow().strftime("%Y-%m-%d")
+    current_date = _today()
     session_date = state.get("session_date", "")
 
     print("\n🗑️  Cleanup de Sessão")
