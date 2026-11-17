@@ -214,6 +214,17 @@ def sample_config_file(temp_file):
     return temp_file("config.ini", config_content)
 
 
+@pytest.fixture(scope="session", autouse=True)
+def isolate_scaffold_logs_session(tmp_path_factory):
+    """
+    Fallback de SCAFFOLD_LOGS_DIR para fixtures de escopo module/class/session,
+    que rodam antes do ``isolate_tests`` (escopo function) e escapariam dele.
+    """
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setenv("SCAFFOLD_LOGS_DIR", str(tmp_path_factory.mktemp("scaffold-logs")))
+        yield
+
+
 @pytest.fixture(autouse=True)
 def isolate_tests(tmp_path, monkeypatch):
     """
@@ -221,7 +232,10 @@ def isolate_tests(tmp_path, monkeypatch):
 
     - Sets temporary HOME/TMPDIR
     - Prevents accidental modifications to real files
+    - Redireciona os logs de operação da ferramenta (SCAFFOLD_LOGS_DIR) para
+      tmp_path — herdado também pelos testes que rodam scaffold.py em subprocesso
     """
+    monkeypatch.setenv("SCAFFOLD_LOGS_DIR", str(tmp_path / "scaffold-logs"))
     monkeypatch.setenv("HOME", str(tmp_path / "home"))
     monkeypatch.setenv("TMPDIR", str(tmp_path / "tmp"))
     (tmp_path / "home").mkdir(exist_ok=True)

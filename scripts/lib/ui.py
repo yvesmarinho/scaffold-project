@@ -6,6 +6,7 @@ Parte do scripts/scaffold.py — Enterprise Scaffold Project Template.
 
 from __future__ import annotations
 
+import os
 import re
 import yaml
 from datetime import datetime, timezone
@@ -790,6 +791,14 @@ def confirm_summary(config: ProjectConfig) -> bool:
 # Diretório de logs da ferramenta scaffold (scaffold-project/logs/).
 # Os logs da operação são gravados aqui além do projeto criado.
 _SCAFFOLD_LOGS_DIR = Path(__file__).resolve().parent.parent.parent / "logs"
+# Sobrescrito por esta variável de ambiente (ex.: a suíte de testes isola em tmp_path)
+_SCAFFOLD_LOGS_ENV = "SCAFFOLD_LOGS_DIR"
+
+
+def _scaffold_logs_dir() -> Path:
+    """Diretório de logs da ferramenta: ``$SCAFFOLD_LOGS_DIR`` ou ``<scaffold-project>/logs``."""
+    override = os.environ.get(_SCAFFOLD_LOGS_ENV, "").strip()
+    return Path(override) if override else _SCAFFOLD_LOGS_DIR
 _LOG_TZ = ZoneInfo("America/Sao_Paulo")
 
 
@@ -887,15 +896,16 @@ def save_operation_log(items: list[CreatedItem | LinkStatus], project_path: Path
     project_logs_dir = project_path / "logs"
     primary_log = _write_log_to_dir(project_logs_dir, items, project_path, operation, timestamp)
 
-    # 2. Log na ferramenta scaffold (_SCAFFOLD_LOGS_DIR), se diferente do projeto
-    if project_logs_dir.resolve() != _SCAFFOLD_LOGS_DIR.resolve():
-        _write_log_to_dir(_SCAFFOLD_LOGS_DIR, items, project_path, operation, timestamp)
+    # 2. Log na ferramenta scaffold (_scaffold_logs_dir()), se diferente do projeto
+    tool_logs_dir = _scaffold_logs_dir()
+    if project_logs_dir.resolve() != tool_logs_dir.resolve():
+        _write_log_to_dir(tool_logs_dir, items, project_path, operation, timestamp)
 
     # 3. Log em --log-dir customizado, se diferente dos anteriores
     if log_dir:
         custom_dir = Path(log_dir)
         if (custom_dir.resolve() != project_logs_dir.resolve()
-                and custom_dir.resolve() != _SCAFFOLD_LOGS_DIR.resolve()):
+                and custom_dir.resolve() != tool_logs_dir.resolve()):
             _write_log_to_dir(custom_dir, items, project_path, operation, timestamp)
 
     return primary_log

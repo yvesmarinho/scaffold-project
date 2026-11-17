@@ -1,6 +1,6 @@
 # ✅ TODO - Enterprise Scaffold Project Template
 
-**Last Updated**: 17/11/2026 16:14 — `ui._iso_now()` em America/Sao_Paulo
+**Last Updated**: 17/11/2026 16:32 — testes isolados do `logs/` real
 **Project**: Enterprise Scaffold Project Template
 **Status**: 🟢 Active Development
 
@@ -13,7 +13,8 @@
 - [ ] Outros timestamps ainda em UTC (`Z`): `scripts/session-time-tracker.py::_iso_now` e `scripts/lib/publish.py` (`created_at` do manifesto; `test_smoke_imp30` exige o `Z`)
 - [ ] Ativar required status checks na branch protection quando houver CI rodando na `main`
 - [ ] Limpeza manual de `~/VyaJobs/enterprise-observability` (adoção acidental do BUG-26) — revisar `git status` antes de `git clean`
-- [ ] Testes gravam logs no `logs/` real da ferramenta (656 arquivos; disparam o `security-scan` do session-manager) — redirecionar para `tmp_path`
+- [x] ~~Testes gravam logs no `logs/` real da ferramenta (656 arquivos; disparam o `security-scan` do session-manager) — redirecionar para `tmp_path`~~: ✅ 17/11 — `SCAFFOLD_LOGS_DIR` isolado pelo conftest; 0 escritas em `logs/` na suíte — `docs/bugs/BUG-testes-poluem-logs-reais.md`
+- [ ] Testes ainda escrevem em `.memory/` e `.session-time/history.csv` do repo (ambos no `.gitignore`) — isolar como foi feito com `logs/`
 
 ---
 
