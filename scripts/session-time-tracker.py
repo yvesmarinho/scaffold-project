@@ -30,6 +30,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 import subprocess
 import sys
 from datetime import datetime, timedelta
@@ -48,10 +49,16 @@ except ImportError:
     HAS_RICH = False
     print("⚠️  Install 'rich' for better output: pip install rich", file=sys.stderr)
 
+# Diretório de estado: $SCAFFOLD_SESSION_TIME_DIR (ex.: a suíte de testes isola
+# em tmp_path) ou <projeto>/.session-time
+STATE_DIR = Path(
+    os.environ.get("SCAFFOLD_SESSION_TIME_DIR", "").strip()
+    or Path(__file__).parent.parent / ".session-time"
+)
 # Arquivo de estado da sessão atual
-STATE_FILE = Path(__file__).parent.parent / ".session-time" / "current.json"
+STATE_FILE = STATE_DIR / "current.json"
 # Arquivo CSV com histórico de sessões
-HISTORY_CSV = Path(__file__).parent.parent / ".session-time" / "history.csv"
+HISTORY_CSV = STATE_DIR / "history.csv"
 
 
 def _ensure_dirs():

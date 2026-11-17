@@ -31,6 +31,7 @@ Usage:
 
 import hashlib
 import logging
+import os
 import re
 import sqlite3
 from dataclasses import dataclass, field
@@ -47,6 +48,24 @@ MEMORY_ROOT = PROJECT_ROOT / ".memory"
 MEMORY_DIR = MEMORY_ROOT / "memories"
 INDEX_DIR = MEMORY_ROOT / "index"
 DB_PATH = INDEX_DIR / "memory.db"
+# Sobrescreve a raiz .memory/ (ex.: a suíte de testes isola em tmp_path)
+MEMORY_ROOT_ENV = "SCAFFOLD_MEMORY_ROOT"
+
+
+def _memory_root() -> Path:
+    """Raiz da memória: ``$SCAFFOLD_MEMORY_ROOT`` ou ``<projeto>/.memory``."""
+    override = os.environ.get(MEMORY_ROOT_ENV, "").strip()
+    return Path(override) if override else MEMORY_ROOT
+
+
+def _memory_dir() -> Path:
+    """Diretório das memórias em markdown (fonte da verdade)."""
+    return _memory_root() / "memories"
+
+
+def _db_path() -> Path:
+    """Caminho do índice SQLite (cache regenerável)."""
+    return _memory_root() / "index" / "memory.db"
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 log = logging.getLogger(__name__)
@@ -83,7 +102,7 @@ class Memory:
         if not self.file_path:
             slug = self._slugify(self.title)
             date_str = datetime.now().strftime("%Y-%m-%d")
-            self.file_path = MEMORY_DIR / self.category / f"{date_str}__{slug}.md"
+            self.file_path = _memory_dir() / self.category / f"{date_str}__{slug}.md"
 
     @staticmethod
     def _slugify(text: str) -> str:
@@ -134,17 +153,17 @@ class SearchResult:
 class MemoryStore:
     """Main API for memory operations."""
 
-    def __init__(self, db_path: Path = DB_PATH):
-        """Initialize memory store."""
-        self.db_path = db_path
+    def __init__(self, db_path: Path | None = None):
+        """Initialize memory store (default: índice em ``_db_path()``)."""
+        self.db_path = db_path or _db_path()
         self._ensure_structure()
         self.conn = self._init_db()
 
     def _ensure_structure(self):
         """Ensure .memory directory structure exists."""
-        INDEX_DIR.mkdir(parents=True, exist_ok=True)
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
         for category in ["project", "team", "sessions"]:
-            (MEMORY_DIR / category).mkdir(parents=True, exist_ok=True)
+            (_memory_dir() / category).mkdir(parents=True, exist_ok=True)
 
     def _init_db(self) -> sqlite3.Connection:
         """Initialize SQLite database with FTS5 tables."""
@@ -369,7 +388,7 @@ class MemoryStore:
 
         # Scan all markdown files
         count = 0
-        for md_file in MEMORY_DIR.rglob("*.md"):
+        for md_file in _memory_dir().rglob("*.md"):
             if md_file.name.startswith("."):
                 continue  # Skip hidden files
 
