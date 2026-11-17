@@ -222,6 +222,8 @@ def isolate_scaffold_logs_session(tmp_path_factory):
     """
     with pytest.MonkeyPatch.context() as mp:
         mp.setenv("SCAFFOLD_LOGS_DIR", str(tmp_path_factory.mktemp("scaffold-logs")))
+        mp.setenv("SCAFFOLD_MEMORY_ROOT", str(tmp_path_factory.mktemp("memory")))
+        mp.setenv("SCAFFOLD_SESSION_TIME_DIR", str(tmp_path_factory.mktemp("session-time")))
         yield
 
 
@@ -236,6 +238,8 @@ def isolate_tests(tmp_path, monkeypatch):
       tmp_path — herdado também pelos testes que rodam scaffold.py em subprocesso
     """
     monkeypatch.setenv("SCAFFOLD_LOGS_DIR", str(tmp_path / "scaffold-logs"))
+    monkeypatch.setenv("SCAFFOLD_MEMORY_ROOT", str(tmp_path / "memory"))
+    monkeypatch.setenv("SCAFFOLD_SESSION_TIME_DIR", str(tmp_path / "session-time"))
     monkeypatch.setenv("HOME", str(tmp_path / "home"))
     monkeypatch.setenv("TMPDIR", str(tmp_path / "tmp"))
     (tmp_path / "home").mkdir(exist_ok=True)
@@ -328,6 +332,6 @@ def isolated_memory(temp_memory_dir: Path, monkeypatch):
         def test_something(isolated_memory):
             save_memory(...)  # Will use temp_memory_dir automatically
     """
-    # Patch MEMORY_DIR constant in memory scripts
-    monkeypatch.setenv("MEMORY_DIR", str(temp_memory_dir))
+    # lib/memory.py lê SCAFFOLD_MEMORY_ROOT (raiz que contém memories/ e index/)
+    monkeypatch.setenv("SCAFFOLD_MEMORY_ROOT", str(temp_memory_dir.parent))
     yield temp_memory_dir

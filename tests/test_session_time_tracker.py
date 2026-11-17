@@ -11,6 +11,7 @@ Valida o fluxo completo de tracking de tempo integrado ao session-manager:
 
 import json
 import csv
+import os
 import subprocess
 import sys
 from datetime import datetime, timedelta
@@ -21,9 +22,11 @@ import pytest
 # Paths
 PROJECT_ROOT = Path(__file__).parent.parent
 TRACKER_SCRIPT = PROJECT_ROOT / "scripts" / "session-time-tracker.py"
-STATE_DIR = PROJECT_ROOT / ".session-time"
-STATE_FILE = STATE_DIR / "current.json"
-HISTORY_CSV = STATE_DIR / "history.csv"
+
+
+def _state_dir() -> Path:
+    """Diretório isolado pelo conftest (SCAFFOLD_SESSION_TIME_DIR em tmp_path)."""
+    return Path(os.environ["SCAFFOLD_SESSION_TIME_DIR"])
 
 
 class TestSessionTimeTracker:
@@ -33,14 +36,14 @@ class TestSessionTimeTracker:
     def setup_teardown(self):
         """Limpar estado antes e depois de cada teste."""
         # Setup: remover arquivos de estado anteriores
-        if STATE_FILE.exists():
-            STATE_FILE.unlink()
+        if (_state_dir() / "current.json").exists():
+            (_state_dir() / "current.json").unlink()
 
         yield
 
         # Teardown: limpar após teste
-        if STATE_FILE.exists():
-            STATE_FILE.unlink()
+        if (_state_dir() / "current.json").exists():
+            (_state_dir() / "current.json").unlink()
 
     def _run_tracker(self, *args) -> subprocess.CompletedProcess:
         """Helper para executar o tracker script."""
@@ -54,9 +57,9 @@ class TestSessionTimeTracker:
 
     def _load_state(self) -> dict:
         """Carregar estado atual da sessão."""
-        if not STATE_FILE.exists():
+        if not (_state_dir() / "current.json").exists():
             return {}
-        with open(STATE_FILE, "r", encoding="utf-8") as f:
+        with open((_state_dir() / "current.json"), "r", encoding="utf-8") as f:
             return json.load(f)
 
     def test_01_start_session(self):
@@ -65,7 +68,7 @@ class TestSessionTimeTracker:
 
         assert result.returncode == 0, f"Start falhou: {result.stderr}"
         assert "✅ Sessão iniciada:" in result.stdout
-        assert STATE_FILE.exists(), "Arquivo de estado não foi criado"
+        assert (_state_dir() / "current.json").exists(), "Arquivo de estado não foi criado"
 
         state = self._load_state()
         assert state["status"] == "active"
@@ -174,13 +177,13 @@ class TestSessionTimeTracker:
         assert "líquido:" in result.stdout or "liquido:" in result.stdout
 
         # Verificar que estado foi removido
-        assert not STATE_FILE.exists(), "State file deveria ter sido removido"
+        assert not (_state_dir() / "current.json").exists(), "State file deveria ter sido removido"
 
         # Verificar CSV foi criado
-        assert HISTORY_CSV.exists(), "CSV history não foi criado"
+        assert (_state_dir() / "history.csv").exists(), "CSV history não foi criado"
 
         # Ler última linha do CSV
-        with open(HISTORY_CSV, "r", encoding="utf-8") as f:
+        with open((_state_dir() / "history.csv"), "r", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             rows = list(reader)
             last_row = rows[-1]
@@ -206,7 +209,7 @@ class TestSessionTimeTracker:
         assert result.returncode == 0
         assert "Retomando automaticamente" in result.stdout or "🏁" in result.stdout
 
-        assert not STATE_FILE.exists()
+        assert not (_state_dir() / "current.json").exists()
 
         print(f"✅ test_06: Auto-resume antes do stop funcionando")
 
@@ -328,13 +331,13 @@ class TestSessionTimeTracker:
         print("\n📊 Verificações finais:")
 
         # CSV deve existir com a entrada
-        assert HISTORY_CSV.exists()
-        with open(HISTORY_CSV, "r", encoding="utf-8") as f:
+        assert (_state_dir() / "history.csv").exists()
+        with open((_state_dir() / "history.csv"), "r", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             rows = list(reader)
             last_row = rows[-1]
 
-            print(f"   ✅ CSV gerado: {HISTORY_CSV}")
+            print(f"   ✅ CSV gerado: {(_state_dir() / "history.csv")}")
             print(f"   ✅ Date: {last_row['session_date']}")
             print(f"   ✅ Total: {last_row['total_duration']}")
             print(f"   ✅ Breaks: {last_row['pause_duration']}")
@@ -344,7 +347,7 @@ class TestSessionTimeTracker:
             assert last_row["num_pauses"] == "3", "Deveria ter 3 pausas"
 
         # State file deve ter sido removido
-        assert not STATE_FILE.exists()
+        assert not (_state_dir() / "current.json").exists()
         print(f"   ✅ State file removido após stop")
 
         print("\n" + "="*60)
@@ -360,8 +363,8 @@ def run_manual_test():
     tracker = TestSessionTimeTracker()
 
     # Setup
-    if STATE_FILE.exists():
-        STATE_FILE.unlink()
+    if (_state_dir() / "current.json").exists():
+        (_state_dir() / "current.json").unlink()
 
     try:
         tracker.test_11_complete_workflow_integration()
