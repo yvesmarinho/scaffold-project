@@ -1,6 +1,6 @@
 # ✅ TODO - Enterprise Scaffold Project Template
 
-**Last Updated**: 17/11/2026 15:53 — TODO sincronizado com a sessão 09/11 + snapshots corrigidos
+**Last Updated**: 17/11/2026 16:14 — `ui._iso_now()` em America/Sao_Paulo
 **Project**: Enterprise Scaffold Project Template
 **Status**: 🟢 Active Development
 
@@ -9,7 +9,8 @@
 ## 🎯 Próxima Sessão (2026-11-17+)
 
 - [x] ~~**3 testes de snapshot falhando** (`tests/test_templates_snapshot.py`)~~: ✅ 17/11 — baseline desatualizado desde a migração da sessão para o vault (`6d76e00`); corrigida também a árvore `docs/` do perfil infra (`└── TODO.md` seguido de `RUNBOOK.md`) — `docs/bugs/BUG-snapshots-desatualizados-arvore-infra.md`
-- [ ] `ui._iso_now()` ainda em UTC → America/Sao_Paulo
+- [x] ~~`ui._iso_now()` ainda em UTC → America/Sao_Paulo~~: ✅ 17/11 — `created_at` em ISO 8601 com offset (`-03:00`) — `docs/bugs/BUG-created-at-em-utc.md`
+- [ ] Outros timestamps ainda em UTC (`Z`): `scripts/session-time-tracker.py::_iso_now` e `scripts/lib/publish.py` (`created_at` do manifesto; `test_smoke_imp30` exige o `Z`)
 - [ ] Ativar required status checks na branch protection quando houver CI rodando na `main`
 - [ ] Limpeza manual de `~/VyaJobs/enterprise-observability` (adoção acidental do BUG-26) — revisar `git status` antes de `git clean`
 - [ ] Testes gravam logs no `logs/` real da ferramenta (656 arquivos; disparam o `security-scan` do session-manager) — redirecionar para `tmp_path`
