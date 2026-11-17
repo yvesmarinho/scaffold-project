@@ -23,7 +23,9 @@ def _log_objetivo_init(output_path: Path, answers: WizardAnswers, success: bool,
         error_msg: Error message if failed
     """
     try:
-        log_file = Path("logs/scaffolds.yaml")
+        # SCAFFOLD_LOGS_DIR (definido pela suíte de testes) evita poluir o histórico real
+        logs_dir = os.environ.get("SCAFFOLD_LOGS_DIR", "").strip() or "logs"
+        log_file = Path(logs_dir) / "scaffolds.yaml"
         log_file.parent.mkdir(parents=True, exist_ok=True)
 
         import yaml

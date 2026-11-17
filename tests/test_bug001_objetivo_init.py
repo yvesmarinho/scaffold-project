@@ -137,6 +137,8 @@ class TestBug001ScaffoldLogging:
         """Logs/scaffolds.yaml deve ser criado após objetivo-init."""
         # Change CWD para tmp_path
         monkeypatch.chdir(tmp_path)
+        # Testa o caminho padrão (relativo ao cwd): remove o isolamento do conftest
+        monkeypatch.delenv("SCAFFOLD_LOGS_DIR", raising=False)
 
         # Criar estrutura de pastas esperada
         template_dir = tmp_path / "template-bases"

@@ -35,6 +35,15 @@ from typing import List, Optional, Dict, Any
 
 DEFAULT_LOG_FILE = Path("logs/scaffolds.yaml")
 
+
+def _default_log_file() -> Path:
+    """``$SCAFFOLD_LOGS_DIR/scaffolds.yaml`` se definido; senão ``DEFAULT_LOG_FILE``.
+
+    A suíte de testes define a variável para não poluir o histórico real.
+    """
+    override = os.environ.get("SCAFFOLD_LOGS_DIR", "").strip()
+    return Path(override) / "scaffolds.yaml" if override else DEFAULT_LOG_FILE
+
 # ---------------------------------------------------------------------------
 # Data Classes
 # ---------------------------------------------------------------------------
@@ -60,8 +69,8 @@ class ScaffoldEntry:
 class ScaffoldLogger:
     """Log and query scaffold operations"""
 
-    def __init__(self, log_file: Path = DEFAULT_LOG_FILE):
-        self.log_file = log_file
+    def __init__(self, log_file: Optional[Path] = None):
+        self.log_file = log_file or _default_log_file()
         self._ensure_log_file()
 
     def _ensure_log_file(self):

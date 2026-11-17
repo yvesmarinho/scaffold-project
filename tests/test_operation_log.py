@@ -3,7 +3,7 @@
 NOME: test_operation_log.py
 TITULO: Testes do log de operação (lib/ui.save_operation_log)
 DATA: 09/11/2026 16:10
-MODIFICADO: 09/11/2026 16:10
+MODIFICADO: 17/11/2026 16:32
 VERSÃO: 1.0.0
 DEPEND: pytest
 STATUS: DEV
@@ -35,7 +35,7 @@ _FIXED_UTC = datetime(2026, 11, 9, 18, 52, 50, tzinfo=timezone.utc)
 def isolated_logs(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """Evita gravar no logs/ real da ferramenta durante os testes."""
     tool_logs = tmp_path / "tool-logs"
-    monkeypatch.setattr(ui, "_SCAFFOLD_LOGS_DIR", tool_logs)
+    monkeypatch.setenv("SCAFFOLD_LOGS_DIR", str(tool_logs))
     return tool_logs
 
 
