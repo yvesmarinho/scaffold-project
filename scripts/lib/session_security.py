@@ -3,6 +3,8 @@ lib/session_security.py — Scans de segurança do workflow de sessão.
 
 Modificado em: 14/07/2026 11:56 — saída agregada (máx. MAX_EXAMPLES_PER_GROUP
 exemplos por grupo de achados) para reduzir consumo de tokens no modo --json.
+Modificado em: 17/11/2026 16:41 — ignora caches de ferramentas, tmp/ e falsos
+positivos conhecidos (SCAN_ALLOWLIST: scanner de secrets e scaffold/templates/).
 """
 
 from __future__ import annotations
@@ -36,7 +38,18 @@ EXCLUDED_DIR_NAMES = {
     "node_modules",
     "htmlcov",
     ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    "tmp",
 }
+# Falsos positivos conhecidos, por caminho relativo à raiz (fnmatch: "*" casa "/").
+# Nomes casam *secret*/.env* mas não guardam segredo: o próprio scanner de secrets
+# e os exemplos/workflows distribuídos em scaffold/templates/.
+SCAN_ALLOWLIST = (
+    "scripts/secrets_scan.py",
+    "tests/test_secrets_scan.py",
+    "scaffold/templates/*",
+)
 ENV_PLACEHOLDER_RE = re.compile(
     r"^(<.*>|.*example.*|.*changeme.*|.*placeholder.*|.*dummy.*|.*redacted.*|\*{3,})$",
     re.IGNORECASE,
@@ -101,7 +114,9 @@ def _summarize_findings(findings: list[SecurityFinding]) -> dict[str, Any]:
 
 
 def _should_skip_path(path: Path) -> bool:
-    return any(part in EXCLUDED_DIR_NAMES for part in path.parts)
+    if any(part in EXCLUDED_DIR_NAMES for part in path.parts):
+        return True
+    return any(fnmatch.fnmatch(path.as_posix(), pattern) for pattern in SCAN_ALLOWLIST)
 
 
 def _matches_sensitive_pattern(path: Path) -> bool:

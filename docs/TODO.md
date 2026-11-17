@@ -1,6 +1,6 @@
 # ✅ TODO - Enterprise Scaffold Project Template
 
-**Last Updated**: 17/11/2026 16:32 — testes isolados do `logs/` real
+**Last Updated**: 17/11/2026 16:41 — security-scan sem falsos positivos
 **Project**: Enterprise Scaffold Project Template
 **Status**: 🟢 Active Development
 
@@ -14,6 +14,8 @@
 - [ ] Ativar required status checks na branch protection quando houver CI rodando na `main`
 - [ ] Limpeza manual de `~/VyaJobs/enterprise-observability` (adoção acidental do BUG-26) — revisar `git status` antes de `git clean`
 - [x] ~~Testes gravam logs no `logs/` real da ferramenta (656 arquivos; disparam o `security-scan` do session-manager) — redirecionar para `tmp_path`~~: ✅ 17/11 — `SCAFFOLD_LOGS_DIR` isolado pelo conftest; 0 escritas em `logs/` na suíte — `docs/bugs/BUG-testes-poluem-logs-reais.md`
+- [x] ~~Logs antigos de teste em `logs/` (741 arquivos)~~: ✅ 17/11 — apagados; `scaffolds.yaml` preservado
+- [x] ~~`security-scan` com falsos positivos (`.mypy_cache`, `tmp/`, scanner de secrets, `scaffold/templates/`)~~: ✅ 17/11 — `SCAN_ALLOWLIST` + dirs excluídos; `session-manager start` volta a `clean: true` — `docs/bugs/BUG-security-scan-falsos-positivos.md`
 - [ ] Testes ainda escrevem em `.memory/` e `.session-time/history.csv` do repo (ambos no `.gitignore`) — isolar como foi feito com `logs/`
 
 ---
