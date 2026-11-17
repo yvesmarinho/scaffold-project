@@ -185,8 +185,8 @@ _FOLDER_STRUCTURE: dict[str, dict[str, str]] = {
 ├── scripts/               # Scripts de automação de infra
 ├── docs/
 │   ├── INDEX.md
-│   └── TODO.md
-│   ├── RUNBOOK.md         # Procedures operacionais
+│   ├── TODO.md
+│   └── RUNBOOK.md         # Procedures operacionais
 └── .vscode/""",
     },
 

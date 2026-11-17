@@ -1,8 +1,18 @@
 # ✅ TODO - Enterprise Scaffold Project Template
 
-**Last Updated**: 09/11/2026 14:57 — Pendências da sessão 28/10 + lembrete.md + remenber.md consolidados
+**Last Updated**: 17/11/2026 15:53 — TODO sincronizado com a sessão 09/11 + snapshots corrigidos
 **Project**: Enterprise Scaffold Project Template
 **Status**: 🟢 Active Development
+
+---
+
+## 🎯 Próxima Sessão (2026-11-17+)
+
+- [x] ~~**3 testes de snapshot falhando** (`tests/test_templates_snapshot.py`)~~: ✅ 17/11 — baseline desatualizado desde a migração da sessão para o vault (`6d76e00`); corrigida também a árvore `docs/` do perfil infra (`└── TODO.md` seguido de `RUNBOOK.md`) — `docs/bugs/BUG-snapshots-desatualizados-arvore-infra.md`
+- [ ] `ui._iso_now()` ainda em UTC → America/Sao_Paulo
+- [ ] Ativar required status checks na branch protection quando houver CI rodando na `main`
+- [ ] Limpeza manual de `~/VyaJobs/enterprise-observability` (adoção acidental do BUG-26) — revisar `git status` antes de `git clean`
+- [ ] Testes gravam logs no `logs/` real da ferramenta (656 arquivos; disparam o `security-scan` do session-manager) — redirecionar para `tmp_path`
 
 ---
 
@@ -20,9 +30,9 @@
 
 ### Repositório GitHub (`yvesmarinho/scaffold-project`, público)
 
-- [ ] **Revisar o repo**: descrição, topics, settings, branch protection (hoje inexistente), Dependabot/secret scanning
-- [ ] **Revisar branches**: 3 branches remotas já mergeadas (`chore/declarar-deps-rich-pyyaml`, `chore/gitignore-graphify-out`, `feature/068-session-obsidian-mcp`) → apagar local + remoto
-- [ ] **Renomear `master` → `main`**: GitHub rename + atualizar referências em workflows (`ci-template.yml`, `scaffold-tests.yml`) e em `scripts/` (`git_validators.py`, `project.py`, `infra.py`, `templates.py`, `vscode.py`, `mem_context.py`) + docs/CLAUDE.md
+- [x] ~~**Revisar o repo**: descrição, topics, settings, branch protection (hoje inexistente), Dependabot/secret scanning~~: ✅ 09/11 — branch protection (PR obrigatório, sem force-push/deleção, admins isentos), secret scanning + push protection, topics e descrição revisados
+- [x] ~~**Revisar branches**: 3 branches remotas já mergeadas (`chore/declarar-deps-rich-pyyaml`, `chore/gitignore-graphify-out`, `feature/068-session-obsidian-mcp`) → apagar local + remoto~~: ✅ 09/11 — removidas
+- [x] ~~**Renomear `master` → `main`**: GitHub rename + atualizar referências em workflows (`ci-template.yml`, `scaffold-tests.yml`) e em `scripts/` (`git_validators.py`, `project.py`, `infra.py`, `templates.py`, `vscode.py`, `mem_context.py`) + docs/CLAUDE.md~~: ✅ 09/11 — renomeada; projetos gerados com `git init -b main` (PR #35)
 
 ### Do `docs/planning/lembrete.md`
 
