@@ -89,8 +89,9 @@ def _validate_directory_conflict(project_name: str, target_dir: Path) -> tuple[b
     return True, ""
 
 
-def _iso_now() -> str:
-    return datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+def _iso_now(now: datetime | None = None) -> str:
+    """Timestamp ISO 8601 com offset em America/Sao_Paulo (ex.: ``-03:00``)."""
+    return _local(now or datetime.now(timezone.utc)).isoformat(timespec="seconds")
 
 
 # ---------------------------------------------------------------------------
