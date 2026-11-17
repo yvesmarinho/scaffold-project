@@ -61,8 +61,7 @@ test-project/
 ├── docs/
 │   ├── INDEX.md
 │   ├── TODO.md
-│   ├── RUNBOOK.md         # Procedures operacionais
-│   └── SESSIONS/
+│   └── RUNBOOK.md         # Procedures operacionais
 └── .vscode/
 ```
 

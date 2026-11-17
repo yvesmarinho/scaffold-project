@@ -50,8 +50,7 @@ test-project/
 │   └── integration/
 ├── docs/
 │   ├── INDEX.md
-│   ├── TODO.md
-│   └── SESSIONS/
+│   └── TODO.md
 ├── scripts/               # Automação
 ├── .venv/                 # Virtual env (gitignored)
 ├── pyproject.toml
