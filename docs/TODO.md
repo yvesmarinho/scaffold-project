@@ -1,6 +1,6 @@
 # ✅ TODO - Enterprise Scaffold Project Template
 
-**Last Updated**: 24/11/2026 12:00 — bug do --publish corrigido (fatia 1 do ADR-003)
+**Last Updated**: 24/11/2026 12:45 — strict checks na main; publish só com versionados
 **Project**: Enterprise Scaffold Project Template
 **Status**: 🟢 Active Development
 
@@ -9,6 +9,7 @@
 ## 🎯 Próxima Sessão (2026-11-24+)
 
 - [x] ~~Ativar required status checks na `main` após o CI ficar verde no PR `fix/ci-main` (`Tests`, `CLI Smoke Tests`; `Lint & Validate` só depois da limpeza do ruff)~~: ✅ 24/11 — `Tests` e `CLI Smoke Tests` obrigatórios (strict: false); demais regras de proteção inalteradas — PR #51, `docs/bugs/BUG-ci-desabilitado-e-tracker-quebra-em-ci.md`
+- [x] ~~Avisos de revisão recuperados (24/11)~~: ✅ 24/11/2026 12:45 — (1) required checks agora com `strict: true` (PR precisa estar atualizado com a `main` antes do merge); (2) `--publish` só empacota arquivos versionados em repo git — `docs/bugs/BUG-publish-tarball-incompleto.md`
 - [ ] Limpar os 1031 achados pré-existentes do `ruff check .` (678 com autofix) — o job `Lint & Validate` falha até lá; depois, tornar o check obrigatório
 - [ ] Estrutura de branches main / dev / fases **nos projetos gerados** (decisão do usuário 24/11): main + dev, PRs de feature → dev, dev → main só com CI verde, fases = `release/faseN` — ADR + TDD
 - [ ] Separar arquivos de template dos arquivos do projeto (distribuição) — etapa 1: ✅ 24/11 inventário + ADR-003 **Proposto** (PR #53, `docs/analysis/INVENTARIO-templates.md`); aguarda aprovação do usuário

@@ -19,12 +19,17 @@ Arquivos incluídos no release:
 Arquivos excluídos:
   __pycache__/, .venv/, .git/, node_modules/, .secrets/, dist/
   caches locais: .ruff_cache/, .mypy_cache/, .pytest_cache/, htmlcov/
+  em repositório git: tudo que não é versionado (git ls-files); fora de repo
+  (ex.: tarball extraído) ou sem git disponível, vale só o glob
   *.pyc, *.pyo
 """
 
 from __future__ import annotations
 
 import json
+import logging
+import shutil
+import subprocess
 import tarfile
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -34,6 +39,8 @@ from zoneinfo import ZoneInfo
 from .config import SCAFFOLD_VERSION
 
 _LOCAL_TZ = ZoneInfo("America/Sao_Paulo")
+
+log = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Padrões de inclusão (glob sobre project_root)
@@ -109,6 +116,34 @@ class PublishResult:
 # Coleta de arquivos
 # ---------------------------------------------------------------------------
 
+def _tracked_files(project_root: Path) -> set[str] | None:
+    """
+    Caminhos relativos (posix) versionados em ``project_root`` via ``git ls-files``.
+
+    Retorna None quando ``project_root`` não é a raiz de um repositório git ou o
+    git não está disponível — nesse caso o chamador mantém a seleção por glob.
+    """
+    git = shutil.which("git")
+    if git is None:
+        log.warning("git não encontrado no PATH; release filtrado só pelo glob")
+        return None
+    try:
+        top = subprocess.run(  # noqa: S603 — argumentos fixos, sem entrada externa
+            [git, "rev-parse", "--show-toplevel"],
+            cwd=project_root, capture_output=True, text=True, check=True, timeout=30,
+        ).stdout.strip()
+        if Path(top).resolve() != project_root.resolve():
+            return None
+        listed = subprocess.run(  # noqa: S603 — argumentos fixos, sem entrada externa
+            [git, "ls-files", "-z"],
+            cwd=project_root, capture_output=True, text=True, check=True, timeout=60,
+        ).stdout
+    except (OSError, subprocess.SubprocessError) as exc:
+        log.warning("git indisponível para filtrar o release (%s); usando só o glob", exc)
+        return None
+    return {entry for entry in listed.split("\0") if entry}
+
+
 def _collect_files(project_root: Path) -> list[Path]:
     """
     Percorre _INCLUDE_PATTERNS sob project_root e retorna lista ordenada
@@ -118,13 +153,18 @@ def _collect_files(project_root: Path) -> list[Path]:
     """
     seen: set[Path] = set()
     result: list[Path] = []
+    # Em repo git, só entra o que é versionado (nada de rascunho local no release)
+    tracked = _tracked_files(project_root)
 
     for pattern in _INCLUDE_PATTERNS:
         for path in sorted(project_root.glob(pattern)):
             if not path.is_file():
                 continue
 
-            rel_parts = path.relative_to(project_root).parts
+            rel = path.relative_to(project_root)
+            if tracked is not None and rel.as_posix() not in tracked:
+                continue
+            rel_parts = rel.parts
 
             # Exclui se qualquer componente do path está na lista negra
             if any(part in _EXCLUDE_NAMES for part in rel_parts):
