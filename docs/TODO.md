@@ -1,6 +1,6 @@
 # ✅ TODO - Enterprise Scaffold Project Template
 
-**Last Updated**: 24/11/2026 11:19 — CI reabilitado, checks obrigatórios, shell integration, análises Copilot/templates
+**Last Updated**: 24/11/2026 12:00 — bug do --publish corrigido (fatia 1 do ADR-003)
 **Project**: Enterprise Scaffold Project Template
 **Status**: 🟢 Active Development
 
@@ -12,7 +12,7 @@
 - [ ] Limpar os 1031 achados pré-existentes do `ruff check .` (678 com autofix) — o job `Lint & Validate` falha até lá; depois, tornar o check obrigatório
 - [ ] Estrutura de branches main / dev / fases **nos projetos gerados** (decisão do usuário 24/11): main + dev, PRs de feature → dev, dev → main só com CI verde, fases = `release/faseN` — ADR + TDD
 - [ ] Separar arquivos de template dos arquivos do projeto (distribuição) — etapa 1: ✅ 24/11 inventário + ADR-003 **Proposto** (PR #53, `docs/analysis/INVENTARIO-templates.md`); aguarda aprovação do usuário
-- [ ] **Bug `--publish`**: tarball sem `scripts/lib/flows/` e `scripts/lib/ai/` (glob não recursivo) → pacote distribuído não roda — fatia 1 do ADR-003
+- [x] ~~**Bug `--publish`**: tarball sem `scripts/lib/flows/` e `scripts/lib/ai/` (glob não recursivo) → pacote distribuído não roda — fatia 1 do ADR-003~~: ✅ 24/11 — gerador completo no tarball (407 → 489 arquivos), caches excluídos; teste de aceitação compara projeto gerado pelo tarball vs. repo — `docs/bugs/BUG-publish-tarball-incompleto.md`
 - [x] ~~Shell integration VS Code (zsh)~~: ✅ 24/11 — `terminal.integrated.shellIntegration.*` no settings.json gerado + guia de fallback (PR #52)
 - [x] ~~Analisar docs VS Code Copilot (instructions, skills, custom agents, MCP)~~: ✅ 24/11 — `docs/analysis/ANALISE-vscode-copilot-customization.md` (PR #53)
 - [ ] Copilot P0 (da análise): remover handoffs para `speckit.*` inexistentes; limpar `chat.promptFilesRecommendations`; migrar prompts de sessão/perfis para `.github/skills/` — depende das decisões pendentes listadas na análise
