@@ -1,5 +1,5 @@
 # Criado em: 23/06/2026 18:55
-# Modificado em: 24/11/2026 10:45
+# Modificado em: 24/11/2026 10:50
 #
 # CI principal do repositório (fonte dos required status checks da `main`).
 # Sem filtro de paths: check obrigatório com filtro de paths trava PRs que não o disparam.
@@ -34,7 +34,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Set up uv
-        uses: astral-sh/setup-uv@v10
+        uses: astral-sh/setup-uv@v10.4.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           enable-cache: true
@@ -61,7 +61,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Set up uv
-        uses: astral-sh/setup-uv@v10
+        uses: astral-sh/setup-uv@v10.4.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           enable-cache: true
@@ -103,7 +103,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Set up uv
-        uses: astral-sh/setup-uv@v10
+        uses: astral-sh/setup-uv@v10.4.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           enable-cache: true
