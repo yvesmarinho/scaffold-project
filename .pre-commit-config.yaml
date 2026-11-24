@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.18.1
+    rev: v8.30.1
     hooks:
       - id: gitleaks
         name: Gitleaks Secret Scanner
@@ -9,7 +9,7 @@ repos:
         pass_filenames: false
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v6.0.0
     hooks:
       - id: check-yaml
         name: Check YAML Syntax
@@ -30,7 +30,7 @@ repos:
         exclude: ^docs/SESSIONS/
 
   - repo: https://github.com/ansible/ansible-lint
-    rev: v26.10.1
+    rev: v26.11.0
     hooks:
       - id: ansible-lint
         name: Ansible Lint
@@ -38,22 +38,24 @@ repos:
         args: [scaffold/templates/project/ansible/]
         language_version: python3.12
 
+  # black, ruff e bandit: mesma versão do uv.lock (= CI). Alinhamento verificado
+  # por tests/test_precommit_versoes_alinhadas.py.
   - repo: https://github.com/psf/black
-    rev: 23.12.1
+    rev: 26.10.1
     hooks:
       - id: black
         name: Black Python Formatter
         language_version: python3.12
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.11
+    rev: v0.16.5
     hooks:
       - id: ruff
         name: Ruff Linter
         args: [--fix, --exit-non-zero-on-fix]
 
   - repo: https://github.com/pycqa/bandit
-    rev: 1.7.6
+    rev: 1.9.4
     hooks:
       - id: bandit
         name: Bandit Security Linter

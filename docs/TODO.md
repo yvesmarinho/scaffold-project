@@ -1,6 +1,6 @@
 # ✅ TODO - Enterprise Scaffold Project Template
 
-**Last Updated**: 24/11/2026 13:06 — validação do repo: pre-commit, mypy, cobertura
+**Last Updated**: 24/11/2026 13:28 — hooks do pre-commit alinhados ao uv.lock
 **Project**: Enterprise Scaffold Project Template
 **Status**: 🟢 Active Development
 
@@ -12,8 +12,9 @@
 - [x] ~~Avisos de revisão recuperados (24/11)~~: ✅ 24/11/2026 12:45 — (1) required checks agora com `strict: true` (PR precisa estar atualizado com a `main` antes do merge); (2) `--publish` só empacota arquivos versionados em repo git — `docs/bugs/BUG-publish-tarball-incompleto.md`
 - [x] ~~Validação do repo (24/11): pre-commit não instalado; mypy abortava; branches mergeadas sobrando~~: ✅ 24/11/2026 13:06 — `pre-commit install`; `delete_branch_on_merge: true` + 2 branches remotas apagadas; comentário `# type: subject` em `git_validators.py` (lido como type comment) corrigido + teste de regressão
 - [ ] **mypy**: 135 erros reais em 40 arquivos (`cd scripts && mypy -p lib --ignore-missing-imports`): 38 arg-type, 29 no-untyped-def, 21 assignment… Bloqueios antes disso: stubs ausentes (`types-PyYAML`, `tomli`) e `release.py` importando `scripts.lib.publish` e `lib.publish` (módulo duplicado)
-- [ ] **pre-commit desatualizado**: hook do ruff fixado em `v0.1.11` (projeto usa 0.16.5) e bandit `1.7.6` — achados divergem (ex.: linha do S603); rodar `pre-commit autoupdate`
+- [x] ~~**pre-commit desatualizado**: hook do ruff fixado em `v0.1.11` (projeto usa 0.16.5) e bandit `1.7.6` — achados divergem (ex.: linha do S603); rodar `pre-commit autoupdate`~~: ✅ 24/11/2026 13:28 — ruff/black/bandit alinhados ao `uv.lock` (0.16.5 / 26.10.1 / 1.9.4) + teste que trava o alinhamento; demais hooks na última versão
 - [ ] **Cobertura**: 60% (meta 90%) e não medida — `pytest.ini` sobrepõe `[tool.pytest.ini_options]` (`--cov` ignorado); unificar config do pytest e medir no CI
+- [ ] Limpeza do ruff em 2 PRs (plano aprovado 24/11): (a) `ruff check --fix` só correções seguras (~677), sem black no repo inteiro; (b) restante manual por regra/diretório, `per-file-ignores` justificado para `scaffold/templates/`; depois tornar `Lint & Validate` obrigatório
 - [ ] Limpar os 1031 achados pré-existentes do `ruff check .` (678 com autofix) — o job `Lint & Validate` falha até lá; depois, tornar o check obrigatório
 - [ ] Estrutura de branches main / dev / fases **nos projetos gerados** (decisão do usuário 24/11): main + dev, PRs de feature → dev, dev → main só com CI verde, fases = `release/faseN` — ADR + TDD
 - [ ] Separar arquivos de template dos arquivos do projeto (distribuição) — etapa 1: ✅ 24/11 inventário + ADR-003 **Proposto** (PR #53, `docs/analysis/INVENTARIO-templates.md`); aguarda aprovação do usuário
