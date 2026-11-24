@@ -1,6 +1,6 @@
 # ✅ TODO - Enterprise Scaffold Project Template
 
-**Last Updated**: 24/11/2026 16:13 — upgrade --force atualiza arquivos de perfil
+**Last Updated**: 24/11/2026 16:26 — --update-profile-files explícito
 **Project**: Enterprise Scaffold Project Template
 **Status**: 🟢 Active Development
 
@@ -20,7 +20,7 @@
 - [x] ~~Tornar `Lint & Validate` check obrigatório na `main` (após merge da limpeza)~~: ✅ 24/11 — obrigatório na `main` junto com Tests e CLI Smoke Tests (strict)
 - [x] ~~Limpar os 1031 achados pré-existentes do `ruff check .` (678 com autofix) — o job `Lint & Validate` falha até lá; depois, tornar o check obrigatório~~: ✅ 24/11/2026 15:05 — ver item acima
 - [x] ~~`make validate-templates` sempre falhava (mirava `.specify/templates/`) e não validava `scaffold/templates/`~~: ✅ 24/11 — PR #64; revelou e corrigiu `helm/templates/service.yaml` corrompido (k8s-helm) — `docs/bugs/BUG-validate-templates-escopo-e-helm-service.md`
-- [x] ~~`scaffold upgrade --force` não atualizava arquivos de perfil já existentes (composer ignorava `--force`)~~: ✅ 24/11 — backup `.backup` + status `updated` + rollback restaura; nenhum projeto k8s-helm afetado encontrado (local e GitHub)
+- [x] ~~`scaffold upgrade --force` não atualizava arquivos de perfil já existentes (composer ignorava `--force`)~~: ✅ 24/11 — backup `.backup` + status `updated` + rollback restaura; nenhum projeto k8s-helm afetado encontrado (local e GitHub); 24/11: atualização restrita à flag explícita `--update-profile-files` (o `--force` não toca arquivos de perfil — decisão do usuário)
 - [ ] `helm lint` / `helm template` no CI para o perfil k8s-helm (o validador detecta corrupção, mas não renderiza)
 - [ ] Estrutura de branches main / dev / fases **nos projetos gerados** (decisão do usuário 24/11): main + dev, PRs de feature → dev, dev → main só com CI verde, fases = `release/faseN` — ADR + TDD
 - [ ] Separar arquivos de template dos arquivos do projeto (distribuição) — etapa 1: ✅ 24/11 inventário + ADR-003 **Proposto** (PR #53, `docs/analysis/INVENTARIO-templates.md`); aguarda aprovação do usuário

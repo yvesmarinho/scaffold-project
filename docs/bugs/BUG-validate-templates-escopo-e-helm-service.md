@@ -1,5 +1,5 @@
 <!-- Criado em: 24/11/2026 15:34 -->
-<!-- Modificado em: 24/11/2026 16:13 -->
+<!-- Modificado em: 24/11/2026 16:26 -->
 
 # BUG: validador de templates olhava o lugar errado, e o Service do perfil k8s-helm estava quebrado
 
@@ -67,3 +67,14 @@ Na fase vermelha, todos falharam. O exemplo híbrido foi corrigido para refletir
   - 4 testes unitários: sem force, com force, arquivo idêntico, rollback.
   - 2 testes ponta a ponta: gera um projeto k8s-helm, corrompe o `service.yaml` como no bug e roda `upgrade`. Sem `--force`, o arquivo é preservado. Com `--force`, ele é corrigido e o `.backup` fica igual ao original corrompido.
   - Sem o repasse do `force` no upgrade, o teste ponta a ponta falhava.
+
+## Ajuste (24/11/2026 16:26): flag explícita no lugar do `--force` (decisão do usuário)
+
+O PR #66 fez o `--force` também sobrescrever arquivos de perfil, como `src/main.py`, `Dockerfile` e `conftest.py`. São arquivos que o usuário costuma editar, então um `--force` usado para atualizar o SpecKit trocaria essas customizações.
+
+**Decisão:** o `--force` voltou a **não** tocar arquivos de perfil. Para atualizá-los, é preciso usar a flag explícita **`--update-profile-files`**:
+- no `upgrade` e no `compose`, os arquivos divergentes são **listados antes** da atualização, e cada um ganha backup `<arquivo>.backup`;
+- sem a flag, o upgrade preserva os arquivos e mostra quais diferem do template, sugerindo a flag;
+- o novo `ProfileComposer.divergent_files()` lista os arquivos divergentes sem escrever nada.
+
+**Para corrigir um projeto k8s-helm antigo:** `scaffold upgrade --update-profile-files`.

@@ -52,7 +52,9 @@ def flow_compose_profiles(args: argparse.Namespace) -> int:
         project_root=_PROJECT_ROOT,
     )
 
-    result = composer.compose(profile_names, cfg, force=getattr(args, "force", False))
+    result = composer.compose(
+        profile_names, cfg, force=getattr(args, "update_profile_files", False)
+    )
 
     if use_json:
         output = {

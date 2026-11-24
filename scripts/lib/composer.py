@@ -213,6 +213,12 @@ def get_template_entries(descriptor: dict) -> list[dict]:
 # ---------------------------------------------------------------------------
 
 
+# Extensões tratadas como texto (recebem substituição de placeholders)
+_TEXT_EXTENSIONS = frozenset(
+    {".md", ".yaml", ".yml", ".toml", ".txt", ".json", ".py", ".sh", ".env"}
+)
+
+
 class ProfileComposer:
     """
     Motor de composição de perfis.
@@ -335,30 +341,8 @@ class ProfileComposer:
                 continue
 
             # Conteúdo final: texto com placeholders substituídos, ou bytes do binário
-            text_extensions = {
-                ".md",
-                ".yaml",
-                ".yml",
-                ".toml",
-                ".txt",
-                ".json",
-                ".py",
-                ".sh",
-                ".env",
-            }
-            conteudo: bytes
             try:
-                if dest_path.suffix in text_extensions or dest_path.name.startswith(
-                    ".env"
-                ):
-                    texto = self._apply_template_placeholders(
-                        src_path.read_text(encoding="utf-8"), cfg
-                    )
-                    conteudo = texto.encode("utf-8")
-                else:
-                    conteudo = src_path.read_bytes()
-            except UnicodeDecodeError:
-                conteudo = src_path.read_bytes()  # fallback: copia binária
+                conteudo = self._render_content(src_path, dest_path, cfg)
             except OSError as exc:
                 items.append(
                     CreatedItem(
@@ -380,7 +364,7 @@ class ProfileComposer:
                             path=dest_path,
                             kind="file",
                             status="skipped",
-                            message="existe e difere do template (use --force para atualizar com backup)",
+                            message="existe e difere do template (use --update-profile-files para atualizar com backup)",
                         )
                     )
                     continue
@@ -412,7 +396,7 @@ class ProfileComposer:
             try:
                 dest_path.parent.mkdir(parents=True, exist_ok=True)
                 dest_path.write_bytes(conteudo)
-                if dest_path.suffix not in text_extensions:
+                if dest_path.suffix not in _TEXT_EXTENSIONS:
                     shutil.copystat(src_path, dest_path)
                 items.append(CreatedItem(path=dest_path, kind="file", status="created"))
             except OSError as exc:
@@ -455,6 +439,51 @@ class ProfileComposer:
         for placeholder, value in replacements.items():
             content = content.replace(placeholder, value)
         return content
+
+    def _render_content(
+        self, src_path: Path, dest_path: Path, cfg: ProjectConfig
+    ) -> bytes:
+        """Conteúdo que o template gera para ``dest_path`` (placeholders aplicados)."""
+        if dest_path.suffix in _TEXT_EXTENSIONS or dest_path.name.startswith(".env"):
+            try:
+                texto = src_path.read_text(encoding="utf-8")
+            except UnicodeDecodeError:
+                return src_path.read_bytes()  # fallback: copia binária
+            return self._apply_template_placeholders(texto, cfg).encode("utf-8")
+        return src_path.read_bytes()
+
+    def divergent_files(
+        self, profile_names: list[str], cfg: ProjectConfig
+    ) -> list[Path]:
+        """
+        Arquivos de perfil que JÁ EXISTEM no projeto e diferem do template.
+
+        São os que ``compose(..., force=True)`` sobrescreveria (com backup).
+        Não escreve nada.
+        """
+        divergentes: list[Path] = []
+        conhecidos = [p for p in profile_names if p in self.descriptors]
+        for profile_name in resolve_order(conhecidos, self.descriptors):
+            for entry in get_template_entries(self.descriptors[profile_name]):
+                src_rel: str = entry["src_rel"]
+                if (
+                    not src_rel
+                    or "inline" in src_rel
+                    or "()" in src_rel
+                    or "templates.py:" in src_rel
+                ):
+                    continue
+                src_path = self.project_root / src_rel
+                dest_path = cfg.target_dir / entry["dest"]
+                if not (src_path.exists() and dest_path.exists()):
+                    continue
+                try:
+                    gerado = self._render_content(src_path, dest_path, cfg)
+                    if dest_path.read_bytes() != gerado:
+                        divergentes.append(dest_path)
+                except OSError:
+                    continue
+        return divergentes
 
     def _rollback(self, items: list[CreatedItem]) -> list[Path]:
         """Desfaz a composição: remove 'created' e restaura 'updated' a partir do backup."""
