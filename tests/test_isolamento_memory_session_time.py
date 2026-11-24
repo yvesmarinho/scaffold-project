@@ -3,7 +3,7 @@
 NOME: test_isolamento_memory_session_time.py
 TITULO: Isolamento de .memory/ e .session-time/ (SCAFFOLD_MEMORY_ROOT / SCAFFOLD_SESSION_TIME_DIR)
 DATA: 17/11/2026 17:01
-MODIFICADO: 17/11/2026 17:01
+MODIFICADO: 24/11/2026 10:24
 VERSÃO: 1.0.0
 DEPEND: pytest
 STATUS: DEV
@@ -101,7 +101,8 @@ def _tracker(*args: str, env: dict[str, str]) -> subprocess.CompletedProcess[str
         [sys.executable, str(_TRACKER), *args],
         capture_output=True,
         text=True,
-        cwd=_PROJECT_ROOT,
+        # Fora de repo git: o resultado não depende da branch real do projeto.
+        cwd=Path(env[_TIME_ENV]).parent,
         env=env,
         timeout=60,
     )

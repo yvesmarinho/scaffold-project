@@ -7,14 +7,11 @@ Cobertura:
     - é YAML válido
     - tem chave 'on' (trigger)
     - dispara em pull_request
-    - dispara em push para main/master
-    - contém path trigger para scripts/**
-    - contém path trigger para tests/**
-    - contém path trigger para profile-descriptors/**
+    - dispara em push e pull_request para main (24/11/2026: master removido)
+    - SEM filtro de paths (fonte de required status checks — check obrigatório
+      com filtro de paths trava PRs que não o disparam)
     - job 'test' existe
-    - job 'test' usa matrix python-version
-    - matrix inclui python 3.10
-    - matrix inclui python 3.12
+    - usa uv (setup-uv com cache, uv sync --locked) e Python 3.12
     - job 'test' roda 'pytest tests/'
     - job 'cli-smoke' existe
     - job 'cli-smoke' executa --list-profiles --json
@@ -23,13 +20,13 @@ Cobertura:
     - job 'lint' existe
     - job 'lint' compila scaffold.py
     - job 'lint' valida YAMLs dos profile descriptors
+    - job 'lint' roda ruff no repositório inteiro
     - concurrency com cancel-in-progress
     - job 'cli-smoke' depende de 'test' (needs: test)
 """
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 import pytest
@@ -97,25 +94,20 @@ class TestWorkflowTriggers:
         text = _workflow_text()
         assert "push" in text
 
-    def test_push_targets_master(self) -> None:
-        text = _workflow_text()
-        assert "master" in text
+    def _triggers(self) -> dict:
+        data = _load_workflow()
+        return data.get("on", data.get(True, {}))
 
-    def test_push_targets_main(self) -> None:
-        text = _workflow_text()
-        assert "main" in text
+    def test_push_and_pr_target_main(self) -> None:
+        triggers = self._triggers()
+        assert triggers["push"]["branches"] == ["main"]
+        assert triggers["pull_request"]["branches"] == ["main"]
 
-    def test_path_trigger_scripts(self) -> None:
-        text = _workflow_text()
-        assert "scripts/**" in text
-
-    def test_path_trigger_tests(self) -> None:
-        text = _workflow_text()
-        assert "tests/**" in text
-
-    def test_path_trigger_profile_descriptors(self) -> None:
-        text = _workflow_text()
-        assert "profile-descriptors/**" in text
+    def test_no_paths_filter(self) -> None:
+        for event in ("push", "pull_request"):
+            config = self._triggers()[event] or {}
+            assert "paths" not in config, f"{event} com filtro de paths"
+            assert "paths-ignore" not in config, f"{event} com paths-ignore"
 
     def test_has_concurrency_cancel(self) -> None:
         text = _workflow_text()
@@ -133,26 +125,29 @@ class TestJobTest:
         data = _load_workflow()
         assert "test" in data["jobs"], "Job 'test' ausente"
 
-    def test_job_test_has_matrix(self) -> None:
+    def test_uses_python_312(self) -> None:
         data = _load_workflow()
-        strategy = data["jobs"]["test"].get("strategy", {})
-        assert "matrix" in strategy, "Job 'test' sem strategy.matrix"
+        assert data["env"]["PYTHON_VERSION"] == "3.12"
 
-    def test_matrix_includes_python_310(self) -> None:
+    def test_job_test_uses_uv_locked(self) -> None:
         text = _workflow_text()
-        assert "3.10" in text, "Python 3.10 ausente na matrix"
-
-    def test_matrix_includes_python_312(self) -> None:
-        text = _workflow_text()
-        assert "3.12" in text, "Python 3.12 ausente na matrix"
+        assert "astral-sh/setup-uv" in text
+        assert "uv sync --locked" in text
 
     def test_job_test_runs_full_suite(self) -> None:
         text = _workflow_text()
         assert "pytest tests/" in text, "'pytest tests/' ausente nos steps"
 
-    def test_job_test_uses_pip_cache(self) -> None:
+    def test_job_test_installs_pinned_specify_cli(self) -> None:
+        """`scaffold new` roda `specify init`; sem o CLI a criação retorna erro."""
+        steps = _load_workflow()["jobs"]["test"]["steps"]
+        runs = " ".join(str(s.get("run", "")) for s in steps)
+        assert "uv tool install specify-cli" in runs
+        assert "github/spec-kit.git@v" in runs, "specify-cli sem versão fixada"
+
+    def test_job_test_uses_uv_cache(self) -> None:
         text = _workflow_text()
-        assert "actions/cache" in text, "Cache de pip ausente"
+        assert "enable-cache: true" in text, "Cache do uv ausente"
 
 
 # ===========================================================================
@@ -204,3 +199,7 @@ class TestJobLint:
     def test_lint_validates_profile_descriptors_yaml(self) -> None:
         text = _workflow_text()
         assert "profile-descriptors" in text and "yaml" in text.lower()
+
+    def test_lint_runs_ruff_on_whole_repo(self) -> None:
+        text = _workflow_text()
+        assert "ruff check ." in text, "ruff no repositório inteiro ausente"

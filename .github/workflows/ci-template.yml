@@ -1,91 +1,89 @@
 # Criado em: 23/06/2026 18:55
-# Modificado em: 23/06/2026 18:55
+# Modificado em: 24/11/2026 10:50
+#
+# CI principal do repositório (fonte dos required status checks da `main`).
+# Sem filtro de paths: check obrigatório com filtro de paths trava PRs que não o disparam.
 name: CI — Template Scaffold
 
 on:
   pull_request:
-    paths:
-      - "scripts/**"
-      - "tests/**"
-      - "profile-descriptors/**"
-      - "template-bases/**"
-      - ".github/workflows/ci-template.yml"
+    branches:
+      - main
   push:
     branches:
       - main
-      - master
-    paths:
-      - "scripts/**"
-      - "tests/**"
-      - "profile-descriptors/**"
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.12"
+
 jobs:
   test:
-    name: Tests — Python ${{ matrix.python-version }}
+    name: Tests
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+    timeout-minutes: 20
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v7
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v10.4.0
         with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Cache pip
-        uses: actions/cache@v6
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/pyproject.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-${{ matrix.python-version }}-
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
 
       - name: Install dependencies
+        run: uv sync --locked --extra dev
+
+      - name: Install specify CLI (SpecKit — usado por `scaffold new`)
+        run: uv tool install specify-cli --from "git+https://github.com/github/spec-kit.git@v1.4.4"
+
+      - name: Git identity (testes que criam commits em repos temporários)
         run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]" || pip install pytest pyyaml rich
+          git config --global user.name "ci"
+          git config --global user.email "ci@users.noreply.github.com"
+          git config --global init.defaultBranch main
 
       - name: Run full test suite
-        run: pytest tests/ -v --tb=short
+        run: uv run pytest tests/ --tb=short
 
   cli-smoke:
     name: CLI Smoke Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: test
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - name: Set up Python
-        uses: actions/setup-python@v7
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v10.4.0
         with:
-          python-version: "3.12"
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]" || pip install pyyaml rich
+        run: uv sync --locked
 
       - name: Smoke — list profiles
-        run: python scripts/scaffold.py --list-profiles --json
+        run: uv run python scripts/scaffold.py --list-profiles --json
 
       - name: Smoke — dry run
         run: |
-          python scripts/scaffold.py --new --dry-run \
+          uv run python scripts/scaffold.py --new --dry-run --ci \
             --name smoke-test \
             --domain programming \
             --language python
 
       - name: Smoke — publish
-        run: python scripts/scaffold.py --publish --json
+        run: uv run python scripts/scaffold.py --publish --json --output-dir "${RUNNER_TEMP}/publish"
 
       - name: Smoke — verify SBOM targets in Layer 2 profiles
         run: |
@@ -102,26 +100,26 @@ jobs:
   lint:
     name: Lint & Validate
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - name: Set up Python
-        uses: actions/setup-python@v7
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v10.4.0
         with:
-          python-version: "3.12"
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pyyaml
+        run: uv sync --locked --extra dev
 
       - name: Compile scaffold.py (syntax check)
-        run: python -m py_compile scripts/scaffold.py && echo "scaffold.py OK"
+        run: uv run python -m py_compile scripts/scaffold.py && echo "scaffold.py OK"
 
       - name: Validate profile-descriptors YAML
         run: |
-          python - <<'EOF'
+          uv run python - <<'EOF'
           import sys
           import yaml
           from pathlib import Path
@@ -141,3 +139,6 @@ jobs:
               sys.exit(1)
           print(f"OK: {len(list(Path('profile-descriptors').glob('*.yaml')))} profile-descriptors validados")
           EOF
+
+      - name: Ruff (repositório inteiro)
+        run: uv run ruff check . --output-format=github

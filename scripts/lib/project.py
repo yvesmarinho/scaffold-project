@@ -2283,6 +2283,13 @@ _AI_TO_SPECIFY: dict[str, list[str]] = {
     "none":    [],
 }
 
+# Integração do specify → binário do agente que o `specify init` exige no PATH.
+# Ausente o binário, o scaffold passa `--ignore-agent-tools` (gera os arquivos
+# mesmo sem o agente instalado, ex.: CI) e registra um warning.
+_SPECIFY_AGENT_BINARY: dict[str, str] = {
+    "claude": "claude",
+}
+
 
 def run_speckit_init(config: ProjectConfig) -> list[CreatedItem]:
     """
@@ -2304,6 +2311,14 @@ def run_speckit_init(config: ProjectConfig) -> list[CreatedItem]:
 
     for integration in integrations:
         cmd = ["specify", "init", "--here", "--force", "--integration", integration]
+        agent_binary = _SPECIFY_AGENT_BINARY.get(integration)
+        if agent_binary and shutil.which(agent_binary) is None:
+            cmd.append("--ignore-agent-tools")
+            log.warning(
+                "⚠️  '%s' não encontrado no PATH → specify init com --ignore-agent-tools "
+                "(arquivos gerados; instale o agente para usá-los)",
+                agent_binary,
+            )
         log.info("Executando: %s em %s", " ".join(cmd), config.project_path)
         try:
             proc = subprocess.run(

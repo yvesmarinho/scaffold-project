@@ -124,7 +124,7 @@ docs/_build/
 
 # uv
 .uv/
-uv.lock
+# uv.lock é versionado (builds reprodutíveis; CI usa `uv sync --locked`)
 
 # arquivo de localização do portfolio-generator
 .portfolio-project
