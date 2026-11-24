@@ -32,15 +32,15 @@ from .config import CreatedItem, ProjectConfig
 # Ordenação de camadas: número menor = aplicado primeiro
 # ---------------------------------------------------------------------------
 _LAYER_ORDER: dict[str | int, int] = {
-    "core":         0,
-    0:              0,
-    "layer2":       1,
-    1:              1,
-    2:              1,
-    "layer3":       2,
-    3:              2,
-    "layer4":       3,
-    4:              3,
+    "core": 0,
+    0: 0,
+    "layer2": 1,
+    1: 1,
+    2: 1,
+    "layer3": 2,
+    3: 2,
+    "layer4": 3,
+    4: 3,
     "transversal": 99,
 }
 
@@ -48,6 +48,7 @@ _LAYER_ORDER: dict[str | int, int] = {
 # ---------------------------------------------------------------------------
 # Resultado da composição
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class CompositionResult:
@@ -82,10 +83,12 @@ class CompositionResult:
 # Loader YAML (sem dependência obrigatória de pyyaml)
 # ---------------------------------------------------------------------------
 
+
 def _load_yaml(path: Path) -> dict:
     """Carrega YAML com pyyaml ou fallback para parser mínimo de campos escalares."""
     try:
         import yaml  # pyyaml
+
         with path.open(encoding="utf-8") as f:
             return yaml.safe_load(f) or {}
     except ImportError:
@@ -107,6 +110,7 @@ def _load_yaml(path: Path) -> dict:
 # Funções puras (composição sem efeitos colaterais)
 # ---------------------------------------------------------------------------
 
+
 def load_all_descriptors(descriptors_dir: Path) -> dict[str, dict]:
     """Carrega todos os *.yaml de descriptors_dir, indexados pelo campo 'name'."""
     result: dict[str, dict] = {}
@@ -119,6 +123,7 @@ def load_all_descriptors(descriptors_dir: Path) -> dict[str, dict]:
 
 def resolve_order(profile_names: list[str], descriptors: dict[str, dict]) -> list[str]:
     """Retorna profile_names ordenados por camada (core primeiro, transversal por último)."""
+
     def _key(name: str) -> int:
         d = descriptors.get(name, {})
         layer = d.get("layer", d.get("LAYER", "layer2"))
@@ -170,11 +175,13 @@ def get_template_entries(descriptor: dict) -> list[dict]:
             rel = e.get("path", "")
             if not rel:
                 continue
-            result.append({
-                "dest": rel,
-                "src_rel": f"{tpl_base}/{rel}",
-                "description": e.get("description", ""),
-            })
+            result.append(
+                {
+                    "dest": rel,
+                    "src_rel": f"{tpl_base}/{rel}",
+                    "description": e.get("description", ""),
+                }
+            )
         return result
 
     # ── Schema B: generates.files[] ───────────────────────────────────────────
@@ -189,11 +196,13 @@ def get_template_entries(descriptor: dict) -> list[dict]:
             src = f.get("source", "")
             if not dest:
                 continue
-            result.append({
-                "dest": dest,
-                "src_rel": src,
-                "description": f.get("description", ""),
-            })
+            result.append(
+                {
+                    "dest": dest,
+                    "src_rel": src,
+                    "description": f.get("description", ""),
+                }
+            )
         return result
 
     return []
@@ -202,6 +211,7 @@ def get_template_entries(descriptor: dict) -> list[dict]:
 # ---------------------------------------------------------------------------
 # Motor principal
 # ---------------------------------------------------------------------------
+
 
 class ProfileComposer:
     """
@@ -228,9 +238,13 @@ class ProfileComposer:
         self,
         profile_names: list[str],
         cfg: ProjectConfig,
+        force: bool = False,
     ) -> CompositionResult:
         """
         Aplica perfis em ordem (core→layer2→layer3), com rollback em caso de erro.
+
+        :param force: sobrescreve arquivos de perfil existentes que diferem do
+            template (com backup ``<arquivo>.backup``); sem ``force`` eles são preservados.
         """
         result = CompositionResult()
 
@@ -254,7 +268,7 @@ class ProfileComposer:
 
         # 4. Aplicar cada perfil (com rollback em falha)
         for profile_name in ordered:
-            items, error = self._apply_profile(profile_name, cfg)
+            items, error = self._apply_profile(profile_name, cfg, force=force)
             result.items.extend(items)
 
             if error:
@@ -285,7 +299,7 @@ class ProfileComposer:
     # ------------------------------------------------------------------
 
     def _apply_profile(
-        self, profile_name: str, cfg: ProjectConfig
+        self, profile_name: str, cfg: ProjectConfig, force: bool = False
     ) -> tuple[list[CreatedItem], str | None]:
         """Copia arquivos de template do perfil para cfg.target_dir."""
         descriptor = self.descriptors[profile_name]
@@ -297,7 +311,12 @@ class ProfileComposer:
             src_rel: str = entry["src_rel"]
 
             # Pula entradas inline/geradas por código (não são arquivos físicos)
-            if not src_rel or "inline" in src_rel or "()" in src_rel or "templates.py:" in src_rel:
+            if (
+                not src_rel
+                or "inline" in src_rel
+                or "()" in src_rel
+                or "templates.py:" in src_rel
+            ):
                 continue
 
             src_path = self.project_root / src_rel
@@ -315,30 +334,86 @@ class ProfileComposer:
                 )
                 continue
 
-            # Destino já existe → pula
+            # Conteúdo final: texto com placeholders substituídos, ou bytes do binário
+            text_extensions = {
+                ".md",
+                ".yaml",
+                ".yml",
+                ".toml",
+                ".txt",
+                ".json",
+                ".py",
+                ".sh",
+                ".env",
+            }
+            conteudo: bytes
+            try:
+                if dest_path.suffix in text_extensions or dest_path.name.startswith(
+                    ".env"
+                ):
+                    texto = self._apply_template_placeholders(
+                        src_path.read_text(encoding="utf-8"), cfg
+                    )
+                    conteudo = texto.encode("utf-8")
+                else:
+                    conteudo = src_path.read_bytes()
+            except UnicodeDecodeError:
+                conteudo = src_path.read_bytes()  # fallback: copia binária
+            except OSError as exc:
+                items.append(
+                    CreatedItem(
+                        path=dest_path, kind="file", status="error", message=str(exc)
+                    )
+                )
+                return items, f"Erro ao copiar '{dest_rel}': {exc}"
+
+            # Destino já existe: preserva (sem force) ou sobrescreve com backup (force)
             if dest_path.exists():
-                items.append(CreatedItem(path=dest_path, kind="file", status="skipped"))
+                if dest_path.read_bytes() == conteudo:
+                    items.append(
+                        CreatedItem(path=dest_path, kind="file", status="skipped")
+                    )
+                    continue
+                if not force:
+                    items.append(
+                        CreatedItem(
+                            path=dest_path,
+                            kind="file",
+                            status="skipped",
+                            message="existe e difere do template (use --force para atualizar com backup)",
+                        )
+                    )
+                    continue
+                backup = dest_path.with_name(dest_path.name + ".backup")
+                try:
+                    shutil.copy2(dest_path, backup)
+                    dest_path.write_bytes(conteudo)
+                except OSError as exc:
+                    items.append(
+                        CreatedItem(
+                            path=dest_path,
+                            kind="file",
+                            status="error",
+                            message=str(exc),
+                        )
+                    )
+                    return items, f"Falha ao atualizar {dest_path}: {exc}"
+                items.append(
+                    CreatedItem(
+                        path=dest_path,
+                        kind="file",
+                        status="updated",
+                        message=f"sobrescrito com o template (backup: {backup.name})",
+                    )
+                )
                 continue
 
-            # Copia com substituição de placeholders
+            # Copia
             try:
                 dest_path.parent.mkdir(parents=True, exist_ok=True)
-
-                # Arquivos de texto: aplicar substituição de placeholders
-                text_extensions = {".md", ".yaml", ".yml", ".toml", ".txt", ".json", ".py", ".sh", ".env"}
-                if dest_path.suffix in text_extensions or dest_path.name.startswith(".env"):
-                    try:
-                        content = src_path.read_text(encoding="utf-8")
-                        # Substituir placeholders no formato {xxx} e {{XXX}}
-                        content = self._apply_template_placeholders(content, cfg)
-                        dest_path.write_text(content, encoding="utf-8")
-                    except (UnicodeDecodeError, OSError):
-                        # Fallback: copiar binário se falhar leitura como texto
-                        shutil.copy2(src_path, dest_path)
-                else:
-                    # Arquivos binários: copiar diretamente
-                    shutil.copy2(src_path, dest_path)
-
+                dest_path.write_bytes(conteudo)
+                if dest_path.suffix not in text_extensions:
+                    shutil.copystat(src_path, dest_path)
                 items.append(CreatedItem(path=dest_path, kind="file", status="created"))
             except OSError as exc:
                 items.append(
@@ -382,9 +457,18 @@ class ProfileComposer:
         return content
 
     def _rollback(self, items: list[CreatedItem]) -> list[Path]:
-        """Remove todos os arquivos com status='created' (desfaz a composição)."""
+        """Desfaz a composição: remove 'created' e restaura 'updated' a partir do backup."""
         removed: list[Path] = []
         for item in reversed(items):
+            if item.status == "updated":
+                backup = item.path.with_name(item.path.name + ".backup")
+                if backup.exists():
+                    try:
+                        backup.replace(item.path)
+                        removed.append(item.path)
+                    except OSError:
+                        pass
+                continue
             if item.status == "created" and item.path.exists():
                 try:
                     item.path.unlink()
