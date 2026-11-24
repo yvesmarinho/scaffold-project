@@ -38,27 +38,29 @@ repos:
         args: [scaffold/templates/project/ansible/]
         language_version: python3.12
 
-  # black, ruff e bandit: mesma versão do uv.lock (= CI). Alinhamento verificado
-  # por tests/test_precommit_versoes_alinhadas.py.
-  - repo: https://github.com/psf/black
-    rev: 26.10.1
+  # black, ruff e bandit: hooks locais via `uv run` — a versão vem do uv.lock
+  # (a mesma do CI) e o Dependabot atualiza um lugar só. Formato verificado por
+  # tests/test_precommit_versoes_alinhadas.py.
+  - repo: local
     hooks:
       - id: black
         name: Black Python Formatter
-        language_version: python3.12
+        entry: uv run black
+        language: system
+        types: [python]
+        require_serial: true
 
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.5
-    hooks:
       - id: ruff
         name: Ruff Linter
-        args: [--fix, --exit-non-zero-on-fix]
+        entry: uv run ruff check --fix --exit-non-zero-on-fix
+        language: system
+        types: [python]
+        require_serial: true
 
-  - repo: https://github.com/pycqa/bandit
-    rev: 1.9.4
-    hooks:
       - id: bandit
         name: Bandit Security Linter
-        args: ["-c", "pyproject.toml"]
-        additional_dependencies: ["bandit[toml]"]
+        entry: uv run --extra security bandit -c pyproject.toml
+        language: system
+        types: [python]
         exclude: ^tests/
+        require_serial: true
