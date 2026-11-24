@@ -1,5 +1,5 @@
 <!-- Criado em: 24/11/2026 15:34 -->
-<!-- Modificado em: 24/11/2026 15:34 -->
+<!-- Modificado em: 24/11/2026 16:13 -->
 
 # BUG: validador de templates olhava o lugar errado, e o Service do perfil k8s-helm estava quebrado
 
@@ -51,3 +51,19 @@ Na fase vermelha, todos falharam. O exemplo híbrido foi corrigido para refletir
 - Um validador que sempre falha deixa de ser olhado. Ele precisa rodar no CI desde o primeiro dia.
 - Formatadores de YAML não podem ser aplicados a templates Go.
 - O `helm` não está instalado nesta máquina, então o `service.yaml` foi validado pela estrutura (padrão do `helm create` e helpers existentes), não renderizado. Rodar `helm lint` no CI fica como sugestão.
+
+## Complemento (24/11/2026 16:13): projetos já gerados
+
+- **Busca por projetos afetados:** nenhum foi encontrado.
+  - Busca local: `helm/templates/service.yaml` em todo o `$HOME`.
+  - Busca no GitHub: `gh search code` nos repositórios do usuário. Os helpers `my-app.*` só aparecem no próprio scaffold. A busca de código do GitHub cobre apenas a branch padrão de cada repositório.
+- **Limitação encontrada:** o `scaffold upgrade` não corrigia arquivos de perfil já existentes. O `ProfileComposer._apply_profile` pulava qualquer destino existente, mesmo com `--force`, porque o flag não era repassado ao composer.
+- **Correção:**
+  - `compose(..., force=)` e `upgrade`/`compose` passam a repassar `--force`.
+  - **Sem `--force`**, o arquivo continua preservado e a mensagem avisa quando ele difere do template.
+  - **Com `--force`**, um arquivo divergente ganha backup em `<arquivo>.backup` e é sobrescrito com status `updated`. Um arquivo idêntico não é tocado.
+  - O rollback restaura os itens `updated` a partir do backup. Antes, ele só apagava os `created`.
+- **Testes** (`tests/test_composer_force.py`, 6 no total):
+  - 4 testes unitários: sem force, com force, arquivo idêntico, rollback.
+  - 2 testes ponta a ponta: gera um projeto k8s-helm, corrompe o `service.yaml` como no bug e roda `upgrade`. Sem `--force`, o arquivo é preservado. Com `--force`, ele é corrigido e o `.backup` fica igual ao original corrompido.
+  - Sem o repasse do `force` no upgrade, o teste ponta a ponta falhava.

@@ -330,7 +330,7 @@ def flow_upgrade(args: argparse.Namespace) -> int:
             console.print(
                 f"  [blue]🧩 Re-aplicando {len(profiles_applied)} perfil(is)...[/blue]"
             )
-        compose_result = composer.compose(profiles_applied, cfg)
+        compose_result = composer.compose(profiles_applied, cfg, force=force)
         # Converte CompositionItem → CreatedItem para o resumo
         for item in getattr(compose_result, "items", []):
             results.append(item)

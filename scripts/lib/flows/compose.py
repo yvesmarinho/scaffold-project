@@ -23,19 +23,21 @@ def flow_compose_profiles(args: argparse.Namespace) -> int:
     profiles_raw: str = getattr(args, "compose", "") or ""
     profile_names = [p.strip() for p in profiles_raw.split(",") if p.strip()]
     if not profile_names:
-        console.print("\n  [bold red]\u274c --compose requer ao menos um perfil (ex: --compose typescript-next)[/bold red]\n")
+        console.print(
+            "\n  [bold red]\u274c --compose requer ao menos um perfil (ex: --compose typescript-next)[/bold red]\n"
+        )
         return 1
 
     overrides = {
-        "name":         args.name,
-        "title":        args.title,
-        "description":  args.description,
-        "domain":       args.domain,
-        "language":     args.language,
+        "name": args.name,
+        "title": args.title,
+        "description": args.description,
+        "domain": args.domain,
+        "language": args.language,
         "ai_assistant": getattr(args, "ai_assistant", None),
-        "repo":         args.repo,
-        "shared_dir":   args.shared_dir,
-        "target_dir":   args.target_dir,
+        "repo": args.repo,
+        "shared_dir": args.shared_dir,
+        "target_dir": args.target_dir,
     }
     overrides = {k: v for k, v in overrides.items() if v is not None}
 
@@ -50,16 +52,16 @@ def flow_compose_profiles(args: argparse.Namespace) -> int:
         project_root=_PROJECT_ROOT,
     )
 
-    result = composer.compose(profile_names, cfg)
+    result = composer.compose(profile_names, cfg, force=getattr(args, "force", False))
 
     if use_json:
         output = {
-            "success":      result.success,
-            "applied":      result.applied,
-            "created":      result.created_count,
-            "skipped":      result.skipped_count,
-            "errors":       result.errors,
-            "rolled_back":  [str(p) for p in result.rolled_back],
+            "success": result.success,
+            "applied": result.applied,
+            "created": result.created_count,
+            "skipped": result.skipped_count,
+            "errors": result.errors,
+            "rolled_back": [str(p) for p in result.rolled_back],
         }
         print(_json.dumps(output, indent=2, ensure_ascii=False))
         return 0 if result.success else 1
@@ -68,16 +70,22 @@ def flow_compose_profiles(args: argparse.Namespace) -> int:
         for err in result.errors:
             console.print(f"  [bold red]\u274c {err}[/bold red]")
         if result.rolled_back:
-            console.print(f"  [yellow]\u21a9 Rollback: {len(result.rolled_back)} arquivo(s) removido(s)[/yellow]")
+            console.print(
+                f"  [yellow]\u21a9 Rollback: {len(result.rolled_back)} arquivo(s) removido(s)[/yellow]"
+            )
         return 1
 
     # Persiste perfis aplicados no state file
     write_scaffold_state(cfg, profiles_applied=result.applied)
 
     # IMP-29: Gera guia de documentação para a combinação de perfis
-    guide_item = templates.generate_profile_guide(cfg, result.applied, composer.descriptors)
+    guide_item = templates.generate_profile_guide(
+        cfg, result.applied, composer.descriptors
+    )
     if guide_item.status == "created":
-        console.print(f"  [dim]📖 Guia de perfis gerado: docs/{guide_item.path.name}[/dim]")
+        console.print(
+            f"  [dim]📖 Guia de perfis gerado: docs/{guide_item.path.name}[/dim]"
+        )
 
     from rich.table import Table
 
@@ -86,14 +94,24 @@ def flow_compose_profiles(args: argparse.Namespace) -> int:
     table.add_column()
 
     for item in result.items:
-        icon = "\u2705" if item.status == "created" else ("\u23ed" if item.status == "skipped" else "\u274c")
+        icon = (
+            "\u2705"
+            if item.status == "created"
+            else ("\u23ed" if item.status == "skipped" else "\u274c")
+        )
         table.add_row(
             icon,
-            str(item.path.relative_to(cfg.target_dir)) if cfg.target_dir in item.path.parents else str(item.path),
+            (
+                str(item.path.relative_to(cfg.target_dir))
+                if cfg.target_dir in item.path.parents
+                else str(item.path)
+            ),
         )
 
     console.print(f"\n  [bold]Composição:[/bold] {', '.join(result.applied)}")
     console.print(f"  [dim]Destino: {cfg.target_dir}[/dim]\n")
     console.print(table)
-    console.print(f"\n  [bold green]\u2705 {result.created_count} arquivo(s) criado(s), {result.skipped_count} pulado(s).[/bold green]\n")
+    console.print(
+        f"\n  [bold green]\u2705 {result.created_count} arquivo(s) criado(s), {result.skipped_count} pulado(s).[/bold green]\n"
+    )
     return 0
