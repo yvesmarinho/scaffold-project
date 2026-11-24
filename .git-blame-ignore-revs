@@ -1,0 +1,7 @@
+# Criado em: 24/11/2026 15:05
+# Modificado em: 24/11/2026 15:05
+# Commits de formatação em massa, ignorados pelo git blame e pelo GitHub.
+# Uso local: git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# style(lint): zera o ruff no repositório inteiro (ruff --fix + black)
+9d82e4affeea920240e5ce3b0509ea9453c44d20
