@@ -94,11 +94,13 @@ def temp_file(tmp_path: Path):
         def test_foo(temp_file):
             test_file = temp_file("test.txt", "content")
     """
+
     def _factory(filename: str, content: str = "") -> Path:
         file_path = tmp_path / filename
         file_path.parent.mkdir(parents=True, exist_ok=True)
         file_path.write_text(content)
         return file_path
+
     return _factory
 
 
@@ -111,9 +113,11 @@ def mock_env(monkeypatch):
         def test_foo(mock_env):
             mock_env({"KEY": "value", "DEBUG": "true"})
     """
+
     def _factory(env_vars: dict[str, str]):
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
+
     return _factory
 
 
@@ -148,39 +152,8 @@ def mock_subprocess(monkeypatch):
         def test_foo(mock_subprocess):
             mock_subprocess(stdout="output", stderr="", returncode=0)
     """
-
-
-# ---------------------------------------------------------------------------
-# Git Configuration for Tests
-# ---------------------------------------------------------------------------
-
-
-@pytest.fixture(scope="session", autouse=True)
-def configure_git_for_tests():
-    """
-    Configure Git user globally for all tests.
-
-    This ensures scaffold tests that create Git commits don't fail
-    due to missing user.email/user.name configuration.
-
-    Runs once per test session automatically.
-    """
     import subprocess
-
-    # Configure Git user for tests
-    subprocess.run(
-        ["git", "config", "--global", "user.email", "test@example.com"],
-        check=False,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "config", "--global", "user.name", "Test User"],
-        check=False,
-        capture_output=True,
-    )
-
     from unittest.mock import Mock
-    import subprocess
 
     def _factory(stdout: str = "", stderr: str = "", returncode: int = 0):
         mock_result = Mock()
@@ -193,6 +166,38 @@ def configure_git_for_tests():
         return mock_run
 
     return _factory
+
+
+# ---------------------------------------------------------------------------
+# Git Configuration for Tests
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(scope="session", autouse=True)
+def configure_git_for_tests(tmp_path_factory):
+    """
+    Identidade git para os testes que criam commits — SEM tocar no ~/.gitconfig real.
+
+    Antes (bug de 20/05/2026 a 24/11/2026) esta fixture rodava
+    ``git config --global user.*`` e sobrescrevia a identidade git da máquina.
+    Agora ``GIT_CONFIG_GLOBAL`` aponta para um arquivo temporário da sessão
+    (herdado pelos subprocessos); o valor original é restaurado ao final.
+    """
+    import os
+
+    gitconfig = tmp_path_factory.mktemp("gitconfig") / ".gitconfig"
+    gitconfig.write_text(
+        "[user]\n\tname = Test User\n\temail = test@example.com\n"
+        "[init]\n\tdefaultBranch = main\n",
+        encoding="utf-8",
+    )
+    anterior = os.environ.get("GIT_CONFIG_GLOBAL")
+    os.environ["GIT_CONFIG_GLOBAL"] = str(gitconfig)
+    yield gitconfig
+    if anterior is None:
+        os.environ.pop("GIT_CONFIG_GLOBAL", None)
+    else:
+        os.environ["GIT_CONFIG_GLOBAL"] = anterior
 
 
 @pytest.fixture
@@ -223,7 +228,9 @@ def isolate_scaffold_logs_session(tmp_path_factory):
     with pytest.MonkeyPatch.context() as mp:
         mp.setenv("SCAFFOLD_LOGS_DIR", str(tmp_path_factory.mktemp("scaffold-logs")))
         mp.setenv("SCAFFOLD_MEMORY_ROOT", str(tmp_path_factory.mktemp("memory")))
-        mp.setenv("SCAFFOLD_SESSION_TIME_DIR", str(tmp_path_factory.mktemp("session-time")))
+        mp.setenv(
+            "SCAFFOLD_SESSION_TIME_DIR", str(tmp_path_factory.mktemp("session-time"))
+        )
         yield
 
 
