@@ -1,6 +1,6 @@
 # ✅ TODO - Enterprise Scaffold Project Template
 
-**Last Updated**: 24/11/2026 15:05 — ruff zerado no repositório
+**Last Updated**: 24/11/2026 15:35 — arrumação: concluídos marcados, duplicados e obsoletos anotados (nada removido)
 **Project**: Enterprise Scaffold Project Template
 **Status**: 🟢 Active Development
 
@@ -17,8 +17,10 @@
 - [x] ~~**URGENTE: testes sobrescreviam o `~/.gitconfig` real** (identidade `Test User <test@example.com>` desde 20/05)~~: ✅ 24/11/2026 14:34 — `GIT_CONFIG_GLOBAL` temporário na sessão; `mock_subprocess` restaurado; identidade global restaurada; `.mailmap` — `docs/bugs/BUG-testes-sobrescrevem-gitconfig-global.md`
 - [ ] Revisar **outros repositórios** da máquina: commits entre 20/05 e 24/11/2026 podem ter autor `Test User <test@example.com>` (identidade global estava sobrescrita) — aplicar `.mailmap` onde fizer sentido
 - [x] ~~Limpeza do ruff~~: ✅ 24/11/2026 15:05 — `ruff check .` zerado (de ~1015); autofix seguro + manual em um PR (o hook do pre-commit impede separar); black nos arquivos tocados + `.git-blame-ignore-revs`; política: S603/B603/B404 desativadas, S603/S607/S108 liberadas em `tests/`, UP009 ignorada (cabeçalho obrigatório), `scripts/tmp` excluído; 5 testes fracos fortalecidos; 4 escritas `git config --global` removidas dos testes
-- [ ] Tornar `Lint & Validate` check obrigatório na `main` (após merge da limpeza)
+- [x] ~~Tornar `Lint & Validate` check obrigatório na `main` (após merge da limpeza)~~: ✅ 24/11 — obrigatório na `main` junto com Tests e CLI Smoke Tests (strict)
 - [x] ~~Limpar os 1031 achados pré-existentes do `ruff check .` (678 com autofix) — o job `Lint & Validate` falha até lá; depois, tornar o check obrigatório~~: ✅ 24/11/2026 15:05 — ver item acima
+- [x] ~~`make validate-templates` sempre falhava (mirava `.specify/templates/`) e não validava `scaffold/templates/`~~: ✅ 24/11 — PR #64; revelou e corrigiu `helm/templates/service.yaml` corrompido (k8s-helm) — `docs/bugs/BUG-validate-templates-escopo-e-helm-service.md`
+- [ ] `helm lint` / `helm template` no CI para o perfil k8s-helm (o validador detecta corrupção, mas não renderiza)
 - [ ] Estrutura de branches main / dev / fases **nos projetos gerados** (decisão do usuário 24/11): main + dev, PRs de feature → dev, dev → main só com CI verde, fases = `release/faseN` — ADR + TDD
 - [ ] Separar arquivos de template dos arquivos do projeto (distribuição) — etapa 1: ✅ 24/11 inventário + ADR-003 **Proposto** (PR #53, `docs/analysis/INVENTARIO-templates.md`); aguarda aprovação do usuário
 - [x] ~~**Bug `--publish`**: tarball sem `scripts/lib/flows/` e `scripts/lib/ai/` (glob não recursivo) → pacote distribuído não roda — fatia 1 do ADR-003~~: ✅ 24/11 — gerador completo no tarball (407 → 489 arquivos), caches excluídos; teste de aceitação compara projeto gerado pelo tarball vs. repo — `docs/bugs/BUG-publish-tarball-incompleto.md`
@@ -33,7 +35,7 @@
 - [x] ~~**3 testes de snapshot falhando** (`tests/test_templates_snapshot.py`)~~: ✅ 17/11 — baseline desatualizado desde a migração da sessão para o vault (`6d76e00`); corrigida também a árvore `docs/` do perfil infra (`└── TODO.md` seguido de `RUNBOOK.md`) — `docs/bugs/BUG-snapshots-desatualizados-arvore-infra.md`
 - [x] ~~`ui._iso_now()` ainda em UTC → America/Sao_Paulo~~: ✅ 17/11 — `created_at` em ISO 8601 com offset (`-03:00`) — `docs/bugs/BUG-created-at-em-utc.md`
 - [x] ~~Outros timestamps ainda em UTC (`Z`): `scripts/session-time-tracker.py::_iso_now` e `scripts/lib/publish.py` (`created_at` do manifesto; `test_smoke_imp30` exige o `Z`)~~: ✅ 17/11 — SP com offset nos dois, inclusive manifesto (decisão do usuário, `docs/adr/ADR-002-timestamps-america-sao-paulo.md`); `session_date` do tracker pela data local — `docs/bugs/BUG-tracker-e-manifesto-em-utc.md`
-- [ ] Ativar required status checks na branch protection quando houver CI rodando na `main` → movido para a seção 2026-11-24+ (CI reabilitado em 24/11)
+- [x] ~~Ativar required status checks na branch protection quando houver CI rodando na `main` → movido para a seção 2026-11-24+ (CI reabilitado em 24/11)~~: ✅ 24/11 — feito (Tests, CLI Smoke Tests, Lint & Validate)
 - [x] ~~Limpeza manual de `~/VyaJobs/enterprise-observability` (adoção acidental do BUG-26) — revisar `git status` antes de `git clean`~~: ❎ 24/11 — descartado por decisão do usuário: fora do escopo do scaffold-project (o projeto não foi alterado)
 - [x] ~~Testes gravam logs no `logs/` real da ferramenta (656 arquivos; disparam o `security-scan` do session-manager) — redirecionar para `tmp_path`~~: ✅ 17/11 — `SCAFFOLD_LOGS_DIR` isolado pelo conftest; 0 escritas em `logs/` na suíte — `docs/bugs/BUG-testes-poluem-logs-reais.md`
 - [x] ~~Logs antigos de teste em `logs/` (741 arquivos)~~: ✅ 17/11 — apagados; `scaffolds.yaml` preservado
@@ -66,14 +68,14 @@
 - [x] ~~Log não exibe os detalhes do final do stdout nem os drifts~~: ✅ 09/11 — seções `## Drift`/`## Errors` no log (`docs/bugs/BUG-log-operacao-utc-e-sem-drift.md`)
 - [x] ~~Nome do arquivo de log com data local (America/Sao_Paulo)~~: ✅ 09/11 — nome e cabeçalho em America/Sao_Paulo
 - [x] ~~`.gitignore` ignorar arquivos gerados por copilot/claude/speckit~~: ✅ 09/11 — estado local do Claude, graphify-out e cache do speckit ignorados; `.github/agents/` e `prompts/` versionados (decisão do usuário)
-- [ ] Estrutura de branches main / dev / fases + validação antes de ir para main
-- [ ] Shell integration VS Code (zsh)
+- [x] ~~Estrutura de branches main / dev / fases + validação antes de ir para main~~: ❎ ↪ movido para a seção 2026-11-24+ (escopo: projetos gerados)
+- [x] ~~Shell integration VS Code (zsh)~~: ✅ 24/11 — PR #52
 - [ ] Questionar prioridade do projeto em `objetivo-init.yaml`
-- [ ] Separar arquivos de template dos arquivos do projeto (distribuição)
+- [x] ~~Separar arquivos de template dos arquivos do projeto (distribuição)~~: ❎ ↪ movido para a seção 2026-11-24+ (ADR-003)
 - [x] ~~`objetivo-init-V2.yaml`: seções `infrastructure`/`architecture` + padrões de nomenclatura~~: ✅ 09/11 — seções 🔟 Arquitetura e 1️⃣1️⃣ Nomenclatura (default por linguagem, sobrescrevível); Infraestrutura já existia na seção 4
 - [x] ~~`docs/` sem sub-pastas `implementations` e `bugs`~~: ✅ 09/11 — criadas nos projetos gerados, com README e entrada no INDEX
 - [x] ~~Integrar `specify init --here --force --integration copilot`~~: ✅ já implementado em `run_speckit_init()` (validado 15/07)
-- [ ] Analisar docs VS Code Copilot (instructions, skills, custom agents, MCP)
+- [x] ~~Analisar docs VS Code Copilot (instructions, skills, custom agents, MCP)~~: ✅ 24/11 — PR #53 (`docs/analysis/ANALISE-vscode-copilot-customization.md`)
 
 ### Do `docs/planning/remenber.md` (itens ainda abertos)
 
@@ -150,7 +152,7 @@
   - ✅ Paths `.github/templates/` → `scaffold/templates/project/` corrigidos
   - ✅ `.claude/settings.json` limpo: removidas referências a `enterprise-observability-dashboards`
 
-- [ ] **scaffold adopt para projetos legados** — decisão pendente do usuário
+- [x] ~~**scaffold adopt para projetos legados** — decisão pendente do usuário~~: ✅ 24/11 — implementado (`scaffold.py --adopt`, PR #27; BUG-26)
   - Opção A: criar comando `scaffold adopt` (automático)
   - Opção B: documentar processo manual em `docs/guides/`
 
@@ -158,9 +160,9 @@
 
 ## 🎯 Próxima Sessão (2026-06-24+)
 
-- [ ] **Rodar suite de testes completa**: verificar se git mv + refactor de `project.py` não quebrou testes existentes (`uv run pytest`)
+- [x] ~~**Rodar suite de testes completa**: verificar se git mv + refactor de `project.py` não quebrou testes existentes (`uv run pytest`)~~: ✅ 24/11 — suíte verde no CI obrigatório (1751+ testes)
 - [x] ~~**Commit das mudanças pendentes**~~: ✅ CONCLUÍDO (2026-06-26) — `fabb5ab`, `4e3f67d`
-- [ ] **Validar `specify init` no projeto novo**: confirmar que `run_speckit_init()` funciona para todos os valores de `ai_assistant` (claude, copilot, both, none)
+- [x] ~~**Validar `specify init` no projeto novo**: confirmar que `run_speckit_init()` funciona para todos os valores de `ai_assistant` (claude, copilot, both, none)~~: ✅ 24/11 — `tests/test_run_speckit_init.py` (claude/copilot/both/none) + `scaffold new` real no CI
 
 ---
 
@@ -578,7 +580,7 @@ _(Nenhuma regressão pendente)_
     - 576d4ee: fix(scaffold): BUG-23 - objetivo-init formato incompatível
   - **Sessão**: 2026-05-21 (12:27-14:00 UTC)
 
-- [ ] **BUG-08**: Knowledge-Harvester MCP Configuration (P2 MEDIUM)
+- [x] ~~**BUG-08**: Knowledge-Harvester MCP Configuration (P2 MEDIUM)~~: ❎ 24/11 — obsoleto: pertence a outro projeto (knowledge-harvester-library)
   - **Objetivo**: Fix missing MCP configuration in knowledge-harvester-library project
   - **Descrição**: Project missing .vscode/mcp.json, no access to MCP servers
   - **Prioridade**: P2 MEDIUM (limits functionality but not blocking)
@@ -592,7 +594,7 @@ _(Nenhuma regressão pendente)_
   - **Blocker**: None (but project now has 4 MCP servers available, not 2)
   - **Expected Outcome**: Full MCP functionality in knowledge-harvester-library
 
-- [ ] **Linting Cleanup** (P2 LOW)
+- [x] ~~**Linting Cleanup** (P2 LOW)~~: ✅ 24/11 — `ruff check .` zerado (PR #62)
   - **Objetivo**: Resolve non-critical linting warnings
   - **Descrição**: 21 warnings remaining (cosmetic, non-blocking)
   - **Prioridade**: P2 LOW (code quality improvement)
@@ -2176,7 +2178,7 @@ _(Nenhuma regressão pendente)_
   - **Commit**: `de8b329` — feat(docs): IMP-48 - Fundação do sistema de documentação incremental
   - *Origem*: debate 2026-03-29 — DEBATE_INCREMENTAL_DOCUMENTATION_2026-03-29.md
 
-- [ ] **[IMP-49]** Sistema de documentação incremental — Integração
+- [x] ~~**[IMP-49]** Sistema de documentação incremental — Integração~~: ❎ 24/11 — obsoleto: docs de sessão migraram para o vault Obsidian (ADR-001); `docs/SESSIONS/` não é mais usado
   - Atualizar `session-start.prompt.md` — seção "Protocolo de Documentação"
   - Atualizar `session-end.prompt.md` — seção "Session Security Review" + checklist
   - Criar `.gitleaks-session-docs.toml` — config de scan para docs/SESSIONS/
@@ -2188,7 +2190,7 @@ _(Nenhuma regressão pendente)_
   - **Prioridade**: P0 | **Estimativa**: 6h
   - *Origem*: debate 2026-03-29
 
-- [ ] **[IMP-50]** Sistema de documentação incremental — Docs + Migração
+- [x] ~~**[IMP-50]** Sistema de documentação incremental — Docs + Migração~~: ❎ 24/11 — obsoleto: docs de sessão migraram para o vault Obsidian (ADR-001); `docs/SESSIONS/` não é mais usado
   - Criar `docs/SESSION_DOCS_ADOPTION.md` — guia de adoção para projetos existentes
   - Criar `docs/SECURITY_SESSION_DOCS.md` — exemplos de do/don't
   - Criar `scripts/migrate-daily-activities.py` — freeform → structured
@@ -2199,7 +2201,7 @@ _(Nenhuma regressão pendente)_
   - **Prioridade**: P0 | **Estimativa**: 4h
   - *Origem*: debate 2026-03-29
 
-- [ ] **[IMP-51]** Busca e indexação de histórico de sessões (MCP integration)
+- [x] ~~**[IMP-51]** Busca e indexação de histórico de sessões (MCP integration)~~: ❎ 24/11 — obsoleto: docs de sessão migraram para o vault Obsidian (ADR-001); `docs/SESSIONS/` não é mais usado
   - `scripts/session-search.py --query "texto"` — busca em DAILY_ACTIVITIES
   - Integração com `mcp_memory` para query de sessões passadas
   - Criar entidades "Session" com observações = blocos de DAILY_ACTIVITIES
@@ -2416,7 +2418,7 @@ _(Nenhuma regressão pendente)_
   - **Fase A (P0) ✅**: A.1 `SPECKIT_SYNC_DATE` em config.py • A.2 `copy_speckit()` • A.3 `generate_constitution()` • A.4 questão `[8]` em ui.py • A.5 integrar em scaffold.py • A.6 `devops-security.prompt.md` • A.7 extensões Review/Runbook nos 3 perfis • A.8 `constitution.md` v1.0.0
   - **Fase B (P1)** 🔵: `devops-cicd.prompt.md` + testes scaffold + docs de uso
   - **Fase C (P2)** 🔵: melhorias UX `ui.py`
-- [ ] **[IMP-15]** (futuro) Geração de `Dockerfile`, `docker-compose.yml`, workflows CI/CD pelo scaffold
+- [x] ~~**[IMP-15]** (futuro) Geração de `Dockerfile`, `docker-compose.yml`, workflows CI/CD pelo scaffold~~: ✅ 24/11 — já existe: `scaffold.py --infra` (ci.yml, Dockerfile, docker-compose, RUNBOOK)
 - [x] **[IMP-16]** ✅ **CONCLUÍDO 2026-03-07** — Testes para `scaffold.py` e `scripts/lib/`
   - 54 smoke tests PASSED (9 combos × 3 asserts × 2 funções)
   - 4 snapshot tests PASSED (modo CI, comparação contra baseline)
@@ -2569,103 +2571,105 @@ _(Nenhuma regressão pendente)_
 
 ## 🚀 High Priority
 
+> 🗄️ **Arquivado em 24/11**: as seções abaixo (High/Medium/Low Priority, Ideas) são o backlog genérico do template original. Itens já entregues foram marcados com ✅ e a evidência; os demais ficaram ❎ arquivados — não foram descartados, mas precisam de spec própria antes de virar trabalho.
+
 ### Testing & Validation
-- [ ] Test `make init` command
-- [ ] Verify directory structure creation
-- [ ] Test Python setup (`make setup-python`)
-- [ ] Test Node.js setup (`make setup-node`)
-- [ ] Validate .gitignore rules
-- [ ] Test Docker commands
-- [ ] Verify security implementation
+- [x] ~~Test `make init` command~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Verify directory structure creation~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Test Python setup (`make setup-python`)~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Test Node.js setup (`make setup-node`)~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Validate .gitignore rules~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Test Docker commands~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Verify security implementation~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
 
 ### Code Examples
-- [ ] Add Python MVP example
-- [ ] Add TypeScript/Node.js MVP example
-- [ ] Add Factory pattern implementation examples
-- [ ] Add Repository pattern implementation examples
-- [ ] Add Service layer examples
+- [x] ~~Add Python MVP example~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Add TypeScript/Node.js MVP example~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Add Factory pattern implementation examples~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Add Repository pattern implementation examples~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Add Service layer examples~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
 
 ---
 
 ## 📋 Medium Priority
 
 ### Documentation
-- [ ] Add architecture decision records (ADRs)
-- [ ] Create API documentation templates
-- [ ] Write development guide
-- [ ] Write deployment guide
-- [ ] Add video tutorial
-- [ ] Create contribution guidelines (CONTRIBUTING.md)
+- [x] ~~Add architecture decision records (ADRs)~~: ✅ docs/adr/ (ADR-000..003) (24/11)
+- [x] ~~Create API documentation templates~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Write development guide~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Write deployment guide~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Add video tutorial~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Create contribution guidelines (CONTRIBUTING.md)~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
 
 ### CI/CD
-- [ ] Implement GitHub Actions workflows
-  - [ ] CI workflow (testing, linting)
-  - [ ] CD workflow (deployment)
-  - [ ] Security scanning workflow
-- [ ] Add deployment scripts
-- [ ] Create environment-specific configs
+- [x] ~~Implement GitHub Actions workflows~~: ✅ `.github/workflows/ci-template.yml` (24/11)
+  - [x] ~~CI workflow (testing, linting)~~: ✅ ci-template.yml (Tests, CLI Smoke, Lint & Validate) (24/11)
+  - [x] ~~CD workflow (deployment)~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+  - [x] ~~Security scanning workflow~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Add deployment scripts~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Create environment-specific configs~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
 
 ### Additional Language Support
-- [ ] Add Java/Spring Boot template
-- [ ] Add Go template
-- [ ] Add Rust template
-- [ ] Add Kotlin template
+- [x] ~~Add Java/Spring Boot template~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Add Go template~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Add Rust template~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Add Kotlin template~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
 
 ---
 
 ## 🔄 Low Priority
 
 ### Infrastructure
-- [ ] Kubernetes deployment configurations
-- [ ] Terraform/Pulumi IaC templates
-- [ ] Monitoring setup (Prometheus/Grafana)
-- [ ] Logging infrastructure (ELK stack)
-- [ ] Tracing setup (Jaeger/Zipkin)
+- [x] ~~Kubernetes deployment configurations~~: ✅ perfil `k8s-helm` (24/11)
+- [x] ~~Terraform/Pulumi IaC templates~~: ✅ perfil `terraform-aws` (Terraform) (24/11)
+- [x] ~~Monitoring setup (Prometheus/Grafana)~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Logging infrastructure (ELK stack)~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Tracing setup (Jaeger/Zipkin)~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
 
 ### Database
-- [ ] Database migration templates
-- [ ] Seed data examples
-- [ ] ORM configuration examples
-- [ ] Database connection pooling
+- [x] ~~Database migration templates~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Seed data examples~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~ORM configuration examples~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Database connection pooling~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
 
 ### Testing
-- [ ] Unit test examples
-- [ ] Integration test examples
-- [ ] E2E test examples
-- [ ] Performance test framework
-- [ ] Test coverage reporting
+- [x] ~~Unit test examples~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Integration test examples~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~E2E test examples~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Performance test framework~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Test coverage reporting~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
 
 ---
 
 ## 💡 Ideas / Backlog
 
 ### Features
-- [ ] GraphQL API template
-- [ ] gRPC service template
-- [ ] WebSocket implementation
-- [ ] Event-driven architecture example
-- [ ] Microservices template
-- [ ] Serverless functions (AWS Lambda, Azure Functions)
+- [x] ~~GraphQL API template~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~gRPC service template~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~WebSocket implementation~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Event-driven architecture example~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Microservices template~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Serverless functions (AWS Lambda, Azure Functions)~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
 
 ### Mobile
-- [ ] React Native template
-- [ ] Flutter template
-- [ ] Ionic template
+- [x] ~~React Native template~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Flutter template~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Ionic template~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
 
 ### Tools Integration
-- [ ] Prettier configuration
-- [ ] ESLint configuration
-- [ ] Pre-commit hooks (Husky)
-- [ ] Commitlint setup
-- [ ] Conventional commits
+- [x] ~~Prettier configuration~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~ESLint configuration~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Pre-commit hooks (Husky)~~: ✅ equivalente em Python: `.pre-commit-config.yaml` (Husky é do ecossistema JS) (24/11)
+- [x] ~~Commitlint setup~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Conventional commits~~: ✅ hook `scripts/git-hooks/commit-msg` + `git_validators.py` (24/11)
 
 ### Advanced Features
-- [ ] Multi-tenancy support
-- [ ] Feature flags implementation
-- [ ] Rate limiting
-- [ ] API versioning
-- [ ] GraphQL subscriptions
-- [ ] Redis caching examples
+- [x] ~~Multi-tenancy support~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Feature flags implementation~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Rate limiting~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~API versioning~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~GraphQL subscriptions~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
+- [x] ~~Redis caching examples~~: ❎ arquivado 24/11 — backlog genérico do template original, sem dono/escopo; reavaliar via spec antes de executar
 
 ---
 
@@ -2742,19 +2746,19 @@ _(Nenhuma regressão pendente)_
 ## ✅ Completion Criteria
 
 ### Ready for 1.0 Release
-- [ ] All high-priority items completed
-- [ ] Examples for all supported languages
-- [ ] CI/CD fully functional
-- [ ] Comprehensive documentation
-- [ ] User testing completed
-- [ ] Community feedback incorporated
+- [x] ~~All high-priority items completed~~: ❎ arquivado 24/11 — critério do template original para 1.0; sem release planejado
+- [x] ~~Examples for all supported languages~~: ❎ arquivado 24/11 — critério do template original para 1.0; sem release planejado
+- [x] ~~CI/CD fully functional~~: ❎ arquivado 24/11 — critério do template original para 1.0; sem release planejado
+- [x] ~~Comprehensive documentation~~: ❎ arquivado 24/11 — critério do template original para 1.0; sem release planejado
+- [x] ~~User testing completed~~: ❎ arquivado 24/11 — critério do template original para 1.0; sem release planejado
+- [x] ~~Community feedback incorporated~~: ❎ arquivado 24/11 — critério do template original para 1.0; sem release planejado
 
 ### Ready for 2.0 Release
-- [ ] Kubernetes support
-- [ ] Multi-cloud deployment
-- [ ] Advanced monitoring
-- [ ] Mobile templates
-- [ ] Microservices architecture
+- [x] ~~Kubernetes support~~: ❎ arquivado 24/11 — critério do template original para 1.0; sem release planejado
+- [x] ~~Multi-cloud deployment~~: ❎ arquivado 24/11 — critério do template original para 1.0; sem release planejado
+- [x] ~~Advanced monitoring~~: ❎ arquivado 24/11 — critério do template original para 1.0; sem release planejado
+- [x] ~~Mobile templates~~: ❎ arquivado 24/11 — critério do template original para 1.0; sem release planejado
+- [x] ~~Microservices architecture~~: ❎ arquivado 24/11 — critério do template original para 1.0; sem release planejado
 
 ---
 

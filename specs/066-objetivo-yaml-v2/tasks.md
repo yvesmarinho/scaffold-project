@@ -27,28 +27,28 @@ description: "Task list for objetivo.yaml v2.0 implementation"
 
 ### US1/US2 - Conversão de Projetos Template
 
-- [ ] T001 [P] [US1] Converter `python-fastapi` para objetivo-v2 em `poc/objetivo-v2-python-fastapi.md`
+- [x] T001 [P] [US1] Converter `python-fastapi` para objetivo-v2 em `poc/objetivo-v2-python-fastapi.md` — ✅ conferido 24/11/2026: `poc/objetivo-v2-python-fastapi.md` existe
   - Usar template v2.0 (Markdown Híbrido)
   - Preencher seções P0: 1️⃣ O que faz / 2️⃣ Problema / 3️⃣ Escopo
   - Preencher seções P1: 4️⃣ Restrições / 5️⃣ Regras de Negócio
   - Adicionar exemplos inline específicos para FastAPI
   - Target: ~300 linhas
 
-- [ ] T002 [P] [US1] Converter `k8s-helm` para objetivo-v2 em `poc/objetivo-v2-k8s-helm.md`
+- [x] T002 [P] [US1] Converter `k8s-helm` para objetivo-v2 em `poc/objetivo-v2-k8s-helm.md` — ✅ conferido 24/11/2026: `poc/objetivo-v2-k8s-helm.md` existe
   - Usar template v2.0 (Markdown Híbrido)
   - Preencher seções P0 + P1
   - Preencher seção P2: 6️⃣ Estrutura de Pastas (chart structure)
   - Adicionar exemplos inline específicos para Helm charts
   - Target: ~280 linhas
 
-- [ ] T003 [P] [US1] Converter `terraform-aws` para objetivo-v2 em `poc/objetivo-v2-terraform-aws.md`
+- [x] T003 [P] [US1] Converter `terraform-aws` para objetivo-v2 em `poc/objetivo-v2-terraform-aws.md` — ✅ conferido 24/11/2026: `poc/objetivo-v2-terraform-aws.md` existe
   - Usar template v2.0 (Markdown Híbrido)
   - Preencher seções P0 + P1
   - Preencher seção P2: 7️⃣ Tecnologias (AWS services)
   - Adicionar exemplos inline específicos para Terraform
   - Target: ~320 linhas
 
-- [ ] T004 [US1] Documentar edge cases encontrados em `docs/debates/VALIDACAO-FASE1-EDGE-CASES.md`
+- [x] T004 [US1] Documentar edge cases encontrados em `docs/debates/VALIDACAO-FASE1-EDGE-CASES.md` — ✅ conferido 24/11/2026: `docs/debates/VALIDACAO-FASE1-EDGE-CASES.md` existe
   - Campos ambíguos ou confusos
   - Seções que faltaram
   - Exemplos que precisaram ser ajustados
