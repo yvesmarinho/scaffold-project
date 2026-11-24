@@ -260,6 +260,15 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     action_group.add_argument(
+        "--update-profile-files",
+        action="store_true",
+        help=(
+            "--upgrade/--compose: atualiza arquivos de PERFIL já existentes que diferem\n"
+            "  do template (ex.: src/main.py, Dockerfile, helm/templates/*), com backup\n"
+            "  <arquivo>.backup; lista os arquivos antes. --force NÃO os altera."
+        ),
+    )
+    action_group.add_argument(
         "--publish",
         action="store_true",
         help="gera tarball de release do template (dist/enterprise-template-v*.tar.gz)",

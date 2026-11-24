@@ -330,7 +330,28 @@ def flow_upgrade(args: argparse.Namespace) -> int:
             console.print(
                 f"  [blue]🧩 Re-aplicando {len(profiles_applied)} perfil(is)...[/blue]"
             )
-        compose_result = composer.compose(profiles_applied, cfg, force=force)
+        # Arquivos de perfil (src/main.py, Dockerfile...) costumam ser editados:
+        # só são atualizados com --update-profile-files (nunca pelo --force).
+        update_profile_files: bool = getattr(args, "update_profile_files", False)
+        divergentes = composer.divergent_files(profiles_applied, cfg)
+        if divergentes and not use_json:
+            nomes = "\n".join(
+                f"      - {p.relative_to(cfg.target_dir)}" for p in divergentes
+            )
+            if update_profile_files:
+                console.print(
+                    f"  [yellow]⚠  {len(divergentes)} arquivo(s) de perfil serão"
+                    f" atualizados (backup <arquivo>.backup):[/yellow]\n{nomes}"
+                )
+            else:
+                console.print(
+                    f"  [yellow]ℹ  {len(divergentes)} arquivo(s) de perfil diferem do"
+                    f" template e foram preservados:[/yellow]\n{nomes}\n"
+                    "     Para atualizá-los (com backup): --update-profile-files"
+                )
+        compose_result = composer.compose(
+            profiles_applied, cfg, force=update_profile_files
+        )
         # Converte CompositionItem → CreatedItem para o resumo
         for item in getattr(compose_result, "items", []):
             results.append(item)

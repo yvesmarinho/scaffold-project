@@ -3,7 +3,7 @@
 NOME: test_composer_force.py
 TITULO: ProfileComposer respeita --force (upgrade consegue corrigir template de perfil)
 DATA: 24/11/2026 16:09
-MODIFICADO: 24/11/2026 16:09
+MODIFICADO: 24/11/2026 16:22
 VERSÃO: 1.0.0
 DEPEND: pytest
 STATUS: DEV
@@ -13,6 +13,10 @@ ignorando `--force`. Correções de template (ex.: helm/templates/service.yaml
 corrompido, BUG de 24/11/2026) nunca chegavam a projetos já gerados via
 `scaffold upgrade --force`. O rollback apaga itens "created" — um arquivo
 sobrescrito não pode ser marcado assim.
+
+Decisão do usuário (24/11/2026, após o PR #66): `--force` NÃO toca arquivos de
+perfil (src/main.py, Dockerfile... costumam ser editados). Atualizá-los exige a
+flag explícita `--update-profile-files`, que lista os arquivos antes.
 """
 
 from __future__ import annotations
@@ -59,7 +63,7 @@ def test_sem_force_preserva_arquivo_divergente_e_avisa(ambiente) -> None:
 
     assert item.status == "skipped"
     assert destino.read_text(encoding="utf-8") == "versao: quebrada\n"
-    assert "--force" in (item.message or "")
+    assert "--update-profile-files" in (item.message or "")
 
 
 def test_force_sobrescreve_divergente_com_backup(ambiente) -> None:
@@ -153,15 +157,48 @@ def test_upgrade_sem_force_preserva_service_divergente(projeto_k8s: Path) -> Non
     assert service.read_text(encoding="utf-8") == _CORROMPIDO
 
 
-def test_upgrade_force_corrige_service_com_backup(projeto_k8s: Path) -> None:
+def test_upgrade_force_nao_toca_arquivos_de_perfil(projeto_k8s: Path) -> None:
+    """--force sozinho mantém o comportamento antigo: arquivo de perfil preservado."""
     service = projeto_k8s / "helm/templates/service.yaml"
     service.write_text(_CORROMPIDO, encoding="utf-8")
 
     proc = _scaffold("upgrade", "--force", "--ci", cwd=projeto_k8s)
 
     assert proc.returncode == 0, proc.stderr[-1500:]
+    assert service.read_text(encoding="utf-8") == _CORROMPIDO
+    assert "--update-profile-files" in proc.stdout, "deve sugerir a flag explícita"
+
+
+def test_upgrade_update_profile_files_corrige_service_com_backup(
+    projeto_k8s: Path,
+) -> None:
+    service = projeto_k8s / "helm/templates/service.yaml"
+    service.write_text(_CORROMPIDO, encoding="utf-8")
+
+    proc = _scaffold("upgrade", "--update-profile-files", "--ci", cwd=projeto_k8s)
+
+    assert proc.returncode == 0, proc.stderr[-1500:]
+    assert "helm/templates/service.yaml" in proc.stdout, "deve listar o arquivo antes"
     assert service.read_text(encoding="utf-8") == _TEMPLATE_SERVICE.read_text(
         encoding="utf-8"
     )
     backup = service.with_name("service.yaml.backup")
     assert backup.read_text(encoding="utf-8") == _CORROMPIDO
+
+
+def test_divergent_files_lista_so_o_que_difere(ambiente) -> None:
+    composer, cfg, destino = ambiente
+    assert composer.divergent_files(["perfil-x"], cfg) == []  # ainda não existe
+    destino.write_text(_NOVO, encoding="utf-8")
+    assert composer.divergent_files(["perfil-x"], cfg) == []  # idêntico
+    destino.write_text("editado pelo usuário\n", encoding="utf-8")
+    assert composer.divergent_files(["perfil-x"], cfg) == [destino]
+
+
+def test_help_documenta_update_profile_files() -> None:
+    import subprocess
+
+    proc = subprocess.run(  # noqa: S603
+        [sys.executable, str(_SCAFFOLD), "--help"], capture_output=True, text=True
+    )
+    assert "--update-profile-files" in proc.stdout
