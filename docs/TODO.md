@@ -1,6 +1,6 @@
 # ✅ TODO - Enterprise Scaffold Project Template
 
-**Last Updated**: 24/11/2026 10:43 — CI reabilitado (ci-template.yml com uv) e tracker robusto em CI
+**Last Updated**: 24/11/2026 11:03 — CI reabilitado (ci-template.yml com uv) e tracker robusto em CI
 **Project**: Enterprise Scaffold Project Template
 **Status**: 🟢 Active Development
 
@@ -8,7 +8,7 @@
 
 ## 🎯 Próxima Sessão (2026-11-24+)
 
-- [ ] Ativar required status checks na `main` após o CI ficar verde no PR `fix/ci-main` (`Tests`, `CLI Smoke Tests`; `Lint & Validate` só depois da limpeza do ruff)
+- [x] ~~Ativar required status checks na `main` após o CI ficar verde no PR `fix/ci-main` (`Tests`, `CLI Smoke Tests`; `Lint & Validate` só depois da limpeza do ruff)~~: ✅ 24/11 — `Tests` e `CLI Smoke Tests` obrigatórios (strict: false); demais regras de proteção inalteradas — PR #51, `docs/bugs/BUG-ci-desabilitado-e-tracker-quebra-em-ci.md`
 - [ ] Limpar os 1031 achados pré-existentes do `ruff check .` (678 com autofix) — o job `Lint & Validate` falha até lá; depois, tornar o check obrigatório
 - [ ] Estrutura de branches main / dev / fases + validação antes de ir para main
 - [ ] Separar arquivos de template dos arquivos do projeto (distribuição)
