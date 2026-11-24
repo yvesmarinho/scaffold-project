@@ -13,7 +13,9 @@ repos:
     hooks:
       - id: check-yaml
         name: Check YAML Syntax
-        exclude: ^\.github/
+        # helm/templates: templates Go ({{ }}), não YAML — validados por
+        # scripts/validate-templates.py (detecta "{ {" corrompido)
+        exclude: ^(\.github/|scaffold/templates/project/k8s-helm/helm/templates/)
       - id: check-json
         name: Check JSON Syntax
       - id: check-added-large-files
