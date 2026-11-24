@@ -2,15 +2,19 @@
 """
 validate-templates.py — Template Validator for IMP-65-LITE
 
-Validates all templates in .specify/templates/:
-  - YAML/JSON syntax validation
-  - Required frontmatter fields
+Validates the templates distributed by the scaffold (default: scaffold/templates/),
+recursively:
+  - YAML (multi-document) / JSON syntax validation
+  - Go templates (Helm charts) are not parsed as YAML
+  - Required frontmatter fields (opt-in: --require-frontmatter FIELD)
   - Variable substitution consistency
-  - Markdown link validation
-  - File reference validation
+  - Markdown link validation (opt-in: --check-links — template links usually
+    point to paths of the GENERATED project)
 
 Usage:
     python scripts/validate-templates.py                    # Full validation
+    python scripts/validate-templates.py --template-dir .specify/templates \
+        --require-frontmatter template_version --check-links  # old IMP-65 mode
     python scripts/validate-templates.py --json             # JSON output for CI/CD
     python scripts/validate-templates.py --template spec    # Validate specific template
     python scripts/validate-templates.py --strict           # Fail on warnings
@@ -35,11 +39,30 @@ import yaml
 # Configuration
 # ---------------------------------------------------------------------------
 
-TEMPLATE_DIR = Path(".specify/templates")
-REQUIRED_FRONTMATTER_FIELDS = {
-    "*.md": ["template_version"],
-    "objetivo-template.yaml": [],  # YAML files may not have frontmatter
-}
+# Templates distribuídos pelo scaffold. (`.specify/templates/` é do SpecKit,
+# gerado pelo `specify init` — não é editado por este projeto.)
+TEMPLATE_DIR = Path("scaffold/templates")
+TEMPLATE_PATTERNS = ("*.md", "*.yaml", "*.yml", "*.json")
+SKIP_DIR_NAMES = frozenset(
+    {
+        ".ruff_cache",
+        ".mypy_cache",
+        ".pytest_cache",
+        "__pycache__",
+        "node_modules",
+        ".venv",
+    }
+)
+# Templates Go (Helm): `{{ .Values.x }}`, `{{- include ... }}` — não são YAML válido.
+# `{{ ... }}` quebrado em `{ { ... } }` por formatador de YAML: o Helm não renderiza.
+BROKEN_GO_TEMPLATE_PATTERN = re.compile(
+    r"\{ \{-?\s*(?:-\s*)?(?:\.|include\b|if\b|end\b|range\b|with\b|toYaml\b)"
+)
+# objetivo v2 ("Markdown híbrido"): frontmatter YAML + corpo Markdown, extensão .yaml
+HYBRID_FRONTMATTER_PATTERN = re.compile(r"\A---\s*\n(.*?)\n---\s*\n(.*)\Z", re.DOTALL)
+GO_TEMPLATE_PATTERN = re.compile(
+    r"\{\{-?\s*(?:\.|include\b|if\b|else\b|end\b|range\b|with\b|define\b|template\b|toYaml\b)"
+)
 
 VARIABLE_PATTERN = re.compile(
     r"\$\{([A-Z_][A-Z0-9_]*)\}|\$([A-Z_][A-Z0-9_]*)\b|\[([A-Z_][A-Z0-9_]*)\]"
@@ -69,6 +92,7 @@ class ValidationResult:
     errors: list[ValidationIssue] = field(default_factory=list)
     warnings: list[ValidationIssue] = field(default_factory=list)
     files_checked: int = 0
+    template_dir: str = ""
 
     @property
     def success(self) -> bool:
@@ -87,9 +111,22 @@ class ValidationResult:
 class TemplateValidator:
     """Main template validation logic"""
 
-    def __init__(self, template_dir: Path):
+    def __init__(
+        self,
+        template_dir: Path,
+        required_frontmatter: tuple[str, ...] = ("template_version",),
+        check_links: bool = True,
+    ):
+        """
+        :param template_dir: raiz dos templates (busca recursiva).
+        :param required_frontmatter: campos obrigatórios no frontmatter dos .md;
+            vazio = frontmatter opcional (sem aviso quando ausente).
+        :param check_links: valida links Markdown relativos.
+        """
         self.template_dir = template_dir
-        self.result = ValidationResult()
+        self.required_frontmatter = tuple(required_frontmatter)
+        self.check_links = check_links
+        self.result = ValidationResult(template_dir=str(template_dir))
 
     def validate_all(self, template_filter: str | None = None) -> ValidationResult:
         """Validate all templates or filtered subset"""
@@ -105,9 +142,15 @@ class TemplateValidator:
             return self.result
 
         # Find all template files
-        template_files = []
-        for pattern in ["*.md", "*.yaml", "*.json"]:
-            template_files.extend(self.template_dir.glob(pattern))
+        template_files = [
+            path
+            for pattern in TEMPLATE_PATTERNS
+            for path in self.template_dir.rglob(pattern)
+            if path.is_file()
+            and not SKIP_DIR_NAMES.intersection(
+                path.relative_to(self.template_dir).parts
+            )
+        ]
 
         # Filter if specified
         if template_filter:
@@ -157,7 +200,7 @@ class TemplateValidator:
             return
 
         # Dispatch to specific validator
-        if file_path.suffix == ".yaml":
+        if file_path.suffix in (".yaml", ".yml"):
             self._validate_yaml(file_path, content)
         elif file_path.suffix == ".json":
             self._validate_json(file_path, content)
@@ -165,10 +208,27 @@ class TemplateValidator:
             self._validate_markdown(file_path, content)
 
     def _validate_yaml(self, file_path: Path, content: str):
-        """Validate YAML file syntax"""
+        """Validate YAML file syntax (multi-document; Go templates skipped)"""
+        corrompido = BROKEN_GO_TEMPLATE_PATTERN.search(content)
+        if corrompido:
+            self.result.errors.append(
+                ValidationIssue(
+                    severity="error",
+                    file=str(file_path),
+                    line=content[: corrompido.start()].count("\n") + 1,
+                    message="Go template corrompido: '{ {' em vez de '{{' (não renderiza no Helm)",
+                    details="Provável formatador de YAML aplicado a template Go",
+                )
+            )
+            return
+        hibrido = HYBRID_FRONTMATTER_PATTERN.match(content)
+        if hibrido and re.search(r"^#{1,6} ", hibrido.group(2), re.MULTILINE):
+            content = hibrido.group(1)  # valida só o frontmatter; o corpo é Markdown
+        if GO_TEMPLATE_PATTERN.search(content):
+            return  # template Go (ex.: Helm) — validado pelo `helm lint`, não por YAML
         try:
-            data = yaml.safe_load(content)
-            if data is None:
+            docs = [doc for doc in yaml.safe_load_all(content) if doc is not None]
+            if not docs:
                 self.result.warnings.append(
                     ValidationIssue(
                         severity="warning",
@@ -206,10 +266,10 @@ class TemplateValidator:
         # Extract frontmatter
         frontmatter = self._extract_frontmatter(content)
 
-        # Validate frontmatter
+        # Validate frontmatter (só quando há campos obrigatórios configurados)
         if frontmatter:
             self._validate_frontmatter(file_path, frontmatter)
-        else:
+        elif self.required_frontmatter:
             self.result.warnings.append(
                 ValidationIssue(
                     severity="warning",
@@ -220,7 +280,8 @@ class TemplateValidator:
             )
 
         # Validate links
-        self._validate_markdown_links(file_path, content)
+        if self.check_links:
+            self._validate_markdown_links(file_path, content)
 
         # Validate variables
         self._validate_variables(file_path, content)
@@ -246,7 +307,7 @@ class TemplateValidator:
     def _validate_frontmatter(self, file_path: Path, frontmatter: dict[str, Any]):
         """Validate frontmatter required fields"""
         # Check required fields
-        for campo in REQUIRED_FRONTMATTER_FIELDS.get("*.md", []):
+        for campo in self.required_frontmatter:
             if campo not in frontmatter:
                 self.result.errors.append(
                     ValidationIssue(
@@ -254,7 +315,7 @@ class TemplateValidator:
                         file=str(file_path),
                         line=1,
                         message=f"Missing required frontmatter field: {campo}",
-                        details=f"Required fields: {', '.join(REQUIRED_FRONTMATTER_FIELDS['*.md'])}",
+                        details=f"Required fields: {', '.join(self.required_frontmatter)}",
                     )
                 )
 
@@ -353,6 +414,7 @@ def format_console(result: ValidationResult) -> str:
     lines.append("=" * 70)
     lines.append("TEMPLATE VALIDATION RESULTS")
     lines.append("=" * 70)
+    lines.append(f"Template dir: {result.template_dir}")
     lines.append(f"Files checked: {result.files_checked}")
     lines.append("")
 
@@ -402,6 +464,7 @@ def format_json(result: ValidationResult) -> str:
     """Format validation results as JSON"""
     data = {
         "success": result.success,
+        "template_dir": result.template_dir,
         "files_checked": result.files_checked,
         "errors": [
             {
@@ -434,7 +497,7 @@ def format_json(result: ValidationResult) -> str:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Validate templates in .specify/templates/",
+        description="Validate scaffold templates (default: scaffold/templates/)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
@@ -453,10 +516,27 @@ def main():
         help=f"Template directory (default: {TEMPLATE_DIR})",
     )
 
+    parser.add_argument(
+        "--require-frontmatter",
+        action="append",
+        default=[],
+        metavar="FIELD",
+        help="Campo obrigatório no frontmatter dos .md (repetível; padrão: nenhum)",
+    )
+    parser.add_argument(
+        "--check-links",
+        action="store_true",
+        help="Valida links Markdown relativos (padrão: desligado)",
+    )
+
     args = parser.parse_args()
 
     # Run validation
-    validator = TemplateValidator(args.template_dir)
+    validator = TemplateValidator(
+        args.template_dir,
+        required_frontmatter=tuple(args.require_frontmatter),
+        check_links=args.check_links,
+    )
     result = validator.validate_all(template_filter=args.template)
 
     # Output results

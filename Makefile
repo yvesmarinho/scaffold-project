@@ -129,10 +129,10 @@ lint-json:
 ## lint-config: Run all configuration validation checks
 lint-config: lint-yaml lint-json
 
-## validate-templates: Validate .specify/templates/ (IMP-65-LITE)
+## validate-templates: Valida os templates distribuídos (scaffold/templates/, recursivo)
 validate-templates:
-	@echo "$(BLUE)🔍 Validating templates in .specify/templates/...$(NC)"
-	@python scripts/validate-templates.py
+	@echo "$(BLUE)🔍 Validating templates in scaffold/templates/...$(NC)"
+	@uv run python scripts/validate-templates.py
 	@echo "$(GREEN)✅ Templates validated$(NC)"
 	@echo "$(GREEN)✅ All configuration files validated$(NC)"
 
