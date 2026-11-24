@@ -191,18 +191,18 @@ python scripts/scaffold-query.py --project "vya-*"
 
 ## ✅ Definition of Done
 
-- [ ] `scripts/validate-templates.py` funcional
-- [ ] Validação de YAML/JSON syntax
-- [ ] Check de variáveis obrigatórias
-- [ ] Validação de links/referências
-- [ ] `make validate-templates` no Makefile
-- [ ] `scripts/scaffold_logger.py` implementado
-- [ ] `logs/scaffolds.yaml` criado
-- [ ] Integração com `scripts/scaffold.py`
-- [ ] `scripts/scaffold-query.py` para consultas
-- [ ] Testes básicos (4-5 testes)
-- [ ] Documentação em `docs/guides/TEMPLATE_VALIDATION.md`
-- [ ] POCs documentados em `docs/reference/POC-LEARNINGS.md`
+- [x] `scripts/validate-templates.py` funcional — ✅ escopo corrigido para `scaffold/templates/` no PR #64 (antes mirava `.specify/templates/` e sempre falhava) (conferido 24/11/2026)
+- [x] Validação de YAML/JSON syntax — ✅ inclui YAML multi-documento, objetivo v2 híbrido e templates Go (PR #64) (conferido 24/11/2026)
+- [x] Check de variáveis obrigatórias — ✅ `_validate_variables` (conferido 24/11/2026)
+- [x] Validação de links/referências — ✅ opt-in `--check-links` (links dos templates apontam para o projeto gerado) (conferido 24/11/2026)
+- [x] `make validate-templates` no Makefile — ✅ e no CI (job Lint & Validate, PR #64) (conferido 24/11/2026)
+- [x] `scripts/scaffold_logger.py` implementado — ✅ (conferido 24/11/2026)
+- [x] `logs/scaffolds.yaml` criado — ✅ (conferido 24/11/2026)
+- [x] Integração com `scripts/scaffold.py` — ✅ via `scripts/lib/flows/new_project.py` (conferido 24/11/2026)
+- [x] `scripts/scaffold-query.py` para consultas — ✅ (conferido 24/11/2026)
+- [x] Testes básicos (4-5 testes) — ✅ `test_validate_templates*.py`, `test_scaffold_logger.py`, `test_scaffold_logs_dir.py` (conferido 24/11/2026)
+- [x] Documentação em `docs/guides/TEMPLATE_VALIDATION.md` — ✅ (conferido 24/11/2026)
+- [x] POCs documentados em `docs/reference/POC-LEARNINGS.md` — ✅ (conferido 24/11/2026)
 
 ---
 
