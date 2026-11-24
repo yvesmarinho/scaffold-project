@@ -68,7 +68,7 @@ def _ensure_dirs():
 
 
 def _get_current_branch() -> str | None:
-    """Retorna nome da branch Git atual, ou None se não estiver em repo Git."""
+    """Retorna nome da branch Git atual, ou None fora de repo Git ou em detached HEAD."""
     try:
         result = subprocess.run(
             ["git", "rev-parse", "--abbrev-ref", "HEAD"],
@@ -77,9 +77,11 @@ def _get_current_branch() -> str | None:
             check=True,
             cwd=Path.cwd()
         )
-        return result.stdout.strip()
     except (subprocess.CalledProcessError, FileNotFoundError):
         return None
+    branch = result.stdout.strip()
+    # Detached HEAD (ex.: checkout de PR no CI) não é uma branch a validar.
+    return None if branch in ("", "HEAD") else branch
 
 
 _LOCAL_TZ = ZoneInfo("America/Sao_Paulo")
@@ -196,7 +198,12 @@ def cmd_start():
             print("   - Veja CONTRIBUTING.md para detalhes", file=sys.stderr)
             print("\n❓ Continuar mesmo assim? (y/N): ", end="", file=sys.stderr)
 
-            response = input().strip().lower()
+            try:
+                response = input().strip().lower()
+            except EOFError:
+                # Sem TTY (CI, pipe): sem confirmação explícita, recusa.
+                print("", file=sys.stderr)
+                response = ""
             if response not in ("y", "yes", "s", "sim"):
                 print("❌ Sessão não iniciada. Corrija o nome da branch primeiro.", file=sys.stderr)
                 return 1

@@ -13,6 +13,8 @@ A production-ready, scalable project template designed to accelerate development
 > **Restauração:** Q2 2026 após conclusão do core
 > **Exceção:** ✅ `.github/workflows/scaffold-tests.yml` está **ativo** (testes automatizados do scaffold)
 > **Guia completo:** [WORKFLOWS_REMOVED_TEMPORARILY.md](WORKFLOWS_REMOVED_TEMPORARILY.md) | [CI-CD-RESTORATION-GUIDE.md](docs/CI-CD-RESTORATION-GUIDE.md)
+>
+> **Atualização 24/11/2026:** 🟢 GitHub Actions reabilitado. CI principal em `.github/workflows/ci-template.yml` (uv + Python 3.12; jobs `Tests`, `CLI Smoke Tests`, `Lint & Validate`), rodando em todo PR para `main`. `scaffold-tests.yml` removido (dependia de `requirements.txt` inexistente e de Python < 3.12).
 
 ---
 

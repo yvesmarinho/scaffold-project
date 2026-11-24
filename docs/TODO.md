@@ -1,8 +1,19 @@
 # ✅ TODO - Enterprise Scaffold Project Template
 
-**Last Updated**: 17/11/2026 17:33 — timestamps do tracker e do manifesto em America/Sao_Paulo (ADR-002)
+**Last Updated**: 24/11/2026 10:43 — CI reabilitado (ci-template.yml com uv) e tracker robusto em CI
 **Project**: Enterprise Scaffold Project Template
 **Status**: 🟢 Active Development
+
+---
+
+## 🎯 Próxima Sessão (2026-11-24+)
+
+- [ ] Ativar required status checks na `main` após o CI ficar verde no PR `fix/ci-main` (`Tests`, `CLI Smoke Tests`; `Lint & Validate` só depois da limpeza do ruff)
+- [ ] Limpar os 1031 achados pré-existentes do `ruff check .` (678 com autofix) — o job `Lint & Validate` falha até lá; depois, tornar o check obrigatório
+- [ ] Estrutura de branches main / dev / fases + validação antes de ir para main
+- [ ] Separar arquivos de template dos arquivos do projeto (distribuição)
+- [ ] Shell integration VS Code (zsh)
+- [ ] Analisar docs VS Code Copilot (instructions, skills, custom agents, MCP)
 
 ---
 
@@ -11,8 +22,8 @@
 - [x] ~~**3 testes de snapshot falhando** (`tests/test_templates_snapshot.py`)~~: ✅ 17/11 — baseline desatualizado desde a migração da sessão para o vault (`6d76e00`); corrigida também a árvore `docs/` do perfil infra (`└── TODO.md` seguido de `RUNBOOK.md`) — `docs/bugs/BUG-snapshots-desatualizados-arvore-infra.md`
 - [x] ~~`ui._iso_now()` ainda em UTC → America/Sao_Paulo~~: ✅ 17/11 — `created_at` em ISO 8601 com offset (`-03:00`) — `docs/bugs/BUG-created-at-em-utc.md`
 - [x] ~~Outros timestamps ainda em UTC (`Z`): `scripts/session-time-tracker.py::_iso_now` e `scripts/lib/publish.py` (`created_at` do manifesto; `test_smoke_imp30` exige o `Z`)~~: ✅ 17/11 — SP com offset nos dois, inclusive manifesto (decisão do usuário, `docs/adr/ADR-002-timestamps-america-sao-paulo.md`); `session_date` do tracker pela data local — `docs/bugs/BUG-tracker-e-manifesto-em-utc.md`
-- [ ] Ativar required status checks na branch protection quando houver CI rodando na `main`
-- [ ] Limpeza manual de `~/VyaJobs/enterprise-observability` (adoção acidental do BUG-26) — revisar `git status` antes de `git clean`
+- [ ] Ativar required status checks na branch protection quando houver CI rodando na `main` → movido para a seção 2026-11-24+ (CI reabilitado em 24/11)
+- [x] ~~Limpeza manual de `~/VyaJobs/enterprise-observability` (adoção acidental do BUG-26) — revisar `git status` antes de `git clean`~~: ❎ 24/11 — descartado por decisão do usuário: fora do escopo do scaffold-project (o projeto não foi alterado)
 - [x] ~~Testes gravam logs no `logs/` real da ferramenta (656 arquivos; disparam o `security-scan` do session-manager) — redirecionar para `tmp_path`~~: ✅ 17/11 — `SCAFFOLD_LOGS_DIR` isolado pelo conftest; 0 escritas em `logs/` na suíte — `docs/bugs/BUG-testes-poluem-logs-reais.md`
 - [x] ~~Logs antigos de teste em `logs/` (741 arquivos)~~: ✅ 17/11 — apagados; `scaffolds.yaml` preservado
 - [x] ~~`security-scan` com falsos positivos (`.mypy_cache`, `tmp/`, scanner de secrets, `scaffold/templates/`)~~: ✅ 17/11 — `SCAN_ALLOWLIST` + dirs excluídos; `session-manager start` volta a `clean: true` — `docs/bugs/BUG-security-scan-falsos-positivos.md`

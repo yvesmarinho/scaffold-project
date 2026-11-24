@@ -52,7 +52,8 @@ class TestSessionTimeTracker:
             cmd,
             capture_output=True,
             text=True,
-            cwd=PROJECT_ROOT
+            # Fora de repo git: o resultado não depende da branch real do projeto.
+            cwd=_state_dir().parent,
         )
 
     def _load_state(self) -> dict:

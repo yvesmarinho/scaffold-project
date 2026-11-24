@@ -220,10 +220,10 @@ pytest tests/test_scaffold_upgrade.py::test_scaffold_upgrade_all_validations -v
 - 51 checks totais (100% passing)
 - Validações de BUG-20, BUG-001, BUG-11, BUG-12, BUG-13, BUG-16, BUG-17, BUG-18, BUG-19, arquivos críticos, logs
 
-**CI/CD**: `.github/workflows/scaffold-tests.yml`
-- 4 jobs: test-scaffold-new, test-scaffold-upgrade, test-scaffold-smoke, summary
-- Matrix testing: Python 3.10, 3.11, 3.12
-- Triggers: push, PR, schedule (Sundays 02:00 UTC)
+**CI/CD**: `.github/workflows/ci-template.yml` (desde 24/11/2026; `scaffold-tests.yml` removido)
+- 3 jobs: `Tests` (suíte completa via `uv run pytest`), `CLI Smoke Tests`, `Lint & Validate` (ruff no repo inteiro)
+- Python 3.12 (uv, `uv sync --locked`)
+- Triggers: push na `main`, PR para `main`, manual
 
 ### 4. Pre-Commit Hooks (IMP-65 P1)
 
