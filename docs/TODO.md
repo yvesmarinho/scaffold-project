@@ -1,6 +1,6 @@
 # ✅ TODO - Enterprise Scaffold Project Template
 
-**Last Updated**: 24/11/2026 11:03 — CI reabilitado (ci-template.yml com uv) e tracker robusto em CI
+**Last Updated**: 24/11/2026 11:19 — CI reabilitado, checks obrigatórios, shell integration, análises Copilot/templates
 **Project**: Enterprise Scaffold Project Template
 **Status**: 🟢 Active Development
 
@@ -10,10 +10,12 @@
 
 - [x] ~~Ativar required status checks na `main` após o CI ficar verde no PR `fix/ci-main` (`Tests`, `CLI Smoke Tests`; `Lint & Validate` só depois da limpeza do ruff)~~: ✅ 24/11 — `Tests` e `CLI Smoke Tests` obrigatórios (strict: false); demais regras de proteção inalteradas — PR #51, `docs/bugs/BUG-ci-desabilitado-e-tracker-quebra-em-ci.md`
 - [ ] Limpar os 1031 achados pré-existentes do `ruff check .` (678 com autofix) — o job `Lint & Validate` falha até lá; depois, tornar o check obrigatório
-- [ ] Estrutura de branches main / dev / fases + validação antes de ir para main
-- [ ] Separar arquivos de template dos arquivos do projeto (distribuição)
-- [ ] Shell integration VS Code (zsh)
-- [ ] Analisar docs VS Code Copilot (instructions, skills, custom agents, MCP)
+- [ ] Estrutura de branches main / dev / fases **nos projetos gerados** (decisão do usuário 24/11): main + dev, PRs de feature → dev, dev → main só com CI verde, fases = `release/faseN` — ADR + TDD
+- [ ] Separar arquivos de template dos arquivos do projeto (distribuição) — etapa 1: ✅ 24/11 inventário + ADR-003 **Proposto** (PR #53, `docs/analysis/INVENTARIO-templates.md`); aguarda aprovação do usuário
+- [ ] **Bug `--publish`**: tarball sem `scripts/lib/flows/` e `scripts/lib/ai/` (glob não recursivo) → pacote distribuído não roda — fatia 1 do ADR-003
+- [x] ~~Shell integration VS Code (zsh)~~: ✅ 24/11 — `terminal.integrated.shellIntegration.*` no settings.json gerado + guia de fallback (PR #52)
+- [x] ~~Analisar docs VS Code Copilot (instructions, skills, custom agents, MCP)~~: ✅ 24/11 — `docs/analysis/ANALISE-vscode-copilot-customization.md` (PR #53)
+- [ ] Copilot P0 (da análise): remover handoffs para `speckit.*` inexistentes; limpar `chat.promptFilesRecommendations`; migrar prompts de sessão/perfis para `.github/skills/` — depende das decisões pendentes listadas na análise
 
 ---
 
