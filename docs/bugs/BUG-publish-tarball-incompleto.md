@@ -55,3 +55,17 @@ Na fase vermelha, os 3 testes falharam sem a correção. A suíte completa ficou
 - O teste de um artefato de distribuição precisa **executar** o artefato. Checar a presença de alguns arquivos não basta.
 - Comparar o resultado gerado pelo pacote com o resultado gerado pelo repositório pega automaticamente qualquer fonte nova que esteja faltando.
 - O `conftest` isola o `HOME`. Subprocessos que fazem commit precisam de identidade git explícita (`GIT_AUTHOR_*` e `GIT_COMMITTER_*`).
+
+## Complemento (24/11/2026 12:45): só arquivos versionados
+
+Uma revisão posterior ao PR #56 apontou que a seleção por glob lê o **disco**. Assim, qualquer arquivo local não versionado (por exemplo, um rascunho em `.claude/skills/`) entraria no release.
+
+- **Correção:** quando a raiz é um repositório git, `_collect_files` só aceita caminhos listados por `git ls-files`, o que inclui arquivos staged. Fora de um repositório (tarball extraído) ou sem git no PATH, a seleção continua por glob e um warning é registrado.
+- **Testes** (`tests/test_publish_somente_versionados.py`):
+  - versionados entram;
+  - não versionados ficam de fora;
+  - staged entra;
+  - fora de repositório e sem git, o glob é mantido.
+  - Na fase vermelha, 2 testes falharam.
+- O pacote atual continua com 489 arquivos, porque hoje não há arquivos não versionados nos caminhos publicados.
+
