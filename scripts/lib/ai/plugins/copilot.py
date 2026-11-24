@@ -5,7 +5,7 @@ NOME..: copilot.py
 LANG..: Python3
 TITULO: Plugin de integração do GitHub Copilot no scaffold
 DATA..: 23/06/2026 10:00
-MODIFICADO: 23/06/2026 10:00
+MODIFICADO: 24/11/2026 15:00
 VERSÃO: 0.1.0
 HOST..: local
 LOCAL.: scripts/lib/ai/plugins/
@@ -33,7 +33,7 @@ from typing import TYPE_CHECKING
 from ..base import AIPlugin
 
 if TYPE_CHECKING:
-    from ...config import ProjectConfig, CreatedItem
+    from ...config import CreatedItem, ProjectConfig
 
 
 class CopilotPlugin(AIPlugin):
@@ -86,6 +86,7 @@ class CopilotPlugin(AIPlugin):
         :rtype: dict
         """
         from rich.prompt import Prompt
+
         from ...config import get_default_shared_dir
 
         shared_dir_str = Prompt.ask(
@@ -104,9 +105,12 @@ class CopilotPlugin(AIPlugin):
         :rtype: dict
         """
         from ...config import get_default_shared_dir
-        return {"shared_dir": str(overrides.get("shared_dir") or get_default_shared_dir())}
 
-    def setup(self, config: "ProjectConfig") -> list["CreatedItem"]:
+        return {
+            "shared_dir": str(overrides.get("shared_dir") or get_default_shared_dir())
+        }
+
+    def setup(self, config: ProjectConfig) -> list[CreatedItem]:
         """
         Executa setup completo do GitHub Copilot em projeto recém-criado.
 
@@ -118,7 +122,8 @@ class CopilotPlugin(AIPlugin):
         :return: Lista de itens criados.
         :rtype: list[CreatedItem]
         """
-        from ... import links, templates, project
+        from ... import links, project, templates
+
         results: list[CreatedItem] = []
         results.extend(links.setup_symlinks(config))
         results.append(templates.generate_copilot_rules(config))
@@ -126,7 +131,7 @@ class CopilotPlugin(AIPlugin):
         results.extend(project.copy_copilot_instructions(config))
         return results
 
-    def upgrade(self, config: "ProjectConfig", force: bool = False) -> list["CreatedItem"]:
+    def upgrade(self, config: ProjectConfig, force: bool = False) -> list[CreatedItem]:
         """
         Re-aplica configuração do GitHub Copilot em projeto existente.
 
@@ -137,7 +142,8 @@ class CopilotPlugin(AIPlugin):
         :return: Lista de itens processados.
         :rtype: list[CreatedItem]
         """
-        from ... import links, templates, project
+        from ... import links, project, templates
+
         results: list[CreatedItem] = []
         results.extend(links.setup_symlinks(config))
         results.append(templates.generate_copilot_rules(config))

@@ -16,9 +16,8 @@ Para cada template são verificados:
   4. Makefile/equivalente contém os targets principais do descriptor
   5. Arquivo de manifesto de dependências existe (pyproject.toml, package.json, etc.)
 """
-from __future__ import annotations
 
-from pathlib import Path
+from __future__ import annotations
 
 import pytest
 
@@ -27,6 +26,7 @@ from tests.helpers.fake_project import TEMPLATES_DIR, FakeProject, expand_templa
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _skip_if_missing(profile: str):
     """Marca o teste como skip se o template físico não existir."""
@@ -37,6 +37,7 @@ def _skip_if_missing(profile: str):
 # ---------------------------------------------------------------------------
 # Layer 2 — python-fastapi
 # ---------------------------------------------------------------------------
+
 
 class TestPythonFastapi:
     """Valida estrutura do template python-fastapi."""
@@ -81,12 +82,15 @@ class TestPythonFastapi:
 
     def test_project_name_expanded_in_makefile(self, proj):
         content = proj.read("Makefile")
-        assert "fake-project" in content, "placeholder {project_name} não foi substituído no Makefile"
+        assert (
+            "fake-project" in content
+        ), "placeholder {project_name} não foi substituído no Makefile"
 
 
 # ---------------------------------------------------------------------------
 # Layer 2 — python-flask
 # ---------------------------------------------------------------------------
+
 
 class TestPythonFlask:
     """Valida estrutura do template python-flask."""
@@ -129,6 +133,7 @@ class TestPythonFlask:
 # ---------------------------------------------------------------------------
 # Layer 2 — typescript-next
 # ---------------------------------------------------------------------------
+
 
 class TestTypescriptNext:
     """Valida estrutura do template typescript-next."""
@@ -179,6 +184,7 @@ class TestTypescriptNext:
 # Layer 3 — k8s-helm
 # ---------------------------------------------------------------------------
 
+
 class TestK8sHelm:
     """Valida estrutura do template k8s-helm."""
 
@@ -210,6 +216,7 @@ class TestK8sHelm:
 
     def test_chart_yaml_is_valid_yaml(self, proj):
         import yaml
+
         content = proj.read("helm/Chart.yaml")
         parsed = yaml.safe_load(content)
         assert isinstance(parsed, dict), "Chart.yaml não é um mapeamento YAML"
@@ -223,6 +230,7 @@ class TestK8sHelm:
 # ---------------------------------------------------------------------------
 # Layer 3 — terraform-aws
 # ---------------------------------------------------------------------------
+
 
 class TestTerraformAws:
     """Valida estrutura do template terraform-aws."""
@@ -261,13 +269,16 @@ class TestTerraformAws:
 # Layer 3 — data-pipeline-airflow
 # ---------------------------------------------------------------------------
 
+
 class TestDataPipelineAirflow:
     """Valida estrutura do template data-pipeline-airflow."""
 
     @pytest.fixture(scope="class")
     def proj(self, tmp_path_factory) -> FakeProject:
         _skip_if_missing("data-pipeline-airflow")
-        return expand_template("data-pipeline-airflow", tmp_path_factory.mktemp("airflow"))
+        return expand_template(
+            "data-pipeline-airflow", tmp_path_factory.mktemp("airflow")
+        )
 
     def test_airflow_dir_exists(self, proj):
         assert proj.exists("airflow"), "airflow/ ausente"
@@ -297,6 +308,7 @@ class TestDataPipelineAirflow:
 # Layer 3 — data-warehouse-dbt
 # ---------------------------------------------------------------------------
 
+
 class TestDataWarehouseDbt:
     """Valida estrutura do template data-warehouse-dbt."""
 
@@ -318,6 +330,7 @@ class TestDataWarehouseDbt:
 # ---------------------------------------------------------------------------
 # Layer 4 — lgpd-baseline
 # ---------------------------------------------------------------------------
+
 
 class TestLgpdBaseline:
     """Valida estrutura do template lgpd-baseline."""
@@ -343,6 +356,7 @@ class TestLgpdBaseline:
 # ---------------------------------------------------------------------------
 # Layer 4 — soc2-baseline
 # ---------------------------------------------------------------------------
+
 
 class TestSoc2Baseline:
     """Valida estrutura do template soc2-baseline."""

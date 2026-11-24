@@ -30,7 +30,6 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Tuple
 
 try:
     import yaml
@@ -39,7 +38,7 @@ except ImportError:
     yaml = None
 
 try:
-    from jsonschema import validate, ValidationError, Draft7Validator
+    from jsonschema import Draft7Validator, ValidationError, validate
 except ImportError:
     logging.warning("jsonschema not installed. Install with: uv pip install jsonschema")
     ValidationError = Exception
@@ -47,23 +46,22 @@ except ImportError:
     validate = None
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(levelname)s: %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 log = logging.getLogger(__name__)
 
 
 class Layer(Enum):
     """4-layer Spec Driven Development layers"""
+
     BUSINESS = "business"  # Layer 1: objetivo.yaml
-    PRODUCT = "product"    # Layer 2: spec.md
+    PRODUCT = "product"  # Layer 2: spec.md
     ARCHITECTURE = "architecture"  # Layer 3: plan.md
     IMPLEMENTATION = "implementation"  # Layer 4: tasks.md
 
 
 class Severity(Enum):
     """Validation issue severity levels"""
+
     ERROR = "error"  # Blocks progression to next layer
     WARNING = "warning"  # Should be addressed but not blocking
     INFO = "info"  # Informational, best practice recommendation
@@ -72,22 +70,25 @@ class Severity(Enum):
 @dataclass
 class ValidationIssue:
     """Represents a single validation issue"""
+
     severity: Severity
     layer: Layer
     rule: str
     message: str
-    file: Optional[str] = None
-    line: Optional[int] = None
-    suggestion: Optional[str] = None
+    file: str | None = None
+    line: int | None = None
+    suggestion: str | None = None
 
     def __str__(self) -> str:
-        prefix = {
-            Severity.ERROR: "❌",
-            Severity.WARNING: "⚠️",
-            Severity.INFO: "ℹ️"
-        }[self.severity]
+        prefix = {Severity.ERROR: "❌", Severity.WARNING: "⚠️", Severity.INFO: "ℹ️"}[
+            self.severity
+        ]
 
-        location = f" ({self.file}" + (f":{self.line}" if self.line else "") + ")" if self.file else ""
+        location = (
+            f" ({self.file}" + (f":{self.line}" if self.line else "") + ")"
+            if self.file
+            else ""
+        )
         suggestion = f"\n   💡 {self.suggestion}" if self.suggestion else ""
 
         return f"{prefix} [{self.rule}] {self.message}{location}{suggestion}"
@@ -96,12 +97,13 @@ class ValidationIssue:
 @dataclass
 class ValidationResult:
     """Aggregated validation result"""
+
     layer_from: Layer
     layer_to: Layer
     passed: bool
-    errors: List[ValidationIssue] = field(default_factory=list)
-    warnings: List[ValidationIssue] = field(default_factory=list)
-    infos: List[ValidationIssue] = field(default_factory=list)
+    errors: list[ValidationIssue] = field(default_factory=list)
+    warnings: list[ValidationIssue] = field(default_factory=list)
+    infos: list[ValidationIssue] = field(default_factory=list)
 
     def add_issue(self, issue: ValidationIssue):
         """Add validation issue to appropriate list"""
@@ -127,7 +129,7 @@ class ValidationResult:
             f"{'='*80}",
             f"Status: {'✅ PASSED' if self.passed else '❌ FAILED'}",
             f"Errors: {len(self.errors)} | Warnings: {len(self.warnings)} | Info: {len(self.infos)}",
-            f"{'='*80}\n"
+            f"{'='*80}\n",
         ]
 
         if self.errors:
@@ -168,7 +170,10 @@ class SpecValidator:
         self.tasks_file = self.feature_dir / "tasks.md"
 
         # Load JSON Schema for objetivo.yaml
-        schema_path = Path(__file__).parent.parent.parent / ".specify/schemas/objetivo-schema.json"
+        schema_path = (
+            Path(__file__).parent.parent.parent
+            / ".specify/schemas/objetivo-schema.json"
+        )
         if schema_path.exists():
             with open(schema_path) as f:
                 self.objetivo_schema = json.load(f)
@@ -177,9 +182,7 @@ class SpecValidator:
             self.objetivo_schema = None
 
     def validate_layer_transition(
-        self,
-        from_layer: str | Layer,
-        to_layer: str | Layer
+        self, from_layer: str | Layer, to_layer: str | Layer
     ) -> ValidationResult:
         """
         Validate quality gates for layer transition.
@@ -196,11 +199,7 @@ class SpecValidator:
         if isinstance(to_layer, str):
             to_layer = Layer(to_layer)
 
-        result = ValidationResult(
-            layer_from=from_layer,
-            layer_to=to_layer,
-            passed=True
-        )
+        result = ValidationResult(layer_from=from_layer, layer_to=to_layer, passed=True)
 
         # Validate specific transition
         if from_layer == Layer.BUSINESS and to_layer == Layer.PRODUCT:
@@ -210,12 +209,14 @@ class SpecValidator:
         elif from_layer == Layer.ARCHITECTURE and to_layer == Layer.IMPLEMENTATION:
             self._validate_architecture_to_implementation(result)
         else:
-            result.add_issue(ValidationIssue(
-                severity=Severity.ERROR,
-                layer=from_layer,
-                rule="invalid-transition",
-                message=f"Invalid layer transition: {from_layer.value} → {to_layer.value}"
-            ))
+            result.add_issue(
+                ValidationIssue(
+                    severity=Severity.ERROR,
+                    layer=from_layer,
+                    rule="invalid-transition",
+                    message=f"Invalid layer transition: {from_layer.value} → {to_layer.value}",
+                )
+            )
 
         return result
 
@@ -236,24 +237,28 @@ class SpecValidator:
 
         # Check objetivo.yaml exists
         if not self.objetivo_file.exists():
-            result.add_issue(ValidationIssue(
-                severity=Severity.ERROR,
-                layer=layer,
-                rule="objetivo-missing",
-                message=f"objetivo.yaml not found in {self.feature_dir}",
-                suggestion="Run: speckit.clarify Mode 1 to generate objetivo.yaml"
-            ))
+            result.add_issue(
+                ValidationIssue(
+                    severity=Severity.ERROR,
+                    layer=layer,
+                    rule="objetivo-missing",
+                    message=f"objetivo.yaml not found in {self.feature_dir}",
+                    suggestion="Run: speckit.clarify Mode 1 to generate objetivo.yaml",
+                )
+            )
             return
 
         # Load and parse YAML
         if yaml is None:
-            result.add_issue(ValidationIssue(
-                severity=Severity.ERROR,
-                layer=layer,
-                rule="yaml-module-missing",
-                message="PyYAML not installed. Cannot validate objetivo.yaml",
-                suggestion="Install with: uv pip install pyyaml jsonschema"
-            ))
+            result.add_issue(
+                ValidationIssue(
+                    severity=Severity.ERROR,
+                    layer=layer,
+                    rule="yaml-module-missing",
+                    message="PyYAML not installed. Cannot validate objetivo.yaml",
+                    suggestion="Install with: uv pip install pyyaml jsonschema",
+                )
+            )
             return
 
         try:
@@ -262,22 +267,30 @@ class SpecValidator:
         except Exception as e:
             # Check if it's a YAML error
             error_type = type(e).__name__
-            if "YAML" in error_type or "Scanner" in error_type or "Parser" in error_type:
-                result.add_issue(ValidationIssue(
-                    severity=Severity.ERROR,
-                    layer=layer,
-                    rule="objetivo-invalid-yaml",
-                    message=f"Invalid YAML syntax: {e}",
-                    file=str(self.objetivo_file)
-                ))
+            if (
+                "YAML" in error_type
+                or "Scanner" in error_type
+                or "Parser" in error_type
+            ):
+                result.add_issue(
+                    ValidationIssue(
+                        severity=Severity.ERROR,
+                        layer=layer,
+                        rule="objetivo-invalid-yaml",
+                        message=f"Invalid YAML syntax: {e}",
+                        file=str(self.objetivo_file),
+                    )
+                )
             else:
-                result.add_issue(ValidationIssue(
-                    severity=Severity.ERROR,
-                    layer=layer,
-                    rule="objetivo-file-error",
-                    message=f"Error reading objetivo.yaml: {e}",
-                    file=str(self.objetivo_file)
-                ))
+                result.add_issue(
+                    ValidationIssue(
+                        severity=Severity.ERROR,
+                        layer=layer,
+                        rule="objetivo-file-error",
+                        message=f"Error reading objetivo.yaml: {e}",
+                        file=str(self.objetivo_file),
+                    )
+                )
             return
 
         # JSON Schema validation
@@ -285,87 +298,111 @@ class SpecValidator:
             try:
                 validate(instance=objetivo_data, schema=self.objetivo_schema)
             except ValidationError as e:
-                result.add_issue(ValidationIssue(
-                    severity=Severity.ERROR,
-                    layer=layer,
-                    rule="objetivo-schema-violation",
-                    message=f"Schema validation failed: {e.message}",
-                    file=str(self.objetivo_file),
-                    suggestion=f"Check field: {'.'.join(str(p) for p in e.path)}" if e.path else None
-                ))
+                result.add_issue(
+                    ValidationIssue(
+                        severity=Severity.ERROR,
+                        layer=layer,
+                        rule="objetivo-schema-violation",
+                        message=f"Schema validation failed: {e.message}",
+                        file=str(self.objetivo_file),
+                        suggestion=(
+                            f"Check field: {'.'.join(str(p) for p in e.path)}"
+                            if e.path
+                            else None
+                        ),
+                    )
+                )
 
         # Check for placeholder tokens
         objetivo_text = self.objetivo_file.read_text()
-        placeholders = re.findall(r'\[([A-Z_]+)\]', objetivo_text)
+        placeholders = re.findall(r"\[([A-Z_]+)\]", objetivo_text)
         if placeholders:
-            result.add_issue(ValidationIssue(
-                severity=Severity.ERROR,
-                layer=layer,
-                rule="objetivo-placeholders",
-                message=f"Placeholder tokens found: {', '.join(set(placeholders))}",
-                file=str(self.objetivo_file),
-                suggestion="Replace all [PLACEHOLDER] tokens with actual values"
-            ))
+            result.add_issue(
+                ValidationIssue(
+                    severity=Severity.ERROR,
+                    layer=layer,
+                    rule="objetivo-placeholders",
+                    message=f"Placeholder tokens found: {', '.join(set(placeholders))}",
+                    file=str(self.objetivo_file),
+                    suggestion="Replace all [PLACEHOLDER] tokens with actual values",
+                )
+            )
 
         # Quality gate: >=1 metrica_sucesso
-        metricas = objetivo_data.get("negocio", {}).get("valor", {}).get("metricas_sucesso", [])
+        metricas = (
+            objetivo_data.get("negocio", {})
+            .get("valor", {})
+            .get("metricas_sucesso", [])
+        )
         if not metricas:
-            result.add_issue(ValidationIssue(
-                severity=Severity.ERROR,
-                layer=layer,
-                rule="metricas-missing",
-                message="No success metrics defined (negocio.valor.metricas_sucesso is empty)",
-                file=str(self.objetivo_file),
-                suggestion="Add at least 1 measurable success metric (metric + target)"
-            ))
+            result.add_issue(
+                ValidationIssue(
+                    severity=Severity.ERROR,
+                    layer=layer,
+                    rule="metricas-missing",
+                    message="No success metrics defined (negocio.valor.metricas_sucesso is empty)",
+                    file=str(self.objetivo_file),
+                    suggestion="Add at least 1 measurable success metric (metric + target)",
+                )
+            )
 
         # Quality gate: >=1 persona (recommended)
         personas = objetivo_data.get("produto", {}).get("personas", [])
         if not personas:
-            result.add_issue(ValidationIssue(
-                severity=Severity.WARNING,
-                layer=layer,
-                rule="personas-missing",
-                message="No personas defined (produto.personas is empty)",
-                file=str(self.objetivo_file),
-                suggestion="Add at least 1 persona (name, needs, pain_points) for better product definition"
-            ))
+            result.add_issue(
+                ValidationIssue(
+                    severity=Severity.WARNING,
+                    layer=layer,
+                    rule="personas-missing",
+                    message="No personas defined (produto.personas is empty)",
+                    file=str(self.objetivo_file),
+                    suggestion="Add at least 1 persona (name, needs, pain_points) for better product definition",
+                )
+            )
 
         # Quality gate: visao_alto_nivel <=3 sentences
         visao = objetivo_data.get("produto", {}).get("visao_alto_nivel", "")
-        sentence_count = len([s for s in visao.split('.') if s.strip()])
+        sentence_count = len([s for s in visao.split(".") if s.strip()])
         if sentence_count > 3:
-            result.add_issue(ValidationIssue(
-                severity=Severity.WARNING,
-                layer=layer,
-                rule="visao-too-long",
-                message=f"Product vision has {sentence_count} sentences (recommended: <=3)",
-                file=str(self.objetivo_file),
-                suggestion="Simplify product vision to 1-3 clear sentences (high-level WHAT, not HOW)"
-            ))
+            result.add_issue(
+                ValidationIssue(
+                    severity=Severity.WARNING,
+                    layer=layer,
+                    rule="visao-too-long",
+                    message=f"Product vision has {sentence_count} sentences (recommended: <=3)",
+                    file=str(self.objetivo_file),
+                    suggestion="Simplify product vision to 1-3 clear sentences (high-level WHAT, not HOW)",
+                )
+            )
 
         # Quality gate: jornadas_criticas have P1/P2/P3 priorities
         jornadas = objetivo_data.get("produto", {}).get("jornadas_criticas", [])
-        jornadas_without_priority = [j for j in jornadas if j.get("priority") not in ["P1", "P2", "P3"]]
+        jornadas_without_priority = [
+            j for j in jornadas if j.get("priority") not in ["P1", "P2", "P3"]
+        ]
         if jornadas_without_priority:
-            result.add_issue(ValidationIssue(
-                severity=Severity.ERROR,
-                layer=layer,
-                rule="jornadas-no-priority",
-                message=f"{len(jornadas_without_priority)} critical journeys missing P1/P2/P3 priority",
-                file=str(self.objetivo_file),
-                suggestion="All jornadas_criticas must have priority: P1 (MVP must-have), P2 (important), or P3 (nice-to-have)"
-            ))
+            result.add_issue(
+                ValidationIssue(
+                    severity=Severity.ERROR,
+                    layer=layer,
+                    rule="jornadas-no-priority",
+                    message=f"{len(jornadas_without_priority)} critical journeys missing P1/P2/P3 priority",
+                    file=str(self.objetivo_file),
+                    suggestion="All jornadas_criticas must have priority: P1 (MVP must-have), P2 (important), or P3 (nice-to-have)",
+                )
+            )
 
         # Info: Report P1 count (MVP scope)
         p1_jornadas = [j for j in jornadas if j.get("priority") == "P1"]
         if p1_jornadas:
-            result.add_issue(ValidationIssue(
-                severity=Severity.INFO,
-                layer=layer,
-                rule="mvp-scope",
-                message=f"MVP scope: {len(p1_jornadas)} P1 critical journeys"
-            ))
+            result.add_issue(
+                ValidationIssue(
+                    severity=Severity.INFO,
+                    layer=layer,
+                    rule="mvp-scope",
+                    message=f"MVP scope: {len(p1_jornadas)} P1 critical journeys",
+                )
+            )
 
     def _validate_product_to_architecture(self, result: ValidationResult):
         """
@@ -382,85 +419,101 @@ class SpecValidator:
 
         # Check spec.md exists
         if not self.spec_file.exists():
-            result.add_issue(ValidationIssue(
-                severity=Severity.ERROR,
-                layer=layer,
-                rule="spec-missing",
-                message=f"spec.md not found in {self.feature_dir}",
-                suggestion="Run: speckit.specify to generate spec.md from objetivo.yaml"
-            ))
+            result.add_issue(
+                ValidationIssue(
+                    severity=Severity.ERROR,
+                    layer=layer,
+                    rule="spec-missing",
+                    message=f"spec.md not found in {self.feature_dir}",
+                    suggestion="Run: speckit.specify to generate spec.md from objetivo.yaml",
+                )
+            )
             return
 
         spec_text = self.spec_file.read_text()
 
         # Quality gate: Business Context section references objetivo.yaml
         if "Business Context" not in spec_text and "objetivo.yaml" not in spec_text:
-            result.add_issue(ValidationIssue(
-                severity=Severity.WARNING,
-                layer=layer,
-                rule="spec-no-business-context",
-                message="spec.md does not reference Business Context or objetivo.yaml",
-                file=str(self.spec_file),
-                suggestion="Add Business Context section that references objetivo.yaml (problema, valor, metricas)"
-            ))
+            result.add_issue(
+                ValidationIssue(
+                    severity=Severity.WARNING,
+                    layer=layer,
+                    rule="spec-no-business-context",
+                    message="spec.md does not reference Business Context or objetivo.yaml",
+                    file=str(self.spec_file),
+                    suggestion="Add Business Context section that references objetivo.yaml (problema, valor, metricas)",
+                )
+            )
 
         # Quality gate: >=1 P1 user story
         # Pattern: **P1**: or ## User Story US-001 *(P1)*
-        p1_stories = re.findall(r'\*\*P1\*\*:|US-\d{3}\s+\*\(P1\)\*', spec_text)
+        p1_stories = re.findall(r"\*\*P1\*\*:|US-\d{3}\s+\*\(P1\)\*", spec_text)
         if not p1_stories:
-            result.add_issue(ValidationIssue(
-                severity=Severity.ERROR,
-                layer=layer,
-                rule="spec-no-p1-stories",
-                message="No P1 (must-have) user stories found in spec.md",
-                file=str(self.spec_file),
-                suggestion="Add at least 1 P1 user story (MVP must-have functionality)"
-            ))
+            result.add_issue(
+                ValidationIssue(
+                    severity=Severity.ERROR,
+                    layer=layer,
+                    rule="spec-no-p1-stories",
+                    message="No P1 (must-have) user stories found in spec.md",
+                    file=str(self.spec_file),
+                    suggestion="Add at least 1 P1 user story (MVP must-have functionality)",
+                )
+            )
         else:
-            result.add_issue(ValidationIssue(
-                severity=Severity.INFO,
-                layer=layer,
-                rule="mvp-stories",
-                message=f"Found {len(p1_stories)} P1 user stories"
-            ))
+            result.add_issue(
+                ValidationIssue(
+                    severity=Severity.INFO,
+                    layer=layer,
+                    rule="mvp-stories",
+                    message=f"Found {len(p1_stories)} P1 user stories",
+                )
+            )
 
         # Quality gate: Acceptance criteria (Given/When/Then)
         # Pattern: Given...When...Then or **Given:**...
         criteria_patterns = [
-            r'Given\s+.+When\s+.+Then',
-            r'\*\*Given:\*\*|\*\*When:\*\*|\*\*Then:\*\*'
+            r"Given\s+.+When\s+.+Then",
+            r"\*\*Given:\*\*|\*\*When:\*\*|\*\*Then:\*\*",
         ]
-        has_acceptance_criteria = any(re.search(pattern, spec_text, re.IGNORECASE | re.DOTALL)
-                                     for pattern in criteria_patterns)
+        has_acceptance_criteria = any(
+            re.search(pattern, spec_text, re.IGNORECASE | re.DOTALL)
+            for pattern in criteria_patterns
+        )
 
         if not has_acceptance_criteria:
-            result.add_issue(ValidationIssue(
-                severity=Severity.WARNING,
-                layer=layer,
-                rule="spec-no-acceptance-criteria",
-                message="No acceptance criteria found (Given/When/Then pattern missing)",
-                file=str(self.spec_file),
-                suggestion="Add acceptance criteria for user stories using Given/When/Then format"
-            ))
+            result.add_issue(
+                ValidationIssue(
+                    severity=Severity.WARNING,
+                    layer=layer,
+                    rule="spec-no-acceptance-criteria",
+                    message="No acceptance criteria found (Given/When/Then pattern missing)",
+                    file=str(self.spec_file),
+                    suggestion="Add acceptance criteria for user stories using Given/When/Then format",
+                )
+            )
 
         # Quality gate: Functional requirements numbered (FR-001, FR-002, ...)
-        fr_requirements = re.findall(r'FR-\d{3}', spec_text)
+        fr_requirements = re.findall(r"FR-\d{3}", spec_text)
         if not fr_requirements:
-            result.add_issue(ValidationIssue(
-                severity=Severity.WARNING,
-                layer=layer,
-                rule="spec-no-functional-requirements",
-                message="No numbered functional requirements found (FR-001 format)",
-                file=str(self.spec_file),
-                suggestion="Number functional requirements as FR-001, FR-002, ... for traceability"
-            ))
+            result.add_issue(
+                ValidationIssue(
+                    severity=Severity.WARNING,
+                    layer=layer,
+                    rule="spec-no-functional-requirements",
+                    message="No numbered functional requirements found (FR-001 format)",
+                    file=str(self.spec_file),
+                    suggestion="Number functional requirements as FR-001, FR-002, ... for traceability",
+                )
+            )
         else:
-            result.add_issue(ValidationIssue(
-                severity=Severity.INFO,
-                layer=layer,
-                rule="functional-requirements-count",
-                message=f"Found {len(set(fr_requirements))} functional requirements"
-            ))
+            result.add_issue(
+                ValidationIssue(
+                    severity=Severity.INFO,
+                    layer=layer,
+                    rule="functional-requirements-count",
+                    message=f"Found {len(set(fr_requirements))} functional requirements",
+                )
+            )
 
     def _validate_architecture_to_implementation(self, result: ValidationResult):
         """
@@ -478,75 +531,94 @@ class SpecValidator:
 
         # Check plan.md exists
         if not self.plan_file.exists():
-            result.add_issue(ValidationIssue(
-                severity=Severity.ERROR,
-                layer=layer,
-                rule="plan-missing",
-                message=f"plan.md not found in {self.feature_dir}",
-                suggestion="Run: speckit.plan to generate plan.md from spec.md"
-            ))
+            result.add_issue(
+                ValidationIssue(
+                    severity=Severity.ERROR,
+                    layer=layer,
+                    rule="plan-missing",
+                    message=f"plan.md not found in {self.feature_dir}",
+                    suggestion="Run: speckit.plan to generate plan.md from spec.md",
+                )
+            )
             return
 
         plan_text = self.plan_file.read_text()
 
         # Quality gate: >=1 ADR (for architectural features)
         # Pattern: ### ADR-001: or ## ADR-001:
-        adrs = re.findall(r'###?\s+ADR-\d{3}:', plan_text)
+        adrs = re.findall(r"###?\s+ADR-\d{3}:", plan_text)
         if not adrs:
-            result.add_issue(ValidationIssue(
-                severity=Severity.WARNING,
-                layer=layer,
-                rule="plan-no-adrs",
-                message="No Architecture Decision Records (ADRs) found in plan.md",
-                file=str(self.plan_file),
-                suggestion="Document architectural decisions as ADRs (format: ADR-001: Decision Title). If not architectural, mark as 'Not Applicable'."
-            ))
+            result.add_issue(
+                ValidationIssue(
+                    severity=Severity.WARNING,
+                    layer=layer,
+                    rule="plan-no-adrs",
+                    message="No Architecture Decision Records (ADRs) found in plan.md",
+                    file=str(self.plan_file),
+                    suggestion="Document architectural decisions as ADRs (format: ADR-001: Decision Title). If not architectural, mark as 'Not Applicable'.",
+                )
+            )
         else:
-            result.add_issue(ValidationIssue(
-                severity=Severity.INFO,
-                layer=layer,
-                rule="adrs-count",
-                message=f"Found {len(adrs)} Architecture Decision Records"
-            ))
+            result.add_issue(
+                ValidationIssue(
+                    severity=Severity.INFO,
+                    layer=layer,
+                    rule="adrs-count",
+                    message=f"Found {len(adrs)} Architecture Decision Records",
+                )
+            )
 
             # Quality gate: All ADRs have "Alternatives Considered"
-            for adr_match in re.finditer(r'###?\s+(ADR-\d{3}:.*?)(?=###?\s+ADR-\d{3}:|$)', plan_text, re.DOTALL):
+            for adr_match in re.finditer(
+                r"###?\s+(ADR-\d{3}:.*?)(?=###?\s+ADR-\d{3}:|$)", plan_text, re.DOTALL
+            ):
                 adr_content = adr_match.group(1)
-                adr_id = re.search(r'ADR-\d{3}', adr_content).group()
+                adr_id = re.search(r"ADR-\d{3}", adr_content).group()
 
-                if "Alternatives Considered" not in adr_content and "alternatives" not in adr_content.lower():
-                    result.add_issue(ValidationIssue(
-                        severity=Severity.WARNING,
-                        layer=layer,
-                        rule="adr-no-alternatives",
-                        message=f"{adr_id} missing 'Alternatives Considered' section",
-                        file=str(self.plan_file),
-                        suggestion="Document alternatives considered (even if only 1 option was viable)"
-                    ))
+                if (
+                    "Alternatives Considered" not in adr_content
+                    and "alternatives" not in adr_content.lower()
+                ):
+                    result.add_issue(
+                        ValidationIssue(
+                            severity=Severity.WARNING,
+                            layer=layer,
+                            rule="adr-no-alternatives",
+                            message=f"{adr_id} missing 'Alternatives Considered' section",
+                            file=str(self.plan_file),
+                            suggestion="Document alternatives considered (even if only 1 option was viable)",
+                        )
+                    )
 
         # Quality gate: Component design section exists
         if "Component" not in plan_text and "component" not in plan_text.lower():
-            result.add_issue(ValidationIssue(
-                severity=Severity.WARNING,
-                layer=layer,
-                rule="plan-no-component-design",
-                message="No component design section found in plan.md",
-                file=str(self.plan_file),
-                suggestion="Add Component Design section (modules, interfaces, data flow)"
-            ))
+            result.add_issue(
+                ValidationIssue(
+                    severity=Severity.WARNING,
+                    layer=layer,
+                    rule="plan-no-component-design",
+                    message="No component design section found in plan.md",
+                    file=str(self.plan_file),
+                    suggestion="Add Component Design section (modules, interfaces, data flow)",
+                )
+            )
 
         # Quality gate: Implementation strategy section exists
         # Quality gate: Implementation strategy section exists
-        if "Implementation" not in plan_text and "implementation" not in plan_text.lower():
-            result.add_issue(ValidationIssue(
-                severity=Severity.WARNING,
-                layer=layer,
-                rule="plan-no-implementation-strategy",
-                message="No implementation strategy section found in plan.md",
-                file=str(self.plan_file),
-                suggestion="Add Implementation Strategy section (steps, order, dependencies, risks)"
-            ))
-
+        if (
+            "Implementation" not in plan_text
+            and "implementation" not in plan_text.lower()
+        ):
+            result.add_issue(
+                ValidationIssue(
+                    severity=Severity.WARNING,
+                    layer=layer,
+                    rule="plan-no-implementation-strategy",
+                    message="No implementation strategy section found in plan.md",
+                    file=str(self.plan_file),
+                    suggestion="Add Implementation Strategy section (steps, order, dependencies, risks)",
+                )
+            )
 
         # Quality gate: References to objetivo.yaml decisoes_iniciais
         if self.objetivo_file.exists() and yaml is not None:
@@ -562,25 +634,26 @@ class SpecValidator:
             if decisoes_iniciais:
                 # Check if ADRs reference any decisoes_iniciais
                 decisao_ids = [d.get("id") for d in decisoes_iniciais if d.get("id")]
-                referenced_decisoes = [d_id for d_id in decisao_ids if d_id in plan_text]
+                referenced_decisoes = [
+                    d_id for d_id in decisao_ids if d_id in plan_text
+                ]
 
                 if not referenced_decisoes and len(decisoes_iniciais) > 0:
-                    result.add_issue(ValidationIssue(
-                        severity=Severity.INFO,
-                        layer=layer,
-                        rule="plan-no-decisoes-reference",
-                        message=f"objetivo.yaml has {len(decisoes_iniciais)} initial decisions, but plan.md doesn't reference them",
-                        file=str(self.plan_file),
-                        suggestion=f"Consider referencing decision IDs: {', '.join(decisao_ids[:3])}"
-                    ))
+                    result.add_issue(
+                        ValidationIssue(
+                            severity=Severity.INFO,
+                            layer=layer,
+                            rule="plan-no-decisoes-reference",
+                            message=f"objetivo.yaml has {len(decisoes_iniciais)} initial decisions, but plan.md doesn't reference them",
+                            file=str(self.plan_file),
+                            suggestion=f"Consider referencing decision IDs: {', '.join(decisao_ids[:3])}",
+                        )
+                    )
 
 
 def validate_feature(
-    feature_dir: Path | str,
-    from_layer: str,
-    to_layer: str,
-    verbose: bool = False
-) -> Tuple[bool, ValidationResult]:
+    feature_dir: Path | str, from_layer: str, to_layer: str, verbose: bool = False
+) -> tuple[bool, ValidationResult]:
     """
     Convenience function to validate a feature transition.
 
@@ -608,8 +681,12 @@ if __name__ == "__main__":
     import sys
 
     if len(sys.argv) < 4:
-        print("Usage: python -m scripts.lib.spec_validate <feature-dir> <from-layer> <to-layer> [--verbose]")
-        print("Example: python -m scripts.lib.spec_validate .specify/specs/IMP-53 business product --verbose")
+        print(
+            "Usage: python -m scripts.lib.spec_validate <feature-dir> <from-layer> <to-layer> [--verbose]"
+        )
+        print(
+            "Example: python -m scripts.lib.spec_validate .specify/specs/IMP-53 business product --verbose"
+        )
         sys.exit(1)
 
     feature_dir = sys.argv[1]
@@ -617,5 +694,7 @@ if __name__ == "__main__":
     to_layer = sys.argv[3]
     verbose = "--verbose" in sys.argv
 
-    passed, result = validate_feature(feature_dir, from_layer, to_layer, verbose=verbose)
+    passed, result = validate_feature(
+        feature_dir, from_layer, to_layer, verbose=verbose
+    )
     sys.exit(0 if passed else 1)

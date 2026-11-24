@@ -9,8 +9,6 @@ import os
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
-
 from scripts.lib.ui import collect_project_info
 
 
@@ -48,14 +46,14 @@ class TestBug02PathResolution:
             config = collect_project_info(ci_mode=True, **overrides)
 
             # Validar que target_dir é absoluto
-            assert config.target_dir.is_absolute(), (
-                f"BUG-02: target_dir deve ser absoluto, mas é relativo: {config.target_dir}"
-            )
+            assert (
+                config.target_dir.is_absolute()
+            ), f"BUG-02: target_dir deve ser absoluto, mas é relativo: {config.target_dir}"
 
             # Validar que não contém componentes '..' (foi normalizado)
-            assert ".." not in config.target_dir.parts, (
-                f"BUG-02: target_dir não deve conter '..': {config.target_dir}"
-            )
+            assert (
+                ".." not in config.target_dir.parts
+            ), f"BUG-02: target_dir não deve conter '..': {config.target_dir}"
 
         finally:
             os.chdir(original_cwd)
@@ -84,14 +82,14 @@ class TestBug02PathResolution:
             config = collect_project_info(ci_mode=True, **overrides)
 
             # Validar que shared_dir é absoluto
-            assert config.shared_dir.is_absolute(), (
-                f"BUG-02: shared_dir deve ser absoluto, mas é relativo: {config.shared_dir}"
-            )
+            assert (
+                config.shared_dir.is_absolute()
+            ), f"BUG-02: shared_dir deve ser absoluto, mas é relativo: {config.shared_dir}"
 
             # Validar que não contém componentes '..'
-            assert ".." not in config.shared_dir.parts, (
-                f"BUG-02: shared_dir não deve conter '..': {config.shared_dir}"
-            )
+            assert (
+                ".." not in config.shared_dir.parts
+            ), f"BUG-02: shared_dir não deve conter '..': {config.shared_dir}"
 
         finally:
             os.chdir(original_cwd)
@@ -110,14 +108,14 @@ class TestBug02PathResolution:
         config = collect_project_info(ci_mode=True, **overrides)
 
         # Validar que tilde foi expandido
-        assert "~" not in str(config.target_dir), (
-            f"BUG-02: tilde não foi expandido: {config.target_dir}"
-        )
+        assert "~" not in str(
+            config.target_dir
+        ), f"BUG-02: tilde não foi expandido: {config.target_dir}"
 
         # Validar que é absoluto
-        assert config.target_dir.is_absolute(), (
-            f"BUG-02: target_dir deve ser absoluto: {config.target_dir}"
-        )
+        assert (
+            config.target_dir.is_absolute()
+        ), f"BUG-02: target_dir deve ser absoluto: {config.target_dir}"
 
     def test_absolute_target_dir_unchanged(self, tmp_path):
         """
@@ -149,17 +147,17 @@ class TestBug02PathResolution:
         # Simular respostas do usuário
         target_rel = Path("../output")
         mock_prompt.side_effect = [
-            "test-project",           # name
-            "Test Project",           # title
-            "Test description",       # description
-            "1",                      # domain (1=programming)
-            "1",                      # language (1=python)
-            "1",                      # ai_assistant (1=both)
-            "",                       # github_repo
-            str(tmp_path / "shared"), # shared_dir (via CopilotPlugin.collect_config)
-            str(target_rel),          # target_dir
-            "1",                      # extra_profiles mode
-            "1",                      # layer2 profile (skip)
+            "test-project",  # name
+            "Test Project",  # title
+            "Test description",  # description
+            "1",  # domain (1=programming)
+            "1",  # language (1=python)
+            "1",  # ai_assistant (1=both)
+            "",  # github_repo
+            str(tmp_path / "shared"),  # shared_dir (via CopilotPlugin.collect_config)
+            str(target_rel),  # target_dir
+            "1",  # extra_profiles mode
+            "1",  # layer2 profile (skip)
         ]
 
         original_cwd = Path.cwd()
@@ -169,9 +167,9 @@ class TestBug02PathResolution:
             config = collect_project_info(ci_mode=False)
 
             # Validar que target_dir é absoluto
-            assert config.target_dir.is_absolute(), (
-                f"BUG-02: target_dir deve ser absoluto em modo interativo: {config.target_dir}"
-            )
+            assert (
+                config.target_dir.is_absolute()
+            ), f"BUG-02: target_dir deve ser absoluto em modo interativo: {config.target_dir}"
 
             # Validar que não contém '..'
             assert ".." not in config.target_dir.parts

@@ -4,9 +4,9 @@ Testes para estratégia universal de merge JSON (user-wins sem union).
 Testa implementação v2.0 do deep_merge_json() e JSONMerger.
 """
 
-import pytest
 from pathlib import Path
-from scripts.lib.json_merge import deep_merge_json, JSONMerger
+
+from scripts.lib.json_merge import JSONMerger, deep_merge_json
 
 
 class TestDeepMergeJsonUserWins:
@@ -19,10 +19,8 @@ class TestDeepMergeJsonUserWins:
 
         result = deep_merge_json(base, overlay)
 
-        assert result["items"] == [4, 5], \
-            "Array deve ser substituído, NÃO concatenado"
-        assert result["items"] != [1, 2, 3, 4, 5], \
-            "NÃO deve fazer union de arrays"
+        assert result["items"] == [4, 5], "Array deve ser substituído, NÃO concatenado"
+        assert result["items"] != [1, 2, 3, 4, 5], "NÃO deve fazer union de arrays"
 
     def test_nested_objects_are_merged(self):
         """Objetos aninhados fazem merge recursivo."""
@@ -65,26 +63,8 @@ class TestDeepMergeJsonUserWins:
 
     def test_deeply_nested_merge(self):
         """Merge funciona em estruturas profundamente aninhadas."""
-        base = {
-            "level1": {
-                "level2": {
-                    "level3": {
-                        "a": 1,
-                        "b": [1, 2]
-                    }
-                }
-            }
-        }
-        overlay = {
-            "level1": {
-                "level2": {
-                    "level3": {
-                        "b": [3, 4],
-                        "c": 3
-                    }
-                }
-            }
-        }
+        base = {"level1": {"level2": {"level3": {"a": 1, "b": [1, 2]}}}}
+        overlay = {"level1": {"level2": {"level3": {"b": [3, 4], "c": 3}}}}
 
         result = deep_merge_json(base, overlay)
 
@@ -151,18 +131,9 @@ class TestRealWorldScenarios:
 
     def test_extensions_json_merge(self):
         """Simula merge de extensions.json sem duplicação."""
-        base = {
-            "recommendations": [
-                "ms-python.python",
-                "github.copilot"
-            ]
-        }
+        base = {"recommendations": ["ms-python.python", "github.copilot"]}
         overlay = {
-            "recommendations": [
-                "github.copilot",
-                "ms-python.python",
-                "astral-sh.uv"
-            ]
+            "recommendations": ["github.copilot", "ms-python.python", "astral-sh.uv"]
         }
 
         result = deep_merge_json(base, overlay)
@@ -171,7 +142,7 @@ class TestRealWorldScenarios:
         assert result["recommendations"] == [
             "github.copilot",
             "ms-python.python",
-            "astral-sh.uv"
+            "astral-sh.uv",
         ]
         # NÃO deve ter duplicações ou concatenação
         assert len(result["recommendations"]) == 3
@@ -182,7 +153,7 @@ class TestRealWorldScenarios:
             "mcpServers": {
                 "memory": {
                     "command": "npx",
-                    "args": ["-y", "@modelcontextprotocol/server-memory"]
+                    "args": ["-y", "@modelcontextprotocol/server-memory"],
                 }
             }
         }
@@ -191,12 +162,12 @@ class TestRealWorldScenarios:
                 "memory": {
                     "command": "npx",
                     "args": ["-y", "@modelcontextprotocol/server-memory"],
-                    "env": {"CUSTOM": "value"}
+                    "env": {"CUSTOM": "value"},
                 },
                 "filesystem": {
                     "command": "npx",
-                    "args": ["-y", "@modelcontextprotocol/server-filesystem"]
-                }
+                    "args": ["-y", "@modelcontextprotocol/server-filesystem"],
+                },
             }
         }
 
@@ -204,7 +175,8 @@ class TestRealWorldScenarios:
 
         # Args do usuário não duplicam
         assert result["mcpServers"]["memory"]["args"] == [
-            "-y", "@modelcontextprotocol/server-memory"
+            "-y",
+            "@modelcontextprotocol/server-memory",
         ]
         # Custom env preservado
         assert result["mcpServers"]["memory"]["env"] == {"CUSTOM": "value"}
@@ -213,18 +185,8 @@ class TestRealWorldScenarios:
 
     def test_package_json_scripts_merge(self):
         """Simula merge de package.json scripts."""
-        base = {
-            "scripts": {
-                "build": "tsc",
-                "test": "jest"
-            }
-        }
-        overlay = {
-            "scripts": {
-                "dev": "tsx watch src/index.ts",
-                "build": "vite build"
-            }
-        }
+        base = {"scripts": {"build": "tsc", "test": "jest"}}
+        overlay = {"scripts": {"dev": "tsx watch src/index.ts", "build": "vite build"}}
 
         result = deep_merge_json(base, overlay)
 
@@ -238,18 +200,12 @@ class TestRealWorldScenarios:
     def test_tsconfig_paths_merge(self):
         """Simula merge de tsconfig.json."""
         base = {
-            "compilerOptions": {
-                "target": "ES2020",
-                "module": "commonjs"
-            },
-            "include": ["src/**/*"]
+            "compilerOptions": {"target": "ES2020", "module": "commonjs"},
+            "include": ["src/**/*"],
         }
         overlay = {
-            "compilerOptions": {
-                "target": "ES2022",
-                "paths": {"@/*": ["src/*"]}
-            },
-            "include": ["src/**/*", "types/**/*"]
+            "compilerOptions": {"target": "ES2022", "paths": {"@/*": ["src/*"]}},
+            "include": ["src/**/*", "types/**/*"],
         }
 
         result = deep_merge_json(base, overlay)
@@ -265,14 +221,8 @@ class TestRealWorldScenarios:
 
     def test_settings_json_merge(self):
         """Simula merge de settings.json."""
-        base = {
-            "editor.rulers": [80],
-            "editor.formatOnSave": True
-        }
-        overlay = {
-            "editor.rulers": [120],
-            "python.linting.enabled": True
-        }
+        base = {"editor.rulers": [80], "editor.formatOnSave": True}
+        overlay = {"editor.rulers": [120], "python.linting.enabled": True}
 
         result = deep_merge_json(base, overlay)
 
@@ -287,23 +237,13 @@ class TestRealWorldScenarios:
         """Testa merge complexo com arrays em múltiplos níveis."""
         base = {
             "settings": {
-                "editor": {
-                    "rulers": [80, 100],
-                    "codeActionsOnSave": ["source.fixAll"]
-                }
+                "editor": {"rulers": [80, 100], "codeActionsOnSave": ["source.fixAll"]}
             }
         }
         overlay = {
             "settings": {
-                "editor": {
-                    "rulers": [120],
-                    "fontSize": 14
-                },
-                "python": {
-                    "analysis": {
-                        "typeCheckingMode": "strict"
-                    }
-                }
+                "editor": {"rulers": [120], "fontSize": 14},
+                "python": {"analysis": {"typeCheckingMode": "strict"}},
             }
         }
 

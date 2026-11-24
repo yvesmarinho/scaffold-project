@@ -1,5 +1,5 @@
-<!-- Criado em: 24/11/2026 10:45 -->
-<!-- Modificado em: 24/11/2026 10:43 -->
+<!-- Criado em: 24/11/2026 10:43 -->
+<!-- Modificado em: 24/11/2026 15:00 -->
 
 # BUG — CI sem rodar desde junho e tracker quebrando em ambiente de CI
 

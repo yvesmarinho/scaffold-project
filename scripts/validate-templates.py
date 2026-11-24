@@ -25,10 +25,11 @@ import argparse
 import json
 import re
 import sys
-import yaml
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Any
+
+import yaml
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -40,27 +41,33 @@ REQUIRED_FRONTMATTER_FIELDS = {
     "objetivo-template.yaml": [],  # YAML files may not have frontmatter
 }
 
-VARIABLE_PATTERN = re.compile(r'\$\{([A-Z_][A-Z0-9_]*)\}|\$([A-Z_][A-Z0-9_]*)\b|\[([A-Z_][A-Z0-9_]*)\]')
-MARKDOWN_LINK_PATTERN = re.compile(r'\[([^\]]+)\]\(([^)]+)\)')
+VARIABLE_PATTERN = re.compile(
+    r"\$\{([A-Z_][A-Z0-9_]*)\}|\$([A-Z_][A-Z0-9_]*)\b|\[([A-Z_][A-Z0-9_]*)\]"
+)
+MARKDOWN_LINK_PATTERN = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 
 # ---------------------------------------------------------------------------
 # Data Classes
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ValidationIssue:
     """Single validation issue (error or warning)"""
+
     severity: str  # "error" or "warning"
     file: str
-    line: Optional[int]
+    line: int | None
     message: str
-    details: Optional[str] = None
+    details: str | None = None
+
 
 @dataclass
 class ValidationResult:
     """Validation results for all templates"""
-    errors: List[ValidationIssue] = field(default_factory=list)
-    warnings: List[ValidationIssue] = field(default_factory=list)
+
+    errors: list[ValidationIssue] = field(default_factory=list)
+    warnings: list[ValidationIssue] = field(default_factory=list)
     files_checked: int = 0
 
     @property
@@ -71,9 +78,11 @@ class ValidationResult:
     def has_warnings(self) -> bool:
         return len(self.warnings) > 0
 
+
 # ---------------------------------------------------------------------------
 # Validators
 # ---------------------------------------------------------------------------
+
 
 class TemplateValidator:
     """Main template validation logic"""
@@ -82,15 +91,17 @@ class TemplateValidator:
         self.template_dir = template_dir
         self.result = ValidationResult()
 
-    def validate_all(self, template_filter: Optional[str] = None) -> ValidationResult:
+    def validate_all(self, template_filter: str | None = None) -> ValidationResult:
         """Validate all templates or filtered subset"""
         if not self.template_dir.exists():
-            self.result.errors.append(ValidationIssue(
-                severity="error",
-                file=str(self.template_dir),
-                line=None,
-                message=f"Template directory not found: {self.template_dir}"
-            ))
+            self.result.errors.append(
+                ValidationIssue(
+                    severity="error",
+                    file=str(self.template_dir),
+                    line=None,
+                    message=f"Template directory not found: {self.template_dir}",
+                )
+            )
             return self.result
 
         # Find all template files
@@ -103,12 +114,14 @@ class TemplateValidator:
             template_files = [f for f in template_files if template_filter in f.stem]
 
         if not template_files:
-            self.result.warnings.append(ValidationIssue(
-                severity="warning",
-                file=str(self.template_dir),
-                line=None,
-                message="No template files found"
-            ))
+            self.result.warnings.append(
+                ValidationIssue(
+                    severity="warning",
+                    file=str(self.template_dir),
+                    line=None,
+                    message="No template files found",
+                )
+            )
             return self.result
 
         # Validate each file
@@ -123,20 +136,24 @@ class TemplateValidator:
         try:
             content = file_path.read_text(encoding="utf-8")
         except UnicodeDecodeError as e:
-            self.result.errors.append(ValidationIssue(
-                severity="error",
-                file=str(file_path),
-                line=None,
-                message=f"File encoding error: {e}"
-            ))
+            self.result.errors.append(
+                ValidationIssue(
+                    severity="error",
+                    file=str(file_path),
+                    line=None,
+                    message=f"File encoding error: {e}",
+                )
+            )
             return
         except Exception as e:
-            self.result.errors.append(ValidationIssue(
-                severity="error",
-                file=str(file_path),
-                line=None,
-                message=f"Failed to read file: {e}"
-            ))
+            self.result.errors.append(
+                ValidationIssue(
+                    severity="error",
+                    file=str(file_path),
+                    line=None,
+                    message=f"Failed to read file: {e}",
+                )
+            )
             return
 
         # Dispatch to specific validator
@@ -152,31 +169,37 @@ class TemplateValidator:
         try:
             data = yaml.safe_load(content)
             if data is None:
-                self.result.warnings.append(ValidationIssue(
-                    severity="warning",
-                    file=str(file_path),
-                    line=None,
-                    message="YAML file is empty"
-                ))
+                self.result.warnings.append(
+                    ValidationIssue(
+                        severity="warning",
+                        file=str(file_path),
+                        line=None,
+                        message="YAML file is empty",
+                    )
+                )
         except yaml.YAMLError as e:
-            self.result.errors.append(ValidationIssue(
-                severity="error",
-                file=str(file_path),
-                line=getattr(e, 'problem_mark', None) and e.problem_mark.line + 1,
-                message=f"YAML syntax error: {e}"
-            ))
+            self.result.errors.append(
+                ValidationIssue(
+                    severity="error",
+                    file=str(file_path),
+                    line=getattr(e, "problem_mark", None) and e.problem_mark.line + 1,
+                    message=f"YAML syntax error: {e}",
+                )
+            )
 
     def _validate_json(self, file_path: Path, content: str):
         """Validate JSON file syntax"""
         try:
             json.loads(content)
         except json.JSONDecodeError as e:
-            self.result.errors.append(ValidationIssue(
-                severity="error",
-                file=str(file_path),
-                line=e.lineno,
-                message=f"JSON syntax error: {e.msg}"
-            ))
+            self.result.errors.append(
+                ValidationIssue(
+                    severity="error",
+                    file=str(file_path),
+                    line=e.lineno,
+                    message=f"JSON syntax error: {e.msg}",
+                )
+            )
 
     def _validate_markdown(self, file_path: Path, content: str):
         """Validate Markdown template"""
@@ -187,12 +210,14 @@ class TemplateValidator:
         if frontmatter:
             self._validate_frontmatter(file_path, frontmatter)
         else:
-            self.result.warnings.append(ValidationIssue(
-                severity="warning",
-                file=str(file_path),
-                line=1,
-                message="No YAML frontmatter found"
-            ))
+            self.result.warnings.append(
+                ValidationIssue(
+                    severity="warning",
+                    file=str(file_path),
+                    line=1,
+                    message="No YAML frontmatter found",
+                )
+            )
 
         # Validate links
         self._validate_markdown_links(file_path, content)
@@ -200,16 +225,16 @@ class TemplateValidator:
         # Validate variables
         self._validate_variables(file_path, content)
 
-    def _extract_frontmatter(self, content: str) -> Optional[Dict[str, Any]]:
+    def _extract_frontmatter(self, content: str) -> dict[str, Any] | None:
         """Extract YAML frontmatter from Markdown"""
-        lines = content.split('\n')
-        if not lines or lines[0].strip() != '---':
+        lines = content.split("\n")
+        if not lines or lines[0].strip() != "---":
             return None
 
         frontmatter_lines = []
-        for i, line in enumerate(lines[1:], start=1):
-            if line.strip() == '---':
-                frontmatter_text = '\n'.join(frontmatter_lines)
+        for _i, line in enumerate(lines[1:], start=1):
+            if line.strip() == "---":
+                frontmatter_text = "\n".join(frontmatter_lines)
                 try:
                     return yaml.safe_load(frontmatter_text) or {}
                 except yaml.YAMLError:
@@ -218,39 +243,48 @@ class TemplateValidator:
 
         return None
 
-    def _validate_frontmatter(self, file_path: Path, frontmatter: Dict[str, Any]):
+    def _validate_frontmatter(self, file_path: Path, frontmatter: dict[str, Any]):
         """Validate frontmatter required fields"""
         # Check required fields
-        for field in REQUIRED_FRONTMATTER_FIELDS.get("*.md", []):
-            if field not in frontmatter:
-                self.result.errors.append(ValidationIssue(
-                    severity="error",
-                    file=str(file_path),
-                    line=1,
-                    message=f"Missing required frontmatter field: {field}",
-                    details=f"Required fields: {', '.join(REQUIRED_FRONTMATTER_FIELDS['*.md'])}"
-                ))
+        for campo in REQUIRED_FRONTMATTER_FIELDS.get("*.md", []):
+            if campo not in frontmatter:
+                self.result.errors.append(
+                    ValidationIssue(
+                        severity="error",
+                        file=str(file_path),
+                        line=1,
+                        message=f"Missing required frontmatter field: {campo}",
+                        details=f"Required fields: {', '.join(REQUIRED_FRONTMATTER_FIELDS['*.md'])}",
+                    )
+                )
 
         # Validate template_version format
         if "template_version" in frontmatter:
             version = frontmatter["template_version"]
-            if not re.match(r'^\d+\.\d+\.\d+$', str(version)):
-                self.result.warnings.append(ValidationIssue(
-                    severity="warning",
-                    file=str(file_path),
-                    line=1,
-                    message=f"template_version should follow semver format (x.y.z): {version}"
-                ))
+            if not re.match(r"^\d+\.\d+\.\d+$", str(version)):
+                self.result.warnings.append(
+                    ValidationIssue(
+                        severity="warning",
+                        file=str(file_path),
+                        line=1,
+                        message=f"template_version should follow semver format (x.y.z): {version}",
+                    )
+                )
 
         # Warn on breaking_changes without justification
         if frontmatter.get("breaking_changes") is True:
-            if "breaking_reason" not in frontmatter and "breaking_change_notes" not in frontmatter:
-                self.result.warnings.append(ValidationIssue(
-                    severity="warning",
-                    file=str(file_path),
-                    line=1,
-                    message="breaking_changes=true but no breaking_reason or breaking_change_notes field"
-                ))
+            if (
+                "breaking_reason" not in frontmatter
+                and "breaking_change_notes" not in frontmatter
+            ):
+                self.result.warnings.append(
+                    ValidationIssue(
+                        severity="warning",
+                        file=str(file_path),
+                        line=1,
+                        message="breaking_changes=true but no breaking_reason or breaking_change_notes campo",
+                    )
+                )
 
     def _validate_markdown_links(self, file_path: Path, content: str):
         """Validate Markdown links"""
@@ -259,25 +293,27 @@ class TemplateValidator:
             link_url = match.group(2)
 
             # Skip external links (http/https)
-            if link_url.startswith(('http://', 'https://', '#')):
+            if link_url.startswith(("http://", "https://", "#")):
                 continue
 
             # Validate file references
-            if link_url.startswith(('./', '../', '/')):
+            if link_url.startswith(("./", "../", "/")):
                 # Resolve relative path
                 link_path = (file_path.parent / link_url).resolve()
 
                 # Check if file exists
                 if not link_path.exists():
                     # Extract line number
-                    line_num = content[:match.start()].count('\n') + 1
-                    self.result.warnings.append(ValidationIssue(
-                        severity="warning",
-                        file=str(file_path),
-                        line=line_num,
-                        message=f"Broken link: [{link_text}]({link_url})",
-                        details=f"Target file not found: {link_path}"
-                    ))
+                    line_num = content[: match.start()].count("\n") + 1
+                    self.result.warnings.append(
+                        ValidationIssue(
+                            severity="warning",
+                            file=str(file_path),
+                            line=line_num,
+                            message=f"Broken link: [{link_text}]({link_url})",
+                            details=f"Target file not found: {link_path}",
+                        )
+                    )
 
     def _validate_variables(self, file_path: Path, content: str):
         """Validate variable substitution placeholders"""
@@ -292,18 +328,22 @@ class TemplateValidator:
         for var in variables:
             # Warn on lowercase variables (convention is uppercase)
             if var != var.upper():
-                line_num = content[:content.find(var)].count('\n') + 1
-                self.result.warnings.append(ValidationIssue(
-                    severity="warning",
-                    file=str(file_path),
-                    line=line_num,
-                    message=f"Variable should be uppercase: {var}",
-                    details="Convention: ${UPPERCASE_VAR}"
-                ))
+                line_num = content[: content.find(var)].count("\n") + 1
+                self.result.warnings.append(
+                    ValidationIssue(
+                        severity="warning",
+                        file=str(file_path),
+                        line=line_num,
+                        message=f"Variable should be uppercase: {var}",
+                        details="Convention: ${UPPERCASE_VAR}",
+                    )
+                )
+
 
 # ---------------------------------------------------------------------------
 # Output Formatters
 # ---------------------------------------------------------------------------
+
 
 def format_console(result: ValidationResult) -> str:
     """Format validation results for console output"""
@@ -357,6 +397,7 @@ def format_console(result: ValidationResult) -> str:
 
     return "\n".join(lines)
 
+
 def format_json(result: ValidationResult) -> str:
     """Format validation results as JSON"""
     data = {
@@ -385,35 +426,31 @@ def format_json(result: ValidationResult) -> str:
     }
     return json.dumps(data, indent=2)
 
+
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+
 
 def main():
     parser = argparse.ArgumentParser(
         description="Validate templates in .specify/templates/",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=__doc__
+        epilog=__doc__,
     )
     parser.add_argument(
         "--template",
-        help="Validate specific template (e.g., 'spec' matches spec-template.md)"
+        help="Validate specific template (e.g., 'spec' matches spec-template.md)",
     )
+    parser.add_argument("--json", action="store_true", help="Output results as JSON")
     parser.add_argument(
-        "--json",
-        action="store_true",
-        help="Output results as JSON"
-    )
-    parser.add_argument(
-        "--strict",
-        action="store_true",
-        help="Fail on warnings (exit code 2)"
+        "--strict", action="store_true", help="Fail on warnings (exit code 2)"
     )
     parser.add_argument(
         "--template-dir",
         type=Path,
         default=TEMPLATE_DIR,
-        help=f"Template directory (default: {TEMPLATE_DIR})"
+        help=f"Template directory (default: {TEMPLATE_DIR})",
     )
 
     args = parser.parse_args()
@@ -435,6 +472,7 @@ def main():
         sys.exit(2)
     else:
         sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

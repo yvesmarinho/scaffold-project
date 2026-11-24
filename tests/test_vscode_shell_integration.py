@@ -2,8 +2,8 @@
 """
 NOME: test_vscode_shell_integration.py
 TITULO: Shell integration do terminal VS Code no settings.json gerado
-DATA: 24/11/2026 11:30
-MODIFICADO: 24/11/2026 11:12
+DATA: 24/11/2026 11:12
+MODIFICADO: 24/11/2026 15:00
 VERSÃO: 1.0.0
 DEPEND: pytest
 STATUS: DEV
@@ -32,7 +32,9 @@ _DECORATIONS = "terminal.integrated.shellIntegration.decorationsEnabled"
 
 
 def _settings(cfg) -> dict:
-    return json.loads((cfg.project_path / ".vscode" / "settings.json").read_text(encoding="utf-8"))
+    return json.loads(
+        (cfg.project_path / ".vscode" / "settings.json").read_text(encoding="utf-8")
+    )
 
 
 @pytest.mark.parametrize(
@@ -44,7 +46,9 @@ def _settings(cfg) -> dict:
         ("analysis", "python"),
     ],
 )
-def test_settings_gerado_habilita_shell_integration(make_project_config, domain, language) -> None:
+def test_settings_gerado_habilita_shell_integration(
+    make_project_config, domain, language
+) -> None:
     cfg = make_project_config(domain, language)
     item = vscode.generate_settings(cfg)
 
@@ -54,11 +58,15 @@ def test_settings_gerado_habilita_shell_integration(make_project_config, domain,
     assert settings[_DECORATIONS] == "both"
 
 
-def test_settings_existente_recebe_shell_integration_sem_perder_chaves(make_project_config) -> None:
+def test_settings_existente_recebe_shell_integration_sem_perder_chaves(
+    make_project_config,
+) -> None:
     cfg = make_project_config("programming", "python")
     dest = cfg.project_path / ".vscode" / "settings.json"
     dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_text(json.dumps({"workbench.colorTheme": "Minha Tema"}) + "\n", encoding="utf-8")
+    dest.write_text(
+        json.dumps({"workbench.colorTheme": "Minha Tema"}) + "\n", encoding="utf-8"
+    )
 
     vscode.generate_settings(cfg)
 

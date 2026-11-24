@@ -25,12 +25,13 @@ import json
 import sys
 from pathlib import Path
 
-import pytest
 import yaml
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 
-from lib.config import DomainType, LanguageType, ProjectConfig  # noqa: E402
+from datetime import UTC
+
+from lib.config import ProjectConfig  # noqa: E402
 from lib.project import (  # noqa: E402
     config_from_state,
     read_scaffold_state,
@@ -46,9 +47,11 @@ _STATE_FILENAME = ".scaffold-state.yaml"
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_cfg(tmp_path: Path, shared: Path | None = None) -> ProjectConfig:
     """Cria um ProjectConfig mínimo para testes."""
-    from datetime import datetime, timezone
+    from datetime import datetime
+
     project_dir = tmp_path / "test-proj"
     project_dir.mkdir(exist_ok=True)
     return ProjectConfig(
@@ -60,7 +63,7 @@ def _make_cfg(tmp_path: Path, shared: Path | None = None) -> ProjectConfig:
         github_repo="https://github.com/test/test-proj",
         shared_dir=shared or tmp_path / "shared",
         target_dir=project_dir,
-        created_at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        created_at=datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         extra_profiles=[],
     )
 
@@ -78,7 +81,7 @@ def _state_path(tmp_path: Path) -> Path:
 class TestWriteScaffoldState:
     def test_creates_state_file(self, tmp_path: Path) -> None:
         cfg = _make_cfg(tmp_path)
-        result = write_scaffold_state(cfg, profiles_applied=[])
+        write_scaffold_state(cfg, profiles_applied=[])
         assert _state_path(tmp_path).exists()
 
     def test_returns_created_item_with_created_status(self, tmp_path: Path) -> None:
@@ -125,6 +128,7 @@ class TestWriteScaffoldState:
 
     def test_updated_at_changes_on_second_call(self, tmp_path: Path) -> None:
         import time
+
         cfg = _make_cfg(tmp_path)
         write_scaffold_state(cfg, profiles_applied=[])
         first_data = yaml.safe_load(_state_path(tmp_path).read_text(encoding="utf-8"))
@@ -181,7 +185,9 @@ class TestReadScaffoldState:
         assert state["project"]["name"] == "test-proj"
 
     def test_returns_none_for_invalid_yaml(self, tmp_path: Path) -> None:
-        (tmp_path / _STATE_FILENAME).write_text(":::INVALID:::\n- not: valid: yaml: content\n", encoding="utf-8")
+        (tmp_path / _STATE_FILENAME).write_text(
+            ":::INVALID:::\n- not: valid: yaml: content\n", encoding="utf-8"
+        )
         result = read_scaffold_state(tmp_path)
         assert result is None
 
@@ -265,9 +271,12 @@ class TestConfigFromState:
 class TestUpgradeFlow:
     """Testes de integração usando subprocess para exercitar scaffold.py --upgrade."""
 
-    def _run_scaffold(self, args: list[str], env: dict | None = None) -> tuple[int, str, str]:
+    def _run_scaffold(
+        self, args: list[str], env: dict | None = None
+    ) -> tuple[int, str, str]:
         import os
         import subprocess
+
         environ = os.environ.copy()
         # Garantir identidade git para commits em repositórios temporários
         environ.setdefault("GIT_AUTHOR_NAME", "Test User")
@@ -285,19 +294,25 @@ class TestUpgradeFlow:
         return result.returncode, result.stdout, result.stderr
 
     def test_upgrade_missing_state_returns_error(self, tmp_path: Path) -> None:
-        rc, _out, _err = self._run_scaffold([
-            "--upgrade",
-            "--target-dir", str(tmp_path),
-            "--json",
-        ])
+        rc, _out, _err = self._run_scaffold(
+            [
+                "--upgrade",
+                "--target-dir",
+                str(tmp_path),
+                "--json",
+            ]
+        )
         assert rc != 0
 
     def test_upgrade_missing_state_json_has_error_key(self, tmp_path: Path) -> None:
-        rc, out, _err = self._run_scaffold([
-            "--upgrade",
-            "--target-dir", str(tmp_path),
-            "--json",
-        ])
+        rc, out, _err = self._run_scaffold(
+            [
+                "--upgrade",
+                "--target-dir",
+                str(tmp_path),
+                "--json",
+            ]
+        )
         parsed = json.loads(out)
         assert "error" in parsed
 
@@ -313,24 +328,37 @@ class TestUpgradeFlow:
         project_dir = tmp_path / project_name
         shared = tmp_path / "shared"
         shared.mkdir(parents=True, exist_ok=True)
-        rc, out, err = self._run_scaffold([
-            "--new", "--ci",
-            "--name", project_name,
-            "--domain", "programming",
-            "--language", "python",
-            "--target-dir", str(tmp_path),
-            "--shared-dir", str(shared),
-            "--json",
-        ])
+        rc, out, err = self._run_scaffold(
+            [
+                "--new",
+                "--ci",
+                "--name",
+                project_name,
+                "--domain",
+                "programming",
+                "--language",
+                "python",
+                "--target-dir",
+                str(tmp_path),
+                "--shared-dir",
+                str(shared),
+                "--json",
+            ]
+        )
         assert rc == 0, f"flow_new_project falhou: stdout={out}\nstderr={err}"
-        assert (project_dir / _STATE_FILENAME).exists(), "State file não foi criado por --new"
+        assert (
+            project_dir / _STATE_FILENAME
+        ).exists(), "State file não foi criado por --new"
 
         # Agora upgrade
-        rc2, out2, _err2 = self._run_scaffold([
-            "--upgrade",
-            "--target-dir", str(project_dir),
-            "--json",
-        ])
+        rc2, out2, _err2 = self._run_scaffold(
+            [
+                "--upgrade",
+                "--target-dir",
+                str(project_dir),
+                "--json",
+            ]
+        )
         assert rc2 == 0, f"--upgrade falhou: rc={rc2}\nstdout={out2}\nstderr={_err2}"
 
     def test_upgrade_json_has_upgrade_key_true(self, tmp_path: Path) -> None:
@@ -338,20 +366,31 @@ class TestUpgradeFlow:
         project_dir = tmp_path / project_name
         shared = tmp_path / "shared"
         shared.mkdir(parents=True, exist_ok=True)
-        self._run_scaffold([
-            "--new", "--ci",
-            "--name", project_name,
-            "--domain", "programming",
-            "--language", "python",
-            "--target-dir", str(tmp_path),
-            "--shared-dir", str(shared),
-            "--json",
-        ])
-        rc, out, err = self._run_scaffold([
-            "--upgrade",
-            "--target-dir", str(project_dir),
-            "--json",
-        ])
+        self._run_scaffold(
+            [
+                "--new",
+                "--ci",
+                "--name",
+                project_name,
+                "--domain",
+                "programming",
+                "--language",
+                "python",
+                "--target-dir",
+                str(tmp_path),
+                "--shared-dir",
+                str(shared),
+                "--json",
+            ]
+        )
+        rc, out, err = self._run_scaffold(
+            [
+                "--upgrade",
+                "--target-dir",
+                str(project_dir),
+                "--json",
+            ]
+        )
         assert rc == 0, f"upgrade rc={rc}\nstdout={out!r}\nstderr={err!r}"
         data = json.loads(out)
         assert data.get("upgrade") is True
@@ -362,63 +401,89 @@ class TestUpgradeFlow:
         project_dir = tmp_path / project_name
         shared = tmp_path / "shared"
         shared.mkdir(parents=True, exist_ok=True)
-        self._run_scaffold([
-            "--new", "--ci",
-            "--name", project_name,
-            "--domain", "programming",
-            "--language", "python",
-            "--target-dir", str(tmp_path),
-            "--shared-dir", str(shared),
-            "--json",
-        ])
+        self._run_scaffold(
+            [
+                "--new",
+                "--ci",
+                "--name",
+                project_name,
+                "--domain",
+                "programming",
+                "--language",
+                "python",
+                "--target-dir",
+                str(tmp_path),
+                "--shared-dir",
+                str(shared),
+                "--json",
+            ]
+        )
         # Primeiro upgrade
-        _, out1, _ = self._run_scaffold([
-            "--upgrade",
-            "--target-dir", str(project_dir),
-            "--json",
-        ])
+        _, out1, _ = self._run_scaffold(
+            [
+                "--upgrade",
+                "--target-dir",
+                str(project_dir),
+                "--json",
+            ]
+        )
         first_created = json.loads(out1).get("created", 0)
 
         # Segundo upgrade
-        rc, out, err = self._run_scaffold([
-            "--upgrade",
-            "--target-dir", str(project_dir),
-            "--json",
-        ])
+        rc, out, err = self._run_scaffold(
+            [
+                "--upgrade",
+                "--target-dir",
+                str(project_dir),
+                "--json",
+            ]
+        )
         assert rc == 0, f"2nd upgrade rc={rc}\nstdout={out!r}\nstderr={err!r}"
         data = json.loads(out)
         second_created = data.get("created", -1)
         # Upgrades sucessivos devem ser estáveis (não crescer a cada execução)
-        assert second_created <= first_created, (
-            f"2º upgrade criou mais arquivos ({second_created}) que o 1º ({first_created})"
-        )
+        assert (
+            second_created <= first_created
+        ), f"2º upgrade criou mais arquivos ({second_created}) que o 1º ({first_created})"
 
     def test_upgrade_updates_state_updated_at(self, tmp_path: Path) -> None:
         """O state file deve ter updated_at atualizado após upgrade."""
         import time
+
         project_name = "ts-test"
         project_dir = tmp_path / project_name
         shared = tmp_path / "shared"
         shared.mkdir(parents=True, exist_ok=True)
-        self._run_scaffold([
-            "--new", "--ci",
-            "--name", project_name,
-            "--domain", "programming",
-            "--language", "python",
-            "--target-dir", str(tmp_path),
-            "--shared-dir", str(shared),
-            "--json",
-        ])
+        self._run_scaffold(
+            [
+                "--new",
+                "--ci",
+                "--name",
+                project_name,
+                "--domain",
+                "programming",
+                "--language",
+                "python",
+                "--target-dir",
+                str(tmp_path),
+                "--shared-dir",
+                str(shared),
+                "--json",
+            ]
+        )
         first_state = yaml.safe_load((project_dir / _STATE_FILENAME).read_text())
         created_at_before = first_state["created_at"]
         updated_at_before = first_state["updated_at"]
 
         time.sleep(1.1)
-        self._run_scaffold([
-            "--upgrade",
-            "--target-dir", str(project_dir),
-            "--json",
-        ])
+        self._run_scaffold(
+            [
+                "--upgrade",
+                "--target-dir",
+                str(project_dir),
+                "--json",
+            ]
+        )
         second_state = yaml.safe_load((project_dir / _STATE_FILENAME).read_text())
         # created_at deve ser preservado
         assert second_state["created_at"] == created_at_before

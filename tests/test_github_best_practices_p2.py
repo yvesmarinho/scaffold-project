@@ -19,7 +19,6 @@ import stat
 import sys
 from pathlib import Path
 
-import pytest
 import yaml
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
@@ -38,9 +37,9 @@ _TEMPLATES_DIR = _PROJECT_ROOT / ".github" / "templates" / "common"
 def test_issue_templates_directory_exists() -> None:
     """Diretório de issue templates existe."""
     issue_template_dir = _TEMPLATES_DIR / "ISSUE_TEMPLATE"
-    assert issue_template_dir.is_dir(), (
-        f"Issue template dir não encontrado: {issue_template_dir}"
-    )
+    assert (
+        issue_template_dir.is_dir()
+    ), f"Issue template dir não encontrado: {issue_template_dir}"
 
 
 def test_issue_templates_yml_files_exist() -> None:
@@ -54,9 +53,9 @@ def test_issue_templates_yml_files_exist() -> None:
         "config.yml",
     }
     present = {f.name for f in issue_template_dir.iterdir() if f.is_file()}
-    assert expected.issubset(present), (
-        f"Issue templates faltando. Esperados: {expected}, Presentes: {present}"
-    )
+    assert expected.issubset(
+        present
+    ), f"Issue templates faltando. Esperados: {expected}, Presentes: {present}"
 
 
 def test_workflow_git_validation_exists() -> None:
@@ -135,9 +134,9 @@ def test_config_yml_disables_blank_issues() -> None:
     path = _TEMPLATES_DIR / "ISSUE_TEMPLATE" / "config.yml"
     content = path.read_text(encoding="utf-8")
     data = yaml.safe_load(content)
-    assert data.get("blank_issues_enabled") is False, (
-        "config.yml deve ter blank_issues_enabled: false"
-    )
+    assert (
+        data.get("blank_issues_enabled") is False
+    ), "config.yml deve ter blank_issues_enabled: false"
 
 
 # ---------------------------------------------------------------------------
@@ -168,9 +167,9 @@ def test_workflow_has_five_jobs() -> None:
         "pr-size-check",
         "summary",
     }
-    assert set(jobs.keys()) == expected_jobs, (
-        f"Jobs esperados: {expected_jobs}, encontrados: {set(jobs.keys())}"
-    )
+    assert (
+        set(jobs.keys()) == expected_jobs
+    ), f"Jobs esperados: {expected_jobs}, encontrados: {set(jobs.keys())}"
 
 
 def test_workflow_triggers_on_pull_request() -> None:
@@ -181,9 +180,9 @@ def test_workflow_triggers_on_pull_request() -> None:
     # YAML interpreta 'on' como True, então verificamos o conteúdo bruto
     # ou a chave True que contém os triggers
     triggers = data.get("on", data.get(True, {}))
-    assert "pull_request" in triggers, (
-        f"Workflow deve ter trigger 'pull_request'. Triggers: {triggers}"
-    )
+    assert (
+        "pull_request" in triggers
+    ), f"Workflow deve ter trigger 'pull_request'. Triggers: {triggers}"
 
 
 # ---------------------------------------------------------------------------
@@ -211,18 +210,18 @@ def test_commit_msg_hook_validates_conventional_commits() -> None:
     hook = _PROJECT_ROOT / "scripts" / "git-hooks" / "commit-msg"
     content = hook.read_text(encoding="utf-8")
     # Verificar padrão regex esperado
-    assert "feat|fix|docs|style|refactor|perf|test|chore|ci|build" in content, (
-        "Hook deve validar tipos de Conventional Commits"
-    )
+    assert (
+        "feat|fix|docs|style|refactor|perf|test|chore|ci|build" in content
+    ), "Hook deve validar tipos de Conventional Commits"
 
 
 def test_commit_msg_hook_allows_merge_commits() -> None:
     """commit-msg hook permite mensagens de merge."""
     hook = _PROJECT_ROOT / "scripts" / "git-hooks" / "commit-msg"
     content = hook.read_text(encoding="utf-8")
-    assert "Merge" in content or "merge" in content, (
-        "Hook deve permitir mensagens de merge"
-    )
+    assert (
+        "Merge" in content or "merge" in content
+    ), "Hook deve permitir mensagens de merge"
 
 
 # ---------------------------------------------------------------------------
@@ -265,9 +264,9 @@ def test_setup_branch_protection_supports_dry_run() -> None:
     """setup-branch-protection.py suporta modo dry-run."""
     script = _PROJECT_ROOT / "scripts" / "setup-branch-protection.py"
     content = script.read_text(encoding="utf-8")
-    assert "dry" in content.lower() or "dry-run" in content.lower(), (
-        "Script deve suportar dry-run"
-    )
+    assert (
+        "dry" in content.lower() or "dry-run" in content.lower()
+    ), "Script deve suportar dry-run"
 
 
 # ---------------------------------------------------------------------------
@@ -279,9 +278,9 @@ def test_badges_md_has_conventional_commits_badge() -> None:
     """BADGES.md contém badge de Conventional Commits."""
     badges = _TEMPLATES_DIR / "BADGES.md"
     content = badges.read_text(encoding="utf-8")
-    assert "Conventional Commits" in content, (
-        "BADGES.md deve conter badge de Conventional Commits"
-    )
+    assert (
+        "Conventional Commits" in content
+    ), "BADGES.md deve conter badge de Conventional Commits"
 
 
 def test_badges_md_has_github_flow_badge() -> None:
@@ -295,9 +294,9 @@ def test_badges_md_has_branch_protection_badge() -> None:
     """BADGES.md contém badge de Branch Protection."""
     badges = _TEMPLATES_DIR / "BADGES.md"
     content = badges.read_text(encoding="utf-8")
-    assert "Branch Protection" in content, (
-        "BADGES.md deve conter badge de Branch Protection"
-    )
+    assert (
+        "Branch Protection" in content
+    ), "BADGES.md deve conter badge de Branch Protection"
 
 
 def test_badges_md_has_shields_io_reference() -> None:
@@ -315,46 +314,50 @@ def test_badges_md_has_shields_io_reference() -> None:
 def test_copy_github_templates_copies_all_p1_files(make_project_config) -> None:
     """copy_github_templates() copia todos arquivos P1."""
     cfg = make_project_config("programming", "python")
-    results = project.copy_github_templates(cfg)
+    project.copy_github_templates(cfg)
 
     # Verificar P1 files
     assert (cfg.target_dir / "CONTRIBUTING.md").exists(), "CONTRIBUTING.md não copiado"
-    assert (cfg.target_dir / ".github" / "PULL_REQUEST_TEMPLATE.md").exists(), (
-        "PULL_REQUEST_TEMPLATE.md não copiado"
-    )
-    assert (cfg.target_dir / ".github" / "CODEOWNERS").exists(), "CODEOWNERS não copiado"
-    assert (cfg.target_dir / "docs" / "BRANCH_PROTECTION_SETUP.md").exists(), (
-        "BRANCH_PROTECTION_SETUP.md não copiado"
-    )
+    assert (
+        cfg.target_dir / ".github" / "PULL_REQUEST_TEMPLATE.md"
+    ).exists(), "PULL_REQUEST_TEMPLATE.md não copiado"
+    assert (
+        cfg.target_dir / ".github" / "CODEOWNERS"
+    ).exists(), "CODEOWNERS não copiado"
+    assert (
+        cfg.target_dir / "docs" / "BRANCH_PROTECTION_SETUP.md"
+    ).exists(), "BRANCH_PROTECTION_SETUP.md não copiado"
 
 
 def test_copy_github_templates_copies_all_p2_files(make_project_config) -> None:
     """copy_github_templates() copia todos arquivos P2."""
     cfg = make_project_config("programming", "python")
-    results = project.copy_github_templates(cfg)
+    project.copy_github_templates(cfg)
 
     # Verificar P2 issue templates
     issue_dir = cfg.target_dir / ".github" / "ISSUE_TEMPLATE"
     assert (issue_dir / "bug_report.yml").exists(), "bug_report.yml não copiado"
-    assert (issue_dir / "feature_request.yml").exists(), "feature_request.yml não copiado"
+    assert (
+        issue_dir / "feature_request.yml"
+    ).exists(), "feature_request.yml não copiado"
     assert (issue_dir / "documentation.yml").exists(), "documentation.yml não copiado"
     assert (issue_dir / "question.yml").exists(), "question.yml não copiado"
     assert (issue_dir / "config.yml").exists(), "config.yml não copiado"
 
     # Verificar workflow
-    assert (cfg.target_dir / ".github" / "workflows" / "git-validation.yml").exists(), (
-        "git-validation.yml não copiado"
-    )
+    assert (
+        cfg.target_dir / ".github" / "workflows" / "git-validation.yml"
+    ).exists(), "git-validation.yml não copiado"
 
     # Verificar git hook
-    assert (cfg.target_dir / "scripts" / "git-hooks" / "commit-msg").exists(), (
-        "commit-msg não copiado"
-    )
+    assert (
+        cfg.target_dir / "scripts" / "git-hooks" / "commit-msg"
+    ).exists(), "commit-msg não copiado"
 
     # Verificar script
-    assert (cfg.target_dir / "scripts" / "setup-branch-protection.py").exists(), (
-        "setup-branch-protection.py não copiado"
-    )
+    assert (
+        cfg.target_dir / "scripts" / "setup-branch-protection.py"
+    ).exists(), "setup-branch-protection.py não copiado"
 
     # Verificar badge guide
     assert (cfg.target_dir / ".github" / "BADGES.md").exists(), "BADGES.md não copiado"
@@ -363,23 +366,25 @@ def test_copy_github_templates_copies_all_p2_files(make_project_config) -> None:
 def test_copy_github_templates_substitutes_variables(make_project_config) -> None:
     """copy_github_templates() substitui variáveis template."""
     cfg = make_project_config("programming", "python", project_name="my-test-project")
-    results = project.copy_github_templates(cfg)
+    project.copy_github_templates(cfg)
 
     # Verificar substituição em CONTRIBUTING.md
     contributing = cfg.target_dir / "CONTRIBUTING.md"
     content = contributing.read_text(encoding="utf-8")
-    assert "my-test-project" in content, (
-        "{{ project_name }} não foi substituído em CONTRIBUTING.md"
-    )
-    assert "{{ project_name }}" not in content, (
-        "Variável {{ project_name }} não processada em CONTRIBUTING.md"
-    )
+    assert (
+        "my-test-project" in content
+    ), "{{ project_name }} não foi substituído em CONTRIBUTING.md"
+    assert (
+        "{{ project_name }}" not in content
+    ), "Variável {{ project_name }} não processada em CONTRIBUTING.md"
 
 
-def test_copy_github_templates_applies_executable_permissions(make_project_config) -> None:
+def test_copy_github_templates_applies_executable_permissions(
+    make_project_config,
+) -> None:
     """copy_github_templates() aplica permissões executáveis."""
     cfg = make_project_config("programming", "python")
-    results = project.copy_github_templates(cfg)
+    project.copy_github_templates(cfg)
 
     # Verificar hook executável
     hook = cfg.target_dir / "scripts" / "git-hooks" / "commit-msg"
@@ -411,7 +416,7 @@ def test_copy_github_templates_substitutes_github_owner(make_project_config) -> 
     """copy_github_templates() substitui {{ github_owner }}."""
     cfg = make_project_config("programming", "python")
     cfg.github_repo = "testowner/testrepo"
-    results = project.copy_github_templates(cfg)
+    project.copy_github_templates(cfg)
 
     # Verificar substituição em BADGES.md se tiver variável
     badges_template = _TEMPLATES_DIR / "BADGES.md"
@@ -422,12 +427,12 @@ def test_copy_github_templates_substitutes_github_owner(make_project_config) -> 
 
     # Verificar se o template tem variáveis e se foram substituídas
     if "{{ github_owner }}" in badges_template_content:
-        assert "testowner" in content, (
-            "{{ github_owner }} não foi substituído corretamente"
-        )
-        assert "{{ github_owner }}" not in content, (
-            "{{ github_owner }} permanece no arquivo processado"
-        )
+        assert (
+            "testowner" in content
+        ), "{{ github_owner }} não foi substituído corretamente"
+        assert (
+            "{{ github_owner }}" not in content
+        ), "{{ github_owner }} permanece no arquivo processado"
     # Se não tem variável no template, apenas verificar que o arquivo foi copiado
     else:
         assert badges.exists(), "BADGES.md não foi copiado"
@@ -442,27 +447,27 @@ def test_contributing_md_has_workflow_section() -> None:
     """CONTRIBUTING.md tem seção de workflow."""
     contributing = _TEMPLATES_DIR / "CONTRIBUTING.md"
     content = contributing.read_text(encoding="utf-8")
-    assert "Workflow" in content or "workflow" in content, (
-        "CONTRIBUTING.md deve ter seção de workflow"
-    )
+    assert (
+        "Workflow" in content or "workflow" in content
+    ), "CONTRIBUTING.md deve ter seção de workflow"
 
 
 def test_contributing_md_has_conventional_commits() -> None:
     """CONTRIBUTING.md menciona Conventional Commits."""
     contributing = _TEMPLATES_DIR / "CONTRIBUTING.md"
     content = contributing.read_text(encoding="utf-8")
-    assert "Conventional Commits" in content, (
-        "CONTRIBUTING.md deve mencionar Conventional Commits"
-    )
+    assert (
+        "Conventional Commits" in content
+    ), "CONTRIBUTING.md deve mencionar Conventional Commits"
 
 
 def test_pr_template_has_checklist() -> None:
     """PULL_REQUEST_TEMPLATE.md tem checklist."""
     pr_template = _TEMPLATES_DIR / "PULL_REQUEST_TEMPLATE.md"
     content = pr_template.read_text(encoding="utf-8")
-    assert "[ ]" in content or "- [ ]" in content, (
-        "PULL_REQUEST_TEMPLATE.md deve ter checklist"
-    )
+    assert (
+        "[ ]" in content or "- [ ]" in content
+    ), "PULL_REQUEST_TEMPLATE.md deve ter checklist"
 
 
 def test_codeowners_has_placeholders() -> None:
@@ -482,15 +487,15 @@ def test_readme_template_has_badges() -> None:
     # Ler o template diretamente do project.py
     from lib.project import _README_MD
 
-    assert "Conventional Commits" in _README_MD, (
-        "README template deve conter badge de Conventional Commits"
-    )
-    assert "GitHub Flow" in _README_MD, (
-        "README template deve conter badge de GitHub Flow"
-    )
-    assert "Branch Protection" in _README_MD, (
-        "README template deve conter badge de Branch Protection"
-    )
-    assert "shields.io" in _README_MD or "img.shields.io" in _README_MD, (
-        "README template deve usar shields.io para badges"
-    )
+    assert (
+        "Conventional Commits" in _README_MD
+    ), "README template deve conter badge de Conventional Commits"
+    assert (
+        "GitHub Flow" in _README_MD
+    ), "README template deve conter badge de GitHub Flow"
+    assert (
+        "Branch Protection" in _README_MD
+    ), "README template deve conter badge de Branch Protection"
+    assert (
+        "shields.io" in _README_MD or "img.shields.io" in _README_MD
+    ), "README template deve usar shields.io para badges"

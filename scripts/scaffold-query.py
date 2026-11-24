@@ -29,17 +29,17 @@ import json
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List
 
 # Import scaffold logger
 sys.path.insert(0, str(Path(__file__).parent))
-from scaffold_logger import ScaffoldLogger, ScaffoldEntry
+from scaffold_logger import ScaffoldEntry, ScaffoldLogger
 
 # ---------------------------------------------------------------------------
 # Formatters
 # ---------------------------------------------------------------------------
 
-def format_table(entries: List[ScaffoldEntry]):
+
+def format_table(entries: list[ScaffoldEntry]):
     """Format entries as a table"""
     if not entries:
         print("No scaffolds found.")
@@ -52,8 +52,8 @@ def format_table(entries: List[ScaffoldEntry]):
 
     # Rows
     for entry in entries:
-        timestamp = datetime.fromisoformat(entry.timestamp.replace('Z', ''))
-        date_str = timestamp.strftime('%Y-%m-%d')
+        timestamp = datetime.fromisoformat(entry.timestamp.replace("Z", ""))
+        date_str = timestamp.strftime("%Y-%m-%d")
 
         status = "✅" if entry.success else "❌"
 
@@ -64,6 +64,7 @@ def format_table(entries: List[ScaffoldEntry]):
 
     print("=" * 100)
     print(f"Total: {len(entries)} scaffold(s)")
+
 
 def format_stats(stats: dict):
     """Format statistics"""
@@ -76,16 +77,21 @@ def format_stats(stats: dict):
     print()
 
     print("By Profile:")
-    for profile, count in sorted(stats['by_profile'].items(), key=lambda x: x[1], reverse=True):
+    for profile, count in sorted(
+        stats["by_profile"].items(), key=lambda x: x[1], reverse=True
+    ):
         print(f"  {profile:<30} {count:>5}")
     print()
 
     print("By User:")
-    for user, count in sorted(stats['by_user'].items(), key=lambda x: x[1], reverse=True):
+    for user, count in sorted(
+        stats["by_user"].items(), key=lambda x: x[1], reverse=True
+    ):
         print(f"  {user:<30} {count:>5}")
     print("=" * 70)
 
-def format_json_output(entries: List[ScaffoldEntry]):
+
+def format_json_output(entries: list[ScaffoldEntry]):
     """Format entries as JSON"""
     data = [
         {
@@ -103,37 +109,46 @@ def format_json_output(entries: List[ScaffoldEntry]):
     ]
     print(json.dumps(data, indent=2))
 
+
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def parse_time_period(period: str) -> datetime:
     """Parse time period like '30d', '7d', '1w'"""
-    if period.endswith('d'):
+    if period.endswith("d"):
         days = int(period[:-1])
         return datetime.utcnow() - timedelta(days=days)
-    elif period.endswith('w'):
+    elif period.endswith("w"):
         weeks = int(period[:-1])
         return datetime.utcnow() - timedelta(weeks=weeks)
-    elif period.endswith('m'):
+    elif period.endswith("m"):
         months = int(period[:-1])
         return datetime.utcnow() - timedelta(days=months * 30)
     else:
         raise ValueError(f"Invalid time period: {period}")
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="Query scaffold history",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=__doc__
+        epilog=__doc__,
     )
 
     # Filters
-    parser.add_argument("--project", help="Filter by project name (supports wildcard *)")
+    parser.add_argument(
+        "--project", help="Filter by project name (supports wildcard *)"
+    )
     parser.add_argument("--profile", help="Filter by profile")
     parser.add_argument("--user", help="Filter by user")
-    parser.add_argument("--success", action="store_true", help="Show only successful scaffolds")
-    parser.add_argument("--failed", action="store_true", help="Show only failed scaffolds")
+    parser.add_argument(
+        "--success", action="store_true", help="Show only successful scaffolds"
+    )
+    parser.add_argument(
+        "--failed", action="store_true", help="Show only failed scaffolds"
+    )
 
     # Time filters
     parser.add_argument("--last", help="Last N days/weeks (e.g., 30d, 2w, 3m)")
@@ -145,8 +160,12 @@ def main():
     parser.add_argument("--export", help="Export to CSV file")
 
     # Config
-    parser.add_argument("--log-file", type=Path, default=Path("logs/scaffolds.yaml"),
-                       help="Path to scaffold log file")
+    parser.add_argument(
+        "--log-file",
+        type=Path,
+        default=Path("logs/scaffolds.yaml"),
+        help="Path to scaffold log file",
+    )
 
     args = parser.parse_args()
 
@@ -176,15 +195,16 @@ def main():
         profile=args.profile,
         created_by=args.user,
         success=success_filter,
-        limit=args.limit
+        limit=args.limit,
     )
 
     # Filter by time period
     if args.last:
         cutoff = parse_time_period(args.last)
         entries = [
-            e for e in entries
-            if datetime.fromisoformat(e.timestamp.replace('Z', '')) >= cutoff
+            e
+            for e in entries
+            if datetime.fromisoformat(e.timestamp.replace("Z", "")) >= cutoff
         ]
 
     # Output
@@ -192,6 +212,7 @@ def main():
         format_json_output(entries)
     else:
         format_table(entries)
+
 
 if __name__ == "__main__":
     main()

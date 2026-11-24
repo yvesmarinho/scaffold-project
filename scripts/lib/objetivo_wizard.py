@@ -17,13 +17,14 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # Try to import Rich for fancy UI (fallback to print() if not available)
 try:
     from rich.console import Console
     from rich.panel import Panel
     from rich.prompt import Prompt
+
     HAS_RICH = True
     console = Console()
 except ImportError:
@@ -107,6 +108,7 @@ class WizardQuestion:
         required: Whether answer is required
         validation: Optional validation function
     """
+
     id: str
     section: int
     priority: str  # "P0" | "P1" | "P2"
@@ -115,12 +117,13 @@ class WizardQuestion:
     placeholder: str
     multiline: bool = False
     required: bool = True
-    validation: Optional[callable] = None
+    validation: callable | None = None
 
 
 @dataclass
 class WizardAnswers:
     """Stores answers collected from the wizard."""
+
     project_name: str = ""
     project_title: str = ""
     project_type: str = ""
@@ -167,14 +170,18 @@ class ObjetivoWizard:
         wizard.run_non_interactive(answers)
     """
 
-    def __init__(self, template_path: Optional[Path] = None):
+    def __init__(self, template_path: Path | None = None):
         """Initialize the wizard.
 
         Args:
             template_path: Path to template base (default: scaffold/templates/objetivo/objetivo-v2-template.yaml)
         """
         self.template_path = template_path or (
-            Path(__file__).parent.parent.parent / "scaffold" / "templates" / "objetivo" / "objetivo-v2-template.yaml"
+            Path(__file__).parent.parent.parent
+            / "scaffold"
+            / "templates"
+            / "objetivo"
+            / "objetivo-v2-template.yaml"
         )
         self.answers = WizardAnswers()
         self.answer_stack: list[tuple[WizardQuestion, str]] = []  # For Ctrl+Z (undo)
@@ -191,121 +198,141 @@ class ObjetivoWizard:
         questions = []
 
         # P0 Questions (Required) - T027
-        questions.append(WizardQuestion(
-            id="q1_what",
-            section=1,
-            priority="P0",
-            prompt="O que este projeto faz? (descreva em 1 frase clara)",
-            example="Sistema automatizado de deploy que permite equipes DevOps configurar e executar deploys via interface web/CLI, com rollback automático em caso de falha.",
-            placeholder="{{DESCRIPTION}}",
-            multiline=False,
-            required=True,
-        ))
+        questions.append(
+            WizardQuestion(
+                id="q1_what",
+                section=1,
+                priority="P0",
+                prompt="O que este projeto faz? (descreva em 1 frase clara)",
+                example="Sistema automatizado de deploy que permite equipes DevOps configurar e executar deploys via interface web/CLI, com rollback automático em caso de falha.",
+                placeholder="{{DESCRIPTION}}",
+                multiline=False,
+                required=True,
+            )
+        )
 
-        questions.append(WizardQuestion(
-            id="q2_problem",
-            section=2,
-            priority="P0",
-            prompt="Qual limitação/problema atual está sendo melhorado? (1-2 parágrafos)",
-            example="Sistema atual: deploys manuais levam 2-3h com 15% de erro. Performance degrada em 50%, custos operacionais +R$ 30k/mês. Falta automação e padronização.",
-            placeholder="{{ANSWER_2}}",
-            multiline=True,
-            required=False,  # Condicional: apenas para projetos "update"
-        ))
+        questions.append(
+            WizardQuestion(
+                id="q2_problem",
+                section=2,
+                priority="P0",
+                prompt="Qual limitação/problema atual está sendo melhorado? (1-2 parágrafos)",
+                example="Sistema atual: deploys manuais levam 2-3h com 15% de erro. Performance degrada em 50%, custos operacionais +R$ 30k/mês. Falta automação e padronização.",
+                placeholder="{{ANSWER_2}}",
+                multiline=True,
+                required=False,  # Condicional: apenas para projetos "update"
+            )
+        )
 
-        questions.append(WizardQuestion(
-            id="q3_scope_included",
-            section=3,
-            priority="P0",
-            prompt="O que está NO escopo? (liste features incluídas, Enter vazio para terminar)",
-            example="Processamento automático de dados (P0)\nInterface web para monitoramento (P1)\nNotificações por email (P2)",
-            placeholder="{{FEATURE}}",  # Will expand to FEATURE_1, FEATURE_2, etc
-            multiline=True,
-            required=True,
-        ))
+        questions.append(
+            WizardQuestion(
+                id="q3_scope_included",
+                section=3,
+                priority="P0",
+                prompt="O que está NO escopo? (liste features incluídas, Enter vazio para terminar)",
+                example="Processamento automático de dados (P0)\nInterface web para monitoramento (P1)\nNotificações por email (P2)",
+                placeholder="{{FEATURE}}",  # Will expand to FEATURE_1, FEATURE_2, etc
+                multiline=True,
+                required=True,
+            )
+        )
 
         # P1 Questions (Recommended) - T028
-        questions.append(WizardQuestion(
-            id="q4_constraints",
-            section=4,
-            priority="P1",
-            prompt="Há restrições técnicas? (performance, segurança, compliance - Enter vazio para pular)",
-            example="Budget: R$ 50k\nPrazo: 3 meses\nDeve ser compatível com LGPD\nPerformance: <200ms p95",
-            placeholder="{{CONSTRAINT}}",  # Will expand to CONSTRAINT_1, CONSTRAINT_2, etc
-            multiline=True,
-            required=False,
-        ))
+        questions.append(
+            WizardQuestion(
+                id="q4_constraints",
+                section=4,
+                priority="P1",
+                prompt="Há restrições técnicas? (performance, segurança, compliance - Enter vazio para pular)",
+                example="Budget: R$ 50k\nPrazo: 3 meses\nDeve ser compatível com LGPD\nPerformance: <200ms p95",
+                placeholder="{{CONSTRAINT}}",  # Will expand to CONSTRAINT_1, CONSTRAINT_2, etc
+                multiline=True,
+                required=False,
+            )
+        )
 
-        questions.append(WizardQuestion(
-            id="q5_business_rules",
-            section=5,
-            priority="P1",
-            prompt="Há regras de negócio complexas? (Enter vazio para pular)",
-            example="Usuários premium têm acesso a features avançadas\nDados devem ser retidos por 7 anos\nCálculo de desconto: 10% para >100 unidades, 20% para >1000",
-            placeholder="{{RULE}}",  # Will expand to RULE_1, RULE_2, RULE_3
-            multiline=True,
-            required=False,
-        ))
+        questions.append(
+            WizardQuestion(
+                id="q5_business_rules",
+                section=5,
+                priority="P1",
+                prompt="Há regras de negócio complexas? (Enter vazio para pular)",
+                example="Usuários premium têm acesso a features avançadas\nDados devem ser retidos por 7 anos\nCálculo de desconto: 10% para >100 unidades, 20% para >1000",
+                placeholder="{{RULE}}",  # Will expand to RULE_1, RULE_2, RULE_3
+                multiline=True,
+                required=False,
+            )
+        )
 
         # Campos adicionais para objetivo-init.yaml
-        questions.append(WizardQuestion(
-            id="q6_response",
-            section=6,
-            priority="P0",
-            prompt="Tipo de solução técnica (linguagem, framework, padrões)",
-            example="código python, com conexão PostgreSQL, usando SQLAlchemy e Alembic",
-            placeholder="{{RESPONSE}}",
-            multiline=False,
-            required=True,
-        ))
+        questions.append(
+            WizardQuestion(
+                id="q6_response",
+                section=6,
+                priority="P0",
+                prompt="Tipo de solução técnica (linguagem, framework, padrões)",
+                example="código python, com conexão PostgreSQL, usando SQLAlchemy e Alembic",
+                placeholder="{{RESPONSE}}",
+                multiline=False,
+                required=True,
+            )
+        )
 
-        questions.append(WizardQuestion(
-            id="q7_docstyle",
-            section=7,
-            priority="P1",
-            prompt="Padrão de documentação (Enter vazio para pular)",
-            example="reStructuredText com Docstring e DocTest",
-            placeholder="{{DOCSTYLE}}",
-            multiline=False,
-            required=False,
-        ))
+        questions.append(
+            WizardQuestion(
+                id="q7_docstyle",
+                section=7,
+                priority="P1",
+                prompt="Padrão de documentação (Enter vazio para pular)",
+                example="reStructuredText com Docstring e DocTest",
+                placeholder="{{DOCSTYLE}}",
+                multiline=False,
+                required=False,
+            )
+        )
 
-        questions.append(WizardQuestion(
-            id="q8_infrastructure",
-            section=8,
-            priority="P1",
-            prompt="Infraestrutura necessária (servidores, DBs, containers)",
-            example="Servidor PostgreSQL em wfdb02.vya.digital\nAplicação em container Docker",
-            placeholder="{{INFRASTRUCTURE}}",  # Will expand to INFRASTRUCTURE_1, INFRASTRUCTURE_2, etc
-            multiline=True,
-            required=False,
-        ))
+        questions.append(
+            WizardQuestion(
+                id="q8_infrastructure",
+                section=8,
+                priority="P1",
+                prompt="Infraestrutura necessária (servidores, DBs, containers)",
+                example="Servidor PostgreSQL em wfdb02.vya.digital\nAplicação em container Docker",
+                placeholder="{{INFRASTRUCTURE}}",  # Will expand to INFRASTRUCTURE_1, INFRASTRUCTURE_2, etc
+                multiline=True,
+                required=False,
+            )
+        )
 
-        questions.append(WizardQuestion(
-            id="q9_profiles",
-            section=9,
-            priority="P1",
-            prompt="Perfis/roles necessários (dba, devops, etc)",
-            example="dba_architect (expert)\npython_developer (senior)\ndevops_engineer (intermediate)",
-            placeholder="{{PROFILE_ROLE_1}}",
-            multiline=True,
-            required=False,
-        ))
+        questions.append(
+            WizardQuestion(
+                id="q9_profiles",
+                section=9,
+                priority="P1",
+                prompt="Perfis/roles necessários (dba, devops, etc)",
+                example="dba_architect (expert)\npython_developer (senior)\ndevops_engineer (intermediate)",
+                placeholder="{{PROFILE_ROLE_1}}",
+                multiline=True,
+                required=False,
+            )
+        )
 
-        questions.append(WizardQuestion(
-            id="q10_expected_outcome",
-            section=10,
-            priority="P0",
-            prompt="Resultados esperados mensuráveis",
-            example="100% dos dados migrados com zero erros de FK\nTempo de migração <2h\nZero exposição de dados sensíveis",
-            placeholder="{{EXPECTED_OUTCOME}}",  # Will expand to EXPECTED_OUTCOME_1, EXPECTED_OUTCOME_2, etc
-            multiline=True,
-            required=True,
-        ))
+        questions.append(
+            WizardQuestion(
+                id="q10_expected_outcome",
+                section=10,
+                priority="P0",
+                prompt="Resultados esperados mensuráveis",
+                example="100% dos dados migrados com zero erros de FK\nTempo de migração <2h\nZero exposição de dados sensíveis",
+                placeholder="{{EXPECTED_OUTCOME}}",  # Will expand to EXPECTED_OUTCOME_1, EXPECTED_OUTCOME_2, etc
+                multiline=True,
+                required=True,
+            )
+        )
 
         return questions
 
-    def _ask_question(self, question: WizardQuestion) -> Optional[str]:
+    def _ask_question(self, question: WizardQuestion) -> str | None:
         """Ask a single question and return the answer.
 
         Args:
@@ -346,7 +373,7 @@ class ObjetivoWizard:
                         lines.append(line)
 
                 except EOFError:  # Ctrl+D or Ctrl+Z
-                    raise EOFError("Go back to previous question")
+                    raise EOFError("Go back to previous question") from None
                 except KeyboardInterrupt:  # Ctrl+C
                     raise
 
@@ -359,13 +386,15 @@ class ObjetivoWizard:
                 else:
                     answer = input("  Resposta: ").strip()
             except EOFError:
-                raise EOFError("Go back to previous question")
+                raise EOFError("Go back to previous question") from None
             except KeyboardInterrupt:
                 raise
 
         # Validate required fields
         if question.required and not answer:
-            self._print("[yellow]⚠️  Esta pergunta é obrigatória. Tente novamente.[/yellow]")
+            self._print(
+                "[yellow]⚠️  Esta pergunta é obrigatória. Tente novamente.[/yellow]"
+            )
             return self._ask_question(question)  # Re-ask
 
         # If empty and optional, return None
@@ -397,27 +426,30 @@ class ObjetivoWizard:
         if not self.template_path.exists():
             raise FileNotFoundError(f"Template not found: {self.template_path}")
 
-        template = self.template_path.read_text(encoding='utf-8')
+        template = self.template_path.read_text(encoding="utf-8")
 
         # 1. Substitute metadata placeholders in frontmatter
         template = template.replace('"{{PROJECT_NAME}}"', f'"{answers.project_name}"')
-        template = template.replace('{{PROJECT_NAME}}', answers.project_name)
+        template = template.replace("{{PROJECT_NAME}}", answers.project_name)
         template = template.replace('"{{PROJECT_TITLE}}"', f'"{answers.project_title}"')
-        template = template.replace('{{PROJECT_TITLE}}', answers.project_title)
+        template = template.replace("{{PROJECT_TITLE}}", answers.project_title)
         template = template.replace('"{{PROJECT_TYPE}}"', f'"{answers.project_type}"')
-        template = template.replace('{{PROJECT_TYPE}}', answers.project_type)
-        template = template.replace('"{{PROJECT_DOMAIN}}"', f'"{answers.project_domain}"')
-        template = template.replace('{{PROJECT_DOMAIN}}', answers.project_domain)
-        template = template.replace('"{{PROJECT_LANGUAGE}}"', f'"{answers.project_language}"')
-        template = template.replace('{{PROJECT_LANGUAGE}}', answers.project_language)
+        template = template.replace("{{PROJECT_TYPE}}", answers.project_type)
+        template = template.replace(
+            '"{{PROJECT_DOMAIN}}"', f'"{answers.project_domain}"'
+        )
+        template = template.replace("{{PROJECT_DOMAIN}}", answers.project_domain)
+        template = template.replace(
+            '"{{PROJECT_LANGUAGE}}"', f'"{answers.project_language}"'
+        )
+        template = template.replace("{{PROJECT_LANGUAGE}}", answers.project_language)
         template = template.replace('"{{CREATED_BY}}"', f'"{answers.created_by}"')
-        template = template.replace('{{CREATED_BY}}', answers.created_by)
+        template = template.replace("{{CREATED_BY}}", answers.created_by)
 
         # Add created_at timestamp
-        from datetime import datetime
         created_at = datetime.now().strftime("%Y-%m-%d")
         template = template.replace('"{{CREATED_AT}}"', f'"{created_at}"')
-        template = template.replace('{{CREATED_AT}}', created_at)
+        template = template.replace("{{CREATED_AT}}", created_at)
 
         # 2. Process answers - expand multiline placeholders
         # Map question IDs to placeholders using question definitions
@@ -433,18 +465,31 @@ class ObjetivoWizard:
             if question_id.startswith("{{") and question_id.endswith("}}"):
                 placeholder = question_id
             else:
-                placeholder = question_map.get(question_id, f"{{{{{question_id.upper()}}}}}")
-            base_placeholder = placeholder.replace('{{', '').replace('}}', '')
+                placeholder = question_map.get(
+                    question_id, f"{{{{{question_id.upper()}}}}}"
+                )
+            base_placeholder = placeholder.replace("{{", "").replace("}}", "")
 
-            if '\n' in value and base_placeholder in ['FEATURE', 'RULE', 'CONSTRAINT', 'INFRASTRUCTURE', 'EXPECTED_OUTCOME']:
+            if "\n" in value and base_placeholder in [
+                "FEATURE",
+                "RULE",
+                "CONSTRAINT",
+                "INFRASTRUCTURE",
+                "EXPECTED_OUTCOME",
+            ]:
                 # Split multiline value into individual items
-                lines = [line.strip() for line in value.split('\n') if line.strip()]
+                lines = [line.strip() for line in value.split("\n") if line.strip()]
 
                 # Create numbered placeholders with markdown list formatting
                 for i, line in enumerate(lines, start=1):
                     numbered_placeholder = f"{{{{{base_placeholder}_{i}}}}}"
                     # Add markdown list prefix if this is a list-type placeholder
-                    if base_placeholder in ['FEATURE', 'CONSTRAINT', 'INFRASTRUCTURE', 'EXPECTED_OUTCOME']:
+                    if base_placeholder in [
+                        "FEATURE",
+                        "CONSTRAINT",
+                        "INFRASTRUCTURE",
+                        "EXPECTED_OUTCOME",
+                    ]:
                         processed_placeholders[numbered_placeholder] = f"- {line}"
                     else:
                         processed_placeholders[numbered_placeholder] = line
@@ -460,13 +505,13 @@ class ObjetivoWizard:
 
         # 4. Add default values for placeholders without questions (BUG-001 Fix)
         defaults = {
-            '{{WORKFLOW_OBJETIVO}}': 'Workflow baseado em objetivo.yaml v2.0 com SpecKit',
-            '{{WORKFLOW_SPECIFY}}': 'Geração automática de spec.md, plan.md e tasks.md',
+            "{{WORKFLOW_OBJETIVO}}": "Workflow baseado em objetivo.yaml v2.0 com SpecKit",
+            "{{WORKFLOW_SPECIFY}}": "Geração automática de spec.md, plan.md e tasks.md",
             # BUG-001 Fix #2: NÃO incluir default para OUT_SCOPE (será removido se vazio)
-            '{{FOLDER_STRUCTURE_CUSTOM}}': '',  # Empty for default structure
-            '{{DOCSTYLE}}': DEFAULT_DOCSTYLE,  # BUG-001 Fix #1: Default quando não fornecido
-            '{{ARCHITECTURE}}': DEFAULT_ARCHITECTURE,
-            '{{NAMING_CONVENTIONS}}': naming_conventions(answers.project_language),
+            "{{FOLDER_STRUCTURE_CUSTOM}}": "",  # Empty for default structure
+            "{{DOCSTYLE}}": DEFAULT_DOCSTYLE,  # BUG-001 Fix #1: Default quando não fornecido
+            "{{ARCHITECTURE}}": DEFAULT_ARCHITECTURE,
+            "{{NAMING_CONVENTIONS}}": naming_conventions(answers.project_language),
         }
 
         for placeholder, default_value in defaults.items():
@@ -480,17 +525,24 @@ class ObjetivoWizard:
 
         # BUG-001 Fix #2: Remover linhas com out-scope vazio
         # Detecta: "      - out-scope: """" ou "      - out-scope: "{{OUT_SCOPE}}""
-        template = re.sub(r'^\s*-?\s*out-scope:\s*("{{OUT_SCOPE}}"|"")?\s*$', '', template, flags=re.MULTILINE)
+        template = re.sub(
+            r'^\s*-?\s*out-scope:\s*("{{OUT_SCOPE}}"|"")?\s*$',
+            "",
+            template,
+            flags=re.MULTILINE,
+        )
 
         # Remove lines with unreplaced placeholders that look like "{{PLACEHOLDER_N}}"
-        template = re.sub(r'^\s*-?\s*"?\{\{[A-Z_0-9]+\}\}"?\s*$', '', template, flags=re.MULTILINE)
+        template = re.sub(
+            r'^\s*-?\s*"?\{\{[A-Z_0-9]+\}\}"?\s*$', "", template, flags=re.MULTILINE
+        )
 
         # Clean up remaining single placeholders
         template = re.sub(r'"?\{\{[A-Z_0-9]+\}\}"?', '""', template)
 
         return template
 
-    def run(self, output_path: Optional[Path] = None) -> int:
+    def run(self, output_path: Path | None = None) -> int:
         """Run the wizard in interactive mode.
 
         Args:
@@ -510,41 +562,67 @@ class ObjetivoWizard:
             # Print banner
             self._print("\n")
             if HAS_RICH and console:
-                console.print(Panel(
-                    "[bold cyan]🧙 Wizard objetivo-init.yaml v1.0[/bold cyan]\n\n"
-                    "Crie seu arquivo objetivo-init.yaml respondendo perguntas.\n"
-                    "[dim]Ctrl+C: salvar draft | Ctrl+Z: voltar[/dim]",
-                    border_style="cyan",
-                    padding=(1, 2),
-                ))
+                console.print(
+                    Panel(
+                        "[bold cyan]🧙 Wizard objetivo-init.yaml v1.0[/bold cyan]\n\n"
+                        "Crie seu arquivo objetivo-init.yaml respondendo perguntas.\n"
+                        "[dim]Ctrl+C: salvar draft | Ctrl+Z: voltar[/dim]",
+                        border_style="cyan",
+                        padding=(1, 2),
+                    )
+                )
             else:
                 self._print("\n🧙 Wizard objetivo-init.yaml v1.0\n")
-                self._print("Crie seu arquivo objetivo.yaml respondendo algumas perguntas.")
+                self._print(
+                    "Crie seu arquivo objetivo.yaml respondendo algumas perguntas."
+                )
                 self._print("(Ctrl+C: salvar draft | Ctrl+Z: voltar)\n")
 
             # Ask project metadata
             self._print("\n[bold]Metadados do Projeto[/bold]\n")
 
-            self.answers.project_name = self._ask_simple("Nome do projeto (kebab-case)", "user-management-api", required=True)
-            self.answers.project_title = self._ask_simple("Título legível", "API de Gerenciamento de Usuários", required=True)
+            self.answers.project_name = self._ask_simple(
+                "Nome do projeto (kebab-case)", "user-management-api", required=True
+            )
+            self.answers.project_title = self._ask_simple(
+                "Título legível", "API de Gerenciamento de Usuários", required=True
+            )
             self.answers.project_type = self._ask_choice(
                 "Tipo do projeto",
-                ["backend-api", "frontend-spa", "cli-tool", "library", "deployment-chart", "infrastructure-code"],
-                default="backend-api"
+                [
+                    "backend-api",
+                    "frontend-spa",
+                    "cli-tool",
+                    "library",
+                    "deployment-chart",
+                    "infrastructure-code",
+                ],
+                default="backend-api",
             )
             self.answers.project_domain = self._ask_choice(
                 "Domínio",
-                ["programming", "infrastructure", "data-engineering", "security", "qa", "design"],
-                default="programming"
+                [
+                    "programming",
+                    "infrastructure",
+                    "data-engineering",
+                    "security",
+                    "qa",
+                    "design",
+                ],
+                default="programming",
             )
-            self.answers.project_language = self._ask_simple("Linguagem principal", "python", required=True)
-            self.answers.created_by = self._ask_simple("Criado por (seu nome ou username)", "devops-team", required=True)
+            self.answers.project_language = self._ask_simple(
+                "Linguagem principal", "python", required=True
+            )
+            self.answers.created_by = self._ask_simple(
+                "Criado por (seu nome ou username)", "devops-team", required=True
+            )
 
             # Ask project context (new vs update)
             project_context = self._ask_choice(
                 "Este é um projeto novo ou atualização/melhoria?",
                 ["novo", "update"],
-                default="novo"
+                default="novo",
             )
 
             # Ask P0 questions (required)
@@ -555,7 +633,9 @@ class ObjetivoWizard:
                 # Skip "problem" question for new projects
                 if question.id == "q2_problem" and project_context == "novo":
                     # Add default text for new projects
-                    self.answers.answers[question.placeholder] = "Projeto greenfield — não há sistema anterior a ser substituído."
+                    self.answers.answers[question.placeholder] = (
+                        "Projeto greenfield — não há sistema anterior a ser substituído."
+                    )
                     continue
                 try:
                     answer = self._ask_question(question)
@@ -573,9 +653,11 @@ class ObjetivoWizard:
 
             # Ask if want to add optional sections
             self._print("\n[bold]Seções Opcionais[/bold]\n")
-            add_optional = self._ask_simple("Adicionar seções opcionais (P1)? [y/N]", "n", required=False)
+            add_optional = self._ask_simple(
+                "Adicionar seções opcionais (P1)? [y/N]", "n", required=False
+            )
 
-            if add_optional and add_optional.lower() in ['y', 'yes', 's', 'sim']:
+            if add_optional and add_optional.lower() in ["y", "yes", "s", "sim"]:
                 self._print("\n[bold]Seções P1 (Contextuais - Recomendado)[/bold]\n")
                 p1_questions = [q for q in self.questions if q.priority == "P1"]
 
@@ -592,15 +674,19 @@ class ObjetivoWizard:
             content = self._render_template(self.answers)
 
             # Write to file
-            output_path.write_text(content, encoding='utf-8')
+            output_path.write_text(content, encoding="utf-8")
 
             # Success message
             self._print("\n[bold green]✅ Pronto![/bold green]\n")
             self._print(f"Arquivo criado: [cyan]{output_path}[/cyan]\n")
             self._print("[bold]Próximos passos:[/bold]")
             self._print("  1. Revise e complete o arquivo objetivo-init.yaml")
-            self._print("  2. Valide: [cyan]scaffold objetivo-validate --file objetivo-init.yaml[/cyan]")
-            self._print("  3. Gere spec: [cyan]scaffold objetivo-generate --input objetivo-init.yaml[/cyan]\n")
+            self._print(
+                "  2. Valide: [cyan]scaffold objetivo-validate --file objetivo-init.yaml[/cyan]"
+            )
+            self._print(
+                "  3. Gere spec: [cyan]scaffold objetivo-generate --input objetivo-init.yaml[/cyan]\n"
+            )
 
             return 0
 
@@ -614,9 +700,7 @@ class ObjetivoWizard:
             return 1
 
     def run_non_interactive(
-        self,
-        answers: WizardAnswers,
-        output_path: Optional[Path] = None
+        self, answers: WizardAnswers, output_path: Path | None = None
     ) -> int:
         """Run the wizard in non-interactive mode (from JSON file).
 
@@ -645,7 +729,7 @@ class ObjetivoWizard:
             content = self._render_template(self.answers)
 
             # Write to file
-            output_path.write_text(content, encoding='utf-8')
+            output_path.write_text(content, encoding="utf-8")
 
             # Success message
             self._print(f"\n[green]✅ Gerado:[/green] {output_path}\n")
@@ -664,7 +748,7 @@ class ObjetivoWizard:
         """
         try:
             content = self._render_template(self.answers)
-            draft_path.write_text(content, encoding='utf-8')
+            draft_path.write_text(content, encoding="utf-8")
             self._print(f"\n  [yellow]📝 Draft salvo:[/yellow] {draft_path}")
         except Exception as e:
             self._print(f"\n  [red]❌ Erro ao salvar draft:[/red] {e}")
@@ -682,7 +766,8 @@ class ObjetivoWizard:
         else:
             # Strip Rich markup tags like [bold], [red], etc.
             import re
-            clean_message = re.sub(r'\[/?[a-z\s]+\]', '', message)
+
+            clean_message = re.sub(r"\[/?[a-z\s]+\]", "", message)
             print(clean_message, **kwargs)
 
     def _ask_simple(self, prompt: str, example: str, required: bool = True) -> str:
@@ -731,7 +816,9 @@ class ObjetivoWizard:
             answer = input(f"  Escolha [{default}]: ").strip() or default
 
         if answer not in choices:
-            self._print(f"[yellow]⚠️  Escolha inválida. Escolha entre: {', '.join(choices)}[/yellow]")
+            self._print(
+                f"[yellow]⚠️  Escolha inválida. Escolha entre: {', '.join(choices)}[/yellow]"
+            )
             return self._ask_choice(prompt, choices, default)
 
         return answer

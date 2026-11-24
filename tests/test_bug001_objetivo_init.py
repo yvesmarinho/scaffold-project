@@ -8,8 +8,8 @@ Valida correções para 3 bugs:
 """
 
 import pytest
-from pathlib import Path
-from scripts.lib.objetivo_wizard import ObjetivoWizard, WizardAnswers, DEFAULT_DOCSTYLE
+
+from scripts.lib.objetivo_wizard import DEFAULT_DOCSTYLE, ObjetivoWizard, WizardAnswers
 
 
 class TestBug001DocstyleDefault:
@@ -38,8 +38,8 @@ class TestBug001DocstyleDefault:
                 "{{DESCRIPTION}}": "Test description",
                 "{{RESPONSE}}": "Python code",
                 "{{DOCSTYLE}}": "reStructuredText com Docstring e DocTest",  # Custom value
-                "{{EXPECTED_OUTCOME_1}}": "Test outcome"
-            }
+                "{{EXPECTED_OUTCOME_1}}": "Test outcome",
+            },
         )
 
         rendered = wizard._render_template(wizard.answers)
@@ -63,8 +63,8 @@ class TestBug001DocstyleDefault:
                 "{{DESCRIPTION}}": "Test description",
                 "{{RESPONSE}}": "Python code",
                 # {{DOCSTYLE}} NÃO fornecido
-                "{{EXPECTED_OUTCOME_1}}": "Test outcome"
-            }
+                "{{EXPECTED_OUTCOME_1}}": "Test outcome",
+            },
         )
 
         rendered = wizard._render_template(wizard.answers)
@@ -91,9 +91,9 @@ class TestBug001OutScopeConditional:
             answers={
                 "{{DESCRIPTION}}": "Test description",
                 "{{RESPONSE}}": "Python code",
-                "{{EXPECTED_OUTCOME_1}}": "Test outcome"
+                "{{EXPECTED_OUTCOME_1}}": "Test outcome",
                 # {{OUT_SCOPE}} NÃO fornecido
-            }
+            },
         )
 
         rendered = wizard._render_template(wizard.answers)
@@ -103,7 +103,9 @@ class TestBug001OutScopeConditional:
         assert 'out-scope: "{{OUT_SCOPE}}"' not in rendered
         # Pode contar linhas para validar que foi removida
         lines = [line for line in rendered.splitlines() if "out-scope" in line]
-        assert len(lines) == 0, f"out-scope não deveria aparecer, mas encontrado: {lines}"
+        assert (
+            len(lines) == 0
+        ), f"out-scope não deveria aparecer, mas encontrado: {lines}"
 
     def test_template_includes_out_scope_when_provided(self, tmp_path):
         """Quando out-scope é fornecido, deve ser incluído."""
@@ -119,8 +121,8 @@ class TestBug001OutScopeConditional:
                 "{{DESCRIPTION}}": "Test description",
                 "{{RESPONSE}}": "Python code",
                 "{{OUT_SCOPE}}": "Não inclui funcionalidades de admin",  # Custom value
-                "{{EXPECTED_OUTCOME_1}}": "Test outcome"
-            }
+                "{{EXPECTED_OUTCOME_1}}": "Test outcome",
+            },
         )
 
         rendered = wizard._render_template(wizard.answers)
@@ -160,11 +162,13 @@ class TestBug001ScaffoldLogging:
 """)
 
         # Executar wizard non-interactive
-        from scripts.lib.flows.objetivo_init import flow_objetivo_init
         import argparse
 
         # Criar answers JSON temporário
         import json
+
+        from scripts.lib.flows.objetivo_init import flow_objetivo_init
+
         answers_file = tmp_path / "answers.json"
         answers_data = {
             "project_name": "test-logging",
@@ -176,15 +180,15 @@ class TestBug001ScaffoldLogging:
             "answers": {
                 "{{DESCRIPTION}}": "Test project for logging",
                 "{{RESPONSE}}": "Python code",
-                "{{EXPECTED_OUTCOME_1}}": "Log created"
-            }
+                "{{EXPECTED_OUTCOME_1}}": "Log created",
+            },
         }
         answers_file.write_text(json.dumps(answers_data))
 
         args = argparse.Namespace(
             from_file=str(answers_file),
             template_only=False,
-            output="objetivo-test.yaml"
+            output="objetivo-test.yaml",
         )
 
         # Executar
@@ -198,7 +202,8 @@ class TestBug001ScaffoldLogging:
 
         # Validar conteúdo do log
         import yaml
-        with log_file.open('r') as f:
+
+        with log_file.open("r") as f:
             log_data = yaml.safe_load(f)
 
         assert "scaffolds" in log_data
@@ -211,13 +216,13 @@ class TestBug001ScaffoldLogging:
         assert "timestamp" in entry
         assert "output_file" in entry
 
-
     def test_log_entry_contains_error_on_failure(self, tmp_path, monkeypatch):
         """Log deve conter error_message quando operação falha."""
         monkeypatch.chdir(tmp_path)
 
-        from scripts.lib.flows.objetivo_init import flow_objetivo_init
         import argparse
+
+        from scripts.lib.flows.objetivo_init import flow_objetivo_init
 
         # Arquivo JSON inválido
         invalid_file = tmp_path / "invalid.json"
@@ -226,7 +231,7 @@ class TestBug001ScaffoldLogging:
         args = argparse.Namespace(
             from_file=str(invalid_file),
             template_only=False,
-            output="objetivo-test.yaml"
+            output="objetivo-test.yaml",
         )
 
         # Executar (deve falhar)
@@ -238,7 +243,8 @@ class TestBug001ScaffoldLogging:
         log_file = tmp_path / "logs" / "scaffolds.yaml"
         if log_file.exists():  # Log pode não ser criado se YAML lib falhar
             import yaml
-            with log_file.open('r') as f:
+
+            with log_file.open("r") as f:
                 log_data = yaml.safe_load(f)
 
             if log_data and "scaffolds" in log_data and len(log_data["scaffolds"]) > 0:
@@ -286,8 +292,8 @@ class TestBug001Integration:
                 "{{RESPONSE}}": "Python implementation",
                 # {{DOCSTYLE}} omitido → deve usar default
                 # {{OUT_SCOPE}} omitido → deve ser removido
-                "{{EXPECTED_OUTCOME_1}}": "All fixes work"
-            }
+                "{{EXPECTED_OUTCOME_1}}": "All fixes work",
+            },
         )
 
         output_file = tmp_path / "objetivo-integration.yaml"

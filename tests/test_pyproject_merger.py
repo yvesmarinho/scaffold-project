@@ -14,20 +14,21 @@ Test strategy:
 - Test edge cases (malformed TOML, no changes)
 """
 
-from pathlib import Path
-import pytest
-import tempfile
 import shutil
+import tempfile
+from pathlib import Path
+
+import pytest
 
 from scripts.lib.pyproject_merge import (
-    PyprojectMerger,
     PyprojectContent,
+    PyprojectMerger,
 )
-
 
 # =============================================================================
 # Fixtures
 # =============================================================================
+
 
 @pytest.fixture
 def temp_dir():
@@ -123,6 +124,7 @@ def merger():
 # Test 01: File Detection
 # =============================================================================
 
+
 def test_01_can_merge_detects_pyproject_toml(merger, temp_dir):
     """Test 01: can_merge() detecta pyproject.toml corretamente."""
     # Caso positivo
@@ -143,6 +145,7 @@ def test_01_can_merge_detects_pyproject_toml(merger, temp_dir):
 # =============================================================================
 # Test 02-03: Parsing
 # =============================================================================
+
 
 def test_02_parse_pyproject_toml(merger, sample_pyproject_v1):
     """Test 02: Parse TOML pyproject corretamente."""
@@ -171,37 +174,33 @@ def test_03_parse_pyproject_with_security_tools(merger, sample_pyproject_v2):
 # Test 04-06: Merge Decision Logic
 # =============================================================================
 
-def test_04_should_merge_detects_new_dependencies(merger, sample_pyproject_v1, sample_pyproject_v2):
+
+def test_04_should_merge_detects_new_dependencies(
+    merger, sample_pyproject_v1, sample_pyproject_v2
+):
     """Test 04: Detecta novas dependencies."""
     existing_proj = merger._parse_pyproject(sample_pyproject_v1)
     template_proj = merger._parse_pyproject(sample_pyproject_v2)
 
-    decision = merger._should_merge(
-        existing_proj,
-        template_proj,
-        "pyproject.toml"
-    )
+    decision = merger._should_merge(existing_proj, template_proj, "pyproject.toml")
 
     assert decision.should_merge
     # Deve detectar pyyaml como nova dependency
     assert any("dependencies" in change.lower() for change in decision.changes)
 
 
-def test_05_should_merge_detects_new_optional_groups(merger, sample_pyproject_v1, sample_pyproject_v2):
+def test_05_should_merge_detects_new_optional_groups(
+    merger, sample_pyproject_v1, sample_pyproject_v2
+):
     """Test 05: Detecta novos optional-dependencies groups."""
     existing_proj = merger._parse_pyproject(sample_pyproject_v1)
     template_proj = merger._parse_pyproject(sample_pyproject_v2)
 
-    decision = merger._should_merge(
-        existing_proj,
-        template_proj,
-        "pyproject.toml"
-    )
+    decision = merger._should_merge(existing_proj, template_proj, "pyproject.toml")
 
     assert decision.should_merge
     # Deve detectar grupo "security"
-    assert any("optional-dependencies" in change.lower()
-               for change in decision.changes)
+    assert any("optional-dependencies" in change.lower() for change in decision.changes)
 
 
 def test_06_should_skip_if_already_updated(merger, sample_pyproject_v2):
@@ -209,9 +208,7 @@ def test_06_should_skip_if_already_updated(merger, sample_pyproject_v2):
     template_proj = merger._parse_pyproject(sample_pyproject_v2)
 
     decision = merger._should_merge(
-        template_proj,  # Existing == Template
-        template_proj,
-        "pyproject.toml"
+        template_proj, template_proj, "pyproject.toml"  # Existing == Template
     )
 
     assert not decision.should_merge
@@ -221,6 +218,7 @@ def test_06_should_skip_if_already_updated(merger, sample_pyproject_v2):
 # =============================================================================
 # Test 07-09: Dependencies Merge
 # =============================================================================
+
 
 def test_07_merge_dependencies_adds_new_packages(merger):
     """Test 07: Merge adiciona novos pacotes."""
@@ -289,11 +287,10 @@ def test_09_merge_optional_dependencies_by_group(merger):
 # Test 10-12: Tool Configs Merge
 # =============================================================================
 
+
 def test_10_merge_tool_configs_adds_new_tools(merger):
     """Test 10: Merge adiciona novas tool configs."""
-    existing_tools = {
-        "black": {"line-length": 88}
-    }
+    existing_tools = {"black": {"line-length": 88}}
     template_tools = {
         "black": {"line-length": 100},
         "ruff": {"select": ["E", "F"], "ignore": ["E501"]},
@@ -347,6 +344,7 @@ def test_12_merge_tool_config_preserves_custom_settings(merger):
 # Test 13-14: Project Metadata Preservation
 # =============================================================================
 
+
 def test_13_merge_preserves_project_metadata(merger):
     """Test 13: Merge preserva name, version, description do projeto."""
     existing_project = {
@@ -395,13 +393,15 @@ def test_14_merge_updates_requires_python(merger):
 # Test 15-16: Full Integration
 # =============================================================================
 
-def test_15_full_merge_creates_backup(merger, temp_dir, sample_pyproject_v1, sample_pyproject_v2):
+
+def test_15_full_merge_creates_backup(
+    merger, temp_dir, sample_pyproject_v1, sample_pyproject_v2
+):
     """Test 15: Merge completo cria backup do arquivo original."""
     existing_path = temp_dir / "pyproject.toml"
     existing_path.write_text(sample_pyproject_v1, encoding="utf-8")
 
-    result = merger.merge(
-        existing_path, sample_pyproject_v2, interactive=False)
+    result = merger.merge(existing_path, sample_pyproject_v2, interactive=False)
 
     assert result.status == "merged"
     backup_path = existing_path.with_suffix(".toml.backup")

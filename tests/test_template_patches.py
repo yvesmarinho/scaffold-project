@@ -10,30 +10,31 @@ Tests cover:
 - Error handling
 """
 
-import pytest
 from pathlib import Path
+
+import pytest
+
 from scripts.lib.template_patches import (
-    PatchMetadata,
-    PatchOperation,
     Patch,
-    PatchOperationType,
-    PatchError,
-    PatchNotFoundError,
-    PatchValidationError,
     PatchApplicationError,
     PatchConflictError,
+    PatchMetadata,
+    PatchNotFoundError,
+    PatchOperation,
+    PatchOperationType,
+    PatchValidationError,
+    apply_patch,
+    apply_patch_operation,
+    apply_patches,
+    list_patches,
+    load_patch,
     parse_patch_frontmatter,
     parse_patch_operations,
-    load_patch,
-    apply_patch_operation,
-    apply_patch,
-    apply_patches,
     validate_patch_file,
-    list_patches,
 )
 
-
 # Test fixtures
+
 
 @pytest.fixture
 def temp_patches_dir(tmp_path):
@@ -84,6 +85,7 @@ FR-001: System must authenticate users
 
 # Tests: parse_patch_frontmatter
 
+
 def test_parse_patch_frontmatter_valid():
     """Test parsing valid patch frontmatter."""
     content = """---
@@ -98,8 +100,8 @@ patch_version: "1.0.0"
     metadata, body = parse_patch_frontmatter(content)
 
     assert metadata is not None
-    assert metadata['patch_name'] == 'test-patch'
-    assert '@@ After' in body
+    assert metadata["patch_name"] == "test-patch"
+    assert "@@ After" in body
 
 
 def test_parse_patch_frontmatter_no_frontmatter():
@@ -127,37 +129,38 @@ Body
 
 # Tests: PatchMetadata
 
+
 def test_patch_metadata_from_dict():
     """Test creating PatchMetadata from dict."""
     data = {
-        'patch_name': 'test-patch',
-        'patch_version': '1.0.0',
-        'target_template': 'spec-template',
-        'target_block': 'user-scenarios',
-        'target_version': '^2.0.0',
-        'created': '2026-04-15',
-        'description': 'Test patch',
-        'author': 'test@example.com'
+        "patch_name": "test-patch",
+        "patch_version": "1.0.0",
+        "target_template": "spec-template",
+        "target_block": "user-scenarios",
+        "target_version": "^2.0.0",
+        "created": "2026-04-15",
+        "description": "Test patch",
+        "author": "test@example.com",
     }
 
     meta = PatchMetadata.from_dict(data)
 
-    assert meta.patch_name == 'test-patch'
-    assert meta.patch_version == '1.0.0'
-    assert meta.target_template == 'spec-template'
+    assert meta.patch_name == "test-patch"
+    assert meta.patch_version == "1.0.0"
+    assert meta.target_template == "spec-template"
 
 
 def test_patch_metadata_validate_valid():
     """Test validation of valid patch metadata."""
     meta = PatchMetadata(
-        patch_name='test-patch',
-        patch_version='1.0.0',
-        target_template='spec-template',
-        target_block='user-scenarios',
-        target_version='^2.0.0',
-        created='2026-04-15',
-        description='Test patch',
-        author='test@example.com'
+        patch_name="test-patch",
+        patch_version="1.0.0",
+        target_template="spec-template",
+        target_block="user-scenarios",
+        target_version="^2.0.0",
+        created="2026-04-15",
+        description="Test patch",
+        author="test@example.com",
     )
 
     errors = meta.validate()
@@ -167,57 +170,58 @@ def test_patch_metadata_validate_valid():
 def test_patch_metadata_validate_missing_name():
     """Test validation fails for missing patch_name."""
     meta = PatchMetadata(
-        patch_name='',
-        patch_version='1.0.0',
-        target_template='spec-template',
+        patch_name="",
+        patch_version="1.0.0",
+        target_template="spec-template",
         target_block=None,
         target_version=None,
-        created='2026-04-15',
-        description='Test',
-        author=None
+        created="2026-04-15",
+        description="Test",
+        author=None,
     )
 
     errors = meta.validate()
-    assert any('Missing patch_name' in e for e in errors)
+    assert any("Missing patch_name" in e for e in errors)
 
 
 def test_patch_metadata_validate_invalid_version():
     """Test validation fails for invalid version format."""
     meta = PatchMetadata(
-        patch_name='test-patch',
-        patch_version='v1.0',  # Invalid
-        target_template='spec-template',
+        patch_name="test-patch",
+        patch_version="v1.0",  # Invalid
+        target_template="spec-template",
         target_block=None,
         target_version=None,
-        created='2026-04-15',
-        description='Test',
-        author=None
+        created="2026-04-15",
+        description="Test",
+        author=None,
     )
 
     errors = meta.validate()
-    assert any('Invalid patch_version' in e for e in errors)
+    assert any("Invalid patch_version" in e for e in errors)
 
 
 def test_patch_metadata_repr():
     """Test __repr__ of PatchMetadata."""
     meta = PatchMetadata(
-        patch_name='test',
-        patch_version='1.0.0',
-        target_template='spec-template',
+        patch_name="test",
+        patch_version="1.0.0",
+        target_template="spec-template",
         target_block=None,
         target_version=None,
-        created='2026-04-15',
-        description='Test',
-        author=None
+        created="2026-04-15",
+        description="Test",
+        author=None,
     )
 
     repr_str = repr(meta)
-    assert 'test' in repr_str
-    assert '1.0.0' in repr_str
-    assert 'spec-template' in repr_str
+    assert "test" in repr_str
+    assert "1.0.0" in repr_str
+    assert "spec-template" in repr_str
 
 
 # Tests: parse_patch_operations
+
 
 def test_parse_patch_operations_insert_after():
     """Test parsing INSERT_AFTER operation."""
@@ -232,8 +236,8 @@ def test_parse_patch_operations_insert_after():
 
     assert len(operations) == 1
     assert operations[0].operation_type == PatchOperationType.INSERT_AFTER
-    assert operations[0].anchor == '## Section'
-    assert 'New content here' in operations[0].content
+    assert operations[0].anchor == "## Section"
+    assert "New content here" in operations[0].content
 
 
 def test_parse_patch_operations_insert_before():
@@ -292,8 +296,8 @@ def test_parse_patch_operations_multiple():
     operations = parse_patch_operations(body)
 
     assert len(operations) == 2
-    assert operations[0].anchor == 'Section 1'
-    assert operations[1].anchor == 'Section 2'
+    assert operations[0].anchor == "Section 1"
+    assert operations[1].anchor == "Section 2"
 
 
 def test_parse_patch_operations_no_operations():
@@ -318,6 +322,7 @@ def test_parse_patch_operations_invalid_type():
 
 # Tests: load_patch
 
+
 def test_load_patch_success(temp_patches_dir, sample_patch_content):
     """Test loading a valid patch file."""
     patch_file = temp_patches_dir / "001-test.patch"
@@ -325,8 +330,8 @@ def test_load_patch_success(temp_patches_dir, sample_patch_content):
 
     patch = load_patch(patch_file)
 
-    assert patch.metadata.patch_name == 'add-security-review'
-    assert patch.metadata.patch_version == '1.0.0'
+    assert patch.metadata.patch_name == "add-security-review"
+    assert patch.metadata.patch_version == "1.0.0"
     assert len(patch.operations) == 1
     assert patch.source_file == patch_file
 
@@ -387,6 +392,7 @@ No operations here
 
 # Tests: apply_patch_operation
 
+
 def test_apply_patch_operation_insert_after():
     """Test INSERT_AFTER operation."""
     content = """## Section
@@ -396,16 +402,16 @@ Original content
 
     operation = PatchOperation(
         operation_type=PatchOperationType.INSERT_AFTER,
-        anchor='## Section',
-        content='New content'
+        anchor="## Section",
+        content="New content",
     )
 
     result, success = apply_patch_operation(content, operation)
 
     assert success
-    assert '## Section' in result
-    assert 'New content' in result
-    assert result.index('## Section') < result.index('New content')
+    assert "## Section" in result
+    assert "New content" in result
+    assert result.index("## Section") < result.index("New content")
 
 
 def test_apply_patch_operation_insert_before():
@@ -417,15 +423,15 @@ Original content
 
     operation = PatchOperation(
         operation_type=PatchOperationType.INSERT_BEFORE,
-        anchor='## Section',
-        content='New content'
+        anchor="## Section",
+        content="New content",
     )
 
     result, success = apply_patch_operation(content, operation)
 
     assert success
-    assert 'New content' in result
-    assert result.index('New content') < result.index('## Section')
+    assert "New content" in result
+    assert result.index("New content") < result.index("## Section")
 
 
 def test_apply_patch_operation_replace():
@@ -435,16 +441,14 @@ Other content
 """
 
     operation = PatchOperation(
-        operation_type=PatchOperationType.REPLACE,
-        anchor='Old line',
-        content='New line'
+        operation_type=PatchOperationType.REPLACE, anchor="Old line", content="New line"
     )
 
     result, success = apply_patch_operation(content, operation)
 
     assert success
-    assert 'New line' in result
-    assert 'Old line' not in result
+    assert "New line" in result
+    assert "Old line" not in result
 
 
 def test_apply_patch_operation_delete():
@@ -455,16 +459,14 @@ Another line to keep
 """
 
     operation = PatchOperation(
-        operation_type=PatchOperationType.DELETE,
-        anchor='Line to delete',
-        content=''
+        operation_type=PatchOperationType.DELETE, anchor="Line to delete", content=""
     )
 
     result, success = apply_patch_operation(content, operation)
 
     assert success
-    assert 'Line to delete' not in result
-    assert 'Line to keep' in result
+    assert "Line to delete" not in result
+    assert "Line to keep" in result
 
 
 def test_apply_patch_operation_anchor_not_found():
@@ -473,8 +475,8 @@ def test_apply_patch_operation_anchor_not_found():
 
     operation = PatchOperation(
         operation_type=PatchOperationType.INSERT_AFTER,
-        anchor='Nonexistent anchor',
-        content='New content'
+        anchor="Nonexistent anchor",
+        content="New content",
     )
 
     with pytest.raises(PatchApplicationError, match="Anchor not found"):
@@ -491,8 +493,8 @@ Content 2
 
     operation = PatchOperation(
         operation_type=PatchOperationType.INSERT_AFTER,
-        anchor='## Section',
-        content='New content'
+        anchor="## Section",
+        content="New content",
     )
 
     with pytest.raises(PatchConflictError, match="multiple locations"):
@@ -501,35 +503,34 @@ Content 2
 
 # Tests: apply_patch
 
+
 def test_apply_patch_single_operation(sample_template):
     """Test applying patch with single operation."""
     operation = PatchOperation(
         operation_type=PatchOperationType.INSERT_AFTER,
-        anchor='## User Scenarios',
-        content='## Security Review\n- [ ] Input validation'
+        anchor="## User Scenarios",
+        content="## Security Review\n- [ ] Input validation",
     )
 
     metadata = PatchMetadata(
-        patch_name='test',
-        patch_version='1.0.0',
-        target_template='spec-template',
+        patch_name="test",
+        patch_version="1.0.0",
+        target_template="spec-template",
         target_block=None,
         target_version=None,
-        created='2026-04-15',
-        description='Test',
-        author=None
+        created="2026-04-15",
+        description="Test",
+        author=None,
     )
 
     patch = Patch(
-        metadata=metadata,
-        operations=[operation],
-        source_file=Path('/tmp/test.patch')
+        metadata=metadata, operations=[operation], source_file=Path("/tmp/test.patch")
     )
 
     result = apply_patch(sample_template, patch)
 
-    assert '## Security Review' in result
-    assert 'Input validation' in result
+    assert "## Security Review" in result
+    assert "Input validation" in result
 
 
 def test_apply_patch_multiple_operations(sample_template):
@@ -537,37 +538,35 @@ def test_apply_patch_multiple_operations(sample_template):
     operations = [
         PatchOperation(
             operation_type=PatchOperationType.INSERT_AFTER,
-            anchor='## User Scenarios',
-            content='## Security Review'
+            anchor="## User Scenarios",
+            content="## Security Review",
         ),
         PatchOperation(
             operation_type=PatchOperationType.INSERT_AFTER,
-            anchor='## Requirements',
-            content='## Performance Criteria'
-        )
+            anchor="## Requirements",
+            content="## Performance Criteria",
+        ),
     ]
 
     metadata = PatchMetadata(
-        patch_name='test',
-        patch_version='1.0.0',
-        target_template='spec-template',
+        patch_name="test",
+        patch_version="1.0.0",
+        target_template="spec-template",
         target_block=None,
         target_version=None,
-        created='2026-04-15',
-        description='Test',
-        author=None
+        created="2026-04-15",
+        description="Test",
+        author=None,
     )
 
     patch = Patch(
-        metadata=metadata,
-        operations=operations,
-        source_file=Path('/tmp/test.patch')
+        metadata=metadata, operations=operations, source_file=Path("/tmp/test.patch")
     )
 
     result = apply_patch(sample_template, patch)
 
-    assert '## Security Review' in result
-    assert '## Performance Criteria' in result
+    assert "## Security Review" in result
+    assert "## Performance Criteria" in result
 
 
 def test_apply_patch_operation_failure():
@@ -576,25 +575,23 @@ def test_apply_patch_operation_failure():
 
     operation = PatchOperation(
         operation_type=PatchOperationType.INSERT_AFTER,
-        anchor='Nonexistent',
-        content='New'
+        anchor="Nonexistent",
+        content="New",
     )
 
     metadata = PatchMetadata(
-        patch_name='test',
-        patch_version='1.0.0',
-        target_template='spec-template',
+        patch_name="test",
+        patch_version="1.0.0",
+        target_template="spec-template",
         target_block=None,
         target_version=None,
-        created='2026-04-15',
-        description='Test',
-        author=None
+        created="2026-04-15",
+        description="Test",
+        author=None,
     )
 
     patch = Patch(
-        metadata=metadata,
-        operations=[operation],
-        source_file=Path('/tmp/test.patch')
+        metadata=metadata, operations=[operation], source_file=Path("/tmp/test.patch")
     )
 
     with pytest.raises(PatchApplicationError):
@@ -603,7 +600,10 @@ def test_apply_patch_operation_failure():
 
 # Tests: apply_patches
 
-def test_apply_patches_single_patch(temp_patches_dir, sample_patch_content, sample_template):
+
+def test_apply_patches_single_patch(
+    temp_patches_dir, sample_patch_content, sample_template
+):
     """Test applying single patch from directory."""
     # Create spec-template subdirectory
     template_dir = temp_patches_dir / "spec-template"
@@ -614,7 +614,7 @@ def test_apply_patches_single_patch(temp_patches_dir, sample_patch_content, samp
 
     result = apply_patches(sample_template, temp_patches_dir, "spec-template")
 
-    assert '## Security Review Checklist' in result
+    assert "## Security Review Checklist" in result
 
 
 def test_apply_patches_multiple_patches(temp_patches_dir, sample_template):
@@ -654,8 +654,8 @@ description: "Patch 2"
 
     result = apply_patches(sample_template, temp_patches_dir, "spec-template")
 
-    assert '## Security Review' in result
-    assert '## Performance' in result
+    assert "## Security Review" in result
+    assert "## Performance" in result
 
 
 def test_apply_patches_no_patches_dir(sample_template, tmp_path):
@@ -680,6 +680,7 @@ def test_apply_patches_no_patches(temp_patches_dir, sample_template):
 
 
 # Tests: validate_patch_file
+
 
 def test_validate_patch_file_valid(temp_patches_dir, sample_patch_content):
     """Test validation of valid patch file."""
@@ -723,6 +724,7 @@ def test_validate_patch_file_not_found(temp_patches_dir):
 
 # Tests: list_patches
 
+
 def test_list_patches_empty(temp_patches_dir):
     """Test listing patches from empty directory."""
     template_dir = temp_patches_dir / "spec-template"
@@ -762,7 +764,7 @@ def test_list_patches_skips_invalid(temp_patches_dir, sample_patch_content):
 
     # Should only return valid patch
     assert len(patches) == 1
-    assert patches[0].metadata.patch_name == 'add-security-review'
+    assert patches[0].metadata.patch_name == "add-security-review"
 
 
 def test_list_patches_nonexistent_dir(tmp_path):

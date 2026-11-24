@@ -2,8 +2,8 @@
 """
 NOME: test_publish_tarball_executavel.py
 TITULO: O tarball do --publish precisa ser um gerador completo e executável
-DATA: 24/11/2026 12:10
-MODIFICADO: 24/11/2026 11:56
+DATA: 24/11/2026 11:56
+MODIFICADO: 24/11/2026 15:00
 VERSÃO: 1.0.0
 DEPEND: pytest
 STATUS: DEV
@@ -33,7 +33,16 @@ sys.path.insert(0, str(_PROJECT_ROOT / "scripts"))
 
 from lib.publish import publish_template  # noqa: E402
 
-_NEW_ARGS = ["new", "--ci", "--name", "demo-pub", "--domain", "programming", "--language", "python"]
+_NEW_ARGS = [
+    "new",
+    "--ci",
+    "--name",
+    "demo-pub",
+    "--domain",
+    "programming",
+    "--language",
+    "python",
+]
 # Variam a cada execução (timestamps), não indicam arquivo faltando no tarball.
 _VOLATEIS = ("logs/", ".git/")
 _CACHES = {".ruff_cache", ".mypy_cache", ".pytest_cache", "htmlcov", ".coverage"}
@@ -84,12 +93,18 @@ def test_tarball_extraido_lista_perfis(extraido: Path, tmp_path: Path) -> None:
     assert proc.returncode == 0, proc.stderr[-1500:]
 
 
-def test_tarball_gera_o_mesmo_projeto_que_o_repositorio(extraido: Path, tmp_path: Path) -> None:
+def test_tarball_gera_o_mesmo_projeto_que_o_repositorio(
+    extraido: Path, tmp_path: Path
+) -> None:
     alvo_repo, alvo_pub = tmp_path / "repo", tmp_path / "pub"
     alvo_repo.mkdir()
     alvo_pub.mkdir()
-    via_repo = _scaffold(_PROJECT_ROOT, *_NEW_ARGS, "--target-dir", str(alvo_repo), cwd=tmp_path)
-    via_pub = _scaffold(extraido, *_NEW_ARGS, "--target-dir", str(alvo_pub), cwd=tmp_path)
+    via_repo = _scaffold(
+        _PROJECT_ROOT, *_NEW_ARGS, "--target-dir", str(alvo_repo), cwd=tmp_path
+    )
+    via_pub = _scaffold(
+        extraido, *_NEW_ARGS, "--target-dir", str(alvo_pub), cwd=tmp_path
+    )
 
     # Sem isto o teste passaria vazio se as duas gerações falhassem igual.
     erros = [ln for ln in via_repo.stdout.splitlines() if "error" in ln]
@@ -98,8 +113,12 @@ def test_tarball_gera_o_mesmo_projeto_que_o_repositorio(extraido: Path, tmp_path
     assert len(_arquivos(alvo_repo / "demo-pub")) > 100
     faltando = _arquivos(alvo_repo / "demo-pub") - _arquivos(alvo_pub / "demo-pub")
     sobrando = _arquivos(alvo_pub / "demo-pub") - _arquivos(alvo_repo / "demo-pub")
-    assert not faltando, f"ausentes no projeto gerado pelo tarball: {sorted(faltando)[:40]}"
-    assert not sobrando, f"extras no projeto gerado pelo tarball: {sorted(sobrando)[:40]}"
+    assert (
+        not faltando
+    ), f"ausentes no projeto gerado pelo tarball: {sorted(faltando)[:40]}"
+    assert (
+        not sobrando
+    ), f"extras no projeto gerado pelo tarball: {sorted(sobrando)[:40]}"
 
 
 def test_tarball_sem_caches_locais(extraido: Path) -> None:

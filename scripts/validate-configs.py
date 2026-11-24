@@ -113,7 +113,9 @@ def validate_pyproject_toml() -> bool:
         try:
             import tomli as tomllib
         except ImportError:
-            log.warning("⚠️  toml library not available (skipping pyproject.toml check)")
+            log.warning(
+                "⚠️  toml library not available (skipping pyproject.toml check)"
+            )
             return True  # Skip validation if no TOML parser
 
     try:
@@ -127,7 +129,7 @@ def validate_pyproject_toml() -> bool:
     optional_deps = pyproject.get("project", {}).get("optional-dependencies", {})
     all_deps = []
 
-    for group_name, deps in optional_deps.items():
+    for _group_name, deps in optional_deps.items():
         all_deps.extend(deps)
 
     # Check if critical deps are present and pinned
@@ -136,7 +138,9 @@ def validate_pyproject_toml() -> bool:
         # Find dep in list (format: "package>=1.0.0" or "package==1.0.0")
         found = False
         for dep_str in all_deps:
-            if dep_str.startswith(f"{dep_name}==") or dep_str.startswith(f"{dep_name}>="):
+            if dep_str.startswith(f"{dep_name}==") or dep_str.startswith(
+                f"{dep_name}>="
+            ):
                 found = True
                 log.info(f"✅ {dep_name}: {dep_str}")
                 break
@@ -183,10 +187,14 @@ def validate_copilot_rules() -> bool:
             missing_sections.append(section)
 
     if missing_sections:
-        log.warning(f"⚠️  .copilot-rules.md missing sections: {', '.join(missing_sections)}")
+        log.warning(
+            f"⚠️  .copilot-rules.md missing sections: {', '.join(missing_sections)}"
+        )
         # Warning only, not failure
 
-    log.info(f"✅ .copilot-rules.md exists ({len(content)} chars, {content.count('##')} sections)")
+    log.info(
+        f"✅ .copilot-rules.md exists ({len(content)} chars, {content.count('##')} sections)"
+    )
     return True
 
 

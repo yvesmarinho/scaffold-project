@@ -11,11 +11,10 @@ Sprint 2 (P0 HIGH): Resolve gap de 2 arquivos copilot-rules sem merge
 Bug fix: Melhores práticas não disseminadas entre projetos
 """
 
-from pathlib import Path
-from typing import Dict, List, Tuple
-from dataclasses import dataclass
 import logging
 import re
+from dataclasses import dataclass
+from pathlib import Path
 
 from .config import CreatedItem
 
@@ -26,9 +25,11 @@ log = logging.getLogger(__name__)
 # Types and Data Classes
 # =============================================================================
 
+
 @dataclass
 class RuleSection:
     """Representa uma seção de regras."""
+
     heading: str
     content: str
     priority: str  # P0, P1, P2, etc.
@@ -37,22 +38,25 @@ class RuleSection:
 @dataclass
 class RulesContent:
     """Representa conteúdo de arquivo .copilot-rules.md."""
+
     header: str  # Cabeçalho do arquivo
-    sections: Dict[str, RuleSection]  # heading -> RuleSection
+    sections: dict[str, RuleSection]  # heading -> RuleSection
     raw_content: str
 
 
 @dataclass
 class RulesMergeDecision:
     """Decisão de merge para copilot-rules."""
+
     should_merge: bool
     reason: str
-    changes: List[str]
+    changes: list[str]
 
 
 # =============================================================================
 # CopilotRulesMerger
 # =============================================================================
+
 
 class CopilotRulesMerger:
     """
@@ -98,17 +102,16 @@ class CopilotRulesMerger:
     def can_merge(self, file_path: Path) -> bool:
         """Verifica se é um arquivo .copilot-rules*.md."""
         return (
-            file_path.suffix == ".md" and
-            ".copilot-rules" in file_path.name and
-            (file_path.name == ".copilot-rules.md" or
-             file_path.name.startswith(".copilot-rules-"))
+            file_path.suffix == ".md"
+            and ".copilot-rules" in file_path.name
+            and (
+                file_path.name == ".copilot-rules.md"
+                or file_path.name.startswith(".copilot-rules-")
+            )
         )
 
     def merge(
-        self,
-        existing_path: Path,
-        template_content: str,
-        interactive: bool = True
+        self, existing_path: Path, template_content: str, interactive: bool = True
     ) -> CreatedItem:
         """
         Faz merge inteligente do arquivo .copilot-rules*.md
@@ -131,24 +134,20 @@ class CopilotRulesMerger:
 
             # 3. Decisão de merge
             decision = self._should_merge(
-                existing_rules,
-                template_rules,
-                existing_path.name
+                existing_rules, template_rules, existing_path.name
             )
 
             if not decision.should_merge:
-                log.info("⏭️  Skip: %s (%s)",
-                         existing_path.name, decision.reason)
+                log.info("⏭️  Skip: %s (%s)", existing_path.name, decision.reason)
                 return CreatedItem(
                     path=existing_path,
                     kind="file",
                     status="skipped",
-                    message=decision.reason
+                    message=decision.reason,
                 )
 
             # 4. Merge conteúdo
-            merged_rules = self._merge_rules_content(
-                existing_rules, template_rules)
+            merged_rules = self._merge_rules_content(existing_rules, template_rules)
 
             # 5. Gerar arquivo final
             merged_content = self._reconstruct_rules_file(merged_rules)
@@ -158,18 +157,19 @@ class CopilotRulesMerger:
             backup_path.write_text(existing_content, encoding="utf-8")
             existing_path.write_text(merged_content, encoding="utf-8")
 
-            changes_msg = "\n".join(
-                f"  - {change}" for change in decision.changes)
+            changes_msg = "\n".join(f"  - {change}" for change in decision.changes)
             log.info(
                 "✅ Merged: %s\n%s\n  Backup: %s",
-                existing_path.name, changes_msg, backup_path.name
+                existing_path.name,
+                changes_msg,
+                backup_path.name,
             )
 
             return CreatedItem(
                 path=existing_path,
                 kind="file",
                 status="merged",
-                message=f"Merged with {len(decision.changes)} changes (backup created)"
+                message=f"Merged with {len(decision.changes)} changes (backup created)",
             )
 
         except Exception as e:
@@ -178,7 +178,7 @@ class CopilotRulesMerger:
                 path=existing_path,
                 kind="file",
                 status="error",
-                message=f"Merge error: {str(e)}"
+                message=f"Merge error: {str(e)}",
             )
 
     # =========================================================================
@@ -229,7 +229,7 @@ class CopilotRulesMerger:
                     section = RuleSection(
                         heading=current_heading,
                         content="\n".join(current_content).strip(),
-                        priority=current_priority or "P2"
+                        priority=current_priority or "P2",
                     )
                     sections[current_heading] = section
 
@@ -250,14 +250,12 @@ class CopilotRulesMerger:
             section = RuleSection(
                 heading=current_heading,
                 content="\n".join(current_content).strip(),
-                priority=current_priority or "P2"
+                priority=current_priority or "P2",
             )
             sections[current_heading] = section
 
         return RulesContent(
-            header="\n".join(header).strip(),
-            sections=sections,
-            raw_content=content
+            header="\n".join(header).strip(), sections=sections, raw_content=content
         )
 
     def _detect_priority(self, heading: str) -> str:
@@ -281,10 +279,7 @@ class CopilotRulesMerger:
     # =========================================================================
 
     def _should_merge(
-        self,
-        existing_rules: RulesContent,
-        template_rules: RulesContent,
-        filename: str
+        self, existing_rules: RulesContent, template_rules: RulesContent, filename: str
     ) -> RulesMergeDecision:
         """
         Decide se deve fazer merge baseado em novas regras.
@@ -342,8 +337,7 @@ class CopilotRulesMerger:
                 # Comparar conteúdo
                 if len(template_section.content) != len(existing_section.content):
                     diff_pct = abs(
-                        len(template_section.content) -
-                        len(existing_section.content)
+                        len(template_section.content) - len(existing_section.content)
                     ) / max(len(template_section.content), 1)
                     if diff_pct > 0.1:  # Mudança > 10%
                         critical_updates += 1
@@ -354,15 +348,13 @@ class CopilotRulesMerger:
         # Decisão final
         if not changes:
             return RulesMergeDecision(
-                should_merge=False,
-                reason="Rules already up-to-date",
-                changes=[]
+                should_merge=False, reason="Rules already up-to-date", changes=[]
             )
 
         return RulesMergeDecision(
             should_merge=True,
             reason=f"Template has updates ({len(changes)} changes)",
-            changes=changes
+            changes=changes,
         )
 
     # =========================================================================
@@ -370,9 +362,7 @@ class CopilotRulesMerger:
     # =========================================================================
 
     def _merge_rules_content(
-        self,
-        existing: RulesContent,
-        template: RulesContent
+        self, existing: RulesContent, template: RulesContent
     ) -> RulesContent:
         """
         Merge conteúdo de regras com estratégia aditiva por prioridade.
@@ -390,8 +380,7 @@ class CopilotRulesMerger:
 
         for priority in priorities_order:
             template_sections_p = {
-                h: s for h, s in template.sections.items()
-                if s.priority == priority
+                h: s for h, s in template.sections.items() if s.priority == priority
             }
 
             for heading, section in template_sections_p.items():
@@ -410,7 +399,7 @@ class CopilotRulesMerger:
         return RulesContent(
             header=existing.header,  # Preservar header do projeto
             sections=merged_sections,
-            raw_content=""
+            raw_content="",
         )
 
     def _reconstruct_rules_file(self, rules: RulesContent) -> str:
@@ -439,11 +428,9 @@ class CopilotRulesMerger:
         sorted_sections = sorted(
             rules.sections.items(),
             key=lambda x: (
-                0 if x[1].priority == "P0" else
-                1 if x[1].priority == "P1" else
-                2,
-                x[0]  # Alfabético dentro da mesma prioridade
-            )
+                0 if x[1].priority == "P0" else 1 if x[1].priority == "P1" else 2,
+                x[0],  # Alfabético dentro da mesma prioridade
+            ),
         )
 
         # Gerar seções

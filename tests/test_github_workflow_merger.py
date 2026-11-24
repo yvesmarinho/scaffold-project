@@ -15,20 +15,21 @@ Test strategy:
 - Test edge cases (malformed YAML, no changes)
 """
 
-from pathlib import Path
-import pytest
-import tempfile
 import shutil
+import tempfile
+from pathlib import Path
+
+import pytest
 
 from scripts.lib.github_workflow_merge import (
     GitHubWorkflowMerger,
     WorkflowContent,
 )
 
-
 # =============================================================================
 # Fixtures
 # =============================================================================
+
 
 @pytest.fixture
 def temp_dir():
@@ -113,6 +114,7 @@ def merger():
 # Test 01: File Detection
 # =============================================================================
 
+
 def test_01_can_merge_detects_workflow_files(merger, temp_dir):
     """Test 01: can_merge() detecta workflows corretamente."""
     # Criar estrutura .github/workflows/
@@ -132,8 +134,7 @@ def test_01_can_merge_detects_workflow_files(merger, temp_dir):
     wrong_dir = temp_dir / "workflows" / "test.yml"
     wrong_dir.parent.mkdir(parents=True)
     wrong_dir.touch()
-    assert not merger.can_merge(
-        wrong_dir), "Should reject workflows/ outside .github/"
+    assert not merger.can_merge(wrong_dir), "Should reject workflows/ outside .github/"
 
     wrong_ext = workflows_dir / "test.txt"
     wrong_ext.touch()
@@ -143,6 +144,7 @@ def test_01_can_merge_detects_workflow_files(merger, temp_dir):
 # =============================================================================
 # Test 02-03: Parsing
 # =============================================================================
+
 
 def test_02_parse_workflow_yaml(merger, sample_workflow_v1):
     """Test 02: Parse YAML workflow corretamente."""
@@ -170,31 +172,28 @@ def test_03_parse_workflow_with_schedule(merger, sample_workflow_v2):
 # Test 04-06: Merge Decision Logic
 # =============================================================================
 
-def test_04_should_merge_detects_new_security_jobs(merger, sample_workflow_v1, sample_workflow_v2):
+
+def test_04_should_merge_detects_new_security_jobs(
+    merger, sample_workflow_v1, sample_workflow_v2
+):
     """Test 04: Detecta novos security jobs."""
     existing_wf = merger._parse_workflow(sample_workflow_v1)
     template_wf = merger._parse_workflow(sample_workflow_v2)
 
-    decision = merger._should_merge(
-        existing_wf,
-        template_wf,
-        "test.yml"
-    )
+    decision = merger._should_merge(existing_wf, template_wf, "test.yml")
 
     assert decision.should_merge
     assert any("security" in change.lower() for change in decision.changes)
 
 
-def test_05_should_merge_detects_new_triggers(merger, sample_workflow_v1, sample_workflow_v2):
+def test_05_should_merge_detects_new_triggers(
+    merger, sample_workflow_v1, sample_workflow_v2
+):
     """Test 05: Detecta novos triggers (schedule, workflow_dispatch)."""
     existing_wf = merger._parse_workflow(sample_workflow_v1)
     template_wf = merger._parse_workflow(sample_workflow_v2)
 
-    decision = merger._should_merge(
-        existing_wf,
-        template_wf,
-        "test.yml"
-    )
+    decision = merger._should_merge(existing_wf, template_wf, "test.yml")
 
     assert decision.should_merge
     # Deve detectar schedule e workflow_dispatch
@@ -206,9 +205,7 @@ def test_06_should_skip_if_already_updated(merger, sample_workflow_v2):
     template_wf = merger._parse_workflow(sample_workflow_v2)
 
     decision = merger._should_merge(
-        template_wf,  # Existing == Template
-        template_wf,
-        "test.yml"
+        template_wf, template_wf, "test.yml"  # Existing == Template
     )
 
     assert not decision.should_merge
@@ -218,6 +215,7 @@ def test_06_should_skip_if_already_updated(merger, sample_workflow_v2):
 # =============================================================================
 # Test 07-09: Triggers Merge
 # =============================================================================
+
 
 def test_07_merge_triggers_adds_new_triggers(merger):
     """Test 07: Merge adiciona novos triggers."""
@@ -276,6 +274,7 @@ def test_09_merge_triggers_merges_branches(merger):
 # Test 10-11: Permissions and Jobs Merge
 # =============================================================================
 
+
 def test_10_merge_permissions_adds_new(merger):
     """Test 10: Merge permissions adiciona novas."""
     existing = {"contents": "read"}
@@ -286,7 +285,9 @@ def test_10_merge_permissions_adds_new(merger):
     assert merged["security-events"] == "write"
 
 
-def test_11_merge_jobs_adds_security_jobs(merger, sample_workflow_v1, sample_workflow_v2):
+def test_11_merge_jobs_adds_security_jobs(
+    merger, sample_workflow_v1, sample_workflow_v2
+):
     """Test 11: Merge jobs adiciona security jobs."""
     existing_wf = merger._parse_workflow(sample_workflow_v1)
     template_wf = merger._parse_workflow(sample_workflow_v2)
@@ -302,6 +303,7 @@ def test_11_merge_jobs_adds_security_jobs(merger, sample_workflow_v1, sample_wor
 # Test 12-14: Action Version Updates
 # =============================================================================
 
+
 def test_12_merge_job_steps_updates_action_versions(merger):
     """Test 12: Merge steps atualiza action versions."""
     existing_job = {
@@ -309,20 +311,19 @@ def test_12_merge_job_steps_updates_action_versions(merger):
         "steps": [
             {"name": "Checkout", "uses": "actions/checkout@v3"},
             {"name": "Run tests", "run": "pytest"},
-        ]
+        ],
     }
     template_job = {
         "runs-on": "ubuntu-latest",
         "steps": [
             {"name": "Checkout", "uses": "actions/checkout@v4"},
-        ]
+        ],
     }
 
     merged = merger._merge_job_steps(existing_job, template_job)
 
     # Action version deve ser atualizada para v4
-    checkout_step = next(
-        s for s in merged["steps"] if s.get("name") == "Checkout")
+    checkout_step = next(s for s in merged["steps"] if s.get("name") == "Checkout")
     assert "@v4" in checkout_step["uses"]
 
 
@@ -333,13 +334,13 @@ def test_13_merge_job_steps_preserves_custom_steps(merger):
         "steps": [
             {"name": "Checkout", "uses": "actions/checkout@v3"},
             {"name": "Custom Build", "run": "make build"},
-        ]
+        ],
     }
     template_job = {
         "runs-on": "ubuntu-latest",
         "steps": [
             {"name": "Checkout", "uses": "actions/checkout@v4"},
-        ]
+        ],
     }
 
     merged = merger._merge_job_steps(existing_job, template_job)
@@ -371,7 +372,10 @@ def test_14_merge_jobs_preserves_custom_jobs(merger):
 # Test 15-16: Full Integration
 # =============================================================================
 
-def test_15_full_merge_creates_backup(merger, temp_dir, sample_workflow_v1, sample_workflow_v2):
+
+def test_15_full_merge_creates_backup(
+    merger, temp_dir, sample_workflow_v1, sample_workflow_v2
+):
     """Test 15: Merge completo cria backup do arquivo original."""
     workflows_dir = temp_dir / ".github" / "workflows"
     workflows_dir.mkdir(parents=True)

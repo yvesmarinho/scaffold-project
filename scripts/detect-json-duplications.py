@@ -12,10 +12,10 @@ Usage:
 """
 
 import json
-from pathlib import Path
-from collections import Counter
 import logging
 import sys
+from collections import Counter
+from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 log = logging.getLogger(__name__)
@@ -38,7 +38,9 @@ def analyze_array_duplicates(arr, path="root"):
     # Contar itens (objetos comparados por JSON)
     items = []
     for item in arr:
-        key = json.dumps(item, sort_keys=True) if isinstance(item, (dict, list)) else item
+        key = (
+            json.dumps(item, sort_keys=True) if isinstance(item, (dict, list)) else item
+        )
         items.append(key)
 
     counts = Counter(items)
@@ -96,7 +98,7 @@ def scan_file(file_path: Path):
         True se encontrou duplicações, False se limpo
     """
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             data = json.load(f)
 
         issues = scan_json_structure(data, file_path.name)
@@ -137,9 +139,7 @@ def main():
         files = list(root.rglob("*.json"))
         # Filtrar .git e node_modules
         files = [
-            f
-            for f in files
-            if ".git" not in f.parts and "node_modules" not in f.parts
+            f for f in files if ".git" not in f.parts and "node_modules" not in f.parts
         ]
 
     log.info(f"🔍 Scanning {len(files)} JSON files...\n")

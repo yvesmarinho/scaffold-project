@@ -1,5 +1,5 @@
-<!-- Criado em: 24/11/2026 12:25 -->
-<!-- Modificado em: 24/11/2026 12:00 -->
+<!-- Criado em: 24/11/2026 12:00 -->
+<!-- Modificado em: 24/11/2026 15:00 -->
 
 # BUG: o tarball do `--publish` não rodava (gerador incompleto)
 
@@ -68,4 +68,3 @@ Uma revisão posterior ao PR #56 apontou que a seleção por glob lê o **disco*
   - fora de repositório e sem git, o glob é mantido.
   - Na fase vermelha, 2 testes falharam.
 - O pacote atual continua com 489 arquivos, porque hoje não há arquivos não versionados nos caminhos publicados.
-

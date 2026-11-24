@@ -13,10 +13,9 @@ from this template. It demonstrates:
 Copy and adapt sections as needed for your own tests.
 """
 
-import pytest
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
+import pytest
 
 # ---------------------------------------------------------------------------
 # Unit Tests - Fast, isolated tests with no external dependencies
@@ -63,8 +62,9 @@ class TestExampleUnitTests:
     def test_with_pytest_warns(self):
         """Testing warning messages."""
         import warnings
+
         with pytest.warns(UserWarning):
-            warnings.warn("example warning", UserWarning)
+            warnings.warn("example warning", UserWarning, stacklevel=2)
 
 
 # ---------------------------------------------------------------------------
@@ -85,6 +85,7 @@ class TestFixtureUsage:
     def test_mock_env_fixture(self, mock_env):
         """Using mock_env fixture to set environment variables."""
         import os
+
         mock_env({"TEST_VAR": "test_value", "DEBUG": "true"})
         assert os.getenv("TEST_VAR") == "test_value"
         assert os.getenv("DEBUG") == "true"
@@ -125,7 +126,7 @@ class TestMockingExamples:
 
     def test_patch_module_function(self):
         """Patching a module-level function."""
-        with patch('builtins.open', MagicMock()) as mock_open:
+        with patch("builtins.open", MagicMock()) as mock_open:
             mock_open.return_value.__enter__.return_value.read.return_value = "mocked"
             # Code that uses open() would get mocked data
             mock_open.assert_not_called()  # Not called yet in this test
@@ -149,23 +150,29 @@ class TestMockingExamples:
 class TestParametrizedTests:
     """Examples of parametrized tests for multiple test cases."""
 
-    @pytest.mark.parametrize("input,expected", [
-        (1, 2),
-        (2, 4),
-        (3, 6),
-        (10, 20),
-    ])
+    @pytest.mark.parametrize(
+        "input,expected",
+        [
+            (1, 2),
+            (2, 4),
+            (3, 6),
+            (10, 20),
+        ],
+    )
     def test_double_function(self, input, expected):
         """Test function with multiple input/output pairs."""
         result = input * 2
         assert result == expected
 
-    @pytest.mark.parametrize("text,is_valid", [
-        ("hello@example.com", True),
-        ("invalid.email", False),
-        ("@example.com", False),
-        ("user@domain.co", True),
-    ])
+    @pytest.mark.parametrize(
+        "text,is_valid",
+        [
+            ("hello@example.com", True),
+            ("invalid.email", False),
+            ("@example.com", False),
+            ("user@domain.co", True),
+        ],
+    )
     def test_email_validation(self, text, is_valid):
         """Test email validation with various inputs."""
         # Simple email validation
@@ -245,6 +252,7 @@ class TestSecurityExamples:
 
         # On Unix systems, check permissions
         import stat
+
         secret_file.chmod(0o600)  # Owner read/write only
         mode = secret_file.stat().st_mode
         assert stat.S_IMODE(mode) == 0o600
@@ -262,8 +270,7 @@ class TestSmokeExamples:
     def test_imports_work(self):
         """Verify critical imports work."""
         import sys
-        import pathlib
-        import json
+
         assert sys.version_info >= (3, 12)
 
     def test_config_file_exists(self, sample_config_file):
@@ -284,6 +291,7 @@ class TestAdvancedPatterns:
     @pytest.fixture
     def complex_fixture(self, tmp_path):
         """Example of a test-specific fixture."""
+
         class ComplexObject:
             def __init__(self, path):
                 self.path = path

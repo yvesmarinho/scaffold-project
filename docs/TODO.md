@@ -1,6 +1,6 @@
 # ✅ TODO - Enterprise Scaffold Project Template
 
-**Last Updated**: 24/11/2026 14:34 — testes não alteram mais o ~/.gitconfig real
+**Last Updated**: 24/11/2026 15:05 — ruff zerado no repositório
 **Project**: Enterprise Scaffold Project Template
 **Status**: 🟢 Active Development
 
@@ -16,8 +16,9 @@
 - [ ] **Cobertura**: 60% (meta 90%) e não medida — `pytest.ini` sobrepõe `[tool.pytest.ini_options]` (`--cov` ignorado); unificar config do pytest e medir no CI
 - [x] ~~**URGENTE: testes sobrescreviam o `~/.gitconfig` real** (identidade `Test User <test@example.com>` desde 20/05)~~: ✅ 24/11/2026 14:34 — `GIT_CONFIG_GLOBAL` temporário na sessão; `mock_subprocess` restaurado; identidade global restaurada; `.mailmap` — `docs/bugs/BUG-testes-sobrescrevem-gitconfig-global.md`
 - [ ] Revisar **outros repositórios** da máquina: commits entre 20/05 e 24/11/2026 podem ter autor `Test User <test@example.com>` (identidade global estava sobrescrita) — aplicar `.mailmap` onde fizer sentido
-- [ ] Limpeza do ruff em 2 PRs (plano aprovado 24/11): (a) `ruff check --fix` só correções seguras (~677), sem black no repo inteiro; (b) restante manual por regra/diretório, `per-file-ignores` justificado para `scaffold/templates/`; depois tornar `Lint & Validate` obrigatório
-- [ ] Limpar os 1031 achados pré-existentes do `ruff check .` (678 com autofix) — o job `Lint & Validate` falha até lá; depois, tornar o check obrigatório
+- [x] ~~Limpeza do ruff~~: ✅ 24/11/2026 15:05 — `ruff check .` zerado (de ~1015); autofix seguro + manual em um PR (o hook do pre-commit impede separar); black nos arquivos tocados + `.git-blame-ignore-revs`; política: S603/B603/B404 desativadas, S603/S607/S108 liberadas em `tests/`, UP009 ignorada (cabeçalho obrigatório), `scripts/tmp` excluído; 5 testes fracos fortalecidos; 4 escritas `git config --global` removidas dos testes
+- [ ] Tornar `Lint & Validate` check obrigatório na `main` (após merge da limpeza)
+- [x] ~~Limpar os 1031 achados pré-existentes do `ruff check .` (678 com autofix) — o job `Lint & Validate` falha até lá; depois, tornar o check obrigatório~~: ✅ 24/11/2026 15:05 — ver item acima
 - [ ] Estrutura de branches main / dev / fases **nos projetos gerados** (decisão do usuário 24/11): main + dev, PRs de feature → dev, dev → main só com CI verde, fases = `release/faseN` — ADR + TDD
 - [ ] Separar arquivos de template dos arquivos do projeto (distribuição) — etapa 1: ✅ 24/11 inventário + ADR-003 **Proposto** (PR #53, `docs/analysis/INVENTARIO-templates.md`); aguarda aprovação do usuário
 - [x] ~~**Bug `--publish`**: tarball sem `scripts/lib/flows/` e `scripts/lib/ai/` (glob não recursivo) → pacote distribuído não roda — fatia 1 do ADR-003~~: ✅ 24/11 — gerador completo no tarball (407 → 489 arquivos), caches excluídos; teste de aceitação compara projeto gerado pelo tarball vs. repo — `docs/bugs/BUG-publish-tarball-incompleto.md`

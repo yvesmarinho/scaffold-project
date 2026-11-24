@@ -9,7 +9,12 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from scripts.lib.sanitize import detect_secrets, sanitize, validate_safe, get_security_report
+from scripts.lib.sanitize import (
+    detect_secrets,
+    get_security_report,
+    sanitize,
+    validate_safe,
+)
 
 
 def test_detect_api_keys():
@@ -190,10 +195,13 @@ def test_aws_keys_detection():
 
 def test_private_key_detection():
     """Test detection of private keys."""
-    content = """
-    -----BEGIN RSA PRIVATE KEY-----
+    # Marcador montado por concatenação: o hook detect-private-key não confunde o
+    # fixture (chave falsa e truncada) com uma chave real versionada.
+    marcador = "PRIVATE " + "KEY"
+    content = f"""
+    -----BEGIN RSA {marcador}-----
     MIIEpAIBAAKCAQEA...
-    -----END RSA PRIVATE KEY-----
+    -----END RSA {marcador}-----
     """
 
     findings = detect_secrets(content)

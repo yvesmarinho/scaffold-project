@@ -18,10 +18,11 @@ Tasks: T006-T009
 """
 
 import re
-import yaml
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Optional, Any
+from typing import Any
+
+import yaml
 
 
 @dataclass
@@ -35,8 +36,9 @@ class ParsedObjetivo:
         file_path: Path to the source file
         version: Format version (extracted from frontmatter)
     """
-    frontmatter: Dict[str, Any]
-    sections: Dict[int, str]
+
+    frontmatter: dict[str, Any]
+    sections: dict[int, str]
     raw_content: str
     file_path: Path
     version: str = field(init=False)
@@ -51,27 +53,27 @@ class ParsedObjetivo:
         return self.version == "2.0"
 
     @property
-    def project_name(self) -> Optional[str]:
+    def project_name(self) -> str | None:
         """Convenience property to get project name."""
         return self.frontmatter.get("project", {}).get("name")
 
     @property
-    def project_type(self) -> Optional[str]:
+    def project_type(self) -> str | None:
         """Convenience property to get project type."""
         return self.frontmatter.get("project", {}).get("type")
 
     @property
-    def p0_sections(self) -> Dict[int, str]:
+    def p0_sections(self) -> dict[int, str]:
         """Get P0 sections (1-3)."""
         return {k: v for k, v in self.sections.items() if k in [1, 2, 3]}
 
     @property
-    def p1_sections(self) -> Dict[int, str]:
+    def p1_sections(self) -> dict[int, str]:
         """Get P1 sections (4-5)."""
         return {k: v for k, v in self.sections.items() if k in [4, 5]}
 
     @property
-    def p2_sections(self) -> Dict[int, str]:
+    def p2_sections(self) -> dict[int, str]:
         """Get P2 sections (6-9)."""
         return {k: v for k, v in self.sections.items() if k in [6, 7, 8, 9]}
 
@@ -91,14 +93,12 @@ class ObjetivoV2Parser:
 
     # Regex patterns
     FRONTMATTER_PATTERN = re.compile(
-        r'^---\s*\n(.*?)\n---\s*\n',
-        re.MULTILINE | re.DOTALL
+        r"^---\s*\n(.*?)\n---\s*\n", re.MULTILINE | re.DOTALL
     )
 
     # Match sections like "## 1️⃣ O que este projeto faz?"
     SECTION_PATTERN = re.compile(
-        r'^##\s+(\d)️⃣\s+(.+?)(?=\n##\s+\d️⃣|\Z)',
-        re.MULTILINE | re.DOTALL
+        r"^##\s+(\d)️⃣\s+(.+?)(?=\n##\s+\d️⃣|\Z)", re.MULTILINE | re.DOTALL
     )
 
     def __init__(self):
@@ -131,37 +131,28 @@ class ObjetivoV2Parser:
         # Check file exists
         if not path.exists():
             raise FileNotFoundError(
-                f"File not found: {path}\n"
-                f"Current directory: {Path.cwd()}"
+                f"File not found: {path}\n" f"Current directory: {Path.cwd()}"
             )
 
         # Read file content
         try:
-            raw_content = path.read_text(encoding='utf-8')
+            raw_content = path.read_text(encoding="utf-8")
         except UnicodeDecodeError as e:
-            raise ValueError(
-                f"File is not valid UTF-8: {path}\n"
-                f"Error: {e}"
-            ) from e
+            raise ValueError(f"File is not valid UTF-8: {path}\n" f"Error: {e}") from e
         except Exception as e:
-            raise IOError(
-                f"Failed to read file: {path}\n"
-                f"Error: {e}"
-            ) from e
+            raise OSError(f"Failed to read file: {path}\n" f"Error: {e}") from e
 
         # Parse frontmatter
         try:
             frontmatter = self._parse_frontmatter(raw_content)
         except (yaml.YAMLError, ValueError) as e:
-            raise ValueError(
-                f"Failed to parse frontmatter in {path.name}:\n{e}"
-            ) from e
+            raise ValueError(f"Failed to parse frontmatter in {path.name}:\n{e}") from e
 
         # Parse sections
         # Extract content after frontmatter for section parsing
         frontmatter_match = self.FRONTMATTER_PATTERN.match(raw_content)
         if frontmatter_match:
-            content_after_frontmatter = raw_content[frontmatter_match.end():]
+            content_after_frontmatter = raw_content[frontmatter_match.end() :]
         else:
             content_after_frontmatter = raw_content
 
@@ -172,10 +163,10 @@ class ObjetivoV2Parser:
             frontmatter=frontmatter,
             sections=sections,
             raw_content=raw_content,
-            file_path=path
+            file_path=path,
         )
 
-    def _parse_frontmatter(self, content: str) -> Dict[str, Any]:
+    def _parse_frontmatter(self, content: str) -> dict[str, Any]:
         """Extract and parse YAML frontmatter.
 
         Args:
@@ -199,7 +190,7 @@ class ObjetivoV2Parser:
         if not match:
             raise ValueError(
                 "Missing or malformed YAML frontmatter. "
-                "Expected format:\n---\nversion: \"2.0\"\n...\n---"
+                'Expected format:\n---\nversion: "2.0"\n...\n---'
             )
 
         yaml_content = match.group(1)
@@ -222,7 +213,7 @@ class ObjetivoV2Parser:
         if "version" not in frontmatter:
             raise ValueError(
                 "Missing required field 'version' in frontmatter.\n"
-                "Add: version: \"2.0\""
+                'Add: version: "2.0"'
             )
 
         if "project" not in frontmatter:
@@ -245,7 +236,7 @@ class ObjetivoV2Parser:
 
         return frontmatter
 
-    def _parse_sections(self, content: str) -> Dict[int, str]:
+    def _parse_sections(self, content: str) -> dict[int, str]:
         """Extract Markdown sections by number.
 
         Args:
@@ -275,7 +266,7 @@ class ObjetivoV2Parser:
 
         for i, match in enumerate(matches):
             section_num = int(match.group(1))
-            section_title = match.group(2).strip()
+            match.group(2).strip()
 
             # Extract content from after the title line until next section or EOF
             # The match.group(0) contains the full match including ## prefix
@@ -295,7 +286,7 @@ class ObjetivoV2Parser:
 
             # Remove the header line (## 1️⃣ Title)
             # Split by first newline and take everything after
-            lines = full_section.split('\n', 1)
+            lines = full_section.split("\n", 1)
             if len(lines) > 1:
                 section_content = lines[1].strip()
             else:

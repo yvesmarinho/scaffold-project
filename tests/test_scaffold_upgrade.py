@@ -27,7 +27,6 @@ Relacionado:
 from __future__ import annotations
 
 import json
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -70,18 +69,7 @@ def base_workspace(tmp_path: Path, scaffold_script: Path) -> Path:
     Simula um projeto criado com uma versão anterior do template
     que precisa ser atualizado.
     """
-    # Configurar Git globalmente ANTES de criar workspace
-    # (necessário para scaffold new criar commits)
-    subprocess.run(
-        ["git", "config", "--global", "user.email", "test@example.com"],
-        check=False,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "config", "--global", "user.name", "Test User"],
-        check=False,
-        capture_output=True,
-    )
+    # Identidade git: GIT_CONFIG_GLOBAL temporário da sessão (tests/conftest.py)
 
     workspace = tmp_path / "test-upgrade-workspace"
     workspace.mkdir(parents=True, exist_ok=True)
@@ -111,20 +99,22 @@ def base_workspace(tmp_path: Path, scaffold_script: Path) -> Path:
     assert result.returncode == 0, f"scaffold new failed: {result.stderr}"
 
     # DEBUG: verificar onde o projeto foi realmente criado
-    print(f"\n=== DEBUG base_workspace ===")
+    print("\n=== DEBUG base_workspace ===")
     print(f"workspace path: {workspace}")
     print(f"workspace exists: {workspace.exists()}")
-    print(f"workspace contents: {list(workspace.iterdir()) if workspace.exists() else 'N/A'}")
+    print(
+        f"workspace contents: {list(workspace.iterdir()) if workspace.exists() else 'N/A'}"
+    )
     if (workspace / "test-upgrade-workspace").exists():
-        print(f"DETECTED: scaffold new criou subdiretório! Ajustando workspace...")
+        print("DETECTED: scaffold new criou subdiretório! Ajustando workspace...")
         workspace = workspace / "test-upgrade-workspace"
 
     # Simular projeto "antigo" removendo alguns arquivos
     # que serão recriados pelo upgrade
     files_to_remove = [
         ".github/copilot-instructions.md",  # BUG-13
-        "scripts/lib/git_validators.py",    # BUG-19
-        "scripts/lib/sanitize.py",          # BUG-19
+        "scripts/lib/git_validators.py",  # BUG-19
+        "scripts/lib/sanitize.py",  # BUG-19
     ]
 
     for file_path in files_to_remove:
@@ -177,11 +167,12 @@ def test_scaffold_upgrade_basic(scaffold_script: Path, base_workspace: Path):
     scaffold_logs = list(logs_dir.glob("scaffold_*.log"))
     assert len(scaffold_logs) > 0, "Nenhum log de scaffold encontrado"
 
-    # Verificar que backup foi criado
-    backups = list(base_workspace.glob(".vscode/*.backup.*"))
-    # Nota: backup pode ou não existir dependendo se houve merge
-    # Apenas verificar que diretório existe
-    assert (base_workspace / ".vscode").is_dir()
+    # Merge dos JSON do .vscode guarda o original como <arquivo>.backup
+    # (o padrão antigo "*.backup.*" nunca casava com esse nome).
+    for nome in ("settings.json", "mcp.json", "extensions.json"):
+        backup = base_workspace / ".vscode" / f"{nome}.backup"
+        assert backup.is_file(), f"backup ausente: {backup.name}"
+        json.loads(backup.read_text(encoding="utf-8"))  # backup íntegro
 
 
 def test_scaffold_upgrade_all_validations(scaffold_script: Path, base_workspace: Path):
@@ -290,7 +281,9 @@ def test_scaffold_upgrade_bug20_mcp_http(scaffold_script: Path, base_workspace: 
     )
 
 
-def test_scaffold_upgrade_bug001_objetivo_init(scaffold_script: Path, base_workspace: Path):
+def test_scaffold_upgrade_bug001_objetivo_init(
+    scaffold_script: Path, base_workspace: Path
+):
     """
     Teste: BUG-001 — Scaffold objetivo-init fixes aplicados.
 
@@ -327,7 +320,9 @@ def test_scaffold_upgrade_bug001_objetivo_init(scaffold_script: Path, base_works
     )
 
 
-def test_scaffold_upgrade_bug19_gitvalidators(scaffold_script: Path, base_workspace: Path):
+def test_scaffold_upgrade_bug19_gitvalidators(
+    scaffold_script: Path, base_workspace: Path
+):
     """
     Teste: BUG-19 — Git validators e sanitize.py deployados.
 
@@ -372,7 +367,9 @@ def test_scaffold_upgrade_bug19_gitvalidators(scaffold_script: Path, base_worksp
     )
 
 
-def test_scaffold_upgrade_copilot_instructions(scaffold_script: Path, base_workspace: Path):
+def test_scaffold_upgrade_copilot_instructions(
+    scaffold_script: Path, base_workspace: Path
+):
     """
     Teste: BUG-13 — Copilot instructions deployado após upgrade.
 
@@ -451,7 +448,9 @@ def test_scaffold_upgrade_merge_strategy(scaffold_script: Path, base_workspace: 
     )
 
 
-def test_scaffold_upgrade_session_memory_init(scaffold_script: Path, base_workspace: Path):
+def test_scaffold_upgrade_session_memory_init(
+    scaffold_script: Path, base_workspace: Path
+):
     """
     Teste: BUG-11 e BUG-12 — Session e Memory systems inicializados.
 
@@ -547,7 +546,7 @@ def test_scaffold_upgrade_idempotent(scaffold_script: Path, base_workspace: Path
                 str(scaffold_script),
                 "upgrade",
                 "--force",
-            "--ci",
+                "--ci",
             ],
             cwd=base_workspace,
             capture_output=True,
@@ -555,9 +554,9 @@ def test_scaffold_upgrade_idempotent(scaffold_script: Path, base_workspace: Path
             timeout=120,
         )
 
-        assert result.returncode == 0, (
-            f"scaffold upgrade #{i+1} failed:\n{result.stderr}"
-        )
+        assert (
+            result.returncode == 0
+        ), f"scaffold upgrade #{i+1} failed:\n{result.stderr}"
 
     # Executar todas as validações após o último upgrade
     suites = [
@@ -584,18 +583,11 @@ def test_scaffold_upgrade_idempotent(scaffold_script: Path, base_workspace: Path
     )
 
 
-def test_scaffold_upgrade_refreshes_security_files(scaffold_script: Path, tmp_path: Path):
+def test_scaffold_upgrade_refreshes_security_files(
+    scaffold_script: Path, tmp_path: Path
+):
     """Teste: upgrade com --force atualiza arquivos gerenciados de segurança."""
-    subprocess.run(
-        ["git", "config", "--global", "user.email", "test@example.com"],
-        check=False,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "config", "--global", "user.name", "Test User"],
-        check=False,
-        capture_output=True,
-    )
+    # Identidade git: GIT_CONFIG_GLOBAL temporário da sessão (tests/conftest.py)
 
     workspace = tmp_path / "test-upgrade-security"
     workspace.mkdir(parents=True, exist_ok=True)
@@ -643,7 +635,9 @@ def test_scaffold_upgrade_refreshes_security_files(scaffold_script: Path, tmp_pa
         text=True,
         timeout=120,
     )
-    assert upgrade_result.returncode == 0, f"scaffold upgrade failed: {upgrade_result.stderr}"
+    assert (
+        upgrade_result.returncode == 0
+    ), f"scaffold upgrade failed: {upgrade_result.stderr}"
 
     assert "@custom-owner" not in codeowners.read_text(encoding="utf-8")
     assert (workspace / ".github" / "CODEOWNERS.backup").exists()
@@ -654,7 +648,9 @@ def test_scaffold_upgrade_refreshes_security_files(scaffold_script: Path, tmp_pa
 # ---------------------------------------------------------------------------
 
 
-def test_scaffold_upgrade_no_old_sessions_folder(scaffold_script: Path, base_workspace: Path):
+def test_scaffold_upgrade_no_old_sessions_folder(
+    scaffold_script: Path, base_workspace: Path
+):
     """
     Teste: BUG-22 — Scaffold upgrade não cria pasta SESSIONS antiga.
 

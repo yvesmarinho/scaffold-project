@@ -5,7 +5,7 @@ NOME..: registry.py
 LANG..: Python3
 TITULO: Registro central de plugins de IA
 DATA..: 23/06/2026 10:00
-MODIFICADO: 23/06/2026 10:00
+MODIFICADO: 24/11/2026 15:00
 VERSÃO: 0.1.0
 HOST..: local
 LOCAL.: scripts/lib/ai/
@@ -38,10 +38,10 @@ if TYPE_CHECKING:
     from .base import AIPlugin
 
 # Dict ordenado: name → plugin instance
-REGISTRY: dict[str, "AIPlugin"] = {}
+REGISTRY: dict[str, AIPlugin] = {}
 
 
-def register(plugin: "AIPlugin") -> None:
+def register(plugin: AIPlugin) -> None:
     """
     Registra um plugin de IA.
 
@@ -61,7 +61,7 @@ def register(plugin: "AIPlugin") -> None:
     REGISTRY[plugin.name] = plugin
 
 
-def resolve_plugins(ai_assistant: str) -> list["AIPlugin"]:
+def resolve_plugins(ai_assistant: str) -> list[AIPlugin]:
     """
     Retorna a lista de plugins ativos para o valor de ai_assistant.
 

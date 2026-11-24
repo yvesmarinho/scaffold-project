@@ -28,14 +28,18 @@ import re
 import subprocess
 import sys
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Tuple
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+import shutil
+
 from scripts.lib.memory import MemoryStore, SearchResult
+
+# Caminho absoluto do git (S607/B607); "git" como fallback fora do PATH.
+_GIT = shutil.which("git") or "git"
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 log = logging.getLogger(__name__)
@@ -44,6 +48,7 @@ log = logging.getLogger(__name__)
 @dataclass
 class ContextSource:
     """Source of context information."""
+
     type: str  # "branch", "commit", "file", "task", "query"
     value: str
     weight: float  # Relevance weight (0.0-1.0)
@@ -52,42 +57,51 @@ class ContextSource:
 @dataclass
 class SuggestedMemory:
     """Memory suggestion with relevance score."""
+
     memory: SearchResult
     relevance: float  # 0-100 (percentage)
-    reasons: List[str]  # Why this memory was suggested
+    reasons: list[str]  # Why this memory was suggested
 
 
 def get_current_branch() -> str:
     """Get current git branch name."""
     try:
         result = subprocess.run(
-            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            [_GIT, "rev-parse", "--abbrev-ref", "HEAD"],
             capture_output=True,
             text=True,
             check=True,
             timeout=2,
         )
         return result.stdout.strip()
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
+    except (
+        subprocess.CalledProcessError,
+        subprocess.TimeoutExpired,
+        FileNotFoundError,
+    ):
         return ""
 
 
-def get_recent_commits(count: int = 10) -> List[str]:
+def get_recent_commits(count: int = 10) -> list[str]:
     """Get recent commit messages."""
     try:
         result = subprocess.run(
-            ["git", "log", f"-{count}", "--pretty=format:%s"],
+            [_GIT, "log", f"-{count}", "--pretty=format:%s"],
             capture_output=True,
             text=True,
             check=True,
             timeout=5,
         )
         return [line.strip() for line in result.stdout.split("\n") if line.strip()]
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
+    except (
+        subprocess.CalledProcessError,
+        subprocess.TimeoutExpired,
+        FileNotFoundError,
+    ):
         return []
 
 
-def extract_keywords(text: str) -> List[str]:
+def extract_keywords(text: str) -> list[str]:
     """Extract meaningful keywords from text.
 
     Args:
@@ -98,20 +112,79 @@ def extract_keywords(text: str) -> List[str]:
     """
     # Remove common prefixes/patterns
     text = re.sub(r"^\d+-", "", text)  # "018-feature" -> "feature"
-    text = re.sub(r"^(feat|fix|chore|docs|refactor|test|style|perf|ci|build)\([^)]+\):\s*", "", text, flags=re.IGNORECASE)
-    text = re.sub(r"^(feat|fix|chore|docs|refactor|test|style|perf|ci|build):\s*", "", text, flags=re.IGNORECASE)
+    text = re.sub(
+        r"^(feat|fix|chore|docs|refactor|test|style|perf|ci|build)\([^)]+\):\s*",
+        "",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(
+        r"^(feat|fix|chore|docs|refactor|test|style|perf|ci|build):\s*",
+        "",
+        text,
+        flags=re.IGNORECASE,
+    )
 
     # Split on non-alphanumeric characters
     words = re.findall(r"\w+", text.lower())
 
     # Filter stopwords and short words
     stopwords = {
-        "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for",
-        "of", "with", "by", "from", "as", "is", "was", "are", "were", "be",
-        "been", "being", "have", "has", "had", "do", "does", "did", "will",
-        "would", "should", "could", "can", "may", "might", "must", "this",
-        "that", "these", "those", "it", "its", "i", "you", "we", "they",
-        "add", "update", "remove", "delete", "create", "make", "set", "get",
+        "the",
+        "a",
+        "an",
+        "and",
+        "or",
+        "but",
+        "in",
+        "on",
+        "at",
+        "to",
+        "for",
+        "of",
+        "with",
+        "by",
+        "from",
+        "as",
+        "is",
+        "was",
+        "are",
+        "were",
+        "be",
+        "been",
+        "being",
+        "have",
+        "has",
+        "had",
+        "do",
+        "does",
+        "did",
+        "will",
+        "would",
+        "should",
+        "could",
+        "can",
+        "may",
+        "might",
+        "must",
+        "this",
+        "that",
+        "these",
+        "those",
+        "it",
+        "its",
+        "i",
+        "you",
+        "we",
+        "they",
+        "add",
+        "update",
+        "remove",
+        "delete",
+        "create",
+        "make",
+        "set",
+        "get",
     }
 
     keywords = [w for w in words if w not in stopwords and len(w) >= 3]
@@ -127,7 +200,9 @@ def extract_keywords(text: str) -> List[str]:
     return unique_keywords
 
 
-def analyze_context(branch: str = None, commits: List[str] = None, query: str = None, task: str = None) -> List[ContextSource]:
+def analyze_context(
+    branch: str = None, commits: list[str] = None, query: str = None, task: str = None
+) -> list[ContextSource]:
     """Analyze current context and extract keywords.
 
     Args:
@@ -144,7 +219,9 @@ def analyze_context(branch: str = None, commits: List[str] = None, query: str = 
     # Manual query (highest priority)
     if query:
         keywords = extract_keywords(query)
-        sources.append(ContextSource(type="query", value=" ".join(keywords), weight=1.0))
+        sources.append(
+            ContextSource(type="query", value=" ".join(keywords), weight=1.0)
+        )
 
     # Task ID
     if task:
@@ -156,7 +233,9 @@ def analyze_context(branch: str = None, commits: List[str] = None, query: str = 
     if branch and branch not in ("main", "master", "HEAD"):
         keywords = extract_keywords(branch)
         if keywords:
-            sources.append(ContextSource(type="branch", value=" ".join(keywords), weight=0.8))
+            sources.append(
+                ContextSource(type="branch", value=" ".join(keywords), weight=0.8)
+            )
 
     # Recent commits (auto-detect if not provided)
     if commits is None:
@@ -170,17 +249,23 @@ def analyze_context(branch: str = None, commits: List[str] = None, query: str = 
             keyword_freq = {}
             for kw in keywords:
                 keyword_freq[kw] = keyword_freq.get(kw, 0) + 1
-            top_keywords = sorted(keyword_freq.items(), key=lambda x: x[1], reverse=True)[:10]
-            sources.append(ContextSource(
-                type="commit",
-                value=" ".join(kw for kw, _ in top_keywords),
-                weight=0.6
-            ))
+            top_keywords = sorted(
+                keyword_freq.items(), key=lambda x: x[1], reverse=True
+            )[:10]
+            sources.append(
+                ContextSource(
+                    type="commit",
+                    value=" ".join(kw for kw, _ in top_keywords),
+                    weight=0.6,
+                )
+            )
 
     return sources
 
 
-def search_with_context(sources: List[ContextSource], limit: int = 5) -> List[SuggestedMemory]:
+def search_with_context(
+    sources: list[ContextSource], limit: int = 5
+) -> list[SuggestedMemory]:
     """Search memories using context sources and calculate relevance.
 
     Args:
@@ -204,7 +289,7 @@ def search_with_context(sources: List[ContextSource], limit: int = 5) -> List[Su
 
     # Build search query (OR all keywords)
     # Quote keywords to avoid FTS5 syntax errors with numbers or special chars
-    query_parts = list(set(kw for kw, _, _ in all_keywords))
+    query_parts = list({kw for kw, _, _ in all_keywords})
     quoted_keywords = [f'"{kw}"' for kw in query_parts[:20]]  # Limit to 20 keywords
     search_query = " OR ".join(quoted_keywords)
 
@@ -213,7 +298,9 @@ def search_with_context(sources: List[ContextSource], limit: int = 5) -> List[Su
         return []
 
     # Search memories
-    results = store.search(search_query, limit=limit * 3)  # Get more results for filtering
+    results = store.search(
+        search_query, limit=limit * 3
+    )  # Get more results for filtering
     store.close()
 
     # Calculate relevance for each result
@@ -222,18 +309,20 @@ def search_with_context(sources: List[ContextSource], limit: int = 5) -> List[Su
         relevance, reasons = calculate_relevance(result, all_keywords, sources)
 
         if relevance > 0:
-            suggestions.append(SuggestedMemory(
-                memory=result,
-                relevance=relevance,
-                reasons=reasons
-            ))
+            suggestions.append(
+                SuggestedMemory(memory=result, relevance=relevance, reasons=reasons)
+            )
 
     # Sort by relevance and take top N
     suggestions.sort(key=lambda x: x.relevance, reverse=True)
     return suggestions[:limit]
 
 
-def calculate_relevance(result: SearchResult, keywords: List[Tuple[str, float, str]], sources: List[ContextSource]) -> Tuple[float, List[str]]:
+def calculate_relevance(
+    result: SearchResult,
+    keywords: list[tuple[str, float, str]],
+    sources: list[ContextSource],
+) -> tuple[float, list[str]]:
     """Calculate relevance score for a memory result.
 
     Args:
@@ -275,7 +364,9 @@ def calculate_relevance(result: SearchResult, keywords: List[Tuple[str, float, s
         if tag_matches > 0:
             tag_bonus = min(15, tag_matches * 10)
             score += tag_bonus
-            reasons.append(f"Tags match: {', '.join(t for t in result.tags if any(kw in t.lower() for kw, _, _ in keywords))}")
+            reasons.append(
+                f"Tags match: {', '.join(t for t in result.tags if any(kw in t.lower() for kw, _, _ in keywords))}"
+            )
 
     # Category bonus (10 points)
     if result.category == "project":
@@ -302,7 +393,7 @@ def calculate_relevance(result: SearchResult, keywords: List[Tuple[str, float, s
             branch_matches = sum(1 for kw in branch_keywords if kw in title_lower)
             if branch_matches > 0:
                 score += 5
-                reasons.append(f"Matches branch context")
+                reasons.append("Matches branch context")
 
     # Ensure score is in 0-100 range
     score = min(100, max(0, score))
@@ -313,7 +404,9 @@ def calculate_relevance(result: SearchResult, keywords: List[Tuple[str, float, s
     return score, reasons
 
 
-def format_output(suggestions: List[SuggestedMemory], context_sources: List[ContextSource]) -> str:
+def format_output(
+    suggestions: list[SuggestedMemory], context_sources: list[ContextSource]
+) -> str:
     """Format suggestions as human-readable output."""
     if not suggestions:
         return "💡 No relevant memories found for current context."
@@ -345,13 +438,17 @@ def format_output(suggestions: List[SuggestedMemory], context_sources: List[Cont
     for i, suggestion in enumerate(suggestions, 1):
         mem = suggestion.memory
         lines.append(f"[{i}] {mem.title} ({suggestion.relevance:.0f}% relevance)")
-        lines.append(f"    Category: {mem.category} | Tags: {', '.join(mem.tags) if mem.tags else 'none'}")
+        lines.append(
+            f"    Category: {mem.category} | Tags: {', '.join(mem.tags) if mem.tags else 'none'}"
+        )
         lines.append(f"    File: {mem.file_path}")
         lines.append(f"    Why: {'; '.join(suggestion.reasons)}")
         lines.append("")
 
     lines.append("─" * 60)
-    lines.append(f"💬 Found {len(suggestions)} relevant memor{'y' if len(suggestions) == 1 else 'ies'}")
+    lines.append(
+        f"💬 Found {len(suggestions)} relevant memor{'y' if len(suggestions) == 1 else 'ies'}"
+    )
     lines.append("")
 
     return "\n".join(lines)
@@ -417,7 +514,12 @@ def main():
         if args.verbose:
             log.debug("Auto-detected context sources: %d", len(sources))
             for source in sources:
-                log.debug("  %s (weight=%.1f): %s", source.type, source.weight, source.value[:50])
+                log.debug(
+                    "  %s (weight=%.1f): %s",
+                    source.type,
+                    source.weight,
+                    source.value[:50],
+                )
     else:
         sources = analyze_context(query=args.query, task=args.task)
 
@@ -461,6 +563,7 @@ def main():
             log.error("❌ ERROR: %s", e)
             if args.verbose:
                 import traceback
+
                 traceback.print_exc()
         sys.exit(1)
 

@@ -23,11 +23,12 @@ Query usage:
 """
 
 import os
-import yaml
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import Any
+
+import yaml
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -44,13 +45,16 @@ def _default_log_file() -> Path:
     override = os.environ.get("SCAFFOLD_LOGS_DIR", "").strip()
     return Path(override) / "scaffolds.yaml" if override else DEFAULT_LOG_FILE
 
+
 # ---------------------------------------------------------------------------
 # Data Classes
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ScaffoldEntry:
     """Single scaffold operation entry"""
+
     id: int
     timestamp: str
     project_name: str
@@ -59,17 +63,19 @@ class ScaffoldEntry:
     created_by: str
     path: str
     success: bool = True
-    error_message: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    error_message: str | None = None
+    metadata: dict[str, Any] | None = None
+
 
 # ---------------------------------------------------------------------------
 # Scaffold Logger
 # ---------------------------------------------------------------------------
 
+
 class ScaffoldLogger:
     """Log and query scaffold operations"""
 
-    def __init__(self, log_file: Optional[Path] = None):
+    def __init__(self, log_file: Path | None = None):
         self.log_file = log_file or _default_log_file()
         self._ensure_log_file()
 
@@ -79,22 +85,22 @@ class ScaffoldLogger:
             self.log_file.parent.mkdir(parents=True, exist_ok=True)
             self._save_data({"scaffolds": []})
 
-    def _load_data(self) -> Dict[str, Any]:
+    def _load_data(self) -> dict[str, Any]:
         """Load scaffold log data"""
         try:
-            with self.log_file.open('r', encoding='utf-8') as f:
+            with self.log_file.open("r", encoding="utf-8") as f:
                 data = yaml.safe_load(f)
                 return data if data else {"scaffolds": []}
         except Exception as e:
             print(f"Warning: Failed to load {self.log_file}: {e}")
             return {"scaffolds": []}
 
-    def _save_data(self, data: Dict[str, Any]):
+    def _save_data(self, data: dict[str, Any]):
         """Save scaffold log data"""
-        with self.log_file.open('w', encoding='utf-8') as f:
+        with self.log_file.open("w", encoding="utf-8") as f:
             yaml.dump(data, f, default_flow_style=False, sort_keys=False)
 
-    def _get_next_id(self, data: Dict[str, Any]) -> int:
+    def _get_next_id(self, data: dict[str, Any]) -> int:
         """Get next sequential ID"""
         scaffolds = data.get("scaffolds", [])
         if not scaffolds:
@@ -109,8 +115,8 @@ class ScaffoldLogger:
         created_by: str,
         path: str,
         success: bool = True,
-        error_message: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        error_message: str | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> ScaffoldEntry:
         """
         Log a scaffold operation
@@ -140,7 +146,7 @@ class ScaffoldLogger:
             path=path,
             success=success,
             error_message=error_message,
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
 
         data["scaffolds"].append(asdict(entry))
@@ -150,12 +156,12 @@ class ScaffoldLogger:
 
     def query(
         self,
-        project_name: Optional[str] = None,
-        profile: Optional[str] = None,
-        created_by: Optional[str] = None,
-        success: Optional[bool] = None,
-        limit: Optional[int] = None
-    ) -> List[ScaffoldEntry]:
+        project_name: str | None = None,
+        profile: str | None = None,
+        created_by: str | None = None,
+        success: bool | None = None,
+        limit: int | None = None,
+    ) -> list[ScaffoldEntry]:
         """
         Query scaffold history
 
@@ -176,7 +182,9 @@ class ScaffoldLogger:
         results = []
         for s in scaffolds:
             # Apply filters
-            if project_name and not self._match_pattern(s["project_name"], project_name):
+            if project_name and not self._match_pattern(
+                s["project_name"], project_name
+            ):
                 continue
             if profile and s["profile"] != profile:
                 continue
@@ -198,15 +206,16 @@ class ScaffoldLogger:
 
     def _match_pattern(self, text: str, pattern: str) -> bool:
         """Simple wildcard matching (* only)"""
-        if '*' not in pattern:
+        if "*" not in pattern:
             return text == pattern
 
         # Convert wildcard to regex
         import re
-        regex_pattern = pattern.replace('*', '.*')
-        return bool(re.match(f'^{regex_pattern}$', text))
 
-    def get_stats(self) -> Dict[str, Any]:
+        regex_pattern = pattern.replace("*", ".*")
+        return bool(re.match(f"^{regex_pattern}$", text))
+
+    def get_stats(self) -> dict[str, Any]:
         """
         Get scaffold statistics
 
@@ -227,7 +236,7 @@ class ScaffoldLogger:
                 "success_rate": 0.0,
                 "by_profile": {},
                 "by_user": {},
-                "recent_activity": 0
+                "recent_activity": 0,
             }
 
         # Count by profile
@@ -248,11 +257,13 @@ class ScaffoldLogger:
 
         # Recent activity (last 30 days)
         from datetime import timedelta
+
         now = datetime.utcnow()
         thirty_days_ago = now - timedelta(days=30)
         recent = sum(
-            1 for s in scaffolds
-            if datetime.fromisoformat(s["timestamp"].replace('Z', ''))
+            1
+            for s in scaffolds
+            if datetime.fromisoformat(s["timestamp"].replace("Z", ""))
             >= thirty_days_ago
         )
 
@@ -261,7 +272,7 @@ class ScaffoldLogger:
             "success_rate": round(success_rate, 1),
             "by_profile": by_profile,
             "by_user": by_user,
-            "recent_activity": recent
+            "recent_activity": recent,
         }
 
     def export_csv(self, output_file: Path):
@@ -275,11 +286,21 @@ class ScaffoldLogger:
             print("No scaffolds to export")
             return
 
-        with output_file.open('w', newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=[
-                "id", "timestamp", "project_name", "template_version",
-                "profile", "created_by", "path", "success", "error_message"
-            ])
+        with output_file.open("w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(
+                f,
+                fieldnames=[
+                    "id",
+                    "timestamp",
+                    "project_name",
+                    "template_version",
+                    "profile",
+                    "created_by",
+                    "path",
+                    "success",
+                    "error_message",
+                ],
+            )
             writer.writeheader()
 
             for s in scaffolds:
@@ -289,14 +310,18 @@ class ScaffoldLogger:
 
         print(f"✅ Exported {len(scaffolds)} scaffolds to {output_file}")
 
+
 # ---------------------------------------------------------------------------
 # Utility Functions
 # ---------------------------------------------------------------------------
 
+
 def get_current_user() -> str:
     """Get current system user"""
     import getpass
+
     return getpass.getuser()
+
 
 def get_template_version() -> str:
     """Get current template version from spec-template.md"""
@@ -309,17 +334,18 @@ def get_template_version() -> str:
         content = template_file.read_text(encoding="utf-8")
         # Extract frontmatter
         if content.startswith("---"):
-            lines = content.split('\n')
+            lines = content.split("\n")
             for line in lines[1:]:
                 if line.strip() == "---":
                     break
                 if line.startswith("template_version:"):
-                    version = line.split(":", 1)[1].strip().strip('"\'')
+                    version = line.split(":", 1)[1].strip().strip("\"'")
                     return version
     except Exception:
-        pass
+        return "unknown"
 
     return "unknown"
+
 
 # ---------------------------------------------------------------------------
 # CLI (simple test)
@@ -343,7 +369,7 @@ if __name__ == "__main__":
             template_version="2.1.0",
             profile="python-fastapi",
             created_by=get_current_user(),
-            path="/tmp/test-project"
+            path="/tmp/test-project",  # noqa: S108  # nosec B108 — exemplo do modo demo
         )
 
         print(f"✅ Logged scaffold #{entry.id}: {entry.project_name}")

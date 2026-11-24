@@ -6,10 +6,10 @@ import argparse
 from pathlib import Path
 
 from .. import git, project, vscode
+from ..ai import resolve_plugins
+from ..config import DOMAIN_DEFAULT_PROFILES, SPECKIT_TRANSVERSAL_PROFILES
 from ..project import write_scaffold_state
 from ..ui import collect_project_info, confirm_summary, console, print_final_summary
-from ..config import DOMAIN_DEFAULT_PROFILES, SPECKIT_TRANSVERSAL_PROFILES
-from ..ai import resolve_plugins
 
 
 def flow_new_project(args: argparse.Namespace) -> int:
@@ -17,16 +17,16 @@ def flow_new_project(args: argparse.Namespace) -> int:
     ci_mode = args.ci
 
     overrides = {
-        "name":           args.name,
-        "title":          args.title,
-        "description":    args.description,
-        "domain":         args.domain,
-        "language":       args.language,
-        "repo":           args.repo,
-        "shared_dir":     args.shared_dir,
-        "target_dir":     args.target_dir,
+        "name": args.name,
+        "title": args.title,
+        "description": args.description,
+        "domain": args.domain,
+        "language": args.language,
+        "repo": args.repo,
+        "shared_dir": args.shared_dir,
+        "target_dir": args.target_dir,
         "extra_profiles": getattr(args, "extra_profiles", None),
-        "ai_assistant":   getattr(args, "ai_assistant", None),
+        "ai_assistant": getattr(args, "ai_assistant", None),
     }
     # Remove chaves None para não substituir defaults
     overrides = {k: v for k, v in overrides.items() if v is not None}
@@ -70,7 +70,9 @@ def flow_new_project(args: argparse.Namespace) -> int:
     results.extend(project.copy_speckit(cfg))
 
     # 5aa. Agents customizados do scaffold — etapa independente do SpecKit
-    console.print("  [blue]🤖 Configurando agents customizados para IA selecionada...[/blue]")
+    console.print(
+        "  [blue]🤖 Configurando agents customizados para IA selecionada...[/blue]"
+    )
     results.extend(project.copy_custom_agents(cfg))
 
     # 5b. Session Support Libraries: scripts/lib/*.py (dependências)
@@ -124,8 +126,7 @@ def flow_new_project(args: argparse.Namespace) -> int:
 
     # 9b. Persiste estado do projeto ANTES do commit (BUG-#3 fix)
     # Calcula profiles aplicados (BUG-#2 fix)
-    domain_profile = DOMAIN_DEFAULT_PROFILES.get(
-        cfg.domain, f"devops-{cfg.domain}")
+    domain_profile = DOMAIN_DEFAULT_PROFILES.get(cfg.domain, f"devops-{cfg.domain}")
     extras = cfg.extra_profiles or []
     all_profiles = [domain_profile] + extras + SPECKIT_TRANSVERSAL_PROFILES
     write_scaffold_state(cfg, profiles_applied=all_profiles)
@@ -141,21 +142,30 @@ def flow_new_project(args: argparse.Namespace) -> int:
 
     # Resumo final (com logging automático se não for --no-log)
     save_log = not getattr(args, "no_log", False)
-    log_dir = Path(getattr(args, "log_dir", None)) if getattr(args, "log_dir", None) else None
-    print_final_summary(results, project_path=cfg.project_path, save_log=save_log, log_dir=log_dir)
+    log_dir = (
+        Path(getattr(args, "log_dir", None)) if getattr(args, "log_dir", None) else None
+    )
+    print_final_summary(
+        results, project_path=cfg.project_path, save_log=save_log, log_dir=log_dir
+    )
 
-    errors = [r for r in results if hasattr(
-        r, "status") and r.status == "error"]
+    errors = [r for r in results if hasattr(r, "status") and r.status == "error"]
     if errors:
         console.print(
-            f"  [bold red]❌ {len(errors)} erro(s) durante a criação.[/bold red]\n")
+            f"  [bold red]❌ {len(errors)} erro(s) durante a criação.[/bold red]\n"
+        )
         return 1
 
     # 10. Log scaffold operation (IMP-65-LITE)
     try:
         import sys
+
         sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-        from scaffold_logger import ScaffoldLogger, get_current_user, get_template_version
+        from scaffold_logger import (
+            ScaffoldLogger,
+            get_current_user,
+            get_template_version,
+        )
 
         logger = ScaffoldLogger()
         logger.log_scaffold(
@@ -164,21 +174,24 @@ def flow_new_project(args: argparse.Namespace) -> int:
             profile=cfg.language or "base",
             created_by=get_current_user(),
             path=str(cfg.project_path),
-            success=True
+            success=True,
         )
     except Exception as e:
         # Don't fail scaffold if logging fails
         console.print(
-            f"  [dim yellow]⚠️  Aviso: Falha ao registrar log: {e}[/dim yellow]")
+            f"  [dim yellow]⚠️  Aviso: Falha ao registrar log: {e}[/dim yellow]"
+        )
 
     console.print(
-        f"  [bold green]✅ Projeto '{cfg.project_name}' criado com sucesso![/bold green]\n")
+        f"  [bold green]✅ Projeto '{cfg.project_name}' criado com sucesso![/bold green]\n"
+    )
     console.print(f"  [dim]Diretório: {cfg.project_path}[/dim]\n")
 
     # BUG-05 Phase 2: Se --with-code-profile fornecido, aplicar perfil de código
     if hasattr(args, "with_code_profile") and args.with_code_profile:
         console.print(
-            f"\n  [blue]🚀 Aplicando perfil de código '{args.with_code_profile}'...[/blue]\n")
+            f"\n  [blue]🚀 Aplicando perfil de código '{args.with_code_profile}'...[/blue]\n"
+        )
         from .compose import flow_compose_profiles
 
         # Criar namespace com argumentos para compose
@@ -201,10 +214,12 @@ def flow_new_project(args: argparse.Namespace) -> int:
         result = flow_compose_profiles(compose_args)
         if result != 0:
             console.print(
-                f"  [bold red]❌ Erro ao aplicar perfil '{args.with_code_profile}'[/bold red]\n")
+                f"  [bold red]❌ Erro ao aplicar perfil '{args.with_code_profile}'[/bold red]\n"
+            )
             return result
 
         console.print(
-            f"  [bold green]✅ Perfil '{args.with_code_profile}' aplicado com sucesso![/bold green]\n")
+            f"  [bold green]✅ Perfil '{args.with_code_profile}' aplicado com sucesso![/bold green]\n"
+        )
 
     return 0

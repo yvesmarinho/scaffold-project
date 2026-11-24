@@ -10,15 +10,11 @@ Part of IMP-65 (Template Synchronization System) Phase 3.1.
 import logging
 import re
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Optional
 
 from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Confirm, Prompt
-from rich.syntax import Syntax
 from rich.table import Table
-from rich.text import Text
 
 from .template_merge import ConflictRegion, MergeResult
 
@@ -30,16 +26,19 @@ console = Console()
 # Data Classes
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ResolutionChoice:
     """User's choice for resolving a conflict."""
+
     action: str  # "local" | "upstream" | "both" | "edit" | "skip"
-    custom_content: Optional[str] = None  # For "edit" action
+    custom_content: str | None = None  # For "edit" action
 
 
 # ---------------------------------------------------------------------------
 # Side-by-Side Diff Viewer
 # ---------------------------------------------------------------------------
+
 
 def show_side_by_side_diff(
     conflict: ConflictRegion,
@@ -57,13 +56,19 @@ def show_side_by_side_diff(
     # Header
     console.print()
     console.print(f"[bold cyan]Conflict {conflict_num}/{total_conflicts}[/bold cyan]")
-    console.print(f"[dim]Lines {conflict.start_line}-{conflict.end_line} • Type: {conflict.region_type}[/dim]")
+    console.print(
+        f"[dim]Lines {conflict.start_line}-{conflict.end_line} • Type: {conflict.region_type}[/dim]"
+    )
     console.print()
 
     # Create side-by-side table
     table = Table(show_header=True, box=None, padding=(0, 2))
-    table.add_column("[bold yellow]LOCAL[/bold yellow] (your changes)", style="yellow", width=50)
-    table.add_column("[bold green]UPSTREAM[/bold green] (template updates)", style="green", width=50)
+    table.add_column(
+        "[bold yellow]LOCAL[/bold yellow] (your changes)", style="yellow", width=50
+    )
+    table.add_column(
+        "[bold green]UPSTREAM[/bold green] (template updates)", style="green", width=50
+    )
 
     # Split content into lines for side-by-side display
     local_lines = conflict.local_content.split("\n")
@@ -90,25 +95,25 @@ def show_conflict_analysis(conflict: ConflictRegion) -> None:
     suggestions = {
         "both_modified": (
             "💡 Both versions modified this section.",
-            "Review carefully and choose the best content or combine both."
+            "Review carefully and choose the best content or combine both.",
         ),
         "local_added": (
             "💡 This is your local customization.",
-            "Recommended: Keep LOCAL to preserve your customization."
+            "Recommended: Keep LOCAL to preserve your customization.",
         ),
         "upstream_added": (
             "💡 This is new content from upstream.",
-            "Recommended: Accept UPSTREAM to get new features."
+            "Recommended: Accept UPSTREAM to get new features.",
         ),
         "both_added": (
             "💡 Both versions added content here.",
-            "Consider keeping BOTH to preserve all improvements."
+            "Consider keeping BOTH to preserve all improvements.",
         ),
     }
 
     title, recommendation = suggestions.get(
         conflict.region_type,
-        ("💡 Conflict detected", "Review both versions carefully.")
+        ("💡 Conflict detected", "Review both versions carefully."),
     )
 
     panel = Panel(
@@ -123,6 +128,7 @@ def show_conflict_analysis(conflict: ConflictRegion) -> None:
 # ---------------------------------------------------------------------------
 # Interactive Resolution
 # ---------------------------------------------------------------------------
+
 
 def prompt_resolution(conflict: ConflictRegion) -> ResolutionChoice:
     """
@@ -167,7 +173,7 @@ def prompt_resolution(conflict: ConflictRegion) -> ResolutionChoice:
             return ResolutionChoice(action="skip")
 
 
-def edit_conflict_manually(conflict: ConflictRegion) -> Optional[str]:
+def edit_conflict_manually(conflict: ConflictRegion) -> str | None:
     """
     Allow user to manually edit conflict content.
 
@@ -255,7 +261,11 @@ def apply_resolution(
     for i, line in enumerate(lines):
         if line.startswith("<<<<<<< LOCAL") and start_idx is None:
             start_idx = i
-        elif line.startswith(">>>>>>> UPSTREAM") and start_idx is not None and end_idx is None:
+        elif (
+            line.startswith(">>>>>>> UPSTREAM")
+            and start_idx is not None
+            and end_idx is None
+        ):
             end_idx = i
             break
 
@@ -264,11 +274,7 @@ def apply_resolution(
         return merged_content
 
     # Replace conflict region (from start marker to end marker inclusive) with resolved content
-    new_lines = (
-        lines[:start_idx] +
-        resolved_content.split("\n") +
-        lines[end_idx + 1:]
-    )
+    new_lines = lines[:start_idx] + resolved_content.split("\n") + lines[end_idx + 1 :]
 
     return "\n".join(new_lines)
 
@@ -276,6 +282,7 @@ def apply_resolution(
 # ---------------------------------------------------------------------------
 # Main Interactive Loop
 # ---------------------------------------------------------------------------
+
 
 def resolve_conflicts_interactively(merge_result: MergeResult) -> tuple[str, bool]:
     """
@@ -294,7 +301,9 @@ def resolve_conflicts_interactively(merge_result: MergeResult) -> tuple[str, boo
         return merge_result.merged_content, True
 
     total_conflicts = len(merge_result.conflicts)
-    console.print(f"\n[bold yellow]⚠️  {total_conflicts} conflict(s) detected[/bold yellow]\n")
+    console.print(
+        f"\n[bold yellow]⚠️  {total_conflicts} conflict(s) detected[/bold yellow]\n"
+    )
 
     # Confirm to proceed
     if not Confirm.ask("Start interactive resolution?", default=True):
@@ -322,14 +331,20 @@ def resolve_conflicts_interactively(merge_result: MergeResult) -> tuple[str, boo
         # Apply resolution
         if resolution.action == "skip":
             skipped_count += 1
-            console.print("[yellow]⏭️  Skipped - conflict marker left in place[/yellow]\n")
+            console.print(
+                "[yellow]⏭️  Skipped - conflict marker left in place[/yellow]\n"
+            )
         else:
             resolved_content = apply_resolution(resolved_content, conflict, resolution)
-            console.print(f"[green]✅ Resolved as: {resolution.action.upper()}[/green]\n")
+            console.print(
+                f"[green]✅ Resolved as: {resolution.action.upper()}[/green]\n"
+            )
 
         # Show progress
         if i < total_conflicts:
-            console.print(f"[dim]Progress: {i}/{total_conflicts} conflicts processed[/dim]")
+            console.print(
+                f"[dim]Progress: {i}/{total_conflicts} conflicts processed[/dim]"
+            )
             console.print("[dim]" + "─" * 60 + "[/dim]\n")
 
     # Summary
@@ -354,6 +369,7 @@ def resolve_conflicts_interactively(merge_result: MergeResult) -> tuple[str, boo
 # ---------------------------------------------------------------------------
 # Utility Functions
 # ---------------------------------------------------------------------------
+
 
 def count_remaining_conflicts(content: str) -> int:
     """

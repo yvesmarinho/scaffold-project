@@ -12,10 +12,9 @@ Task: T020
 """
 
 import pytest
-from pathlib import Path
 import yaml
 
-from scripts.lib.objetivo_migrator import ObjetivoMigrator, MigrationResult
+from scripts.lib.objetivo_migrator import ObjetivoMigrator
 
 
 class TestObjetivoMigrator:
@@ -105,7 +104,7 @@ decisoes_iniciais:
     decision: "Kubernetes (better scalability and resource utilization)"
 """
         file_path = tmp_path / "objetivo.yaml"
-        file_path.write_text(content, encoding='utf-8')
+        file_path.write_text(content, encoding="utf-8")
         return file_path
 
     @pytest.fixture
@@ -123,7 +122,7 @@ negocio:
     descricao: "Some problem that needs solving."
 """
         file_path = tmp_path / "minimal.yaml"
-        file_path.write_text(content, encoding='utf-8')
+        file_path.write_text(content, encoding="utf-8")
         return file_path
 
     @pytest.fixture
@@ -149,7 +148,7 @@ Content here.
 - Feature 1
 """
         file_path = tmp_path / "v2.yaml"
-        file_path.write_text(content, encoding='utf-8')
+        file_path.write_text(content, encoding="utf-8")
         return file_path
 
     @pytest.fixture
@@ -162,7 +161,7 @@ feature:
 ---
 """
         file_path = tmp_path / "invalid.yaml"
-        file_path.write_text(content, encoding='utf-8')
+        file_path.write_text(content, encoding="utf-8")
         return file_path
 
     # Test 1: Migrate valid v1.0 → v2.0 (all fields mapped)
@@ -188,10 +187,10 @@ feature:
         assert len(result.warnings) > 0
 
         # Verify v2.0 content structure
-        v2_content = result.preview_file.read_text(encoding='utf-8')
+        v2_content = result.preview_file.read_text(encoding="utf-8")
 
         # Should have YAML frontmatter
-        assert '---' in v2_content
+        assert "---" in v2_content
         assert 'version: "2.0"' in v2_content or "version: '2.0'" in v2_content
 
         # Should have project name
@@ -221,7 +220,7 @@ feature:
         assert result.preview_file.exists()
 
         # Should still have basic structure
-        v2_content = result.preview_file.read_text(encoding='utf-8')
+        v2_content = result.preview_file.read_text(encoding="utf-8")
         assert "## 1️⃣" in v2_content
         assert "## 2️⃣" in v2_content
         assert "## 3️⃣" in v2_content
@@ -261,14 +260,14 @@ feature:
     # Test 6: Version detection
     def test_version_detection_v1(self, migrator, valid_v1_simple):
         """Test that version detection correctly identifies v1.0."""
-        content = valid_v1_simple.read_text(encoding='utf-8')
+        content = valid_v1_simple.read_text(encoding="utf-8")
         version = migrator._detect_version(content)
 
         assert version == "1.0"
 
     def test_version_detection_v2(self, migrator, valid_v2_file):
         """Test that version detection correctly identifies v2.0."""
-        content = valid_v2_file.read_text(encoding='utf-8')
+        content = valid_v2_file.read_text(encoding="utf-8")
         version = migrator._detect_version(content)
 
         assert version == "2.0"
@@ -299,11 +298,12 @@ feature:
         assert result.success is True
 
         # Parse the v2 file and check frontmatter
-        v2_content = result.preview_file.read_text(encoding='utf-8')
+        v2_content = result.preview_file.read_text(encoding="utf-8")
 
         # Extract frontmatter
         import re
-        match = re.match(r'^---\s*\n(.*?)\n---\s*\n', v2_content, re.DOTALL)
+
+        match = re.match(r"^---\s*\n(.*?)\n---\s*\n", v2_content, re.DOTALL)
         assert match is not None
 
         frontmatter_yaml = match.group(1)
@@ -324,7 +324,7 @@ feature:
 
         assert result.success is True
 
-        v2_content = result.preview_file.read_text(encoding='utf-8')
+        v2_content = result.preview_file.read_text(encoding="utf-8")
 
         # Section 1 should have visao_alto_nivel content
         assert "Automated deployment system" in v2_content
@@ -334,7 +334,10 @@ feature:
 
         # Section 3 should have jornadas mapped to Incluído
         assert "Incluído ✅" in v2_content
-        assert "Deploy new feature to production" in v2_content or "production" in v2_content.lower()
+        assert (
+            "Deploy new feature to production" in v2_content
+            or "production" in v2_content.lower()
+        )
 
         # Section 4 should have restricoes if present
         assert "Budget limit" in v2_content or "Restrições" in v2_content

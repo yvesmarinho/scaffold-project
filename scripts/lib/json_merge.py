@@ -8,23 +8,23 @@ Bug fix: BUG-16 (P1 - JSON/workspace não mergeados, customizações perdidas)
 Implementação: Sprint 2026-W21 (Fase 1 e 2)
 """
 
-from pathlib import Path
-from typing import Any, Dict, List
-from collections import Counter
 import json
 import logging
+import os
+from collections import Counter
+from pathlib import Path
+from typing import Any
 
 from .config import CreatedItem
 
 log = logging.getLogger(__name__)
 
 # DEBUG: Ativar logs de debug para troubleshooting BUG-20
-import os
 if os.environ.get("DEBUG_MCP_MERGE"):
     log.setLevel(logging.DEBUG)
     handler = logging.StreamHandler()
     handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(levelname)s - %(message)s')
+    formatter = logging.Formatter("%(levelname)s - %(message)s")
     handler.setFormatter(formatter)
     log.addHandler(handler)
     log.debug("🐛 DEBUG mode enabled for MCP merge troubleshooting")
@@ -34,7 +34,8 @@ if os.environ.get("DEBUG_MCP_MERGE"):
 # JSON Deep Merge Utilities
 # =============================================================================
 
-def deep_merge_json(base: Dict[str, Any], overlay: Dict[str, Any]) -> Dict[str, Any]:
+
+def deep_merge_json(base: dict[str, Any], overlay: dict[str, Any]) -> dict[str, Any]:
     """
     Deep merge com estratégia user-wins SEM union de arrays.
 
@@ -81,7 +82,7 @@ def deep_merge_json(base: Dict[str, Any], overlay: Dict[str, Any]) -> Dict[str, 
     return _merge_user_wins_recursive(base, overlay, path=[])
 
 
-def _is_mcp_schema_change(base: Dict, overlay: Dict, path: List[str]) -> bool:
+def _is_mcp_schema_change(base: dict, overlay: dict, path: list[str]) -> bool:
     """
     Detecta mudança de schema em servidor MCP.
 
@@ -118,7 +119,7 @@ def _is_mcp_schema_change(base: Dict, overlay: Dict, path: List[str]) -> bool:
         False
     """
     # DEBUG: Log entrada da função
-    log.debug(f"🔍 [DEBUG] _is_mcp_schema_change called:")
+    log.debug("🔍 [DEBUG] _is_mcp_schema_change called:")
     log.debug(f"  path: {path}")
     log.debug(f"  len(path): {len(path)}")
     log.debug(f"  path[0] if len>=1: {path[0] if len(path) >= 1 else 'N/A'}")
@@ -128,7 +129,7 @@ def _is_mcp_schema_change(base: Dict, overlay: Dict, path: List[str]) -> bool:
         base_type = base.get("type")
         overlay_type = overlay.get("type")
 
-        log.debug(f"  ✓ In servers path!")
+        log.debug("  ✓ In servers path!")
         log.debug(f"  base_type: {base_type}")
         log.debug(f"  overlay_type: {overlay_type}")
 
@@ -159,11 +160,13 @@ def _is_mcp_schema_change(base: Dict, overlay: Dict, path: List[str]) -> bool:
     else:
         log.debug(f"  ✗ Not in servers path (path={path})")
 
-    log.debug(f"  → No schema change detected")
+    log.debug("  → No schema change detected")
     return False
 
 
-def _merge_user_wins_recursive(base: Dict, overlay: Dict, path: List[str] = None) -> Dict:
+def _merge_user_wins_recursive(
+    base: dict, overlay: dict, path: list[str] = None
+) -> dict:
     """
     Implementação do merge user-wins recursivo com detecção de schema change.
 
@@ -191,7 +194,7 @@ def _merge_user_wins_recursive(base: Dict, overlay: Dict, path: List[str] = None
 
     # DEBUG: Log entrada da função
     if len(path) >= 2 and path[0] == "servers":
-        log.debug(f"🔍 [DEBUG] _merge_user_wins_recursive called:")
+        log.debug("🔍 [DEBUG] _merge_user_wins_recursive called:")
         log.debug(f"  path: {path}")
         log.debug(f"  base keys: {list(base.keys())}")
         log.debug(f"  overlay keys: {list(overlay.keys())}")
@@ -212,7 +215,9 @@ def _merge_user_wins_recursive(base: Dict, overlay: Dict, path: List[str] = None
 
         # Se ambos são dicts, merge recursivo
         if isinstance(overlay_value, dict) and isinstance(base_value, dict):
-            merged[key] = _merge_user_wins_recursive(base_value, overlay_value, path + [key])
+            merged[key] = _merge_user_wins_recursive(
+                base_value, overlay_value, path + [key]
+            )
         else:
             # Primitivos e arrays: user wins completamente
             merged[key] = overlay_value
@@ -225,7 +230,7 @@ def _merge_user_wins_recursive(base: Dict, overlay: Dict, path: List[str] = None
     return merged
 
 
-def load_json_safe(file_path: Path) -> Dict[str, Any]:
+def load_json_safe(file_path: Path) -> dict[str, Any]:
     """
     Carrega arquivo JSON com tratamento de erros.
 
@@ -285,7 +290,7 @@ def _detect_duplications(data, path="root"):
     return issues
 
 
-def save_json_formatted(file_path: Path, data: Dict[str, Any]) -> None:
+def save_json_formatted(file_path: Path, data: dict[str, Any]) -> None:
     """
     Salva JSON com formatação consistente e validação anti-duplicação.
 
@@ -302,7 +307,9 @@ def save_json_formatted(file_path: Path, data: Dict[str, Any]) -> None:
     if issues:
         log.warning(f"⚠️  Duplicações detectadas em {file_path.name}:")
         for issue in issues:
-            log.warning(f"   {issue['path']}: {issue['duplication_rate']:.1f}% duplicado")
+            log.warning(
+                f"   {issue['path']}: {issue['duplication_rate']:.1f}% duplicado"
+            )
         log.warning("   Execute: python scripts/fix-json-duplications.py")
 
     # Salvar com formatação consistente
@@ -313,6 +320,7 @@ def save_json_formatted(file_path: Path, data: Dict[str, Any]) -> None:
 # =============================================================================
 # JSONMerger - Merge genérico para arquivos .json
 # =============================================================================
+
 
 class JSONMerger:
     """
@@ -335,21 +343,18 @@ class JSONMerger:
     def can_merge(self, file_path: Path) -> bool:
         """Verifica se é arquivo .json (exceto os que têm merger próprio)."""
         # launch.json e tasks.json em .vscode/ são tratados por VSCodeConfigMerger
-        is_vscode_config = (
-            ".vscode" in file_path.parts and
-            file_path.name in ("launch.json", "tasks.json")
+        is_vscode_config = ".vscode" in file_path.parts and file_path.name in (
+            "launch.json",
+            "tasks.json",
         )
         return (
-            file_path.suffix == ".json" and
-            not file_path.name.endswith(".code-workspace") and
-            not is_vscode_config
+            file_path.suffix == ".json"
+            and not file_path.name.endswith(".code-workspace")
+            and not is_vscode_config
         )
 
     def merge(
-        self,
-        existing_path: Path,
-        template_content: str,
-        interactive: bool = True
+        self, existing_path: Path, template_content: str, interactive: bool = True
     ) -> CreatedItem:
         """
         Faz deep merge de arquivo JSON existente com template.
@@ -384,7 +389,7 @@ class JSONMerger:
                 path=existing_path,
                 kind="file",
                 status="created",
-                message=f"Merged with user customizations (backup: {backup_path.name})"
+                message=f"Merged with user customizations (backup: {backup_path.name})",
             )
 
         except ValueError as e:
@@ -398,22 +403,20 @@ class JSONMerger:
                 path=existing_path,
                 kind="file",
                 status="error",
-                message=f"Invalid JSON, restored backup: {e}"
+                message=f"Invalid JSON, restored backup: {e}",
             )
 
         except Exception as e:
             log.error(f"❌ Erro inesperado no merge de {existing_path.name}: {e}")
             return CreatedItem(
-                path=existing_path,
-                kind="file",
-                status="error",
-                message=str(e)
+                path=existing_path, kind="file", status="error", message=str(e)
             )
 
 
 # =============================================================================
 # WorkspaceMerger - Merge especializado para .code-workspace
 # =============================================================================
+
 
 class WorkspaceMerger:
     """
@@ -457,13 +460,12 @@ class WorkspaceMerger:
 
     def can_merge(self, file_path: Path) -> bool:
         """Verifica se é arquivo .code-workspace."""
-        return file_path.suffix == ".code-workspace" or file_path.name.endswith(".code-workspace")
+        return file_path.suffix == ".code-workspace" or file_path.name.endswith(
+            ".code-workspace"
+        )
 
     def merge(
-        self,
-        existing_path: Path,
-        template_content: str,
-        interactive: bool = True
+        self, existing_path: Path, template_content: str, interactive: bool = True
     ) -> CreatedItem:
         """
         Merge especializado de .code-workspace.
@@ -498,27 +500,22 @@ class WorkspaceMerger:
                 path=existing_path,
                 kind="file",
                 status="created",
-                message=f"Merged workspace (backup: {backup_path.name})"
+                message=f"Merged workspace (backup: {backup_path.name})",
             )
 
         except Exception as e:
             log.error(f"❌ Erro no merge de workspace: {e}")
             if backup_path.exists():
                 backup_path.rename(existing_path)
-                log.info(f"♻️  Restaurado backup")
+                log.info("♻️  Restaurado backup")
 
             return CreatedItem(
-                path=existing_path,
-                kind="file",
-                status="error",
-                message=str(e)
+                path=existing_path, kind="file", status="error", message=str(e)
             )
 
     def _merge_workspace_data(
-        self,
-        base: Dict[str, Any],
-        overlay: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, base: dict[str, Any], overlay: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Merge de dados de workspace com lógica específica.
 

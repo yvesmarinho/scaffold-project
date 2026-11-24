@@ -5,9 +5,6 @@ Validates that write_scaffold_state() properly saves template bases
 to .scaffold-state.yaml, enabling three-way merge functionality.
 """
 
-import tempfile
-
-import pytest
 import yaml
 
 from scripts.lib.project import ProjectConfig, write_scaffold_state
@@ -32,13 +29,13 @@ def test_write_scaffold_state_saves_template_bases(tmp_path):
     spec_template = templates_dir / "spec-template.md"
     spec_template.write_text(
         "---\n"
-        "template_version: \"1.0.0\"\n"
-        "last_updated: \"2026-04-23\"\n"
+        'template_version: "1.0.0"\n'
+        'last_updated: "2026-04-23"\n'
         "breaking_changes: false\n"
         "---\n\n"
         "# Test Template\n\n"
         "This is a test template.\n",
-        encoding="utf-8"
+        encoding="utf-8",
     )
 
     # Create ProjectConfig
@@ -73,7 +70,9 @@ def test_write_scaffold_state_saves_template_bases(tmp_path):
     assert state["template_versions"]["spec-template.md"] == "1.0.0"
 
     # BUG-03 FIX: Verify template_bases exists (IMP-65 Phase 3)
-    assert "template_bases" in state, "template_bases missing from .scaffold-state.yaml (BUG-03)"
+    assert (
+        "template_bases" in state
+    ), "template_bases missing from .scaffold-state.yaml (BUG-03)"
     assert "spec-template.md" in state["template_bases"]
 
     # Verify base content structure
@@ -142,12 +141,12 @@ def test_write_scaffold_state_saves_multiple_template_bases(tmp_path):
         template_path = templates_dir / name
         template_path.write_text(
             f"---\n"
-            f"template_version: \"{version}\"\n"
-            f"last_updated: \"2026-04-23\"\n"
+            f'template_version: "{version}"\n'
+            f'last_updated: "2026-04-23"\n'
             f"breaking_changes: false\n"
             f"---\n\n"
             f"# {name}\n",
-            encoding="utf-8"
+            encoding="utf-8",
         )
 
     config = ProjectConfig(
@@ -201,12 +200,12 @@ def test_bug03_regression_compose_creates_template_bases(tmp_path):
     spec_template = templates_dir / "spec-template.md"
     spec_template.write_text(
         "---\n"
-        "template_version: \"1.0.0\"\n"
-        "last_updated: \"2026-04-14\"\n"
+        'template_version: "1.0.0"\n'
+        'last_updated: "2026-04-14"\n'
         "breaking_changes: false\n"
         "---\n\n"
         "# Feature Specification\n",
-        encoding="utf-8"
+        encoding="utf-8",
     )
 
     config = ProjectConfig(

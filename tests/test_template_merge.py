@@ -10,15 +10,17 @@ Tests cover:
 - Template base storage/retrieval
 """
 
-import pytest
 from pathlib import Path
 from textwrap import dedent
-from scripts.lib import template_merge, template_version
 
+import pytest
+
+from scripts.lib import template_merge, template_version
 
 # ---------------------------------------------------------------------------
 # Unit Tests - Three-Way Merge
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestThreeWayMerge:
@@ -84,6 +86,7 @@ class TestThreeWayMerge:
 # ---------------------------------------------------------------------------
 # Unit Tests - Conflict Detection
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestConflictDetection:
@@ -163,6 +166,7 @@ class TestConflictDetection:
 # Unit Tests - Conflict Analysis
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestConflictAnalysis:
     """Test conflict resolution suggestions."""
@@ -202,6 +206,7 @@ class TestConflictAnalysis:
 # Unit Tests - Backup Creation
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestBackupCreation:
     """Test backup file creation."""
@@ -222,6 +227,7 @@ class TestBackupCreation:
 # ---------------------------------------------------------------------------
 # Unit Tests - Template Base Storage
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestTemplateBaseStorage:
@@ -312,6 +318,7 @@ class TestTemplateBaseStorage:
 # ---------------------------------------------------------------------------
 # Integration Tests - Full Merge
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.integration
 class TestFullMerge:

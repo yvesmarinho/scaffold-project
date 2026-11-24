@@ -5,11 +5,9 @@ Reproduz problema onde merge user-wins preserva estrutura antiga ao invés
 de aplicar mudança de schema do template (CLI → HTTP).
 """
 
-import json
 import pytest
-from pathlib import Path
 
-from scripts.lib.json_merge import deep_merge_json, _merge_user_wins_recursive
+from scripts.lib.json_merge import deep_merge_json
 
 
 class TestBug20MCPMerge:
@@ -25,10 +23,7 @@ class TestBug20MCPMerge:
         # Template novo (HTTP)
         base = {
             "servers": {
-                "github": {
-                    "type": "http",
-                    "url": "https://api.githubcopilot.com/mcp/"
-                }
+                "github": {"type": "http", "url": "https://api.githubcopilot.com/mcp/"}
             }
         }
 
@@ -41,7 +36,7 @@ class TestBug20MCPMerge:
                     "type": "stdio",
                     "env": {
                         "GITHUB_PERSONAL_ACCESS_TOKEN": "${env:GITHUB_PERSONAL_ACCESS_TOKEN}"
-                    }
+                    },
                 }
             }
         }
@@ -51,10 +46,13 @@ class TestBug20MCPMerge:
         github_config = merged["servers"]["github"]
 
         # APÓS CORREÇÃO: Template-wins quando type muda
-        assert github_config == {"type": "http", "url": "https://api.githubcopilot.com/mcp/"}
+        assert github_config == {
+            "type": "http",
+            "url": "https://api.githubcopilot.com/mcp/",
+        }
         assert "command" not in github_config  # ✅ Removido (schema change)
-        assert "args" not in github_config     # ✅ Removido (schema change)
-        assert "env" not in github_config      # ✅ Removido (schema change)
+        assert "args" not in github_config  # ✅ Removido (schema change)
+        assert "env" not in github_config  # ✅ Removido (schema change)
         assert github_config["type"] == "http"  # ✅ Template aplicado
 
     def test_expected_behavior_after_fix(self):
@@ -68,14 +66,11 @@ class TestBug20MCPMerge:
         """
         base = {
             "servers": {
-                "github": {
-                    "type": "http",
-                    "url": "https://api.githubcopilot.com/mcp/"
-                },
+                "github": {"type": "http", "url": "https://api.githubcopilot.com/mcp/"},
                 "memory": {
                     "command": "npx",
-                    "args": ["-y", "@modelcontextprotocol/server-memory"]
-                }
+                    "args": ["-y", "@modelcontextprotocol/server-memory"],
+                },
             }
         }
 
@@ -85,12 +80,12 @@ class TestBug20MCPMerge:
                     "command": "npx",
                     "args": ["-y", "@modelcontextprotocol/server-github"],
                     "type": "stdio",
-                    "env": {"GITHUB_PERSONAL_ACCESS_TOKEN": "${env:TOKEN}"}
+                    "env": {"GITHUB_PERSONAL_ACCESS_TOKEN": "${env:TOKEN}"},
                 },
                 "memory": {
                     "command": "npx",
-                    "args": ["-y", "@modelcontextprotocol/server-memory"]
-                }
+                    "args": ["-y", "@modelcontextprotocol/server-memory"],
+                },
             }
         }
 
@@ -99,7 +94,10 @@ class TestBug20MCPMerge:
 
         # GITHUB: Schema mudou (stdio → http) → template-wins
         github_config = merged["servers"]["github"]
-        assert github_config == {"type": "http", "url": "https://api.githubcopilot.com/mcp/"}
+        assert github_config == {
+            "type": "http",
+            "url": "https://api.githubcopilot.com/mcp/",
+        }
         assert "command" not in github_config
         assert "args" not in github_config
         assert "env" not in github_config
@@ -117,7 +115,7 @@ class TestBug20MCPMerge:
                 "memory": {
                     "command": "npx",
                     "args": ["-y", "@modelcontextprotocol/server-memory"],
-                    "type": "stdio"
+                    "type": "stdio",
                 }
             }
         }
@@ -128,7 +126,7 @@ class TestBug20MCPMerge:
                     "command": "npx",
                     "args": ["-y", "@modelcontextprotocol/server-memory"],
                     "type": "stdio",
-                    "timeout": 10000  # Customização do usuário
+                    "timeout": 10000,  # Customização do usuário
                 }
             }
         }
@@ -138,15 +136,18 @@ class TestBug20MCPMerge:
         # OK: Preserva customização do usuário
         memory_config = merged["servers"]["memory"]
         assert memory_config["timeout"] == 10000  # ✅ User customization
-        assert memory_config["type"] == "stdio"   # ✅ Sem mudança
+        assert memory_config["type"] == "stdio"  # ✅ Sem mudança
 
 
-@pytest.mark.parametrize("old_type,new_type,is_breaking", [
-    ("stdio", "http", True),
-    ("http", "stdio", True),
-    ("stdio", "stdio", False),
-    ("http", "http", False),
-])
+@pytest.mark.parametrize(
+    "old_type,new_type,is_breaking",
+    [
+        ("stdio", "http", True),
+        ("http", "stdio", True),
+        ("stdio", "stdio", False),
+        ("http", "http", False),
+    ],
+)
 def test_detect_schema_change(old_type, new_type, is_breaking):
     """
     Teste para função auxiliar que detecta mudança de schema.
@@ -241,16 +242,16 @@ class TestSolutionApproach:
             "servers": {
                 "memory": {
                     "command": "npx",
-                    "args": ["-y", "@modelcontextprotocol/server-memory"]
+                    "args": ["-y", "@modelcontextprotocol/server-memory"],
                 },
                 "sequential-thinking": {
                     "command": "npx",
-                    "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+                    "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
                 },
                 "filesystem": {
                     "command": "npx",
-                    "args": ["-y", "@modelcontextprotocol/server-filesystem", "."]
-                }
+                    "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
+                },
             }
         }
 
@@ -260,18 +261,18 @@ class TestSolutionApproach:
                 "memory": {
                     "command": "npx",
                     "args": ["-y", "@modelcontextprotocol/server-memory"],
-                    "type": "stdio"  # ❌ OBSOLETO - deve ser removido
+                    "type": "stdio",  # ❌ OBSOLETO - deve ser removido
                 },
                 "sequential-thinking": {
                     "command": "npx",
                     "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
-                    "type": "stdio"  # ❌ OBSOLETO
+                    "type": "stdio",  # ❌ OBSOLETO
                 },
                 "filesystem": {
                     "command": "npx",
                     "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
-                    "type": "stdio"  # ❌ OBSOLETO
-                }
+                    "type": "stdio",  # ❌ OBSOLETO
+                },
             }
         }
 
@@ -283,8 +284,9 @@ class TestSolutionApproach:
             server_config = merged["servers"][server_name]
 
             # ✅ Deve usar config do template (sem type)
-            assert "type" not in server_config, \
-                f"{server_name}: Campo 'type' obsoleto deveria ser removido"
+            assert (
+                "type" not in server_config
+            ), f"{server_name}: Campo 'type' obsoleto deveria ser removido"
 
             # ✅ Deve manter command e args do template
             assert server_config["command"] == "npx"
@@ -299,10 +301,7 @@ class TestSolutionApproach:
         # Template: adiciona type='http'
         base = {
             "servers": {
-                "github": {
-                    "type": "http",
-                    "url": "https://api.githubcopilot.com/mcp/"
-                }
+                "github": {"type": "http", "url": "https://api.githubcopilot.com/mcp/"}
             }
         }
 
@@ -311,7 +310,7 @@ class TestSolutionApproach:
             "servers": {
                 "github": {
                     "command": "npx",
-                    "args": ["-y", "@modelcontextprotocol/server-github"]
+                    "args": ["-y", "@modelcontextprotocol/server-github"],
                 }
             }
         }

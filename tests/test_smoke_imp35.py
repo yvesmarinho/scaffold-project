@@ -40,6 +40,7 @@ Cobertura:
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -67,17 +68,24 @@ _PYTHON = sys.executable
 # ---------------------------------------------------------------------------
 
 
+def _tmp_file(suffix: str) -> Path:
+    """Arquivo temporário criado de forma segura (substitui tempfile.mktemp)."""
+    fd, nome = tempfile.mkstemp(suffix=suffix)
+    os.close(fd)
+    return Path(nome)
+
+
 def _mock_changelog(lines: str) -> Path:
     """Cria um CHANGELOG.md temporário com o conteúdo dado."""
-    tmp = tempfile.mktemp(suffix=".md")
-    Path(tmp).write_text(lines, encoding="utf-8")
-    return Path(tmp)
+    tmp = _tmp_file(".md")
+    tmp.write_text(lines, encoding="utf-8")
+    return tmp
 
 
 def _mock_config_py(version: str = "1.0.0") -> Path:
     """Cria um config.py temporário com SCAFFOLD_VERSION definido."""
-    tmp = tempfile.mktemp(suffix=".py")
-    Path(tmp).write_text(
+    tmp = _tmp_file(".py")
+    tmp.write_text(
         textwrap.dedent(f"""\
             # scripts/lib/config.py
             SCAFFOLD_VERSION = "{version}"
@@ -241,7 +249,7 @@ class TestBumpScaffoldVersion:
             cfg.unlink(missing_ok=True)
 
     def test_levanta_se_campo_ausente(self):
-        tmp = Path(tempfile.mktemp(suffix=".py"))
+        tmp = _tmp_file(".py")
         tmp.write_text("# sem scaffold\nSOME_VAR = 1\n", encoding="utf-8")
         try:
             with pytest.raises(ValueError, match="SCAFFOLD_VERSION"):
@@ -289,11 +297,13 @@ class TestRunReleaseDryRun:
         subprocess.run(["git", "init", "-q"], cwd=str(root), check=True)
         subprocess.run(
             ["git", "config", "user.email", "test@test.com"],
-            cwd=str(root), check=True,
+            cwd=str(root),
+            check=True,
         )
         subprocess.run(
             ["git", "config", "user.name", "Test"],
-            cwd=str(root), check=True,
+            cwd=str(root),
+            check=True,
         )
         return root
 

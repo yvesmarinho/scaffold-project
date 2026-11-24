@@ -9,14 +9,14 @@ Valida o fluxo completo de tracking de tempo integrado ao session-manager:
 - Visualização de estatísticas
 """
 
-import json
 import csv
+import json
 import os
 import subprocess
 import sys
-from datetime import datetime, timedelta
 from pathlib import Path
 from time import sleep
+
 import pytest
 
 # Paths
@@ -60,7 +60,7 @@ class TestSessionTimeTracker:
         """Carregar estado atual da sessão."""
         if not (_state_dir() / "current.json").exists():
             return {}
-        with open((_state_dir() / "current.json"), "r", encoding="utf-8") as f:
+        with open((_state_dir() / "current.json"), encoding="utf-8") as f:
             return json.load(f)
 
     def test_01_start_session(self):
@@ -69,7 +69,9 @@ class TestSessionTimeTracker:
 
         assert result.returncode == 0, f"Start falhou: {result.stderr}"
         assert "✅ Sessão iniciada:" in result.stdout
-        assert (_state_dir() / "current.json").exists(), "Arquivo de estado não foi criado"
+        assert (
+            _state_dir() / "current.json"
+        ).exists(), "Arquivo de estado não foi criado"
 
         state = self._load_state()
         assert state["status"] == "active"
@@ -77,7 +79,7 @@ class TestSessionTimeTracker:
         assert state["pauses"] == []
         assert state["current_pause"] is None
 
-        print(f"✅ test_01: Sessão iniciada com sucesso")
+        print("✅ test_01: Sessão iniciada com sucesso")
 
     def test_02_prevent_double_start(self):
         """Teste: Prevenir iniciar sessão quando já existe uma ativa."""
@@ -87,7 +89,7 @@ class TestSessionTimeTracker:
         assert result.returncode == 1
         assert "já em andamento" in result.stdout or "já em andamento" in result.stderr
 
-        print(f"✅ test_02: Duplo start corretamente prevenido")
+        print("✅ test_02: Duplo start corretamente prevenido")
 
     def test_03_pause_resume_single(self):
         """Teste: Pausar e retomar sessão."""
@@ -119,7 +121,7 @@ class TestSessionTimeTracker:
         assert state["pauses"][0]["reason"] == "café"
         assert "duration_seconds" in state["pauses"][0]
 
-        print(f"✅ test_03: Pause/resume funcionando")
+        print("✅ test_03: Pause/resume funcionando")
 
     def test_04_multiple_pauses(self):
         """Teste: Múltiplas pausas durante a sessão."""
@@ -155,7 +157,7 @@ class TestSessionTimeTracker:
             # Accept 0 for very short pauses
             assert pause["duration_seconds"] >= 0
 
-        print(f"✅ test_04: Múltiplas pausas registradas corretamente")
+        print("✅ test_04: Múltiplas pausas registradas corretamente")
 
     def test_05_stop_session(self):
         """Teste: Finalizar sessão e gerar CSV."""
@@ -172,19 +174,24 @@ class TestSessionTimeTracker:
         # Stop
         result = self._run_tracker("stop")
         assert result.returncode == 0
-        assert "🏁 Sessão finalizada:" in result.stdout or "Sessao finalizada:" in result.stdout
+        assert (
+            "🏁 Sessão finalizada:" in result.stdout
+            or "Sessao finalizada:" in result.stdout
+        )
         assert "Duração total:" in result.stdout or "Duracao total:" in result.stdout
         assert "Pausas:" in result.stdout
         assert "líquido:" in result.stdout or "liquido:" in result.stdout
 
         # Verificar que estado foi removido
-        assert not (_state_dir() / "current.json").exists(), "State file deveria ter sido removido"
+        assert not (
+            _state_dir() / "current.json"
+        ).exists(), "State file deveria ter sido removido"
 
         # Verificar CSV foi criado
         assert (_state_dir() / "history.csv").exists(), "CSV history não foi criado"
 
         # Ler última linha do CSV
-        with open((_state_dir() / "history.csv"), "r", encoding="utf-8") as f:
+        with open((_state_dir() / "history.csv"), encoding="utf-8") as f:
             reader = csv.DictReader(f)
             rows = list(reader)
             last_row = rows[-1]
@@ -196,7 +203,7 @@ class TestSessionTimeTracker:
             assert "num_pauses" in last_row
             assert last_row["num_pauses"] == "1"
 
-        print(f"✅ test_05: Session stop e CSV gerado com sucesso")
+        print("✅ test_05: Session stop e CSV gerado com sucesso")
 
     def test_06_stop_while_paused(self):
         """Teste: Finalizar sessão enquanto pausada (auto-resume)."""
@@ -212,15 +219,18 @@ class TestSessionTimeTracker:
 
         assert not (_state_dir() / "current.json").exists()
 
-        print(f"✅ test_06: Auto-resume antes do stop funcionando")
+        print("✅ test_06: Auto-resume antes do stop funcionando")
 
     def test_07_prevent_pause_without_session(self):
         """Teste: Prevenir pause sem sessão ativa."""
         result = self._run_tracker("pause", "café")
         assert result.returncode == 1
-        assert "Nenhuma sessão ativa" in result.stdout or "Nenhuma sessão ativa" in result.stderr
+        assert (
+            "Nenhuma sessão ativa" in result.stdout
+            or "Nenhuma sessão ativa" in result.stderr
+        )
 
-        print(f"✅ test_07: Pause sem sessão corretamente bloqueado")
+        print("✅ test_07: Pause sem sessão corretamente bloqueado")
 
     def test_08_prevent_resume_without_pause(self):
         """Teste: Prevenir resume sem estar pausado."""
@@ -228,9 +238,11 @@ class TestSessionTimeTracker:
 
         result = self._run_tracker("resume")
         assert result.returncode == 1
-        assert "não está pausada" in result.stdout or "não está pausada" in result.stderr
+        assert (
+            "não está pausada" in result.stdout or "não está pausada" in result.stderr
+        )
 
-        print(f"✅ test_08: Resume sem pause corretamente bloqueado")
+        print("✅ test_08: Resume sem pause corretamente bloqueado")
 
     def test_09_prevent_double_pause(self):
         """Teste: Prevenir pausar quando já pausado."""
@@ -241,7 +253,7 @@ class TestSessionTimeTracker:
         assert result.returncode == 1
         assert "já pausada" in result.stdout or "já pausada" in result.stderr
 
-        print(f"✅ test_09: Duplo pause corretamente bloqueado")
+        print("✅ test_09: Duplo pause corretamente bloqueado")
 
     def test_10_stats_command(self):
         """Teste: Comando stats (requer sessões no CSV)."""
@@ -262,13 +274,13 @@ class TestSessionTimeTracker:
         # O output pode variar dependendo se Rich está instalado
         # Mas deve mostrar dados de alguma forma
 
-        print(f"✅ test_10: Stats command executado")
+        print("✅ test_10: Stats command executado")
 
     def test_11_complete_workflow_integration(self):
         """Teste de integração: Workflow completo session-manager."""
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("🧪 TESTE DE INTEGRAÇÃO COMPLETO - SESSION MANAGER WORKFLOW")
-        print("="*60)
+        print("=" * 60)
 
         # Simular workflow de um dia de trabalho
         print("\n📅 Simulando dia de trabalho 09:00-17:00")
@@ -333,7 +345,7 @@ class TestSessionTimeTracker:
 
         # CSV deve existir com a entrada
         assert (_state_dir() / "history.csv").exists()
-        with open((_state_dir() / "history.csv"), "r", encoding="utf-8") as f:
+        with open((_state_dir() / "history.csv"), encoding="utf-8") as f:
             reader = csv.DictReader(f)
             rows = list(reader)
             last_row = rows[-1]
@@ -349,17 +361,17 @@ class TestSessionTimeTracker:
 
         # State file deve ter sido removido
         assert not (_state_dir() / "current.json").exists()
-        print(f"   ✅ State file removido após stop")
+        print("   ✅ State file removido após stop")
 
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("✅ TESTE DE INTEGRAÇÃO COMPLETO - SUCESSO")
-        print("="*60)
+        print("=" * 60)
 
 
 def run_manual_test():
     """Execução manual de teste de demonstração."""
     print("🧪 TESTE MANUAL - SESSION TIME TRACKER")
-    print("="*60)
+    print("=" * 60)
 
     tracker = TestSessionTimeTracker()
 

@@ -4,9 +4,9 @@ Testes para vscode_config_merge.py (Sprint 4 - P2 Coverage Expansion)
 Testes unitários para VSCodeConfigMerger.
 """
 
-from pathlib import Path
-import pytest
 import json
+from pathlib import Path
+
 from scripts.lib.vscode_config_merge import VSCodeConfigMerger
 
 
@@ -242,7 +242,9 @@ class TestVSCodeConfigMerger:
         result = merger.merge(launch_file, content, interactive=False)
 
         assert result.status == "skipped"
-        assert "mudan" in result.message.lower()  # Aceita "sem mudanças" ou "nenhuma mudança"
+        assert (
+            "mudan" in result.message.lower()
+        )  # Aceita "sem mudanças" ou "nenhuma mudança"
 
     def test_creates_backup(self, tmp_path):
         """Teste: Cria backup antes de mergear."""
@@ -326,7 +328,7 @@ class TestVSCodeConfigMerger:
 }"""
 
         tasks_file.write_text(existing_content, encoding="utf-8")
-        result = merger.merge(tasks_file, template_content, interactive=False)
+        merger.merge(tasks_file, template_content, interactive=False)
 
         merged_data = json.loads(tasks_file.read_text(encoding="utf-8"))
         assert "presentation" in merged_data  # Preservado

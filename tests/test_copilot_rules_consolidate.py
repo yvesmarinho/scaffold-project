@@ -6,14 +6,12 @@ arquivos de regras Copilot.
 """
 
 import pytest
-from pathlib import Path
-import shutil
 
 from scripts.lib.copilot_rules_consolidate import (
-    parse_markdown_sections,
-    merge_markdown_sections,
-    detect_copilot_rules_files,
     consolidate_copilot_rules,
+    detect_copilot_rules_files,
+    merge_markdown_sections,
+    parse_markdown_sections,
     validate_consolidation_needed,
 )
 
@@ -65,6 +63,7 @@ Detalhes B.
 # Testes de parse_markdown_sections
 # =============================================================================
 
+
 def test_parse_markdown_sections_simple(sample_md_content):
     """Testa parse de Markdown simples com 2 seções."""
     sections = parse_markdown_sections(sample_md_content["simple"])
@@ -95,24 +94,31 @@ def test_parse_markdown_sections_empty():
 # Testes de merge_markdown_sections
 # =============================================================================
 
+
 def test_merge_markdown_sections_two_files(temp_project):
     """Testa merge de 2 arquivos com seções únicas."""
     file1 = temp_project / "file1.md"
     file2 = temp_project / "file2.md"
 
-    file1.write_text("""## Seção A
+    file1.write_text(
+        """## Seção A
 Conteúdo A do arquivo 1.
 
 ## Seção B
 Conteúdo B do arquivo 1.
-""", encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
 
-    file2.write_text("""## Seção C
+    file2.write_text(
+        """## Seção C
 Conteúdo C do arquivo 2.
 
 ## Seção D
 Conteúdo D do arquivo 2.
-""", encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
 
     result = merge_markdown_sections([file1, file2])
 
@@ -128,13 +134,19 @@ def test_merge_markdown_sections_duplicate_sections(temp_project):
     file1 = temp_project / "file1.md"
     file2 = temp_project / "file2.md"
 
-    file1.write_text("""## Seção Comum
+    file1.write_text(
+        """## Seção Comum
 Conteúdo do arquivo 1 (deve ser preservado).
-""", encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
 
-    file2.write_text("""## Seção Comum
+    file2.write_text(
+        """## Seção Comum
 Conteúdo do arquivo 2 (deve ser descartado).
-""", encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
 
     result = merge_markdown_sections([file1, file2])
 
@@ -146,12 +158,15 @@ def test_merge_markdown_sections_preserves_headers(temp_project):
     """Testa que cabeçalho (antes do primeiro ##) é preservado."""
     file1 = temp_project / "file1.md"
 
-    file1.write_text("""# Título Principal
+    file1.write_text(
+        """# Título Principal
 Descrição do documento.
 
 ## Seção 1
 Conteúdo.
-""", encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
 
     result = merge_markdown_sections([file1])
 
@@ -163,7 +178,8 @@ def test_merge_markdown_sections_sorts_alphabetically(temp_project):
     """Testa que seções são ordenadas alfabeticamente."""
     file1 = temp_project / "file1.md"
 
-    file1.write_text("""## Zebra
+    file1.write_text(
+        """## Zebra
 Último alfabeticamente.
 
 ## Alpha
@@ -171,10 +187,12 @@ Primeiro alfabeticamente.
 
 ## Beta
 Segundo alfabeticamente.
-""", encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
 
     result = merge_markdown_sections([file1])
-    lines = result.split('\n')
+    lines = result.split("\n")
 
     # Encontrar posições dos headers
     alpha_pos = next(i for i, line in enumerate(lines) if "## Alpha" in line)
@@ -187,6 +205,7 @@ Segundo alfabeticamente.
 # =============================================================================
 # Testes de detect_copilot_rules_files
 # =============================================================================
+
 
 def test_detect_copilot_rules_files_finds_multiple(temp_project):
     """Testa detecção de múltiplos arquivos .copilot-rules*."""
@@ -223,6 +242,7 @@ def test_detect_copilot_rules_files_ignores_subdirectories(temp_project):
 # Testes de consolidate_copilot_rules
 # =============================================================================
 
+
 def test_consolidate_copilot_rules_no_files(temp_project):
     """Testa consolidação quando não há arquivos."""
     result = consolidate_copilot_rules(temp_project)
@@ -245,16 +265,22 @@ def test_consolidate_copilot_rules_multiple_files(temp_project):
     file1 = temp_project / ".copilot-rules.md"
     file2 = temp_project / ".copilot-strict-rules.md"
 
-    file1.write_text("""## Regra A
+    file1.write_text(
+        """## Regra A
 Conteúdo A.
 
 ## Regra B
 Conteúdo B.
-""", encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
 
-    file2.write_text("""## Regra C
+    file2.write_text(
+        """## Regra C
 Conteúdo C.
-""", encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
 
     backup_dir = temp_project / ".backups" / "copilot-rules"
     result = consolidate_copilot_rules(temp_project, backup_dir)
@@ -283,13 +309,19 @@ def test_consolidate_copilot_rules_preserves_priority(temp_project):
     primary = temp_project / ".copilot-rules.md"
     secondary = temp_project / ".copilot-strict-rules.md"
 
-    primary.write_text("""## Regra Compartilhada
+    primary.write_text(
+        """## Regra Compartilhada
 Conteúdo do arquivo primary (deve prevalecer).
-""", encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
 
-    secondary.write_text("""## Regra Compartilhada
+    secondary.write_text(
+        """## Regra Compartilhada
 Conteúdo do arquivo secondary (deve ser descartado).
-""", encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
 
     result = consolidate_copilot_rules(temp_project)
     content = result.read_text(encoding="utf-8")
@@ -301,6 +333,7 @@ Conteúdo do arquivo secondary (deve ser descartado).
 # =============================================================================
 # Testes de validate_consolidation_needed
 # =============================================================================
+
 
 def test_validate_consolidation_needed_true(temp_project):
     """Testa que retorna True quando há múltiplos arquivos."""

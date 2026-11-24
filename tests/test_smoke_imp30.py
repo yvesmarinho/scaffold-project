@@ -44,11 +44,9 @@ import tarfile
 from datetime import datetime
 from pathlib import Path
 
-import pytest
-
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 
-from lib.publish import PublishResult, _collect_files, publish_template  # noqa: E402
+from lib.publish import _collect_files, publish_template  # noqa: E402
 
 _PROJECT_ROOT = Path(__file__).parent.parent
 _SCRIPTS_DIR = _PROJECT_ROOT / "scripts"
@@ -65,12 +63,16 @@ class TestCollectFiles:
     def test_includes_scaffold_py(self) -> None:
         files = _collect_files(_PROJECT_ROOT)
         rel = [str(f.relative_to(_PROJECT_ROOT)) for f in files]
-        assert "scripts/scaffold.py" in rel, f"scaffold.py ausente; encontrado: {rel[:10]}"
+        assert (
+            "scripts/scaffold.py" in rel
+        ), f"scaffold.py ausente; encontrado: {rel[:10]}"
 
     def test_includes_at_least_one_profile_descriptor(self) -> None:
         files = _collect_files(_PROJECT_ROOT)
         rel = [str(f.relative_to(_PROJECT_ROOT)) for f in files]
-        descriptors = [r for r in rel if r.startswith("scaffold/profiles/") and r.endswith(".yaml")]
+        descriptors = [
+            r for r in rel if r.startswith("scaffold/profiles/") and r.endswith(".yaml")
+        ]
         assert len(descriptors) >= 1, "Nenhum profile descriptor encontrado"
 
     def test_includes_readme(self) -> None:
@@ -120,21 +122,29 @@ class TestPublishTemplate:
 
     def test_creates_tarball(self, tmp_path: Path) -> None:
         result = publish_template(output_dir=tmp_path, project_root=_PROJECT_ROOT)
-        assert result.tarball_path.exists(), f"Tarball não criado: {result.tarball_path}"
+        assert (
+            result.tarball_path.exists()
+        ), f"Tarball não criado: {result.tarball_path}"
 
     def test_creates_manifest(self, tmp_path: Path) -> None:
         result = publish_template(output_dir=tmp_path, project_root=_PROJECT_ROOT)
-        assert result.manifest_path.exists(), f"Manifesto não criado: {result.manifest_path}"
+        assert (
+            result.manifest_path.exists()
+        ), f"Manifesto não criado: {result.manifest_path}"
 
     def test_tarball_is_valid_gz(self, tmp_path: Path) -> None:
         result = publish_template(output_dir=tmp_path, project_root=_PROJECT_ROOT)
-        assert tarfile.is_tarfile(result.tarball_path), "O tarball não é um arquivo tar válido"
+        assert tarfile.is_tarfile(
+            result.tarball_path
+        ), "O tarball não é um arquivo tar válido"
 
     def test_tarball_contains_scaffold_py(self, tmp_path: Path) -> None:
         result = publish_template(output_dir=tmp_path, project_root=_PROJECT_ROOT)
         with tarfile.open(result.tarball_path, "r:gz") as tar:
             names = tar.getnames()
-        assert "scripts/scaffold.py" in names, f"scaffold.py ausente no tarball; nomes: {names[:10]}"
+        assert (
+            "scripts/scaffold.py" in names
+        ), f"scaffold.py ausente no tarball; nomes: {names[:10]}"
 
     def test_tarball_contains_readme(self, tmp_path: Path) -> None:
         result = publish_template(output_dir=tmp_path, project_root=_PROJECT_ROOT)
@@ -146,7 +156,11 @@ class TestPublishTemplate:
         result = publish_template(output_dir=tmp_path, project_root=_PROJECT_ROOT)
         with tarfile.open(result.tarball_path, "r:gz") as tar:
             names = tar.getnames()
-        descriptors = [n for n in names if n.startswith("scaffold/profiles/") and n.endswith(".yaml")]
+        descriptors = [
+            n
+            for n in names
+            if n.startswith("scaffold/profiles/") and n.endswith(".yaml")
+        ]
         assert len(descriptors) >= 1, "Nenhum profile descriptor no tarball"
 
     def test_manifest_version_correct(self, tmp_path: Path) -> None:
@@ -180,16 +194,15 @@ class TestPublishTemplate:
     def test_second_call_overwrites_tarball(self, tmp_path: Path) -> None:
         """Segunda chamada no mesmo dia sobrescreve o tarball anterior."""
         result1 = publish_template(output_dir=tmp_path, project_root=_PROJECT_ROOT)
-        mtime1 = result1.tarball_path.stat().st_mtime
+        # Corrompe o tarball: se a 2ª chamada não sobrescrever, ele continua inválido
+        # (comparar mtime não serve — pode ser igual em sistemas rápidos).
+        result1.tarball_path.write_bytes(b"corrompido")
 
         result2 = publish_template(output_dir=tmp_path, project_root=_PROJECT_ROOT)
-        mtime2 = result2.tarball_path.stat().st_mtime
 
         # Ambos apontam para o mesmo arquivo (mesmo nome por data)
         assert result1.tarball_path == result2.tarball_path
-        # O arquivo foi sobrescrito (mtime pode ser igual em sistemas rápidos,
-        # mas o arquivo deve existir e ser válido)
-        assert result2.tarball_path.exists()
+        assert tarfile.is_tarfile(result2.tarball_path), "tarball não foi sobrescrito"
 
     def test_output_dir_is_created_if_missing(self, tmp_path: Path) -> None:
         output_dir = tmp_path / "sub" / "releases"
@@ -200,6 +213,7 @@ class TestPublishTemplate:
 
     def test_publish_result_has_correct_version(self, tmp_path: Path) -> None:
         from lib.config import SCAFFOLD_VERSION
+
         result = publish_template(output_dir=tmp_path, project_root=_PROJECT_ROOT)
         assert result.version == SCAFFOLD_VERSION
 
@@ -220,7 +234,9 @@ class TestPublishCLI:
 
     def test_help_mentions_publish(self) -> None:
         proc = self._run("--help")
-        assert "--publish" in proc.stdout, f"--publish ausente no --help; stdout: {proc.stdout[:300]}"
+        assert (
+            "--publish" in proc.stdout
+        ), f"--publish ausente no --help; stdout: {proc.stdout[:300]}"
 
     def test_help_mentions_output_dir(self) -> None:
         proc = self._run("--help")
@@ -258,14 +274,18 @@ class TestPublishCLI:
     def test_publish_json_manifest_file_exists(self, tmp_path: Path) -> None:
         proc = self._run("--publish", "--json", "--output-dir", str(tmp_path))
         data = json.loads(proc.stdout)
-        assert Path(data["manifest"]).exists(), f"Manifesto não existe: {data['manifest']}"
+        assert Path(
+            data["manifest"]
+        ).exists(), f"Manifesto não existe: {data['manifest']}"
 
     def test_publish_json_created_at_is_iso(self, tmp_path: Path) -> None:
         proc = self._run("--publish", "--json", "--output-dir", str(tmp_path))
         data = json.loads(proc.stdout)
         created_at = data.get("created_at", "")
         # America/Sao_Paulo com offset (ISO 8601), não mais UTC com "Z"
-        assert datetime.fromisoformat(created_at).utcoffset() is not None, f"created_at inválido: {created_at}"
+        assert (
+            datetime.fromisoformat(created_at).utcoffset() is not None
+        ), f"created_at inválido: {created_at}"
 
     def test_publish_output_dir_flag(self, tmp_path: Path) -> None:
         custom_dir = tmp_path / "my-releases"

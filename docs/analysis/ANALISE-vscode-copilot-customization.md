@@ -1,5 +1,5 @@
-<!-- Criado em: 24/11/2026 11:50 -->
-<!-- Modificado em: 24/11/2026 11:18 -->
+<!-- Criado em: 24/11/2026 11:18 -->
+<!-- Modificado em: 24/11/2026 15:00 -->
 
 # Análise: customização do VS Code Copilot vs. o que o scaffold gera
 

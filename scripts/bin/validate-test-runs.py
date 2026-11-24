@@ -5,7 +5,7 @@ NOME..: validate-test-runs.py
 LANG..: Python3
 TITULO: Valida a estrutura dos projetos gerados pelo rotation script
 DATA..: 24/06/2026 14:30
-MODIFICADO: 24/06/2026 14:30
+MODIFICADO: 24/11/2026 15:00
 VERSÃO: 0.1.0
 HOST..: local
 LOCAL.: scripts/bin/
@@ -32,9 +32,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import yaml
+from rich import box
 from rich.console import Console
 from rich.table import Table
-from rich import box
 
 # ---------------------------------------------------------------------------
 # Configuração
@@ -63,9 +63,11 @@ def config_logging() -> bool:
 # Tipos
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class CheckResult:
     """Resultado de uma verificação individual."""
+
     label: str
     passed: bool
     message: str = ""
@@ -74,6 +76,7 @@ class CheckResult:
 @dataclass
 class ProjectReport:
     """Relatório completo de um projeto."""
+
     name: str
     path: Path
     domain: str = ""
@@ -98,6 +101,7 @@ class ProjectReport:
 # ---------------------------------------------------------------------------
 # Leitura de estado e descritores
 # ---------------------------------------------------------------------------
+
 
 def _load_scaffold_state(project_path: Path) -> dict:
     """
@@ -167,10 +171,10 @@ _BASE_REQUIRED = [
 
 # Obrigatórios por AI assistant
 _AI_REQUIRED: dict[str, list[str]] = {
-    "claude":  ["CLAUDE.md", ".claude"],
-    "both":    ["CLAUDE.md", ".claude", ".copilot-rules.md"],
+    "claude": ["CLAUDE.md", ".claude"],
+    "both": ["CLAUDE.md", ".claude", ".copilot-rules.md"],
     "copilot": [".copilot-rules.md"],
-    "none":    [],
+    "none": [],
 }
 
 
@@ -187,11 +191,13 @@ def _check_base_structure(project_path: Path) -> list[CheckResult]:
     results = []
     for item in _BASE_REQUIRED:
         p = project_path / item
-        results.append(CheckResult(
-            label=f"base/{item}",
-            passed=p.exists(),
-            message="" if p.exists() else "ausente",
-        ))
+        results.append(
+            CheckResult(
+                label=f"base/{item}",
+                passed=p.exists(),
+                message="" if p.exists() else "ausente",
+            )
+        )
     return results
 
 
@@ -211,11 +217,13 @@ def _check_ai_assets(project_path: Path, ai_assistant: str) -> list[CheckResult]
     results = []
     for item in required:
         p = project_path / item
-        results.append(CheckResult(
-            label=f"ai({ai_assistant})/{item}",
-            passed=p.exists(),
-            message="" if p.exists() else "ausente",
-        ))
+        results.append(
+            CheckResult(
+                label=f"ai({ai_assistant})/{item}",
+                passed=p.exists(),
+                message="" if p.exists() else "ausente",
+            )
+        )
     return results
 
 
@@ -245,11 +253,13 @@ def _check_profile_files(
     for profile_name in profiles:
         descriptor = _load_profile_descriptor(profile_name)
         if not descriptor:
-            results.append(CheckResult(
-                label=f"profile/{profile_name}",
-                passed=False,
-                message="descriptor não encontrado",
-            ))
+            results.append(
+                CheckResult(
+                    label=f"profile/{profile_name}",
+                    passed=False,
+                    message="descriptor não encontrado",
+                )
+            )
             continue
 
         generates = descriptor.get("generates") or {}
@@ -282,11 +292,13 @@ def _check_profile_files(
             resolved_path = path_rel.replace("{project_name}", project_name)
 
             p = project_path / resolved_path
-            results.append(CheckResult(
-                label=f"profile/{profile_name}/{resolved_path}",
-                passed=p.exists(),
-                message="" if p.exists() else "ausente",
-            ))
+            results.append(
+                CheckResult(
+                    label=f"profile/{profile_name}/{resolved_path}",
+                    passed=p.exists(),
+                    message="" if p.exists() else "ausente",
+                )
+            )
 
     return results
 
@@ -294,6 +306,7 @@ def _check_profile_files(
 # ---------------------------------------------------------------------------
 # Motor principal
 # ---------------------------------------------------------------------------
+
 
 def validate_project(project_path: Path) -> ProjectReport:
     """
@@ -309,23 +322,27 @@ def validate_project(project_path: Path) -> ProjectReport:
 
     state = _load_scaffold_state(project_path)
     if not state:
-        report.checks.append(CheckResult(
-            label=".scaffold-state.yaml",
-            passed=False,
-            message="arquivo ausente ou inválido",
-        ))
+        report.checks.append(
+            CheckResult(
+                label=".scaffold-state.yaml",
+                passed=False,
+                message="arquivo ausente ou inválido",
+            )
+        )
         return report
 
     project_info = state.get("project", {})
-    report.domain       = project_info.get("domain", "")
-    report.language     = project_info.get("language", "")
+    report.domain = project_info.get("domain", "")
+    report.language = project_info.get("language", "")
     report.ai_assistant = project_info.get("ai_assistant", "")
-    report.profiles     = state.get("profiles_applied", [])
-    project_name        = project_info.get("name", project_path.name)
+    report.profiles = state.get("profiles_applied", [])
+    project_name = project_info.get("name", project_path.name)
 
     report.checks.extend(_check_base_structure(project_path))
     report.checks.extend(_check_ai_assets(project_path, report.ai_assistant))
-    report.checks.extend(_check_profile_files(project_path, project_name, report.profiles))
+    report.checks.extend(
+        _check_profile_files(project_path, project_name, report.profiles)
+    )
 
     return report
 
@@ -344,7 +361,8 @@ def discover_projects(test_runs_dir: Path) -> list[Path]:
     if not test_runs_dir.exists():
         return []
     return sorted(
-        p for p in test_runs_dir.iterdir()
+        p
+        for p in test_runs_dir.iterdir()
         if p.is_dir() and (p / ".scaffold-state.yaml").exists()
     )
 
@@ -353,9 +371,14 @@ def discover_projects(test_runs_dir: Path) -> list[Path]:
 # Saída
 # ---------------------------------------------------------------------------
 
+
 def _print_project_report(report: ProjectReport, verbose: bool) -> None:
     """Exibe o resultado de um projeto na console."""
-    status = "[bold green]✅ OK[/bold green]" if report.ok else f"[bold red]❌ {report.failed} falha(s)[/bold red]"
+    status = (
+        "[bold green]✅ OK[/bold green]"
+        if report.ok
+        else f"[bold red]❌ {report.failed} falha(s)[/bold red]"
+    )
     meta = f"[dim]{report.domain}/{report.language}/{report.ai_assistant}[/dim]"
     console.print(f"\n  {status}  [bold]{report.name}[/bold]  {meta}")
 
@@ -382,17 +405,21 @@ def _print_summary(reports: list[ProjectReport]) -> None:
         box=box.ROUNDED,
         show_lines=True,
     )
-    table.add_column("Projeto",     style="cyan",  no_wrap=True)
-    table.add_column("Domain",      style="dim",   no_wrap=True)
-    table.add_column("Lang",        style="dim",   no_wrap=True)
-    table.add_column("AI",          style="dim",   no_wrap=True)
-    table.add_column("Perfis",      style="dim")
-    table.add_column("✅ OK",        justify="right")
-    table.add_column("❌ Falhas",    justify="right")
-    table.add_column("Status",      no_wrap=True)
+    table.add_column("Projeto", style="cyan", no_wrap=True)
+    table.add_column("Domain", style="dim", no_wrap=True)
+    table.add_column("Lang", style="dim", no_wrap=True)
+    table.add_column("AI", style="dim", no_wrap=True)
+    table.add_column("Perfis", style="dim")
+    table.add_column("✅ OK", justify="right")
+    table.add_column("❌ Falhas", justify="right")
+    table.add_column("Status", no_wrap=True)
 
     for r in reports:
-        status = "[bold green]✅ PASS[/bold green]" if r.ok else f"[bold red]❌ FAIL[/bold red]"
+        status = (
+            "[bold green]✅ PASS[/bold green]"
+            if r.ok
+            else "[bold red]❌ FAIL[/bold red]"
+        )
         table.add_row(
             r.name,
             r.domain,
@@ -406,11 +433,11 @@ def _print_summary(reports: list[ProjectReport]) -> None:
 
     console.print(table)
 
-    total     = len(reports)
-    ok_count  = sum(1 for r in reports if r.ok)
+    total = len(reports)
+    ok_count = sum(1 for r in reports if r.ok)
     fail_count = total - ok_count
     total_checks = sum(len(r.checks) for r in reports)
-    total_fail   = sum(r.failed for r in reports)
+    total_fail = sum(r.failed for r in reports)
 
     console.print(
         f"\n  [bold]{total}[/bold] projeto(s) | "
@@ -423,6 +450,7 @@ def _print_summary(reports: list[ProjectReport]) -> None:
 # ---------------------------------------------------------------------------
 # Ponto de entrada
 # ---------------------------------------------------------------------------
+
 
 def main() -> int:
     """
@@ -439,10 +467,14 @@ def main() -> int:
     projects = discover_projects(_TEST_RUNS_DIR)
 
     if not projects:
-        console.print(f"\n  [yellow]Nenhum projeto encontrado em {_TEST_RUNS_DIR}[/yellow]\n")
+        console.print(
+            f"\n  [yellow]Nenhum projeto encontrado em {_TEST_RUNS_DIR}[/yellow]\n"
+        )
         return 0
 
-    console.print(f"\n  [bold]Validando {len(projects)} projeto(s) em[/bold] [dim]{_TEST_RUNS_DIR}[/dim]")
+    console.print(
+        f"\n  [bold]Validando {len(projects)} projeto(s) em[/bold] [dim]{_TEST_RUNS_DIR}[/dim]"
+    )
     console.print(f"  [dim]Perfis verificados via: {_PROFILES_DIR}[/dim]\n")
 
     reports = []

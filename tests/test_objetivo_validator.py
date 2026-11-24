@@ -13,10 +13,9 @@ Task: T015
 """
 
 import pytest
-from pathlib import Path
 
-from scripts.lib.objetivo_parser import ObjetivoV2Parser, ParsedObjetivo
-from scripts.lib.objetivo_validator import ObjetivoValidator, ValidationError
+from scripts.lib.objetivo_parser import ObjetivoV2Parser
+from scripts.lib.objetivo_validator import ObjetivoValidator
 
 
 class TestObjetivoValidator:
@@ -77,7 +76,7 @@ Performance: <200ms por request
 - Validação de CPF
 """
         file_path = tmp_path / "valid.yaml"
-        file_path.write_text(content, encoding='utf-8')
+        file_path.write_text(content, encoding="utf-8")
         return file_path
 
     @pytest.fixture
@@ -99,7 +98,7 @@ API REST para gerenciamento de usuários.
 - CRUD de usuários
 """
         file_path = tmp_path / "missing-p0.yaml"
-        file_path.write_text(content, encoding='utf-8')
+        file_path.write_text(content, encoding="utf-8")
         return file_path
 
     @pytest.fixture
@@ -125,7 +124,7 @@ API REST completa.
 - CRUD
 """
         file_path = tmp_path / "empty-p0.yaml"
-        file_path.write_text(content, encoding='utf-8')
+        file_path.write_text(content, encoding="utf-8")
         return file_path
 
     @pytest.fixture
@@ -153,7 +152,7 @@ Content
 - Item
 """
         file_path = tmp_path / "invalid-front.yaml"
-        file_path.write_text(content, encoding='utf-8')
+        file_path.write_text(content, encoding="utf-8")
         return file_path
 
     @pytest.fixture
@@ -179,7 +178,7 @@ Resolver problema X.
 - Feature A
 """
         file_path = tmp_path / "missing-included.yaml"
-        file_path.write_text(content, encoding='utf-8')
+        file_path.write_text(content, encoding="utf-8")
         return file_path
 
     # Test 1: Validate valid objetivo.yaml → no errors
@@ -274,7 +273,7 @@ Content
         # since dict stores {1: ..., 2: ..., 3: ...} regardless of file order
         # But the test validates the warning generation logic exists
         file_path = tmp_path / "out-of-order.yaml"
-        file_path.write_text(content, encoding='utf-8')
+        file_path.write_text(content, encoding="utf-8")
 
         parsed = parser.parse(file_path)
         errors, warnings = validator.validate(parsed)
@@ -286,10 +285,7 @@ Content
 
     # Test 6: Missing 'Incluído ✅' in section 3
     def test_validate_missing_included_section_3(
-        self,
-        validator,
-        parser,
-        missing_section_3_included
+        self, validator, parser, missing_section_3_included
     ):
         """Test that section 3 without 'Incluído ✅' items generates error."""
         parsed = parser.parse(missing_section_3_included)
@@ -299,18 +295,12 @@ Content
 
         # Check for section 3 error about missing Incluído
         section_3_error = any(
-            "section_3" in e.field and "Incluído" in e.message
-            for e in errors
+            "section_3" in e.field and "Incluído" in e.message for e in errors
         )
         assert section_3_error
 
     # Test 7: Strict mode converts P1 warnings to errors
-    def test_strict_mode_p1_warnings(
-        self,
-        strict_validator,
-        parser,
-        tmp_path
-    ):
+    def test_strict_mode_p1_warnings(self, strict_validator, parser, tmp_path):
         """Test that strict mode converts P1 section warnings to errors."""
         content = """---
 version: "2.0"
@@ -339,13 +329,15 @@ Resolver problema X.
 
 """
         file_path = tmp_path / "empty-p1.yaml"
-        file_path.write_text(content, encoding='utf-8')
+        file_path.write_text(content, encoding="utf-8")
 
         parsed = parser.parse(file_path)
         errors, warnings = strict_validator.validate(parsed)
 
         # In strict mode, empty P1 sections should become errors
-        p1_errors = [e for e in errors if "section_4" in e.field or "section_5" in e.field]
+        p1_errors = [
+            e for e in errors if "section_4" in e.field or "section_5" in e.field
+        ]
         assert len(p1_errors) > 0
 
     # Test 8: Valid types and domains
@@ -374,14 +366,15 @@ Manual infrastructure provisioning is slow.
 - Configuration management
 """
         file_path = tmp_path / "valid-types.yaml"
-        file_path.write_text(content, encoding='utf-8')
+        file_path.write_text(content, encoding="utf-8")
 
         parsed = parser.parse(file_path)
         errors, warnings = validator.validate(parsed)
 
         # Should have no frontmatter errors
         frontmatter_errors = [
-            e for e in errors
+            e
+            for e in errors
             if e.field in ["version", "project.type", "project.domain"]
         ]
         assert len(frontmatter_errors) == 0

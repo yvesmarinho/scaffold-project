@@ -10,11 +10,12 @@ Tests cover:
 - Output formatting (colored and markdown)
 """
 
-import pytest
 from pathlib import Path
 from textwrap import dedent
-from scripts.lib import template_diff
 
+import pytest
+
+from scripts.lib import template_diff
 
 # ---------------------------------------------------------------------------
 # Unit Tests - Diff Generation
@@ -33,9 +34,7 @@ class TestDiffGeneration:
         local.write_text(content)
         upstream.write_text(content)
 
-        diff = template_diff.generate_unified_diff(
-            content, content, local, upstream
-        )
+        diff = template_diff.generate_unified_diff(content, content, local, upstream)
 
         assert diff == ""
 
@@ -352,16 +351,17 @@ class TestFullDiff:
 
         assert result.customizations_detected is True
         # Impact report should mention customizations
-        assert "Customizations Detected" in result.impact_report or "customizations" in result.impact_report.lower()
+        assert (
+            "Customizations Detected" in result.impact_report
+            or "customizations" in result.impact_report.lower()
+        )
         # The actual custom content should be in the unified diff
         assert "Custom Security Review" in result.unified_diff
         upstream = tmp_path / "upstream.md"
         local.write_text("Line 1\nLine 2\n")
         upstream.write_text("Line 1\nLine 2\nLine 3\n")
 
-        diff_result = template_diff.diff_templates(
-            local, upstream, "1.0.0", "1.2.0"
-        )
+        diff_result = template_diff.diff_templates(local, upstream, "1.0.0", "1.2.0")
         markdown = template_diff.format_diff_markdown(diff_result)
 
         # Should have markdown headers
@@ -380,9 +380,7 @@ class TestFullDiff:
         local.write_text("Content\n")
         upstream.write_text("Content\n")
 
-        diff_result = template_diff.diff_templates(
-            local, upstream, "1.0.0", "1.0.0"
-        )
+        diff_result = template_diff.diff_templates(local, upstream, "1.0.0", "1.0.0")
         markdown = template_diff.format_diff_markdown(diff_result)
 
         # Should NOT have ANSI codes

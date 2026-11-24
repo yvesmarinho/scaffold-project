@@ -20,24 +20,25 @@ Uso:
 from __future__ import annotations
 
 import argparse
-import asyncio
 import json
 import logging
 import logging.handlers
 import os
+import shlex
+import shutil
 import subprocess
 import sys
 import traceback
-import yaml
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
-from rich.text import Text
+import yaml
 from textual import on, work
 from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.containers import Horizontal, Vertical, ScrollableContainer
+from textual.containers import Horizontal, ScrollableContainer, Vertical
 from textual.screen import ModalScreen
 from textual.widgets import (
     Button,
@@ -48,10 +49,11 @@ from textual.widgets import (
     RichLog,
     Select,
     Static,
-    Switch,
     Tree,
 )
-from textual.widgets.tree import TreeNode
+
+# Caminho absoluto do git (S607/B607); "git" como fallback fora do PATH.
+_GIT = shutil.which("git") or "git"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Project root (directory where this script lives)
@@ -115,6 +117,7 @@ ALL_SPA_HOSTS = [
 # Menu data model
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @dataclass
 class MenuInput:
     name: str
@@ -131,7 +134,7 @@ class MenuItem:
     command: str = ""
     inputs: list[MenuInput] = field(default_factory=list)
     requires_file: str = ""
-    generator_id: str = ""      # key into FILE_GENERATORS
+    generator_id: str = ""  # key into FILE_GENERATORS
     dangerous: bool = False
     dry_run_flag: str = "--check --diff"
     tags: list[str] = field(default_factory=list)
@@ -148,6 +151,7 @@ class Category:
 # ─────────────────────────────────────────────────────────────────────────────
 # MENU DEFINITIONS
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 def _ap(playbook: str, extra: str = "") -> str:
     """Build ansible-playbook command with vault."""
@@ -196,7 +200,7 @@ MENU: list[Category] = [
                     "Use na primeira vez ou após um clone do repositório."
                 ),
                 command="uv venv && uv pip install -r requirements.txt && "
-                        "ansible-galaxy collection install community.general ansible.posix",
+                "ansible-galaxy collection install community.general ansible.posix",
             ),
             MenuItem(
                 id="lint",
@@ -215,8 +219,8 @@ MENU: list[Category] = [
                 description="Verifica sintaxe de todos os playbooks em playbooks/*.yml.",
                 command=(
                     "for p in playbooks/*.yml; do "
-                    "echo \"  ✓ $p\" && "
-                    f"{ANSIBLE_PLAYBOOK} \"$p\" --syntax-check || exit 1; "
+                    'echo "  ✓ $p" && '
+                    f'{ANSIBLE_PLAYBOOK} "$p" --syntax-check || exit 1; '
                     "done && echo 'Todos OK'"
                 ),
             ),
@@ -321,7 +325,10 @@ MENU: list[Category] = [
                     "Grupo alvo: production\n"
                     "Playbook: playbooks/vps-initial-setup.yml"
                 ),
-                command=_ap("playbooks/vps-initial-setup.yml", "--limit production --check --diff"),
+                command=_ap(
+                    "playbooks/vps-initial-setup.yml",
+                    "--limit production --check --diff",
+                ),
             ),
             MenuItem(
                 id="vps-setup",
@@ -401,7 +408,11 @@ MENU: list[Category] = [
                     "Requer: group_vars/all_spa/vault.yml (Ansible Vault)"
                 ),
                 command=_ap("playbooks/ssh-spa-deploy.yml"),
-                inputs=[MenuInput("HOST", "Limitar a um servidor (ex: wf001)", optional=True)],
+                inputs=[
+                    MenuInput(
+                        "HOST", "Limitar a um servidor (ex: wf001)", optional=True
+                    )
+                ],
             ),
             MenuItem(
                 id="ssh-spa-fix-ufw",
@@ -520,7 +531,11 @@ MENU: list[Category] = [
                     "Fonte: data/ssh-users.json"
                 ),
                 command=_ap("playbooks/ssh-keys-deploy.yml"),
-                inputs=[MenuInput("HOST", "Limitar a um servidor (ex: wf008)", optional=True)],
+                inputs=[
+                    MenuInput(
+                        "HOST", "Limitar a um servidor (ex: wf008)", optional=True
+                    )
+                ],
                 requires_file="data/ssh-users.json",
                 generator_id="ssh-users-json",
             ),
@@ -627,7 +642,9 @@ MENU: list[Category] = [
                     "Simula o deploy do Cloudflare WARP Connector no wfdb03.\n"
                     "Playbook: playbooks/cloudflare-vpn-server-deploy.yml"
                 ),
-                command=_ap("playbooks/cloudflare-vpn-server-deploy.yml", "--check --diff"),
+                command=_ap(
+                    "playbooks/cloudflare-vpn-server-deploy.yml", "--check --diff"
+                ),
             ),
             MenuItem(
                 id="vpn-server-deploy",
@@ -707,7 +724,9 @@ MENU: list[Category] = [
                     "Deploy isolado do RabbitMQ cluster.\n"
                     "Playbook: playbooks/messaging-rabbitmq-deploy.yml"
                 ),
-                command=_ap("playbooks/messaging-rabbitmq-deploy.yml", "--limit production"),
+                command=_ap(
+                    "playbooks/messaging-rabbitmq-deploy.yml", "--limit production"
+                ),
             ),
             MenuItem(
                 id="messaging-redis",
@@ -717,7 +736,9 @@ MENU: list[Category] = [
                     "Persistência híbrida (RDB + AOF).\n"
                     "Playbook: playbooks/messaging-redis-deploy.yml"
                 ),
-                command=_ap("playbooks/messaging-redis-deploy.yml", "--limit production"),
+                command=_ap(
+                    "playbooks/messaging-redis-deploy.yml", "--limit production"
+                ),
             ),
             MenuItem(
                 id="messaging-validate",
@@ -826,14 +847,20 @@ MENU: list[Category] = [
                     "Ex: group_vars/all_spa/vault.yml"
                 ),
                 command="ansible-vault encrypt {FILE}",
-                inputs=[MenuInput("FILE", "Caminho do arquivo a encriptar", optional=False)],
+                inputs=[
+                    MenuInput("FILE", "Caminho do arquivo a encriptar", optional=False)
+                ],
             ),
             MenuItem(
                 id="vault-decrypt",
                 title="Desencriptar arquivo",
                 description="Desencripta um arquivo Ansible Vault.",
                 command="ansible-vault decrypt {FILE}",
-                inputs=[MenuInput("FILE", "Caminho do arquivo a desencriptar", optional=False)],
+                inputs=[
+                    MenuInput(
+                        "FILE", "Caminho do arquivo a desencriptar", optional=False
+                    )
+                ],
             ),
             MenuItem(
                 id="vault-edit",
@@ -923,15 +950,12 @@ MENU: list[Category] = [
 ]
 
 # Build a flat index for quick lookup
-MENU_INDEX: dict[str, MenuItem] = {
-    item.id: item
-    for cat in MENU
-    for item in cat.items
-}
+MENU_INDEX: dict[str, MenuItem] = {item.id: item for cat in MENU for item in cat.items}
 
 # ─────────────────────────────────────────────────────────────────────────────
 # File Generators
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 def generate_ssh_users_json(data: dict[str, Any]) -> str:
     """Build data/ssh-users.json from form data."""
@@ -943,17 +967,28 @@ def generate_ssh_users_json(data: dict[str, Any]) -> str:
             continue
         keys_raw = data.get(f"user{i}_keys", "").strip()
         ssh_keys = [k.strip() for k in keys_raw.splitlines() if k.strip()]
-        users.append({
-            "name": name,
-            "comment": data.get(f"user{i}_comment", name),
-            "state": data.get(f"user{i}_state", "present"),
-            "shell": data.get(f"user{i}_shell", "/bin/bash"),
-            "groups": [g.strip() for g in data.get(f"user{i}_groups", "sudo").split(",") if g.strip()],
-            "password_auth": data.get(f"user{i}_password_auth", "false").lower() == "true",
-            "pubkey_auth": True,
-            "ssh_keys": ssh_keys if ssh_keys else [f"ssh-ed25519 AAAA_SUBSTITUA_CHAVE_{name.upper()}"],
-            "servers": "all",
-        })
+        users.append(
+            {
+                "name": name,
+                "comment": data.get(f"user{i}_comment", name),
+                "state": data.get(f"user{i}_state", "present"),
+                "shell": data.get(f"user{i}_shell", "/bin/bash"),
+                "groups": [
+                    g.strip()
+                    for g in data.get(f"user{i}_groups", "sudo").split(",")
+                    if g.strip()
+                ],
+                "password_auth": data.get(f"user{i}_password_auth", "false").lower()
+                == "true",
+                "pubkey_auth": True,
+                "ssh_keys": (
+                    ssh_keys
+                    if ssh_keys
+                    else [f"ssh-ed25519 AAAA_SUBSTITUA_CHAVE_{name.upper()}"]
+                ),
+                "servers": "all",
+            }
+        )
     manifest = {
         "_comment": "Manifesto de usuários SSH gerenciado por enterprise-ansible/manage.py",
         "_instructions": [
@@ -983,6 +1018,7 @@ FILE_GENERATOR_PATHS: dict[str, str] = {
 # ─────────────────────────────────────────────────────────────────────────────
 # Modal Screens
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class ConfirmModal(ModalScreen[bool]):
     """Simple yes/no confirmation."""
@@ -1062,9 +1098,13 @@ class InputModal(ModalScreen[dict[str, str]]):
         with Vertical(id="dialog"):
             yield Label("📝 Parâmetros adicionais")
             for inp in self.inputs:
-                label = f"{inp.name}" + ("  (opcional)" if inp.optional else "  *obrigatório*")
+                label = f"{inp.name}" + (
+                    "  (opcional)" if inp.optional else "  *obrigatório*"
+                )
                 yield Label(label)
-                widget = Input(placeholder=inp.hint, value=inp.default, id=f"inp_{inp.name}")
+                widget = Input(
+                    placeholder=inp.hint, value=inp.default, id=f"inp_{inp.name}"
+                )
                 self._widgets[inp.name] = widget
                 yield widget
                 yield Static(f"  {inp.hint}", classes="hint")
@@ -1116,13 +1156,17 @@ class SSHUsersGeneratorModal(ModalScreen[dict[str, str] | None]):
                 yield Label("Comentário")
                 yield Input(placeholder="Operador principal", id="user1_comment")
                 yield Label("Shell")
-                yield Input(placeholder="/bin/bash", value="/bin/bash", id="user1_shell")
+                yield Input(
+                    placeholder="/bin/bash", value="/bin/bash", id="user1_shell"
+                )
                 yield Label("Grupos (vírgula)")
                 yield Input(placeholder="sudo", value="sudo", id="user1_groups")
                 yield Label("Estado")
                 yield Input(placeholder="present", value="present", id="user1_state")
                 yield Label("Permitir senha? (true/false)")
-                yield Input(placeholder="false", value="false", id="user1_password_auth")
+                yield Input(
+                    placeholder="false", value="false", id="user1_password_auth"
+                )
                 yield Label("Chaves SSH públicas (uma por linha) *")
                 yield Input(
                     placeholder="ssh-ed25519 AAAA... usuario@host",
@@ -1131,11 +1175,15 @@ class SSHUsersGeneratorModal(ModalScreen[dict[str, str] | None]):
                 yield Label("")
                 yield Label("─── Usuário 2 (opcional) ───────────────────")
                 yield Label("Nome do usuário")
-                yield Input(placeholder="archyros (deixe vazio para ignorar)", id="user2_name")
+                yield Input(
+                    placeholder="archyros (deixe vazio para ignorar)", id="user2_name"
+                )
                 yield Label("Comentário")
                 yield Input(placeholder="Administrador secundário", id="user2_comment")
                 yield Label("Shell")
-                yield Input(placeholder="/bin/bash", value="/bin/bash", id="user2_shell")
+                yield Input(
+                    placeholder="/bin/bash", value="/bin/bash", id="user2_shell"
+                )
                 yield Label("Grupos (vírgula)")
                 yield Input(placeholder="sudo", value="sudo", id="user2_groups")
                 yield Label("Estado")
@@ -1150,10 +1198,20 @@ class SSHUsersGeneratorModal(ModalScreen[dict[str, str] | None]):
 
     def _collect(self) -> dict[str, str]:
         fields = [
-            "user1_name", "user1_comment", "user1_shell", "user1_groups",
-            "user1_state", "user1_password_auth", "user1_keys",
-            "user2_name", "user2_comment", "user2_shell", "user2_groups",
-            "user2_state", "user2_password_auth", "user2_keys",
+            "user1_name",
+            "user1_comment",
+            "user1_shell",
+            "user1_groups",
+            "user1_state",
+            "user1_password_auth",
+            "user1_keys",
+            "user2_name",
+            "user2_comment",
+            "user2_shell",
+            "user2_groups",
+            "user2_state",
+            "user2_password_auth",
+            "user2_keys",
         ]
         data: dict[str, str] = {"user_count": "2"}
         for f in fields:
@@ -1228,11 +1286,11 @@ class HostsGeneratorModal(ModalScreen[dict[str, str] | None]):
     """Form to add a new host to inventories/hosts.yml."""
 
     GROUPS = [
-        ("all_spa",         "all_spa — SSH SPA (fwknop, porta 5010)"),
-        ("vps_new",         "vps_new — Novo servidor (porta 22, root)"),
+        ("all_spa", "all_spa — SSH SPA (fwknop, porta 5010)"),
+        ("vps_new", "vps_new — Novo servidor (porta 22, root)"),
         ("vps_fresh_setup", "vps_fresh_setup — Setup inicial (porta 22)"),
-        ("vps_hardened",    "vps_hardened — Servidor endurecido (porta 5010)"),
-        ("cf_vpn_servers",  "cf_vpn_servers — WARP Connector (Cloudflare VPN)"),
+        ("vps_hardened", "vps_hardened — Servidor endurecido (porta 5010)"),
+        ("cf_vpn_servers", "cf_vpn_servers — WARP Connector (Cloudflare VPN)"),
     ]
 
     CSS = """
@@ -1277,13 +1335,15 @@ class HostsGeneratorModal(ModalScreen[dict[str, str] | None]):
             yield Label("Node name  (deixe vazio para auto: igual ao nome do host)")
             yield Input(placeholder="wf010", id="host_node")
             with Horizontal(id="buttons"):
-                yield Button("💾 Adicionar ao hosts.yml", id="btn-save", variant="success")
+                yield Button(
+                    "💾 Adicionar ao hosts.yml", id="btn-save", variant="success"
+                )
                 yield Button("✖ Cancelar", id="btn-cancel")
 
     @on(Button.Pressed, "#btn-save")
     def save(self) -> None:
         name = self.query_one("#host_name", Input).value.strip()
-        ip   = self.query_one("#host_ip",   Input).value.strip()
+        ip = self.query_one("#host_ip", Input).value.strip()
         group_sel = self.query_one("#host_group", Select)
         group = group_sel.value
 
@@ -1297,15 +1357,19 @@ class HostsGeneratorModal(ModalScreen[dict[str, str] | None]):
             self.notify("❌ Selecione um grupo!", severity="error")
             return
 
-        fqdn = self.query_one("#host_fqdn", Input).value.strip() or f"{name}.vya.digital"
+        fqdn = (
+            self.query_one("#host_fqdn", Input).value.strip() or f"{name}.vya.digital"
+        )
         node = self.query_one("#host_node", Input).value.strip() or name
-        self.dismiss({
-            "name":  name,
-            "ip":    ip,
-            "group": str(group),
-            "fqdn":  fqdn,
-            "node":  node,
-        })
+        self.dismiss(
+            {
+                "name": name,
+                "ip": ip,
+                "group": str(group),
+                "fqdn": fqdn,
+                "node": node,
+            }
+        )
 
     @on(Button.Pressed, "#btn-cancel")
     def cancel(self) -> None:
@@ -1345,8 +1409,9 @@ class HostsRemoveModal(ModalScreen[dict[str, str] | None]):
                 hosts = (grp_data or {}).get("hosts") or {}
                 if hosts:
                     self._hosts_by_group[grp] = list(hosts.keys())
-        except Exception:
-            pass
+        except Exception as exc:
+            # inventário ausente/ilegível: TUI segue sem lista de hosts (como antes)
+            logger.debug("hosts.yml não carregado: %s", exc)
 
     def compose(self) -> ComposeResult:
         # Build flat SelectOption list: "hostname  (grupo)"
@@ -1363,7 +1428,9 @@ class HostsRemoveModal(ModalScreen[dict[str, str] | None]):
             )
             yield Label("Host a remover  *")
             if options:
-                yield Select(options=options, id="host_select", prompt="Selecione o host...")
+                yield Select(
+                    options=options, id="host_select", prompt="Selecione o host..."
+                )
             else:
                 yield Static("[yellow]Nenhum host encontrado no inventário.[/yellow]")
             with Horizontal(id="buttons"):
@@ -1569,7 +1636,9 @@ class EnterpriseAnsibleApp(App[None]):
                 with Horizontal(id="actions-bar"):
                     yield Button("▶ Executar [r]", id="btn-run", variant="primary")
                     yield Button("🔍 Dry-run [d]", id="btn-dry", variant="warning")
-                    yield Button("✏️  Gerar arquivo [g]", id="btn-gen", variant="success")
+                    yield Button(
+                        "✏️  Gerar arquivo [g]", id="btn-gen", variant="success"
+                    )
                 with Vertical(id="output-panel"):
                     yield Static(" 📋 Output", id="output-title")
                     yield RichLog(highlight=True, markup=True, id="output-log")
@@ -1586,7 +1655,9 @@ class EnterpriseAnsibleApp(App[None]):
 
     def _welcome_text(self) -> str:
         branch = self._git_branch()
-        hosts = "  ".join(f"[cyan]{h}[/cyan] [dim]{ip}[/dim]" for h, ip in ALL_SPA_HOSTS)
+        hosts = "  ".join(
+            f"[cyan]{h}[/cyan] [dim]{ip}[/dim]" for h, ip in ALL_SPA_HOSTS
+        )
         return (
             f"\n\n"
             f"[bold #58a6ff]Enterprise Ansible Manager[/bold #58a6ff]\n\n"
@@ -1602,8 +1673,11 @@ class EnterpriseAnsibleApp(App[None]):
     def _git_branch() -> str:
         try:
             result = subprocess.run(
-                ["git", "branch", "--show-current"],
-                capture_output=True, text=True, cwd=ROOT, timeout=3
+                [_GIT, "branch", "--show-current"],
+                capture_output=True,
+                text=True,
+                cwd=ROOT,
+                timeout=3,
             )
             return result.stdout.strip() or "desconhecida"
         except Exception:
@@ -1628,15 +1702,27 @@ class EnterpriseAnsibleApp(App[None]):
 
         # Title
         danger_badge = " [bold red]⚠ DESTRUTIVO[/bold red]" if item.dangerous else ""
-        await panel.mount(Static(f"[bold #58a6ff]{item.title}[/bold #58a6ff]{danger_badge}", id="item-title"))
+        await panel.mount(
+            Static(
+                f"[bold #58a6ff]{item.title}[/bold #58a6ff]{danger_badge}",
+                id="item-title",
+            )
+        )
 
         # Description
         await panel.mount(Static(item.description, id="item-description"))
 
         # Command preview
         if item.command:
-            cmd_display = item.command.replace("--vault-password-file .secrets/.vault_pass", "[dim]--vault-pass[/dim]")
-            await panel.mount(Static(f"[dim]🔧 Comando:[/dim]\n[green]{cmd_display}[/green]", id="item-meta"))
+            cmd_display = item.command.replace(
+                "--vault-password-file .secrets/.vault_pass", "[dim]--vault-pass[/dim]"
+            )
+            await panel.mount(
+                Static(
+                    f"[dim]🔧 Comando:[/dim]\n[green]{cmd_display}[/green]",
+                    id="item-meta",
+                )
+            )
 
         # File status
         if item.requires_file:
@@ -1656,8 +1742,12 @@ class EnterpriseAnsibleApp(App[None]):
             await panel.mount(Static(f"[dim]📝 Parâmetros:[/dim]\n{hints}"))
 
         # Button visibility
-        self.query_one("#btn-run", Button).disabled = not item.command and not item.generator_id
-        self.query_one("#btn-dry", Button).disabled = not item.command or not item.dry_run_flag
+        self.query_one("#btn-run", Button).disabled = (
+            not item.command and not item.generator_id
+        )
+        self.query_one("#btn-dry", Button).disabled = (
+            not item.command or not item.dry_run_flag
+        )
         self.query_one("#btn-gen", Button).disabled = not item.generator_id
         self.query_one("#btn-gen", Button).display = bool(item.generator_id)
 
@@ -1771,7 +1861,7 @@ class EnterpriseAnsibleApp(App[None]):
         # Append Ansible --limit if HOST provided
         if "HOST" in input_values and input_values["HOST"]:
             if "--limit" not in cmd:
-                cmd += f" --limit {input_values['HOST']}"
+                cmd += f" --limit {shlex.quote(input_values['HOST'])}"
         if dry_run and item.dry_run_flag:
             cmd += f" {item.dry_run_flag}"
 
@@ -1788,7 +1878,9 @@ class EnterpriseAnsibleApp(App[None]):
         self.call_from_thread(log.write, f"[bold cyan]{'─'*60}[/bold cyan]")
 
         try:
-            proc = subprocess.Popen(
+            # shell=True intencional: comandos do menu podem usar sintaxe de shell;
+            # valores digitados (ex.: HOST) entram escapados via shlex.quote.
+            proc = subprocess.Popen(  # noqa: S602  # nosec B602
                 cmd,
                 shell=True,
                 stdout=subprocess.PIPE,
@@ -1803,11 +1895,22 @@ class EnterpriseAnsibleApp(App[None]):
             proc.wait()
             rc = proc.returncode
             if rc == 0:
-                self.call_from_thread(log.write, f"\n[bold green]✅ Concluído com sucesso (rc=0)[/bold green]")
-                self.call_from_thread(self.notify, "✅ Comando concluído com sucesso!", severity="information")
+                self.call_from_thread(
+                    log.write,
+                    "\n[bold green]✅ Concluído com sucesso (rc=0)[/bold green]",
+                )
+                self.call_from_thread(
+                    self.notify,
+                    "✅ Comando concluído com sucesso!",
+                    severity="information",
+                )
             else:
-                self.call_from_thread(log.write, f"\n[bold red]❌ Falhou com código {rc}[/bold red]")
-                self.call_from_thread(self.notify, f"❌ Falhou (rc={rc})", severity="error")
+                self.call_from_thread(
+                    log.write, f"\n[bold red]❌ Falhou com código {rc}[/bold red]"
+                )
+                self.call_from_thread(
+                    self.notify, f"❌ Falhou (rc={rc})", severity="error"
+                )
         except Exception as exc:
             self.call_from_thread(log.write, f"[red]Erro ao executar: {exc}[/red]")
             self.call_from_thread(self.notify, f"Erro: {exc}", severity="error")
@@ -1844,12 +1947,14 @@ class EnterpriseAnsibleApp(App[None]):
             return
 
         group = host_data["group"]
-        name  = host_data["name"]
-        ip    = host_data["ip"]
+        name = host_data["name"]
+        ip = host_data["ip"]
 
         children = (raw.get("all") or {}).get("children") or {}
         if group not in children:
-            self.notify(f"❌ Grupo '{group}' não encontrado em hosts.yml", severity="error")
+            self.notify(
+                f"❌ Grupo '{group}' não encontrado em hosts.yml", severity="error"
+            )
             return
         if children[group] is None:
             children[group] = {}
@@ -1858,13 +1963,15 @@ class EnterpriseAnsibleApp(App[None]):
 
         group_hosts = children[group]["hosts"]
         if name in group_hosts:
-            self.notify(f"⚠️  Host '{name}' já existe no grupo '{group}'!", severity="warning")
+            self.notify(
+                f"⚠️  Host '{name}' já existe no grupo '{group}'!", severity="warning"
+            )
             return
 
         group_hosts[name] = {
             "ansible_host": ip,
-            "hostname":     host_data.get("fqdn") or f"{name}.vya.digital",
-            "node_name":    host_data.get("node") or name,
+            "hostname": host_data.get("fqdn") or f"{name}.vya.digital",
+            "node_name": host_data.get("node") or name,
         }
 
         try:
@@ -1882,7 +1989,9 @@ class EnterpriseAnsibleApp(App[None]):
                 indent=2,
             )
             hosts_file.write_text(header + yaml_body)
-            log.write(f"\n[bold green]✅ Host '{name}' adicionado ao grupo '{group}'[/bold green]")
+            log.write(
+                f"\n[bold green]✅ Host '{name}' adicionado ao grupo '{group}'[/bold green]"
+            )
             log.write(f"[dim]  ansible_host : {ip}[/dim]")
             log.write(f"[dim]  hostname     : {group_hosts[name]['hostname']}[/dim]")
             log.write(f"[dim]  Arquivo      : {hosts_file}[/dim]")
@@ -1902,12 +2011,14 @@ class EnterpriseAnsibleApp(App[None]):
             return
 
         group = host_data["group"]
-        name  = host_data["name"]
+        name = host_data["name"]
 
         children = (raw.get("all") or {}).get("children") or {}
         group_hosts = (children.get(group) or {}).get("hosts") or {}
         if name not in group_hosts:
-            self.notify(f"❌ Host '{name}' não encontrado no grupo '{group}'!", severity="error")
+            self.notify(
+                f"❌ Host '{name}' não encontrado no grupo '{group}'!", severity="error"
+            )
             return
 
         del group_hosts[name]
@@ -1927,7 +2038,9 @@ class EnterpriseAnsibleApp(App[None]):
                 indent=2,
             )
             hosts_file.write_text(header + yaml_body)
-            log.write(f"\n[bold red]🗑️  Host '{name}' removido do grupo '{group}'[/bold red]")
+            log.write(
+                f"\n[bold red]🗑️  Host '{name}' removido do grupo '{group}'[/bold red]"
+            )
             log.write(f"[dim]  Arquivo: {hosts_file}[/dim]")
             self.notify(f"🗑️  {name} removido do inventário.", severity="warning")
         except Exception as exc:
@@ -1938,6 +2051,7 @@ class EnterpriseAnsibleApp(App[None]):
 # ─────────────────────────────────────────────────────────────────────────────
 # Entry point
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Enterprise Ansible Manager TUI")

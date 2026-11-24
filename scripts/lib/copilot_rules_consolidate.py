@@ -8,13 +8,10 @@ Bug fix: BUG-16 Fase 3 (Consolidação .copilot-rules)
 Implementação: Sprint 2026-W21
 """
 
-from pathlib import Path
-from typing import List, Dict, Tuple, Optional
 import logging
-import shutil
 import re
-
-from .config import CreatedItem
+import shutil
+from pathlib import Path
 
 log = logging.getLogger(__name__)
 
@@ -23,7 +20,8 @@ log = logging.getLogger(__name__)
 # Markdown Section Parser
 # =============================================================================
 
-def parse_markdown_sections(content: str) -> Dict[str, str]:
+
+def parse_markdown_sections(content: str) -> dict[str, str]:
     """
     Parsea documento Markdown em seções por headers (##).
 
@@ -45,16 +43,16 @@ def parse_markdown_sections(content: str) -> Dict[str, str]:
     current_section = None
     current_content = []
 
-    lines = content.split('\n')
+    lines = content.split("\n")
 
     for line in lines:
         # Detectar header de seção (## Título)
-        header_match = re.match(r'^##\s+(.+)$', line)
+        header_match = re.match(r"^##\s+(.+)$", line)
 
         if header_match:
             # Salvar seção anterior se existir
             if current_section:
-                sections[current_section] = '\n'.join(current_content).strip()
+                sections[current_section] = "\n".join(current_content).strip()
 
             # Iniciar nova seção
             current_section = header_match.group(1).strip()
@@ -66,12 +64,12 @@ def parse_markdown_sections(content: str) -> Dict[str, str]:
 
     # Salvar última seção
     if current_section:
-        sections[current_section] = '\n'.join(current_content).strip()
+        sections[current_section] = "\n".join(current_content).strip()
 
     return sections
 
 
-def merge_markdown_sections(files: List[Path]) -> str:
+def merge_markdown_sections(files: list[Path]) -> str:
     """
     Faz merge de múltiplos arquivos Markdown em um único documento.
 
@@ -94,24 +92,26 @@ def merge_markdown_sections(files: List[Path]) -> str:
 
     # Coletar cabeçalhos (tudo antes do primeiro ##)
     headers = []
-    all_sections: Dict[str, Tuple[str, int]] = {}  # título -> (conteúdo, prioridade_arquivo)
+    all_sections: dict[str, tuple[str, int]] = (
+        {}
+    )  # título -> (conteúdo, prioridade_arquivo)
 
     for idx, file in enumerate(files):
         content = file.read_text(encoding="utf-8")
 
         # Extrair cabeçalho (tudo antes do primeiro ##)
         # Verificar se arquivo começa com ## (sem cabeçalho)
-        if content.strip().startswith('##'):
+        if content.strip().startswith("##"):
             # Sem cabeçalho, todo conteúdo é seções
             sections_content = content
         else:
             # Procurar primeiro ## no meio do arquivo
-            first_header_pos = content.find('\n##')
+            first_header_pos = content.find("\n##")
             if first_header_pos != -1:
                 header = content[:first_header_pos].strip()
                 if header:
                     headers.append((header, file.name))
-                sections_content = content[first_header_pos+1:]
+                sections_content = content[first_header_pos + 1 :]
             else:
                 # Arquivo sem seções, todo conteúdo é cabeçalho
                 headers.append((content.strip(), file.name))
@@ -132,7 +132,9 @@ def merge_markdown_sections(files: List[Path]) -> str:
                     all_sections[title] = (section_content, idx)
                     log.debug(f"  ↻ Seção '{title}' substituída por {file.name}")
                 else:
-                    log.debug(f"  = Seção '{title}' preservada (de {files[existing_priority].name})")
+                    log.debug(
+                        f"  = Seção '{title}' preservada (de {files[existing_priority].name})"
+                    )
 
     # Construir documento consolidado
     result_parts = []
@@ -145,7 +147,9 @@ def merge_markdown_sections(files: List[Path]) -> str:
 
     # 2. Comentário de consolidação (sempre incluir quando múltiplos arquivos)
     if len(files) > 1:
-        result_parts.append(f"<!-- Consolidado de {len(files)} arquivos: {', '.join(f.name for f in files)} -->")
+        result_parts.append(
+            f"<!-- Consolidado de {len(files)} arquivos: {', '.join(f.name for f in files)} -->"
+        )
         result_parts.append("")
 
     # 3. Seções ordenadas alfabeticamente
@@ -157,14 +161,15 @@ def merge_markdown_sections(files: List[Path]) -> str:
         result_parts.append(content)
         result_parts.append("")
 
-    return '\n'.join(result_parts)
+    return "\n".join(result_parts)
 
 
 # =============================================================================
 # Consolidation Functions
 # =============================================================================
 
-def detect_copilot_rules_files(project_root: Path) -> List[Path]:
+
+def detect_copilot_rules_files(project_root: Path) -> list[Path]:
     """
     Detecta todos os arquivos .copilot-rules* na raiz do projeto.
 
@@ -209,7 +214,9 @@ def detect_copilot_rules_files(project_root: Path) -> List[Path]:
     return unique_files
 
 
-def consolidate_copilot_rules(project_root: Path, backup_dir: Optional[Path] = None) -> Optional[Path]:
+def consolidate_copilot_rules(
+    project_root: Path, backup_dir: Path | None = None
+) -> Path | None:
     """
     Detecta e consolida múltiplos arquivos .copilot-rules* automaticamente.
 
@@ -285,12 +292,14 @@ def consolidate_copilot_rules(project_root: Path, backup_dir: Optional[Path] = N
             log.info(f"🗑️  Removido: {file.name}")
             removed_count += 1
 
-    log.info(f"✨ Consolidação completa: {len(found_files)} arquivos → 1 arquivo ({removed_count} removidos)")
+    log.info(
+        f"✨ Consolidação completa: {len(found_files)} arquivos → 1 arquivo ({removed_count} removidos)"
+    )
 
     return output_file
 
 
-def validate_consolidation_needed(project_root: Path) -> Tuple[bool, List[Path]]:
+def validate_consolidation_needed(project_root: Path) -> tuple[bool, list[Path]]:
     """
     Verifica se consolidação de .copilot-rules* é necessária.
 

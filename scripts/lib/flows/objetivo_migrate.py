@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 import shutil
 from pathlib import Path
-from datetime import datetime
 
 from ..objetivo_migrator import ObjetivoMigrator
 from ..ui import console
@@ -28,7 +27,9 @@ def flow_objetivo_migrate(args: argparse.Namespace) -> int:
 
     # Check file exists
     if not file_path.exists():
-        console.print(f"\n  [bold red]❌ Erro:[/bold red] Arquivo não encontrado: {file_path}\n")
+        console.print(
+            f"\n  [bold red]❌ Erro:[/bold red] Arquivo não encontrado: {file_path}\n"
+        )
         return 1
 
     try:
@@ -38,14 +39,16 @@ def flow_objetivo_migrate(args: argparse.Namespace) -> int:
 
         # Check if migration succeeded
         if not result.success:
-            console.print(f"\n  [bold red]❌ Erro na migração:[/bold red]\n")
+            console.print("\n  [bold red]❌ Erro na migração:[/bold red]\n")
             for err in result.errors:
                 console.print(f"  • {err}")
             console.print()
             return 1
 
         # Show migration result
-        console.print(f"\n[bold green]✅ Migração concluída:[/bold green] {result.source_version} → {result.target_version}\n")
+        console.print(
+            f"\n[bold green]✅ Migração concluída:[/bold green] {result.source_version} → {result.target_version}\n"
+        )
 
         # Show mappings
         if result.mappings:
@@ -70,10 +73,16 @@ def flow_objetivo_migrate(args: argparse.Namespace) -> int:
         # Ask for confirmation (unless --auto)
         if not auto_accept:
             console.print()
-            response = input("Aceitar migração? (substituir arquivo original) [y/N]: ").strip().lower()
+            response = (
+                input("Aceitar migração? (substituir arquivo original) [y/N]: ")
+                .strip()
+                .lower()
+            )
 
-            if response != 'y':
-                console.print(f"\n  [yellow]Cancelado.[/yellow] Preview mantido em: {result.preview_file}\n")
+            if response != "y":
+                console.print(
+                    f"\n  [yellow]Cancelado.[/yellow] Preview mantido em: {result.preview_file}\n"
+                )
                 return 0
 
         # Backup original to .v1
@@ -87,7 +96,7 @@ def flow_objetivo_migrate(args: argparse.Namespace) -> int:
         result.preview_file.unlink()
 
         # Success
-        console.print(f"\n  [green]✅ Migração aplicada:[/green]")
+        console.print("\n  [green]✅ Migração aplicada:[/green]")
         console.print(f"    • Original (v1.0): {backup_path}")
         console.print(f"    • Migrado (v2.0): {file_path}")
         console.print()
@@ -105,17 +114,17 @@ def _show_preview_comparison(v1_file: Path, v2_file: Path, max_lines: int = 30) 
     from rich.panel import Panel
 
     # Read files
-    v1_content = v1_file.read_text(encoding='utf-8').split('\n')[:max_lines]
-    v2_content = v2_file.read_text(encoding='utf-8').split('\n')[:max_lines]
+    v1_content = v1_file.read_text(encoding="utf-8").split("\n")[:max_lines]
+    v2_content = v2_file.read_text(encoding="utf-8").split("\n")[:max_lines]
 
     # Limit content
-    v1_preview = '\n'.join(v1_content)
-    v2_preview = '\n'.join(v2_content)
+    v1_preview = "\n".join(v1_content)
+    v2_preview = "\n".join(v2_content)
 
-    if len(v1_file.read_text(encoding='utf-8').split('\n')) > max_lines:
+    if len(v1_file.read_text(encoding="utf-8").split("\n")) > max_lines:
         v1_preview += f"\n\n[dim]... (+{len(v1_file.read_text(encoding='utf-8').split('\n')) - max_lines} linhas)[/dim]"
 
-    if len(v2_file.read_text(encoding='utf-8').split('\n')) > max_lines:
+    if len(v2_file.read_text(encoding="utf-8").split("\n")) > max_lines:
         v2_preview += f"\n\n[dim]... (+{len(v2_file.read_text(encoding='utf-8').split('\n')) - max_lines} linhas)[/dim]"
 
     # Create panels
@@ -128,7 +137,7 @@ def _show_preview_comparison(v1_file: Path, v2_file: Path, max_lines: int = 30) 
 
     v2_panel = Panel(
         v2_preview,
-        title=f"[green]v2.0[/green] (preview)",
+        title="[green]v2.0[/green] (preview)",
         border_style="green",
         padding=(1, 2),
     )

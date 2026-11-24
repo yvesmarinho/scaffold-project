@@ -35,9 +35,7 @@ def _load_json_loose(path: Path) -> dict[str, Any] | None:
 
     raw_content = path.read_text(encoding="utf-8")
     cleaned_lines = [
-        line
-        for line in raw_content.splitlines()
-        if not line.lstrip().startswith("//")
+        line for line in raw_content.splitlines() if not line.lstrip().startswith("//")
     ]
     cleaned = "\n".join(cleaned_lines)
     return json.loads(cleaned)
@@ -57,7 +55,7 @@ class SessionPaths:
     readme_file: Path
 
     @classmethod
-    def from_root(cls, root: Path | str) -> "SessionPaths":
+    def from_root(cls, root: Path | str) -> SessionPaths:
         root_path = Path(root).resolve()
         docs_dir = root_path / "docs"
         return cls(

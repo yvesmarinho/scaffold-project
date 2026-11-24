@@ -36,7 +36,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
 import yaml
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
@@ -182,7 +181,9 @@ class TestDevopsInfrastructureDescriptor:
         infra_result = next(
             (r for r in report.results if r.name == "devops-infrastructure"), None
         )
-        assert infra_result is not None, "devops-infrastructure não encontrado no report"
+        assert (
+            infra_result is not None
+        ), "devops-infrastructure não encontrado no report"
         assert infra_result.status in ("ok",), (
             f"devops-infrastructure status inesperado: {infra_result.status}; "
             f"issues: {[i.message for i in infra_result.issues]}"
@@ -257,7 +258,8 @@ class TestValidateZeroWarnings:
     def _run_json(self) -> dict:
         proc = subprocess.run(
             [_PYTHON, str(_SCRIPTS_DIR / "scaffold.py"), "--validate", "--json"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
             cwd=str(_PROJECT_ROOT),
         )
         return json.loads(proc.stdout)
@@ -273,16 +275,16 @@ class TestValidateZeroWarnings:
     def test_validate_zero_warnings_cli_json(self):
         """--validate --json deve reportar warnings == 0."""
         data = self._run_json()
-        assert data.get("warnings", data.get("total_warnings", -1)) == 0, (
-            f"--validate --json retornou warnings != 0: {data}"
-        )
+        assert (
+            data.get("warnings", data.get("total_warnings", -1)) == 0
+        ), f"--validate --json retornou warnings != 0: {data}"
 
     def test_validate_thirteen_profiles_cli(self):
         """Todos os perfis registrados devem ser encontrados."""
         data = self._run_json()
-        assert data["profiles_checked"] == 22, (
-            f"Esperado 22 perfis, obtido {data['profiles_checked']}"
-        )
+        assert (
+            data["profiles_checked"] == 22
+        ), f"Esperado 22 perfis, obtido {data['profiles_checked']}"
 
     def test_validate_no_errors(self):
         """Nenhum descriptor deve ter erros após IMP-33."""

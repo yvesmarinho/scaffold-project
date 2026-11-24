@@ -15,21 +15,21 @@ Bug fix: BUG-#1.1 (P0 CRITICAL - Sistema de merge ausente)
 Implementação: Sprint 1 (Security Critical)
 """
 
-from pathlib import Path
-from typing import Protocol, Optional, List, Tuple
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Protocol
 
 from .config import CreatedItem
 from .copilot_agent_merge import CopilotAgentMerger
 from .copilot_prompt_merge import CopilotPromptMerger
 from .copilot_rules_merge import CopilotRulesMerger
 from .github_workflow_merge import GitHubWorkflowMerger
-from .pyproject_merge import PyprojectMerger
+from .issue_template_merge import IssueTemplateMerger
 from .json_merge import JSONMerger, WorkspaceMerger
 from .precommit_merge import PreCommitMerger
+from .pyproject_merge import PyprojectMerger
 from .vscode_config_merge import VSCodeConfigMerger
-from .issue_template_merge import IssueTemplateMerger
 
 log = logging.getLogger(__name__)
 
@@ -37,6 +37,7 @@ log = logging.getLogger(__name__)
 # =============================================================================
 # Protocol e Tipos
 # =============================================================================
+
 
 class FileMerger(Protocol):
     """
@@ -59,10 +60,7 @@ class FileMerger(Protocol):
         ...
 
     def merge(
-        self,
-        existing_path: Path,
-        template_content: str,
-        interactive: bool = True
+        self, existing_path: Path, template_content: str, interactive: bool = True
     ) -> CreatedItem:
         """
         Faz merge do conteúdo do template com arquivo existente.
@@ -81,15 +79,17 @@ class FileMerger(Protocol):
 @dataclass
 class MergeResult:
     """Resultado de uma operação de merge."""
+
     success: bool
     merged_content: str
-    changes_made: List[str]
-    conflicts: List[str]
+    changes_made: list[str]
+    conflicts: list[str]
 
 
 # =============================================================================
 # GitignoreMerger - P0 CRITICAL (Segurança)
 # =============================================================================
+
 
 class GitignoreMerger:
     """
@@ -127,10 +127,7 @@ class GitignoreMerger:
         return file_path.name == ".gitignore"
 
     def merge(
-        self,
-        existing_path: Path,
-        template_content: str,
-        interactive: bool = True
+        self, existing_path: Path, template_content: str, interactive: bool = True
     ) -> CreatedItem:
         """
         Faz merge inteligente do .gitignore.
@@ -142,29 +139,31 @@ class GitignoreMerger:
         4. Preserva conteúdo original abaixo
         """
         existing_content = existing_path.read_text()
-        existing_lines = set(
-            line.strip() for line in existing_content.splitlines()
+        existing_lines = {
+            line.strip()
+            for line in existing_content.splitlines()
             if line.strip() and not line.strip().startswith("#")
-        )
+        }
 
         # Detectar padrões críticos ausentes
         missing_patterns = [
-            pattern for pattern in self.CRITICAL_PATTERNS
+            pattern
+            for pattern in self.CRITICAL_PATTERNS
             if pattern not in existing_lines
         ]
 
         if not missing_patterns:
-            log.info(
-                f"✅ {existing_path.name}: Todos padrões críticos presentes")
+            log.info(f"✅ {existing_path.name}: Todos padrões críticos presentes")
             return CreatedItem(
                 path=existing_path,
                 kind="file",
                 status="skipped",
-                message="All critical patterns present"
+                message="All critical patterns present",
             )
 
         # Construir seção de segurança
         from datetime import datetime
+
         security_section = self.SECURITY_HEADER.format(
             timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
@@ -186,13 +185,14 @@ class GitignoreMerger:
             path=existing_path,
             kind="file",
             status="created",
-            message=f"Added {len(missing_patterns)} security patterns"
+            message=f"Added {len(missing_patterns)} security patterns",
         )
 
 
 # =============================================================================
 # MakefileMerger - P1 IMPORTANT (Workflow)
 # =============================================================================
+
 
 class MakefileMerger:
     """
@@ -223,10 +223,7 @@ class MakefileMerger:
         return file_path.name == "Makefile"
 
     def merge(
-        self,
-        existing_path: Path,
-        template_content: str,
-        interactive: bool = True
+        self, existing_path: Path, template_content: str, interactive: bool = True
     ) -> CreatedItem:
         """
         Faz merge inteligente do Makefile.
@@ -242,25 +239,25 @@ class MakefileMerger:
         existing_content = existing_path.read_text()
 
         # Regex para extrair targets: linhas que começam com palavra: (não tab)
-        target_pattern = re.compile(r'^([a-zA-Z0-9_-]+):', re.MULTILINE)
+        target_pattern = re.compile(r"^([a-zA-Z0-9_-]+):", re.MULTILINE)
 
         existing_targets = set(target_pattern.findall(existing_content))
-        template_targets = set(target_pattern.findall(template_content))
+        set(target_pattern.findall(template_content))
 
         # Targets essenciais ausentes
         missing_essential = [
-            target for target in self.ESSENTIAL_TARGETS
+            target
+            for target in self.ESSENTIAL_TARGETS
             if target not in existing_targets
         ]
 
         if not missing_essential:
-            log.info(
-                f"✅ {existing_path.name}: Todos targets essenciais presentes")
+            log.info(f"✅ {existing_path.name}: Todos targets essenciais presentes")
             return CreatedItem(
                 path=existing_path,
                 kind="file",
                 status="skipped",
-                message="All essential targets present"
+                message="All essential targets present",
             )
 
         # Extrair definições completas dos targets ausentes do template
@@ -268,8 +265,7 @@ class MakefileMerger:
         for target in missing_essential:
             # Encontrar bloco completo do target no template
             pattern = re.compile(
-                rf'^({target}:.*?)(?=^\S|\Z)',
-                re.MULTILINE | re.DOTALL
+                rf"^({target}:.*?)(?=^\S|\Z)", re.MULTILINE | re.DOTALL
             )
             match = pattern.search(template_content)
             if match:
@@ -295,13 +291,14 @@ class MakefileMerger:
             path=existing_path,
             kind="file",
             status="created",
-            message=f"Added {len(missing_essential)} targets"
+            message=f"Added {len(missing_essential)} targets",
         )
 
 
 # =============================================================================
 # ReadmeMerger - P1 IMPORTANT (Documentação)
 # =============================================================================
+
 
 class ReadmeMerger:
     """
@@ -331,10 +328,7 @@ class ReadmeMerger:
         return file_path.name == "README.md"
 
     def merge(
-        self,
-        existing_path: Path,
-        template_content: str,
-        interactive: bool = True
+        self, existing_path: Path, template_content: str, interactive: bool = True
     ) -> CreatedItem:
         """
         Faz merge inteligente do README.md.
@@ -350,30 +344,31 @@ class ReadmeMerger:
         existing_content = existing_path.read_text()
 
         # Regex para extrair seções: linhas que começam com ##
-        section_pattern = re.compile(r'^## (.+?)$', re.MULTILINE)
+        section_pattern = re.compile(r"^## (.+?)$", re.MULTILINE)
 
         existing_sections = set(section_pattern.findall(existing_content))
-        template_sections = set(section_pattern.findall(template_content))
+        set(section_pattern.findall(template_content))
 
         # Seções essenciais ausentes
         missing_sections = [
-            section for section in self.ESSENTIAL_SECTIONS
+            section
+            for section in self.ESSENTIAL_SECTIONS
             if section not in existing_sections
         ]
 
         if not missing_sections:
-            log.info(
-                f"✅ {existing_path.name}: Todas seções essenciais presentes")
+            log.info(f"✅ {existing_path.name}: Todas seções essenciais presentes")
             return CreatedItem(
                 path=existing_path,
                 kind="file",
                 status="skipped",
-                message="All essential sections present"
+                message="All essential sections present",
             )
 
         # Extrair introdução do README existente (até primeiro ##)
-        intro_match = re.match(r'^(.*?)(?=^##|\Z)',
-                               existing_content, re.DOTALL | re.MULTILINE)
+        intro_match = re.match(
+            r"^(.*?)(?=^##|\Z)", existing_content, re.DOTALL | re.MULTILINE
+        )
         intro = intro_match.group(1).rstrip() if intro_match else ""
 
         # Extrair definições completas das seções ausentes do template
@@ -381,8 +376,7 @@ class ReadmeMerger:
         for section in missing_sections:
             # Encontrar bloco completo da seção no template
             pattern = re.compile(
-                rf'^(## {re.escape(section)}.*?)(?=^##|\Z)',
-                re.MULTILINE | re.DOTALL
+                rf"^(## {re.escape(section)}.*?)(?=^##|\Z)", re.MULTILINE | re.DOTALL
             )
             match = pattern.search(template_content)
             if match:
@@ -401,7 +395,8 @@ class ReadmeMerger:
 
         # Adicionar seções originais (se houver)
         original_sections_match = re.search(
-            r'^##.*', existing_content, re.MULTILINE | re.DOTALL)
+            r"^##.*", existing_content, re.MULTILINE | re.DOTALL
+        )
         if original_sections_match:
             merged_content += original_sections_match.group(0)
 
@@ -417,7 +412,7 @@ class ReadmeMerger:
             path=existing_path,
             kind="file",
             status="created",
-            message=f"Added {len(missing_sections)} sections"
+            message=f"Added {len(missing_sections)} sections",
         )
 
 
@@ -426,16 +421,16 @@ class ReadmeMerger:
 # =============================================================================
 
 # Registry global de mergers (ordem importa: mais específico primeiro)
-_MERGERS: List[FileMerger] = [
-    WorkspaceMerger(),      # Sprint W21: BUG-16 (.code-workspace merge)
-    JSONMerger(),           # v2.0: User-wins universal para TODOS os JSONs (fix duplicação)
-    CopilotAgentMerger(),   # Sprint 1: P0 CRITICAL (32 agents)
+_MERGERS: list[FileMerger] = [
+    WorkspaceMerger(),  # Sprint W21: BUG-16 (.code-workspace merge)
+    JSONMerger(),  # v2.0: User-wins universal para TODOS os JSONs (fix duplicação)
+    CopilotAgentMerger(),  # Sprint 1: P0 CRITICAL (32 agents)
     CopilotPromptMerger(),  # Sprint 2: P0 HIGH (26 prompts)
-    CopilotRulesMerger(),   # Sprint 2: P0 HIGH (2 rules files)
+    CopilotRulesMerger(),  # Sprint 2: P0 HIGH (2 rules files)
     GitHubWorkflowMerger(),  # Sprint 3: P1 HIGH (3+ workflows)
-    PyprojectMerger(),      # Sprint 3: P1 HIGH (pyproject.toml)
-    PreCommitMerger(),      # Sprint 4: P2 MEDIUM (.pre-commit-config.yaml)
-    VSCodeConfigMerger(),   # Sprint 4: P2 MEDIUM (launch.json, tasks.json)
+    PyprojectMerger(),  # Sprint 3: P1 HIGH (pyproject.toml)
+    PreCommitMerger(),  # Sprint 4: P2 MEDIUM (.pre-commit-config.yaml)
+    VSCodeConfigMerger(),  # Sprint 4: P2 MEDIUM (launch.json, tasks.json)
     IssueTemplateMerger(),  # Sprint 4: P2 MEDIUM (.github/ISSUE_TEMPLATE/*)
     GitignoreMerger(),
     MakefileMerger(),
@@ -444,9 +439,7 @@ _MERGERS: List[FileMerger] = [
 
 
 def merge_or_skip(
-    file_path: Path,
-    template_content: str,
-    interactive: bool = True
+    file_path: Path, template_content: str, interactive: bool = True
 ) -> CreatedItem:
     """
     Tenta fazer merge inteligente; se não há merger disponível, faz skip.
@@ -474,8 +467,7 @@ def merge_or_skip(
     # Tentar encontrar merger apropriado
     for merger in _MERGERS:
         if merger.can_merge(file_path):
-            log.debug(
-                f"🔀 Merge: {file_path.name} via {merger.__class__.__name__}")
+            log.debug(f"🔀 Merge: {file_path.name} via {merger.__class__.__name__}")
             return merger.merge(file_path, template_content, interactive)
 
     # Sem merger disponível → skip (comportamento seguro)
@@ -484,7 +476,7 @@ def merge_or_skip(
         path=file_path,
         kind="file",
         status="skipped",
-        message="File exists, no merger available"
+        message="File exists, no merger available",
     )
 
 
@@ -512,7 +504,7 @@ def register_merger(merger: FileMerger) -> None:
     log.info(f"✅ Merger registrado: {merger.__class__.__name__}")
 
 
-def get_registered_mergers() -> List[str]:
+def get_registered_mergers() -> list[str]:
     """
     Retorna lista de mergers registrados (útil para debug/testes).
 

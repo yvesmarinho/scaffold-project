@@ -3,7 +3,7 @@
 NOME: test_operation_log.py
 TITULO: Testes do log de operação (lib/ui.save_operation_log)
 DATA: 09/11/2026 16:10
-MODIFICADO: 17/11/2026 16:32
+MODIFICADO: 24/11/2026 15:00
 VERSÃO: 1.0.0
 DEPEND: pytest
 STATUS: DEV
@@ -16,7 +16,7 @@ Bugs cobertos (docs/planning/lembrete.md):
 from __future__ import annotations
 
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -28,7 +28,7 @@ from lib import ui  # noqa: E402
 from lib.config import CreatedItem  # noqa: E402
 
 # 18:52:50 UTC == 15:52:50 em São Paulo (UTC-3, sem horário de verão)
-_FIXED_UTC = datetime(2026, 11, 9, 18, 52, 50, tzinfo=timezone.utc)
+_FIXED_UTC = datetime(2026, 11, 9, 18, 52, 50, tzinfo=UTC)
 
 
 @pytest.fixture
@@ -49,9 +49,18 @@ def project(tmp_path: Path) -> Path:
 def _items(project: Path) -> list[CreatedItem]:
     return [
         CreatedItem(path=project / "docs", kind="dir", status="created"),
-        CreatedItem(path=project / ".github" / "agents" / "a.agent.md", kind="file", status="drift",
-                    message="difere do upstream"),
-        CreatedItem(path=project / "README.md", kind="file", status="error", message="sem permissão"),
+        CreatedItem(
+            path=project / ".github" / "agents" / "a.agent.md",
+            kind="file",
+            status="drift",
+            message="difere do upstream",
+        ),
+        CreatedItem(
+            path=project / "README.md",
+            kind="file",
+            status="error",
+            message="sem permissão",
+        ),
     ]
 
 
@@ -83,20 +92,26 @@ def test_cabecalho_com_iso_e_offset(project: Path, isolated_logs: Path):
 
 
 def test_log_tem_secao_de_drift_com_path_relativo(project: Path, isolated_logs: Path):
-    text = ui.save_operation_log(_items(project), project, now=_FIXED_UTC).read_text(encoding="utf-8")
+    text = ui.save_operation_log(_items(project), project, now=_FIXED_UTC).read_text(
+        encoding="utf-8"
+    )
     assert "## Drift (1)" in text
     assert "- .github/agents/a.agent.md | difere do upstream" in text
 
 
 def test_log_tem_secao_de_erros(project: Path, isolated_logs: Path):
-    text = ui.save_operation_log(_items(project), project, now=_FIXED_UTC).read_text(encoding="utf-8")
+    text = ui.save_operation_log(_items(project), project, now=_FIXED_UTC).read_text(
+        encoding="utf-8"
+    )
     assert "## Errors (1)" in text
     assert "- README.md | sem permissão" in text
 
 
 def test_sem_drift_nao_cria_secao(project: Path, isolated_logs: Path):
     items = [CreatedItem(path=project / "docs", kind="dir", status="created")]
-    text = ui.save_operation_log(items, project, now=_FIXED_UTC).read_text(encoding="utf-8")
+    text = ui.save_operation_log(items, project, now=_FIXED_UTC).read_text(
+        encoding="utf-8"
+    )
     assert "## Drift" not in text
 
 
@@ -105,7 +120,9 @@ def test_lista_vazia_ainda_gera_log(project: Path, isolated_logs: Path):
     assert log is not None and "# Total items: 0" in log.read_text(encoding="utf-8")
 
 
-def test_diretorio_sem_permissao_nao_derruba(project: Path, isolated_logs: Path, monkeypatch: pytest.MonkeyPatch):
+def test_diretorio_sem_permissao_nao_derruba(
+    project: Path, isolated_logs: Path, monkeypatch: pytest.MonkeyPatch
+):
     def boom(*_args, **_kwargs):
         raise PermissionError("negado")
 

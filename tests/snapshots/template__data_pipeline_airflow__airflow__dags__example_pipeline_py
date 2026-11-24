@@ -16,7 +16,6 @@ from datetime import datetime, timedelta
 from airflow.decorators import dag, task
 from airflow.models import Variable
 
-
 default_args = {
     "owner": "data-engineering",
     "retries": 3,

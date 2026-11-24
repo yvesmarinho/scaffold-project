@@ -5,8 +5,9 @@ Testes unitários para IssueTemplateMerger.
 """
 
 from pathlib import Path
-import pytest
+
 import yaml
+
 from scripts.lib.issue_template_merge import IssueTemplateMerger
 
 
@@ -106,7 +107,7 @@ OS, version, etc.
 """
 
         bug_file.write_text(existing_content, encoding="utf-8")
-        result = merger.merge(bug_file, template_content, interactive=False)
+        merger.merge(bug_file, template_content, interactive=False)
 
         # Frontmatter merged (user wins), corpo preservado (customizado)
         content = bug_file.read_text(encoding="utf-8")
@@ -168,7 +169,7 @@ What other approaches did you consider?
 """
 
         feature_file.write_text(existing_content, encoding="utf-8")
-        result = merger.merge(feature_file, template_content, interactive=False)
+        merger.merge(feature_file, template_content, interactive=False)
 
         # Corpo atualizado (>70% similar)
         content = feature_file.read_text(encoding="utf-8")
@@ -216,7 +217,7 @@ This is a standard template.
 """
 
         custom_file.write_text(existing_content, encoding="utf-8")
-        result = merger.merge(custom_file, template_content, interactive=False)
+        merger.merge(custom_file, template_content, interactive=False)
 
         # Frontmatter merged, corpo preservado (< 70% similar)
         content = custom_file.read_text(encoding="utf-8")
@@ -319,7 +320,7 @@ Standard body.
 """
 
         simple_file.write_text(existing_content, encoding="utf-8")
-        result = merger.merge(simple_file, template_content, interactive=False)
+        merger.merge(simple_file, template_content, interactive=False)
 
         # Frontmatter adicionado, corpo preservado (customizado)
         content = simple_file.read_text(encoding="utf-8")
@@ -397,7 +398,7 @@ Bug content.
 """
 
         bug_file.write_text(existing_content, encoding="utf-8")
-        result = merger.merge(bug_file, template_content, interactive=False)
+        merger.merge(bug_file, template_content, interactive=False)
 
         # User wins: critical label e assignee preservados
         content = bug_file.read_text(encoding="utf-8")

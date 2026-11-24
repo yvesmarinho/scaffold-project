@@ -32,7 +32,7 @@ import shutil
 import subprocess
 import tarfile
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -77,19 +77,21 @@ _INCLUDE_PATTERNS: list[str] = [
 ]
 
 # Nomes de diretório/arquivo a excluir (qualquer nível do path)
-_EXCLUDE_NAMES: frozenset[str] = frozenset({
-    "__pycache__",
-    ".venv",
-    "venv",
-    "node_modules",
-    ".secrets",
-    ".git",
-    "dist",
-    ".ruff_cache",
-    ".mypy_cache",
-    ".pytest_cache",
-    "htmlcov",
-})
+_EXCLUDE_NAMES: frozenset[str] = frozenset(
+    {
+        "__pycache__",
+        ".venv",
+        "venv",
+        "node_modules",
+        ".secrets",
+        ".git",
+        "dist",
+        ".ruff_cache",
+        ".mypy_cache",
+        ".pytest_cache",
+        "htmlcov",
+    }
+)
 
 # Extensões de bytecode Python a excluir
 _EXCLUDE_SUFFIXES: frozenset[str] = frozenset({".pyc", ".pyo", ".pyd"})
@@ -98,6 +100,7 @@ _EXCLUDE_SUFFIXES: frozenset[str] = frozenset({".pyc", ".pyo", ".pyd"})
 # ---------------------------------------------------------------------------
 # Dataclass de resultado
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class PublishResult:
@@ -116,6 +119,7 @@ class PublishResult:
 # Coleta de arquivos
 # ---------------------------------------------------------------------------
 
+
 def _tracked_files(project_root: Path) -> set[str] | None:
     """
     Caminhos relativos (posix) versionados em ``project_root`` via ``git ls-files``.
@@ -130,16 +134,26 @@ def _tracked_files(project_root: Path) -> set[str] | None:
     try:
         top = subprocess.run(  # noqa: S603 — argumentos fixos, sem entrada externa
             [git, "rev-parse", "--show-toplevel"],
-            cwd=project_root, capture_output=True, text=True, check=True, timeout=30,
+            cwd=project_root,
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=30,
         ).stdout.strip()
         if Path(top).resolve() != project_root.resolve():
             return None
         listed = subprocess.run(  # noqa: S603 — argumentos fixos, sem entrada externa
             [git, "ls-files", "-z"],
-            cwd=project_root, capture_output=True, text=True, check=True, timeout=60,
+            cwd=project_root,
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=60,
         ).stdout
     except (OSError, subprocess.SubprocessError) as exc:
-        log.warning("git indisponível para filtrar o release (%s); usando só o glob", exc)
+        log.warning(
+            "git indisponível para filtrar o release (%s); usando só o glob", exc
+        )
         return None
     return {entry for entry in listed.split("\0") if entry}
 
@@ -186,6 +200,7 @@ def _collect_files(project_root: Path) -> list[Path]:
 # Publicação
 # ---------------------------------------------------------------------------
 
+
 def publish_template(
     output_dir: Path,
     project_root: Path,
@@ -216,7 +231,7 @@ def publish_template(
 
     if now is not None and now.tzinfo is None:
         raise ValueError("datetime sem timezone — use datetime.now(timezone.utc)")
-    local = (now or datetime.now(timezone.utc)).astimezone(_LOCAL_TZ)
+    local = (now or datetime.now(UTC)).astimezone(_LOCAL_TZ)
     created_at = local.isoformat(timespec="seconds")
     date_slug = local.strftime("%Y%m%d")
     base_name = f"enterprise-template-v{version}-{date_slug}"
@@ -225,9 +240,7 @@ def publish_template(
     manifest_path = output_dir / f"release-manifest-v{version}-{date_slug}.json"
 
     files = _collect_files(project_root)
-    included_files: list[str] = [
-        str(f.relative_to(project_root)) for f in files
-    ]
+    included_files: list[str] = [str(f.relative_to(project_root)) for f in files]
 
     # Escreve tarball (sobrescreve se existir — idempotente por data)
     with tarfile.open(tarball_path, "w:gz") as tar:
@@ -239,12 +252,12 @@ def publish_template(
 
     # Escreve manifesto JSON
     manifest: dict = {
-        "version":    version,
+        "version": version,
         "created_at": created_at,
-        "tarball":    tarball_path.name,
+        "tarball": tarball_path.name,
         "file_count": len(files),
         "size_bytes": size_bytes,
-        "files":      included_files,
+        "files": included_files,
     }
     manifest_path.write_text(
         json.dumps(manifest, indent=2, ensure_ascii=False),

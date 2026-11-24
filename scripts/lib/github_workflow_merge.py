@@ -12,10 +12,11 @@ Sprint 3 (P1 HIGH): Resolve gap de 3+ workflows sem merge
 Bug fix: Security workflows não propagados (CodeQL, secret scan, dependency audit)
 """
 
-from pathlib import Path
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
 import yaml
 
 from .config import CreatedItem
@@ -27,28 +28,32 @@ log = logging.getLogger(__name__)
 # Types and Data Classes
 # =============================================================================
 
+
 @dataclass
 class WorkflowContent:
     """Representa conteúdo de um workflow YAML."""
-    name: Optional[str]
-    on_triggers: Dict[str, Any]  # on: push, pull_request, schedule, etc.
-    permissions: Dict[str, str]  # permissions: contents: read, etc.
-    jobs: Dict[str, Any]  # jobs: job_name: {...}
-    env: Dict[str, Any]  # env global
-    raw_yaml: Dict[str, Any]  # YAML completo
+
+    name: str | None
+    on_triggers: dict[str, Any]  # on: push, pull_request, schedule, etc.
+    permissions: dict[str, str]  # permissions: contents: read, etc.
+    jobs: dict[str, Any]  # jobs: job_name: {...}
+    env: dict[str, Any]  # env global
+    raw_yaml: dict[str, Any]  # YAML completo
 
 
 @dataclass
 class WorkflowMergeDecision:
     """Decisão de merge para um workflow."""
+
     should_merge: bool
     reason: str
-    changes: List[str]
+    changes: list[str]
 
 
 # =============================================================================
 # GitHubWorkflowMerger
 # =============================================================================
+
 
 class GitHubWorkflowMerger:
     """
@@ -98,17 +103,14 @@ class GitHubWorkflowMerger:
     def can_merge(self, file_path: Path) -> bool:
         """Verifica se é um workflow YAML em .github/workflows/."""
         return (
-            file_path.suffix in [".yml", ".yaml"] and
-            len(file_path.parts) >= 3 and
-            ".github" in file_path.parts and
-            "workflows" in file_path.parts
+            file_path.suffix in [".yml", ".yaml"]
+            and len(file_path.parts) >= 3
+            and ".github" in file_path.parts
+            and "workflows" in file_path.parts
         )
 
     def merge(
-        self,
-        existing_path: Path,
-        template_content: str,
-        interactive: bool = True
+        self, existing_path: Path, template_content: str, interactive: bool = True
     ) -> CreatedItem:
         """
         Faz merge inteligente do workflow YAML
@@ -131,39 +133,29 @@ class GitHubWorkflowMerger:
             template_wf = self._parse_workflow(template_content)
 
             # 3. Decisão de merge
-            decision = self._should_merge(
-                existing_wf,
-                template_wf,
-                existing_path.name
-            )
+            decision = self._should_merge(existing_wf, template_wf, existing_path.name)
 
             if not decision.should_merge:
-                log.info("⏭️  Skip: %s (%s)",
-                         existing_path.name, decision.reason)
+                log.info("⏭️  Skip: %s (%s)", existing_path.name, decision.reason)
                 return CreatedItem(
                     path=existing_path,
                     kind="file",
                     status="skipped",
-                    message=decision.reason
+                    message=decision.reason,
                 )
 
             # 4. Merge triggers
             merged_triggers = self._merge_triggers(
-                existing_wf.on_triggers,
-                template_wf.on_triggers
+                existing_wf.on_triggers, template_wf.on_triggers
             )
 
             # 5. Merge permissions
             merged_permissions = self._merge_permissions(
-                existing_wf.permissions,
-                template_wf.permissions
+                existing_wf.permissions, template_wf.permissions
             )
 
             # 6. Merge jobs
-            merged_jobs = self._merge_jobs(
-                existing_wf.jobs,
-                template_wf.jobs
-            )
+            merged_jobs = self._merge_jobs(existing_wf.jobs, template_wf.jobs)
 
             # 7. Merge env (se houver)
             merged_env = {**existing_wf.env, **template_wf.env}
@@ -187,7 +179,7 @@ class GitHubWorkflowMerger:
                 default_flow_style=False,
                 allow_unicode=True,
                 sort_keys=False,
-                width=120
+                width=120,
             )
 
             # 9. Backup e save
@@ -195,18 +187,19 @@ class GitHubWorkflowMerger:
             backup_path.write_text(existing_content, encoding="utf-8")
             existing_path.write_text(merged_content, encoding="utf-8")
 
-            changes_msg = "\n".join(
-                f"  - {change}" for change in decision.changes)
+            changes_msg = "\n".join(f"  - {change}" for change in decision.changes)
             log.info(
                 "✅ Merged: %s\n%s\n  Backup: %s",
-                existing_path.name, changes_msg, backup_path.name
+                existing_path.name,
+                changes_msg,
+                backup_path.name,
             )
 
             return CreatedItem(
                 path=existing_path,
                 kind="file",
                 status="merged",
-                message=f"Merged with {len(decision.changes)} changes (backup created)"
+                message=f"Merged with {len(decision.changes)} changes (backup created)",
             )
 
         except Exception as e:
@@ -215,7 +208,7 @@ class GitHubWorkflowMerger:
                 path=existing_path,
                 kind="file",
                 status="error",
-                message=f"Merge error: {str(e)}"
+                message=f"Merge error: {str(e)}",
             )
 
     # =========================================================================
@@ -248,7 +241,7 @@ class GitHubWorkflowMerger:
             permissions=yaml_data.get("permissions", {}),
             jobs=yaml_data.get("jobs", {}),
             env=yaml_data.get("env", {}),
-            raw_yaml=yaml_data
+            raw_yaml=yaml_data,
         )
 
     # =========================================================================
@@ -256,10 +249,7 @@ class GitHubWorkflowMerger:
     # =========================================================================
 
     def _should_merge(
-        self,
-        existing_wf: WorkflowContent,
-        template_wf: WorkflowContent,
-        filename: str
+        self, existing_wf: WorkflowContent, template_wf: WorkflowContent, filename: str
     ) -> WorkflowMergeDecision:
         """
         Decide se deve fazer merge baseado em novos jobs/triggers.
@@ -291,13 +281,12 @@ class GitHubWorkflowMerger:
         template_triggers = set(template_wf.on_triggers.keys())
         new_triggers = template_triggers - existing_triggers
 
-        new_security_triggers = [
-            t for t in new_triggers if t in self.SECURITY_TRIGGERS
-        ]
+        new_security_triggers = [t for t in new_triggers if t in self.SECURITY_TRIGGERS]
 
         if new_security_triggers:
             changes.append(
-                f"Add {len(new_security_triggers)} triggers ({', '.join(new_security_triggers)})")
+                f"Add {len(new_security_triggers)} triggers ({', '.join(new_security_triggers)})"
+            )
 
         # 3. Detectar novas permissions
         existing_perms = set(existing_wf.permissions.keys())
@@ -310,15 +299,13 @@ class GitHubWorkflowMerger:
         # Decisão final
         if not changes:
             return WorkflowMergeDecision(
-                should_merge=False,
-                reason="Workflow already up-to-date",
-                changes=[]
+                should_merge=False, reason="Workflow already up-to-date", changes=[]
             )
 
         return WorkflowMergeDecision(
             should_merge=True,
             reason=f"Template has updates ({len(changes)} changes)",
-            changes=changes
+            changes=changes,
         )
 
     # =========================================================================
@@ -326,10 +313,8 @@ class GitHubWorkflowMerger:
     # =========================================================================
 
     def _merge_triggers(
-        self,
-        existing: Dict[str, Any],
-        template: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, existing: dict[str, Any], template: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Merge triggers (on) com estratégia aditiva.
 
@@ -354,10 +339,8 @@ class GitHubWorkflowMerger:
         return merged
 
     def _merge_permissions(
-        self,
-        existing: Dict[str, str],
-        template: Dict[str, str]
-    ) -> Dict[str, str]:
+        self, existing: dict[str, str], template: dict[str, str]
+    ) -> dict[str, str]:
         """
         Merge permissions com estratégia de adicionar ausentes.
 
@@ -375,10 +358,8 @@ class GitHubWorkflowMerger:
         return merged
 
     def _merge_jobs(
-        self,
-        existing: Dict[str, Any],
-        template: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, existing: dict[str, Any], template: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Merge jobs com estratégia aditiva preservando customizações.
 
@@ -397,24 +378,20 @@ class GitHubWorkflowMerger:
             else:
                 # Job existe - verificar se é security job
                 job_name_lower = job_name.lower()
-                is_security = any(
-                    sec in job_name_lower for sec in self.SECURITY_JOBS)
+                is_security = any(sec in job_name_lower for sec in self.SECURITY_JOBS)
 
                 if is_security:
                     # Security job - atualizar steps (action versions)
                     merged[job_name] = self._merge_job_steps(
-                        merged[job_name],
-                        job_config
+                        merged[job_name], job_config
                     )
                 # Else: preserve existing custom job
 
         return merged
 
     def _merge_job_steps(
-        self,
-        existing_job: Dict[str, Any],
-        template_job: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, existing_job: dict[str, Any], template_job: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Merge steps de um job (principalmente action versions).
 

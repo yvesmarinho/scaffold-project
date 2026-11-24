@@ -68,10 +68,22 @@ ignore = [
     "E501",  # line too long (handled by black)
     "B008",  # do not perform function calls in argument defaults
     "S101",  # use of assert (common in tests)
+    "UP009", # cabeçalho "# -*- coding: utf-8 -*-" é obrigatório pelo padrão do projeto
+    # S603: dispara em toda chamada de subprocess, mesmo sem shell e com args em
+    # lista (decisão 24/11/2026). Seguem ativas S602 (shell=True) e S607
+    # (executável sem caminho absoluto).
+    "S603",
 ]
 
+# scripts/tmp/: scripts descartáveis de correções antigas — não publicados
+# (fora do --publish) nem importados por nenhum módulo.
+extend-exclude = ["scripts/tmp"]
+
 [tool.ruff.per-file-ignores]
-"tests/**/*.py" = ["S101"]  # Allow asserts in tests
+# Testes: asserts; subprocess com argumentos fixos do próprio teste (S603/S607);
+# caminhos /tmp em fixtures e dados de teste (S108). Código de produção segue
+# coberto por essas regras.
+"tests/**/*.py" = ["S101", "S603", "S607", "S108"]
 
 [tool.bandit]
 exclude_dirs = [
@@ -82,6 +94,10 @@ exclude_dirs = [
 ]
 skips = [
     "B101",  # assert_used (common in tests, handled by exclude_dirs)
+    # B404/B603: disparam em todo import/chamada de subprocess, mesmo sem shell
+    # (decisão 24/11/2026). Seguem ativas B602 (shell=True) e B607 (caminho parcial).
+    "B404",
+    "B603",
 ]
 
 [tool.bandit.assert_used]

@@ -8,13 +8,15 @@ Part of IMP-65 (Template Synchronization System) Phase 3.
 """
 
 import logging
-import re
+import shutil
 import subprocess
 import tempfile
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+
+# Caminho absoluto do git (S607/B607); "git" como fallback fora do PATH.
+_GIT = shutil.which("git") or "git"
 
 log = logging.getLogger(__name__)
 
@@ -23,9 +25,11 @@ log = logging.getLogger(__name__)
 # Data Classes
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ConflictRegion:
     """Represents a merge conflict region."""
+
     start_line: int
     end_line: int
     local_content: str
@@ -36,6 +40,7 @@ class ConflictRegion:
 @dataclass
 class MergeResult:
     """Result of a three-way merge operation."""
+
     success: bool
     has_conflicts: bool
     merged_content: str
@@ -45,13 +50,14 @@ class MergeResult:
     base_version: str
     local_version: str
     upstream_version: str
-    backup_path: Optional[Path] = None
-    error_message: Optional[str] = None
+    backup_path: Path | None = None
+    error_message: str | None = None
 
 
 # ---------------------------------------------------------------------------
 # Three-Way Merge
 # ---------------------------------------------------------------------------
+
 
 def three_way_merge(
     base_content: str,
@@ -91,12 +97,16 @@ def three_way_merge(
             # Exit code: 0 = clean merge, 1 = conflicts, >1 = error
             result = subprocess.run(
                 [
-                    "git", "merge-file",
+                    _GIT,
+                    "merge-file",
                     "-p",  # Output to stdout
                     "--diff3",  # Show base in conflicts
-                    "-L", "LOCAL",
-                    "-L", "BASE",
-                    "-L", "UPSTREAM",
+                    "-L",
+                    "LOCAL",
+                    "-L",
+                    "BASE",
+                    "-L",
+                    "UPSTREAM",
                     str(local_file),
                     str(base_file),
                     str(upstream_file),
@@ -109,7 +119,9 @@ def three_way_merge(
             has_conflicts = result.returncode == 1
 
             if result.returncode > 1:
-                log.error("git merge-file failed for %s: %s", template_name, result.stderr)
+                log.error(
+                    "git merge-file failed for %s: %s", template_name, result.stderr
+                )
                 return False, "", False
 
             log.debug(
@@ -132,6 +144,7 @@ def three_way_merge(
 # ---------------------------------------------------------------------------
 # Conflict Detection and Parsing
 # ---------------------------------------------------------------------------
+
 
 def detect_conflicts(merged_content: str) -> list[ConflictRegion]:
     """
@@ -204,13 +217,15 @@ def detect_conflicts(merged_content: str) -> list[ConflictRegion]:
                 else:
                     region_type = "both_modified"
 
-                conflicts.append(ConflictRegion(
-                    start_line=start_line,
-                    end_line=end_line,
-                    local_content=local_str,
-                    upstream_content=upstream_str,
-                    region_type=region_type,
-                ))
+                conflicts.append(
+                    ConflictRegion(
+                        start_line=start_line,
+                        end_line=end_line,
+                        local_content=local_str,
+                        upstream_content=upstream_str,
+                        region_type=region_type,
+                    )
+                )
 
         i += 1
 
@@ -255,6 +270,7 @@ def analyze_conflict(conflict: ConflictRegion) -> str:
 # Merge Operations
 # ---------------------------------------------------------------------------
 
+
 def create_backup(file_path: Path) -> Path:
     """
     Create timestamped backup of a file.
@@ -279,7 +295,7 @@ def apply_merge_result(
     merged_content: str,
     target_path: Path,
     create_backup_file: bool = True,
-) -> Optional[Path]:
+) -> Path | None:
     """
     Apply merged content to target file with optional backup.
 
@@ -396,6 +412,7 @@ def merge_templates(
 # Conflict Resolution Helpers
 # ---------------------------------------------------------------------------
 
+
 def format_conflict_report(merge_result: MergeResult) -> str:
     """
     Generate human-readable conflict report.
@@ -413,7 +430,9 @@ def format_conflict_report(merge_result: MergeResult) -> str:
     lines.append(f"⚠️  {len(merge_result.conflicts)} conflict(s) detected\n")
 
     for i, conflict in enumerate(merge_result.conflicts, 1):
-        lines.append(f"Conflict #{i} (lines {conflict.start_line}-{conflict.end_line}):")
+        lines.append(
+            f"Conflict #{i} (lines {conflict.start_line}-{conflict.end_line}):"
+        )
         lines.append(f"  Type: {conflict.region_type}")
         lines.append(f"  Suggestion: {analyze_conflict(conflict)}")
         lines.append("")

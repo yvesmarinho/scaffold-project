@@ -2,8 +2,8 @@
 """
 NOME: test_precommit_versoes_alinhadas.py
 TITULO: Hooks de lint do pre-commit rodam a versão do uv.lock (via `uv run`)
-DATA: 24/11/2026 13:40
-MODIFICADO: 24/11/2026 14:07
+DATA: 24/11/2026 13:24
+MODIFICADO: 24/11/2026 15:00
 VERSÃO: 2.0.0
 DEPEND: pytest, pyyaml
 STATUS: DEV

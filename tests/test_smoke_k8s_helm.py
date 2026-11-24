@@ -19,8 +19,6 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-import pytest
-
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 
 from lib.composer import (  # noqa: E402
@@ -44,9 +42,9 @@ _TEMPLATES_DIR = _PROJECT_ROOT / ".github" / "templates" / "k8s-helm"
 def test_k8s_helm_descriptor_loads() -> None:
     """k8s-helm descriptor carregado pela função load_all_descriptors."""
     descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
-    assert "k8s-helm" in descriptors, (
-        f"k8s-helm não encontrado. Carregados: {list(descriptors.keys())}"
-    )
+    assert (
+        "k8s-helm" in descriptors
+    ), f"k8s-helm não encontrado. Carregados: {list(descriptors.keys())}"
 
 
 def test_k8s_helm_descriptor_has_required_fields() -> None:
@@ -68,18 +66,18 @@ def test_k8s_helm_combines_with_python_fastapi() -> None:
     """combines_with deve incluir python-fastapi."""
     descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
     combines = descriptors["k8s-helm"].get("combines_with", [])
-    assert "python-fastapi" in combines, (
-        f"python-fastapi não está em combines_with: {combines}"
-    )
+    assert (
+        "python-fastapi" in combines
+    ), f"python-fastapi não está em combines_with: {combines}"
 
 
 def test_k8s_helm_combines_with_typescript_next() -> None:
     """combines_with deve incluir typescript-next."""
     descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
     combines = descriptors["k8s-helm"].get("combines_with", [])
-    assert "typescript-next" in combines, (
-        f"typescript-next não está em combines_with: {combines}"
-    )
+    assert (
+        "typescript-next" in combines
+    ), f"typescript-next não está em combines_with: {combines}"
 
 
 # ---------------------------------------------------------------------------
@@ -100,7 +98,7 @@ def test_k8s_helm_templates_exist_on_disk() -> None:
         if not src_path.exists():
             missing.append(str(src_path))
 
-    assert not missing, f"Templates ausentes no disco:\n" + "\n".join(missing)
+    assert not missing, "Templates ausentes no disco:\n" + "\n".join(missing)
 
 
 def test_k8s_helm_chart_yaml_has_apiv2() -> None:
@@ -117,7 +115,9 @@ def test_k8s_helm_values_yaml_has_security_defaults() -> None:
     assert values_yaml.exists(), "helm/values.yaml não encontrado"
     content = values_yaml.read_text()
     assert "runAsNonRoot" in content, "values.yaml sem runAsNonRoot"
-    assert "allowPrivilegeEscalation" in content, "values.yaml sem allowPrivilegeEscalation"
+    assert (
+        "allowPrivilegeEscalation" in content
+    ), "values.yaml sem allowPrivilegeEscalation"
 
 
 # ---------------------------------------------------------------------------
@@ -169,7 +169,9 @@ def test_compose_k8s_helm_idempotent(make_project_config) -> None:
     result2 = composer.compose(["k8s-helm"], cfg)
 
     assert result2.success
-    assert result2.created_count == 0, "Segunda composição criou arquivos — não é idempotente"
+    assert (
+        result2.created_count == 0
+    ), "Segunda composição criou arquivos — não é idempotente"
 
 
 def test_resolve_order_layer2_before_layer3() -> None:
@@ -178,6 +180,6 @@ def test_resolve_order_layer2_before_layer3() -> None:
     profiles = ["k8s-helm", "python-fastapi"]
     ordered = resolve_order(profiles, descriptors)
 
-    assert ordered.index("python-fastapi") < ordered.index("k8s-helm"), (
-        f"Esperado layer2 antes de layer3, got: {ordered}"
-    )
+    assert ordered.index("python-fastapi") < ordered.index(
+        "k8s-helm"
+    ), f"Esperado layer2 antes de layer3, got: {ordered}"

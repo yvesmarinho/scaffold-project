@@ -10,23 +10,22 @@ Tests cover:
 """
 
 import pytest
-from pathlib import Path
+
 from scripts.lib.template_blocks import (
     BlockMetadata,
-    TemplateMetadata,
-    BlockError,
     BlockNotFoundError,
     BlockValidationError,
     CompositionError,
-    parse_frontmatter,
-    load_block,
+    TemplateMetadata,
     compose_template,
     get_template_blocks,
+    load_block,
+    parse_frontmatter,
     validate_block_file,
 )
 
-
 # Test fixtures
+
 
 @pytest.fixture
 def temp_blocks_dir(tmp_path):
@@ -86,6 +85,7 @@ More content here.
 
 # Tests: parse_frontmatter
 
+
 def test_parse_frontmatter_valid():
     """Test parsing valid YAML frontmatter."""
     content = """---
@@ -98,9 +98,9 @@ Body content here.
     metadata, body = parse_frontmatter(content)
 
     assert metadata is not None
-    assert metadata['key'] == 'value'
-    assert metadata['number'] == 123
-    assert body.strip() == 'Body content here.'
+    assert metadata["key"] == "value"
+    assert metadata["number"] == 123
+    assert body.strip() == "Body content here."
 
 
 def test_parse_frontmatter_no_frontmatter():
@@ -136,42 +136,43 @@ Body
     metadata, body = parse_frontmatter(content)
 
     assert metadata is None or metadata == {}
-    assert 'Body' in body
+    assert "Body" in body
 
 
 # Tests: BlockMetadata
 
+
 def test_block_metadata_from_dict():
     """Test creating BlockMetadata from dict."""
     data = {
-        'block_type': 'template_fragment',
-        'block_name': 'test-block',
-        'block_version': '1.0.0',
-        'last_updated': '2026-04-15',
-        'compatible_with': ['template >= 1.0.0'],
-        'dependencies': [],
-        'breaking_changes': False,
-        'changelog': []
+        "block_type": "template_fragment",
+        "block_name": "test-block",
+        "block_version": "1.0.0",
+        "last_updated": "2026-04-15",
+        "compatible_with": ["template >= 1.0.0"],
+        "dependencies": [],
+        "breaking_changes": False,
+        "changelog": [],
     }
 
     meta = BlockMetadata.from_dict(data)
 
-    assert meta.block_name == 'test-block'
-    assert meta.block_version == '1.0.0'
-    assert meta.block_type == 'template_fragment'
+    assert meta.block_name == "test-block"
+    assert meta.block_version == "1.0.0"
+    assert meta.block_type == "template_fragment"
 
 
 def test_block_metadata_validate_valid():
     """Test validation of valid block metadata."""
     meta = BlockMetadata(
-        block_type='template_fragment',
-        block_name='test-block',
-        block_version='1.0.0',
-        last_updated='2026-04-15',
+        block_type="template_fragment",
+        block_name="test-block",
+        block_version="1.0.0",
+        last_updated="2026-04-15",
         compatible_with=[],
         dependencies=[],
         breaking_changes=False,
-        changelog=[]
+        changelog=[],
     )
 
     errors = meta.validate()
@@ -181,81 +182,80 @@ def test_block_metadata_validate_valid():
 def test_block_metadata_validate_missing_name():
     """Test validation fails for missing block_name."""
     meta = BlockMetadata(
-        block_type='template_fragment',
-        block_name='',
-        block_version='1.0.0',
-        last_updated='2026-04-15',
+        block_type="template_fragment",
+        block_name="",
+        block_version="1.0.0",
+        last_updated="2026-04-15",
         compatible_with=[],
         dependencies=[],
         breaking_changes=False,
-        changelog=[]
+        changelog=[],
     )
 
     errors = meta.validate()
-    assert any('Missing block_name' in e for e in errors)
+    assert any("Missing block_name" in e for e in errors)
 
 
 def test_block_metadata_validate_invalid_version():
     """Test validation fails for invalid version format."""
     meta = BlockMetadata(
-        block_type='template_fragment',
-        block_name='test-block',
-        block_version='v1.0',  # Invalid: not semver
-        last_updated='2026-04-15',
+        block_type="template_fragment",
+        block_name="test-block",
+        block_version="v1.0",  # Invalid: not semver
+        last_updated="2026-04-15",
         compatible_with=[],
         dependencies=[],
         breaking_changes=False,
-        changelog=[]
+        changelog=[],
     )
 
     errors = meta.validate()
-    assert any('Invalid block_version' in e for e in errors)
+    assert any("Invalid block_version" in e for e in errors)
 
 
 def test_block_metadata_validate_invalid_block_type():
     """Test validation fails for invalid block_type."""
     meta = BlockMetadata(
-        block_type='invalid_type',
-        block_name='test-block',
-        block_version='1.0.0',
-        last_updated='2026-04-15',
+        block_type="invalid_type",
+        block_name="test-block",
+        block_version="1.0.0",
+        last_updated="2026-04-15",
         compatible_with=[],
         dependencies=[],
         breaking_changes=False,
-        changelog=[]
+        changelog=[],
     )
 
     errors = meta.validate()
-    assert any('Invalid block_type' in e for e in errors)
+    assert any("Invalid block_type" in e for e in errors)
 
 
 # Tests: TemplateMetadata
 
+
 def test_template_metadata_from_dict():
     """Test creating TemplateMetadata from dict."""
     data = {
-        'template_version': '1.0.0',
-        'template_type': 'composition',
-        'last_updated': '2026-04-15',
-        'blocks': [
-            {'name': 'block1', 'version': '1.0.0', 'source': 'block1.md'}
-        ]
+        "template_version": "1.0.0",
+        "template_type": "composition",
+        "last_updated": "2026-04-15",
+        "blocks": [{"name": "block1", "version": "1.0.0", "source": "block1.md"}],
     }
 
     meta = TemplateMetadata.from_dict(data)
 
-    assert meta.template_version == '1.0.0'
-    assert meta.template_type == 'composition'
+    assert meta.template_version == "1.0.0"
+    assert meta.template_type == "composition"
     assert len(meta.blocks) == 1
 
 
 def test_template_metadata_validate_valid():
     """Test validation of valid template metadata."""
     meta = TemplateMetadata(
-        template_version='1.0.0',
-        template_type='composition',
-        last_updated='2026-04-15',
-        blocks=[]
+        template_version="1.0.0",
+        template_type="composition",
+        last_updated="2026-04-15",
+        blocks=[],
     )
 
     errors = meta.validate()
@@ -265,17 +265,18 @@ def test_template_metadata_validate_valid():
 def test_template_metadata_validate_invalid_version():
     """Test validation fails for invalid version."""
     meta = TemplateMetadata(
-        template_version='v1',  # Invalid
-        template_type='composition',
-        last_updated='2026-04-15',
-        blocks=[]
+        template_version="v1",  # Invalid
+        template_type="composition",
+        last_updated="2026-04-15",
+        blocks=[],
     )
 
     errors = meta.validate()
-    assert any('Invalid template_version' in e for e in errors)
+    assert any("Invalid template_version" in e for e in errors)
 
 
 # Tests: load_block
+
 
 def test_load_block_success(temp_blocks_dir, sample_block_content):
     """Test loading a valid block file."""
@@ -284,10 +285,10 @@ def test_load_block_success(temp_blocks_dir, sample_block_content):
 
     metadata, content = load_block(block_file)
 
-    assert metadata.block_name == 'test-block'
-    assert metadata.block_version == '1.0.0'
-    assert '## Test Block Content' in content
-    assert '---' not in content  # Frontmatter removed
+    assert metadata.block_name == "test-block"
+    assert metadata.block_version == "1.0.0"
+    assert "## Test Block Content" in content
+    assert "---" not in content  # Frontmatter removed
 
 
 def test_load_block_not_found(temp_blocks_dir):
@@ -326,7 +327,10 @@ Content
 
 # Tests: compose_template
 
-def test_compose_template_success(tmp_path, sample_block_content, sample_template_content):
+
+def test_compose_template_success(
+    tmp_path, sample_block_content, sample_template_content
+):
     """Test successful template composition."""
     # Setup
     blocks_dir = tmp_path / "blocks"
@@ -342,11 +346,11 @@ def test_compose_template_success(tmp_path, sample_block_content, sample_templat
     result = compose_template(template_file, blocks_dir)
 
     # Verify
-    assert '## Test Block Content' in result
-    assert 'This is test content.' in result
-    assert '## Additional Content' in result
-    assert '@include' not in result  # Directive replaced
-    assert '---' not in result  # Frontmatter removed
+    assert "## Test Block Content" in result
+    assert "This is test content." in result
+    assert "## Additional Content" in result
+    assert "@include" not in result  # Directive replaced
+    assert "---" not in result  # Frontmatter removed
 
 
 def test_compose_template_multiple_blocks(tmp_path):
@@ -404,10 +408,10 @@ blocks:
     result = compose_template(template_file, blocks_dir)
 
     # Verify both blocks included
-    assert '## Block 1' in result
-    assert 'Content 1' in result
-    assert '## Block 2' in result
-    assert 'Content 2' in result
+    assert "## Block 1" in result
+    assert "Content 1" in result
+    assert "## Block 2" in result
+    assert "Content 2" in result
 
 
 def test_compose_template_missing_block(tmp_path, sample_template_content):
@@ -465,10 +469,11 @@ Content here.
     # Should return as-is
     result = compose_template(template_file, blocks_dir)
 
-    assert 'Content here.' in result
+    assert "Content here." in result
 
 
 # Tests: get_template_blocks
+
 
 def test_get_template_blocks(tmp_path, sample_template_content):
     """Test getting blocks list from template."""
@@ -478,8 +483,8 @@ def test_get_template_blocks(tmp_path, sample_template_content):
     blocks = get_template_blocks(template_file)
 
     assert len(blocks) == 1
-    assert blocks[0]['name'] == 'test-block'
-    assert blocks[0]['version'] == '1.0.0'
+    assert blocks[0]["name"] == "test-block"
+    assert blocks[0]["version"] == "1.0.0"
 
 
 def test_get_template_blocks_no_frontmatter(tmp_path):
@@ -502,6 +507,7 @@ def test_get_template_blocks_nonexistent(tmp_path):
 
 
 # Tests: validate_block_file
+
 
 def test_validate_block_file_valid(temp_blocks_dir, sample_block_content):
     """Test validation of valid block file."""
@@ -540,12 +546,15 @@ def test_validate_block_file_not_found(temp_blocks_dir):
 
     assert not is_valid
     assert len(errors) > 0
-    assert 'not found' in errors[0].lower()
+    assert "not found" in errors[0].lower()
 
 
 # Tests: Error handling edge cases
 
-def test_compose_template_verbose_output(tmp_path, sample_block_content, sample_template_content, capsys):
+
+def test_compose_template_verbose_output(
+    tmp_path, sample_block_content, sample_template_content, capsys
+):
     """Test verbose output during composition."""
     blocks_dir = tmp_path / "blocks"
     blocks_dir.mkdir()
@@ -560,37 +569,37 @@ def test_compose_template_verbose_output(tmp_path, sample_block_content, sample_
     compose_template(template_file, blocks_dir, verbose=True)
 
     captured = capsys.readouterr()
-    assert 'Composing template' in captured.out
-    assert 'Loading block' in captured.out
+    assert "Composing template" in captured.out
+    assert "Loading block" in captured.out
 
 
 def test_block_metadata_repr():
     """Test __repr__ of BlockMetadata."""
     meta = BlockMetadata(
-        block_type='template_fragment',
-        block_name='test',
-        block_version='1.0.0',
-        last_updated='2026-04-15',
+        block_type="template_fragment",
+        block_name="test",
+        block_version="1.0.0",
+        last_updated="2026-04-15",
         compatible_with=[],
         dependencies=[],
         breaking_changes=False,
-        changelog=[]
+        changelog=[],
     )
 
     repr_str = repr(meta)
-    assert 'test' in repr_str
-    assert '1.0.0' in repr_str
+    assert "test" in repr_str
+    assert "1.0.0" in repr_str
 
 
 def test_template_metadata_repr():
     """Test __repr__ of TemplateMetadata."""
     meta = TemplateMetadata(
-        template_version='1.0.0',
-        template_type='composition',
-        last_updated='2026-04-15',
-        blocks=[{}, {}]  # 2 blocks
+        template_version="1.0.0",
+        template_type="composition",
+        last_updated="2026-04-15",
+        blocks=[{}, {}],  # 2 blocks
     )
 
     repr_str = repr(meta)
-    assert '1.0.0' in repr_str
-    assert '2 blocks' in repr_str
+    assert "1.0.0" in repr_str
+    assert "2 blocks" in repr_str

@@ -9,15 +9,14 @@ Tests:
 - CSV export
 """
 
+import sys
 import tempfile
 from pathlib import Path
-import sys
-from datetime import datetime
 
 # Add scripts to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 
-from scaffold_logger import ScaffoldLogger, ScaffoldEntry
+from scaffold_logger import ScaffoldLogger
 
 
 def test_log_scaffold():
@@ -31,7 +30,7 @@ def test_log_scaffold():
             template_version="2.1.0",
             profile="python-fastapi",
             created_by="test_user",
-            path="/tmp/test"
+            path="/tmp/test",
         )
 
         assert entry.id == 1
@@ -76,9 +75,15 @@ def test_wildcard_query():
         log_file = Path(tmpdir) / "test.yaml"
         logger = ScaffoldLogger(log_file)
 
-        logger.log_scaffold("vya-api-users", "2.0.0", "python-fastapi", "user1", "/tmp/1")
-        logger.log_scaffold("vya-api-orders", "2.0.0", "python-fastapi", "user1", "/tmp/2")
-        logger.log_scaffold("other-project", "2.0.0", "python-fastapi", "user1", "/tmp/3")
+        logger.log_scaffold(
+            "vya-api-users", "2.0.0", "python-fastapi", "user1", "/tmp/1"
+        )
+        logger.log_scaffold(
+            "vya-api-orders", "2.0.0", "python-fastapi", "user1", "/tmp/2"
+        )
+        logger.log_scaffold(
+            "other-project", "2.0.0", "python-fastapi", "user1", "/tmp/3"
+        )
 
         # Wildcard query
         results = logger.query(project_name="vya-*")
@@ -108,9 +113,15 @@ def test_statistics():
         logger = ScaffoldLogger(log_file)
 
         # Log scaffolds
-        logger.log_scaffold("proj-1", "2.0.0", "python-fastapi", "user1", "/tmp/1", success=True)
-        logger.log_scaffold("proj-2", "2.0.0", "typescript-next", "user2", "/tmp/2", success=True)
-        logger.log_scaffold("proj-3", "2.0.0", "python-fastapi", "user1", "/tmp/3", success=False)
+        logger.log_scaffold(
+            "proj-1", "2.0.0", "python-fastapi", "user1", "/tmp/1", success=True
+        )
+        logger.log_scaffold(
+            "proj-2", "2.0.0", "typescript-next", "user2", "/tmp/2", success=True
+        )
+        logger.log_scaffold(
+            "proj-3", "2.0.0", "python-fastapi", "user1", "/tmp/3", success=False
+        )
 
         stats = logger.get_stats()
 
@@ -135,7 +146,7 @@ def test_failed_scaffold_logging():
             created_by="user1",
             path="/tmp/failed",
             success=False,
-            error_message="Template parse error"
+            error_message="Template parse error",
         )
 
         assert entry.success is False

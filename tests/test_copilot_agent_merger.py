@@ -11,16 +11,20 @@ Valida merge inteligente de arquivos .github/agents/*.agent.md com:
 Sprint 1 (P0 CRITICAL): 32 agents sem merge
 """
 
-import pytest
-from pathlib import Path
-import tempfile
 import shutil
-from scripts.lib.copilot_agent_merge import CopilotAgentMerger, AgentFrontmatter, AgentContent
+import tempfile
+from pathlib import Path
 
+import pytest
+
+from scripts.lib.copilot_agent_merge import (
+    CopilotAgentMerger,
+)
 
 # =============================================================================
 # Fixtures
 # =============================================================================
+
 
 @pytest.fixture
 def merger():
@@ -128,6 +132,7 @@ This agent does not have a version field.
 # Test: File Detection
 # =============================================================================
 
+
 def test_01_can_merge_detection(merger):
     """Test 01: Verifica detecção correta de arquivos .agent.md."""
     # Should detect
@@ -144,6 +149,7 @@ def test_01_can_merge_detection(merger):
 # =============================================================================
 # Test: YAML Frontmatter Parsing
 # =============================================================================
+
 
 def test_02_parse_yaml_frontmatter(merger, sample_agent_v1):
     """Test 02: Parse YAML frontmatter corretamente."""
@@ -172,6 +178,7 @@ def test_03_parse_markdown_sections(merger, sample_agent_v1):
 # Test: Version Comparison
 # =============================================================================
 
+
 def test_04_version_comparison(merger):
     """Test 04: Comparação de versões semânticas."""
     assert merger._compare_versions("1.2.0", "1.0.0") > 0
@@ -185,6 +192,7 @@ def test_04_version_comparison(merger):
 # Test: Merge Decision Logic
 # =============================================================================
 
+
 def test_05_should_merge_version_update(merger, sample_agent_v1, sample_agent_v1_2):
     """Test 05: Decide merge quando há atualização de versão."""
     existing_fm, _ = merger._parse_agent_file(sample_agent_v1)
@@ -194,8 +202,7 @@ def test_05_should_merge_version_update(merger, sample_agent_v1, sample_agent_v1
 
     assert decision.should_merge is True
     assert any("version" in change.lower() for change in decision.changes)
-    assert any(
-        "1.0.0" in change and "1.2.0" in change for change in decision.changes)
+    assert any("1.0.0" in change and "1.2.0" in change for change in decision.changes)
 
 
 def test_06_should_merge_new_handoffs(merger, sample_agent_v1, sample_agent_v1_2):
@@ -235,6 +242,7 @@ def test_08_should_skip_if_uptodate(merger, sample_agent_v1):
 # Test: Frontmatter Merge
 # =============================================================================
 
+
 def test_09_merge_frontmatter_version(merger, sample_agent_v1, sample_agent_v1_2):
     """Test 09: Merge frontmatter atualiza versão."""
     existing_fm, _ = merger._parse_agent_file(sample_agent_v1)
@@ -245,7 +253,9 @@ def test_09_merge_frontmatter_version(merger, sample_agent_v1, sample_agent_v1_2
     assert merged["version"] == "1.2.0"  # Versão do template
 
 
-def test_10_merge_frontmatter_handoffs_additive(merger, sample_agent_v1, sample_agent_v1_2):
+def test_10_merge_frontmatter_handoffs_additive(
+    merger, sample_agent_v1, sample_agent_v1_2
+):
     """Test 10: Merge frontmatter adiciona novos handoffs (aditivo)."""
     existing_fm, _ = merger._parse_agent_file(sample_agent_v1)
     template_fm, _ = merger._parse_agent_file(sample_agent_v1_2)
@@ -258,7 +268,9 @@ def test_10_merge_frontmatter_handoffs_additive(merger, sample_agent_v1, sample_
     assert "agent2" in agents  # New from template
 
 
-def test_11_merge_frontmatter_tools_additive(merger, sample_agent_v1, sample_agent_v1_2):
+def test_11_merge_frontmatter_tools_additive(
+    merger, sample_agent_v1, sample_agent_v1_2
+):
     """Test 11: Merge frontmatter adiciona novos tools (aditivo)."""
     existing_fm, _ = merger._parse_agent_file(sample_agent_v1)
     template_fm, _ = merger._parse_agent_file(sample_agent_v1_2)
@@ -276,7 +288,10 @@ def test_11_merge_frontmatter_tools_additive(merger, sample_agent_v1, sample_age
 # Test: Markdown Content Merge
 # =============================================================================
 
-def test_12_merge_markdown_preserves_custom_sections(merger, sample_agent_v1, sample_agent_v1_2):
+
+def test_12_merge_markdown_preserves_custom_sections(
+    merger, sample_agent_v1, sample_agent_v1_2
+):
     """Test 12: Merge markdown preserva seções customizadas."""
     _, existing_md = merger._parse_agent_file(sample_agent_v1)
     _, template_md = merger._parse_agent_file(sample_agent_v1_2)
@@ -287,7 +302,9 @@ def test_12_merge_markdown_preserves_custom_sections(merger, sample_agent_v1, sa
     assert "user" in merged_md.sections["Custom Section"].lower()
 
 
-def test_13_merge_markdown_adds_new_sections(merger, sample_agent_v1, sample_agent_v1_2):
+def test_13_merge_markdown_adds_new_sections(
+    merger, sample_agent_v1, sample_agent_v1_2
+):
     """Test 13: Merge markdown adiciona novas seções do template."""
     _, existing_md = merger._parse_agent_file(sample_agent_v1)
     _, template_md = merger._parse_agent_file(sample_agent_v1_2)
@@ -297,7 +314,9 @@ def test_13_merge_markdown_adds_new_sections(merger, sample_agent_v1, sample_age
     assert "Workflow" in merged_md.sections  # New section from template
 
 
-def test_14_merge_markdown_updates_standard_sections(merger, sample_agent_v1, sample_agent_v1_2):
+def test_14_merge_markdown_updates_standard_sections(
+    merger, sample_agent_v1, sample_agent_v1_2
+):
     """Test 14: Merge markdown atualiza seções padrão."""
     _, existing_md = merger._parse_agent_file(sample_agent_v1)
     _, template_md = merger._parse_agent_file(sample_agent_v1_2)
@@ -312,7 +331,10 @@ def test_14_merge_markdown_updates_standard_sections(merger, sample_agent_v1, sa
 # Test: Full Integration (End-to-End)
 # =============================================================================
 
-def test_15_full_merge_integration(merger, temp_dir, sample_agent_v1, sample_agent_v1_2):
+
+def test_15_full_merge_integration(
+    merger, temp_dir, sample_agent_v1, sample_agent_v1_2
+):
     """Test 15: Teste de integração completo do merge."""
     # Setup
     agents_dir = temp_dir / ".github" / "agents"
@@ -364,8 +386,7 @@ This agent now has a version field.
 """
 
     # Execute merge
-    result = merger.merge(
-        existing_file, template_with_version, interactive=False)
+    result = merger.merge(existing_file, template_with_version, interactive=False)
 
     # Validate
     assert result.status == "merged"
@@ -376,6 +397,7 @@ This agent now has a version field.
 # =============================================================================
 # Test: Edge Cases
 # =============================================================================
+
 
 def test_17_merge_handles_malformed_yaml(merger, temp_dir):
     """Test 17: Merge lida com YAML malformado graciosamente."""

@@ -41,15 +41,16 @@ Example:
 """
 
 import re
-import yaml
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
+
+import yaml
 
 
 class PatchOperationType(Enum):
     """Types of patch operations."""
+
     INSERT_AFTER = "after"
     INSERT_BEFORE = "before"
     REPLACE = "replace"
@@ -70,30 +71,31 @@ class PatchMetadata:
         description: Human-readable description
         author: Author email/identifier (optional)
     """
+
     patch_name: str
     patch_version: str
     target_template: str
-    target_block: Optional[str]
-    target_version: Optional[str]
+    target_block: str | None
+    target_version: str | None
     created: str
     description: str
-    author: Optional[str]
+    author: str | None
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'PatchMetadata':
+    def from_dict(cls, data: dict) -> "PatchMetadata":
         """Create PatchMetadata from parsed YAML dict."""
         return cls(
-            patch_name=data.get('patch_name', ''),
-            patch_version=data.get('patch_version', ''),
-            target_template=data.get('target_template', ''),
-            target_block=data.get('target_block'),
-            target_version=data.get('target_version'),
-            created=data.get('created', ''),
-            description=data.get('description', ''),
-            author=data.get('author')
+            patch_name=data.get("patch_name", ""),
+            patch_version=data.get("patch_version", ""),
+            target_template=data.get("target_template", ""),
+            target_block=data.get("target_block"),
+            target_version=data.get("target_version"),
+            created=data.get("created", ""),
+            description=data.get("description", ""),
+            author=data.get("author"),
         )
 
-    def validate(self) -> List[str]:
+    def validate(self) -> list[str]:
         """Validate patch metadata.
 
         Returns:
@@ -103,13 +105,17 @@ class PatchMetadata:
 
         if not self.patch_name:
             errors.append("Missing patch_name")
-        elif not re.match(r'^[a-z0-9][a-z0-9-]*$', self.patch_name):
-            errors.append(f"Invalid patch_name: {self.patch_name} (must match ^[a-z0-9][a-z0-9-]*$)")
+        elif not re.match(r"^[a-z0-9][a-z0-9-]*$", self.patch_name):
+            errors.append(
+                f"Invalid patch_name: {self.patch_name} (must match ^[a-z0-9][a-z0-9-]*$)"
+            )
 
         if not self.patch_version:
             errors.append("Missing patch_version")
-        elif not re.match(r'^\d+\.\d+\.\d+$', self.patch_version):
-            errors.append(f"Invalid patch_version: {self.patch_version} (must be semver x.y.z)")
+        elif not re.match(r"^\d+\.\d+\.\d+$", self.patch_version):
+            errors.append(
+                f"Invalid patch_version: {self.patch_version} (must be semver x.y.z)"
+            )
 
         if not self.target_template:
             errors.append("Missing target_template")
@@ -123,7 +129,9 @@ class PatchMetadata:
         return errors
 
     def __repr__(self):
-        return f"Patch({self.patch_name} v{self.patch_version} → {self.target_template})"
+        return (
+            f"Patch({self.patch_name} v{self.patch_version} → {self.target_template})"
+        )
 
 
 @dataclass
@@ -136,6 +144,7 @@ class PatchOperation:
         content: Content to add/replace
         line_offset: Optional line offset from anchor
     """
+
     operation_type: PatchOperationType
     anchor: str
     content: str
@@ -154,8 +163,9 @@ class Patch:
         operations: List of patch operations to apply
         source_file: Path to source patch file
     """
+
     metadata: PatchMetadata
-    operations: List[PatchOperation]
+    operations: list[PatchOperation]
     source_file: Path
 
     def __repr__(self):
@@ -164,30 +174,35 @@ class Patch:
 
 class PatchError(Exception):
     """Base exception for patch-related errors."""
+
     pass
 
 
 class PatchNotFoundError(PatchError):
     """Raised when a patch file cannot be found."""
+
     pass
 
 
 class PatchValidationError(PatchError):
     """Raised when patch validation fails."""
+
     pass
 
 
 class PatchApplicationError(PatchError):
     """Raised when patch application fails."""
+
     pass
 
 
 class PatchConflictError(PatchError):
     """Raised when patch conflicts are detected."""
+
     pass
 
 
-def parse_patch_frontmatter(content: str) -> Tuple[Optional[dict], str]:
+def parse_patch_frontmatter(content: str) -> tuple[dict | None, str]:
     """Parse YAML frontmatter from patch content.
 
     Args:
@@ -196,7 +211,7 @@ def parse_patch_frontmatter(content: str) -> Tuple[Optional[dict], str]:
     Returns:
         Tuple of (metadata_dict, body_content)
     """
-    pattern = r'^---\s*\n(.*?)\n---\s*\n(.*)$'
+    pattern = r"^---\s*\n(.*?)\n---\s*\n(.*)$"
     match = re.match(pattern, content, re.DOTALL)
 
     if not match:
@@ -209,10 +224,10 @@ def parse_patch_frontmatter(content: str) -> Tuple[Optional[dict], str]:
         metadata = yaml.safe_load(yaml_text)
         return metadata, body
     except yaml.YAMLError as e:
-        raise PatchValidationError(f"YAML parse error: {e}")
+        raise PatchValidationError(f"YAML parse error: {e}") from e
 
 
-def parse_patch_operations(body: str) -> List[PatchOperation]:
+def parse_patch_operations(body: str) -> list[PatchOperation]:
     """Parse patch operations from patch body.
 
     Patch operations have format:
@@ -234,7 +249,7 @@ def parse_patch_operations(body: str) -> List[PatchOperation]:
 
     # Find all operation blocks: @@ ... @@ ... @@ END @@
     # Match any word for operation type, validate later
-    op_pattern = r'@@\s*(\w+):\s*(.+?)\s*@@\s*\n(.*?)@@\s*END\s*@@'
+    op_pattern = r"@@\s*(\w+):\s*(.+?)\s*@@\s*\n(.*?)@@\s*END\s*@@"
     matches = re.findall(op_pattern, body, re.DOTALL | re.IGNORECASE)
 
     if not matches:
@@ -243,40 +258,38 @@ def parse_patch_operations(body: str) -> List[PatchOperation]:
     for op_type_str, anchor, content_block in matches:
         # Map operation type string to enum
         op_type_lower = op_type_str.lower()
-        if op_type_lower == 'after':
+        if op_type_lower == "after":
             op_type = PatchOperationType.INSERT_AFTER
-        elif op_type_lower == 'before':
+        elif op_type_lower == "before":
             op_type = PatchOperationType.INSERT_BEFORE
-        elif op_type_lower == 'replace':
+        elif op_type_lower == "replace":
             op_type = PatchOperationType.REPLACE
-        elif op_type_lower == 'delete':
+        elif op_type_lower == "delete":
             op_type = PatchOperationType.DELETE
         else:
             raise PatchValidationError(f"Invalid operation type: {op_type_str}")
 
         # Parse content (lines starting with + or -)
         content_lines = []
-        for line in content_block.split('\n'):
+        for line in content_block.split("\n"):
             line = line.rstrip()
-            if line.startswith('+ '):
+            if line.startswith("+ "):
                 content_lines.append(line[2:])  # Remove '+ ' prefix
-            elif line.startswith('+'):
+            elif line.startswith("+"):
                 content_lines.append(line[1:])  # Remove '+' prefix
-            elif line.startswith('- '):
+            elif line.startswith("- "):
                 # For delete operations
                 content_lines.append(line[2:])
-            elif line.startswith('-'):
+            elif line.startswith("-"):
                 content_lines.append(line[1:])
             elif line.strip():
                 # Non-prefixed non-empty line - include as-is
                 content_lines.append(line)
 
-        content = '\n'.join(content_lines)
+        content = "\n".join(content_lines)
 
         operation = PatchOperation(
-            operation_type=op_type,
-            anchor=anchor.strip(),
-            content=content
+            operation_type=op_type, anchor=anchor.strip(), content=content
         )
         operations.append(operation)
 
@@ -299,7 +312,7 @@ def load_patch(patch_path: Path) -> Patch:
     if not patch_path.exists():
         raise PatchNotFoundError(f"Patch not found: {patch_path}")
 
-    content = patch_path.read_text(encoding='utf-8')
+    content = patch_path.read_text(encoding="utf-8")
     metadata_dict, body = parse_patch_frontmatter(content)
 
     if not metadata_dict:
@@ -310,7 +323,9 @@ def load_patch(patch_path: Path) -> Patch:
     # Validate metadata
     errors = metadata.validate()
     if errors:
-        raise PatchValidationError(f"Patch validation failed for {patch_path.name}: {'; '.join(errors)}")
+        raise PatchValidationError(
+            f"Patch validation failed for {patch_path.name}: {'; '.join(errors)}"
+        )
 
     # Parse operations
     operations = parse_patch_operations(body)
@@ -318,14 +333,10 @@ def load_patch(patch_path: Path) -> Patch:
     if not operations:
         raise PatchValidationError(f"Patch has no operations: {patch_path.name}")
 
-    return Patch(
-        metadata=metadata,
-        operations=operations,
-        source_file=patch_path
-    )
+    return Patch(metadata=metadata, operations=operations, source_file=patch_path)
 
 
-def apply_patch_operation(content: str, operation: PatchOperation) -> Tuple[str, bool]:
+def apply_patch_operation(content: str, operation: PatchOperation) -> tuple[str, bool]:
     """Apply a single patch operation to content.
 
     Args:
@@ -338,7 +349,7 @@ def apply_patch_operation(content: str, operation: PatchOperation) -> Tuple[str,
     Raises:
         PatchApplicationError: If operation cannot be applied
     """
-    lines = content.split('\n')
+    lines = content.split("\n")
 
     # Find anchor line
     anchor_indices = []
@@ -360,25 +371,25 @@ def apply_patch_operation(content: str, operation: PatchOperation) -> Tuple[str,
     if operation.operation_type == PatchOperationType.INSERT_AFTER:
         # Insert content after anchor line
         insert_idx = anchor_idx + 1
-        patch_lines = operation.content.split('\n')
-        lines = lines[:insert_idx] + [''] + patch_lines + lines[insert_idx:]
+        patch_lines = operation.content.split("\n")
+        lines = lines[:insert_idx] + [""] + patch_lines + lines[insert_idx:]
 
     elif operation.operation_type == PatchOperationType.INSERT_BEFORE:
         # Insert content before anchor line
         insert_idx = anchor_idx
-        patch_lines = operation.content.split('\n')
-        lines = lines[:insert_idx] + patch_lines + [''] + lines[insert_idx:]
+        patch_lines = operation.content.split("\n")
+        lines = lines[:insert_idx] + patch_lines + [""] + lines[insert_idx:]
 
     elif operation.operation_type == PatchOperationType.REPLACE:
         # Replace anchor line with content
-        patch_lines = operation.content.split('\n')
-        lines = lines[:anchor_idx] + patch_lines + lines[anchor_idx + 1:]
+        patch_lines = operation.content.split("\n")
+        lines = lines[:anchor_idx] + patch_lines + lines[anchor_idx + 1 :]
 
     elif operation.operation_type == PatchOperationType.DELETE:
         # Delete anchor line
-        lines = lines[:anchor_idx] + lines[anchor_idx + 1:]
+        lines = lines[:anchor_idx] + lines[anchor_idx + 1 :]
 
-    return '\n'.join(lines), True
+    return "\n".join(lines), True
 
 
 def apply_patch(content: str, patch: Patch) -> str:
@@ -439,7 +450,7 @@ def apply_patches(content: str, patches_dir: Path, template_name: str = None) ->
             return content  # No patches for this template
 
     # Find all patch files (*.patch)
-    patch_files = sorted(patches_dir.glob('*.patch'))
+    patch_files = sorted(patches_dir.glob("*.patch"))
 
     if not patch_files:
         return content  # No patches to apply
@@ -450,12 +461,14 @@ def apply_patches(content: str, patches_dir: Path, template_name: str = None) ->
             patch = load_patch(patch_file)
             result = apply_patch(result, patch)
         except (PatchNotFoundError, PatchValidationError, PatchApplicationError) as e:
-            raise PatchApplicationError(f"Failed to apply {patch_file.name}: {e}") from e
+            raise PatchApplicationError(
+                f"Failed to apply {patch_file.name}: {e}"
+            ) from e
 
     return result
 
 
-def validate_patch_file(patch_path: Path) -> Tuple[bool, List[str]]:
+def validate_patch_file(patch_path: Path) -> tuple[bool, list[str]]:
     """Validate a patch file.
 
     Args:
@@ -465,7 +478,7 @@ def validate_patch_file(patch_path: Path) -> Tuple[bool, List[str]]:
         Tuple of (is_valid, error_messages)
     """
     try:
-        patch = load_patch(patch_path)
+        load_patch(patch_path)
         return True, []
     except PatchNotFoundError as e:
         return False, [str(e)]
@@ -475,7 +488,7 @@ def validate_patch_file(patch_path: Path) -> Tuple[bool, List[str]]:
         return False, [f"Unexpected error: {e}"]
 
 
-def list_patches(patches_dir: Path, template_name: str = None) -> List[Patch]:
+def list_patches(patches_dir: Path, template_name: str = None) -> list[Patch]:
     """List all patches for a template.
 
     Args:
@@ -494,7 +507,7 @@ def list_patches(patches_dir: Path, template_name: str = None) -> List[Patch]:
             return []
 
     patches = []
-    for patch_file in sorted(patches_dir.glob('*.patch')):
+    for patch_file in sorted(patches_dir.glob("*.patch")):
         try:
             patch = load_patch(patch_file)
             patches.append(patch)

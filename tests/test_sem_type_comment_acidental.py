@@ -2,8 +2,8 @@
 """
 NOME: test_sem_type_comment_acidental.py
 TITULO: Nenhum comentário "# type: ..." acidental em scripts/ (quebra o mypy)
-DATA: 24/11/2026 13:10
-MODIFICADO: 24/11/2026 13:05
+DATA: 24/11/2026 13:05
+MODIFICADO: 24/11/2026 15:00
 VERSÃO: 1.0.0
 DEPEND: pytest
 STATUS: DEV

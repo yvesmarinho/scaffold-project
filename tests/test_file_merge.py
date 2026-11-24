@@ -13,21 +13,21 @@ Cenários testados:
 
 import tempfile
 from pathlib import Path
+
 import pytest
 
 from scripts.lib.file_merge import (
     GitignoreMerger,
     MakefileMerger,
     ReadmeMerger,
-    merge_or_skip,
     get_registered_mergers,
+    merge_or_skip,
 )
-from scripts.lib.config import CreatedItem
-
 
 # =============================================================================
 # Fixtures
 # =============================================================================
+
 
 @pytest.fixture
 def temp_dir():
@@ -39,6 +39,7 @@ def temp_dir():
 # =============================================================================
 # GitignoreMerger Tests
 # =============================================================================
+
 
 def test_gitignore_merge_adds_security_patterns(temp_dir):
     """
@@ -137,6 +138,7 @@ def test_gitignore_merge_on_empty_file(temp_dir):
 # MakefileMerger Tests
 # =============================================================================
 
+
 def test_makefile_merge_adds_essential_targets(temp_dir):
     """
     Cenário: Makefile customizado sem targets do template
@@ -218,6 +220,7 @@ install-deps:
 # =============================================================================
 # ReadmeMerger Tests
 # =============================================================================
+
 
 def test_readme_merge_adds_template_sections(temp_dir):
     """
@@ -348,6 +351,7 @@ Python
 # merge_or_skip Function Tests
 # =============================================================================
 
+
 def test_merge_or_skip_uses_gitignore_merger(temp_dir):
     """
     Cenário: Arquivo .gitignore existente
@@ -433,6 +437,7 @@ def test_merge_or_skip_uses_readme_merger(temp_dir):
 # Registry Tests
 # =============================================================================
 
+
 def test_get_registered_mergers():
     """
     Cenário: Consultar mergers registrados
@@ -464,6 +469,7 @@ def test_get_registered_mergers():
 # =============================================================================
 # Integration Tests (Cenário Completo)
 # =============================================================================
+
 
 def test_full_github_repo_scaffold_scenario(temp_dir):
     """
@@ -501,12 +507,8 @@ Python
 """
 
     # Act: Executar merge em ambos os arquivos
-    gitignore_result = merge_or_skip(
-        gitignore, gitignore_template, interactive=False
-    )
-    readme_result = merge_or_skip(
-        readme, readme_template, interactive=False
-    )
+    gitignore_result = merge_or_skip(gitignore, gitignore_template, interactive=False)
+    readme_result = merge_or_skip(readme, readme_template, interactive=False)
 
     # Assert: Verificar merge bem-sucedido
     # .gitignore

@@ -15,7 +15,6 @@ import logging
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 import yaml
 
@@ -26,9 +25,11 @@ log = logging.getLogger(__name__)
 # Data Classes
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class TemplateVersion:
     """Version information extracted from template frontmatter."""
+
     name: str
     version: str
     last_updated: str
@@ -39,13 +40,14 @@ class TemplateVersion:
 @dataclass
 class TemplateDrift:
     """Comparison result between local and upstream template versions."""
+
     name: str
-    local_version: Optional[str]
+    local_version: str | None
     upstream_version: str
     is_outdated: bool
     is_missing: bool
     breaking_changes: bool
-    local_path: Optional[Path]
+    local_path: Path | None
     upstream_path: Path
 
 
@@ -53,7 +55,8 @@ class TemplateDrift:
 # Version Parsing
 # ---------------------------------------------------------------------------
 
-def parse_template_version(template_path: Path) -> Optional[TemplateVersion]:
+
+def parse_template_version(template_path: Path) -> TemplateVersion | None:
     """
     Parse template version metadata from YAML frontmatter.
 
@@ -78,7 +81,7 @@ def parse_template_version(template_path: Path) -> Optional[TemplateVersion]:
         content = template_path.read_text(encoding="utf-8")
 
         # Extract YAML frontmatter (between --- delimiters)
-        match = re.match(r'^---\s*\n(.*?)\n---\s*\n', content, re.DOTALL)
+        match = re.match(r"^---\s*\n(.*?)\n---\s*\n", content, re.DOTALL)
         if not match:
             log.debug("No YAML frontmatter found in %s", template_path.name)
             return None
@@ -117,7 +120,7 @@ def parse_version_tuple(version_str: str) -> tuple[int, int, int] | None:
     Returns:
         Tuple of (major, minor, patch) integers, or None if invalid
     """
-    match = re.match(r'^(\d+)\.(\d+)\.(\d+)$', version_str)
+    match = re.match(r"^(\d+)\.(\d+)\.(\d+)$", version_str)
     if not match:
         return None
     return tuple(map(int, match.groups()))
@@ -155,6 +158,7 @@ def compare_versions(v1: str, v2: str) -> int:
 # ---------------------------------------------------------------------------
 # Drift Detection
 # ---------------------------------------------------------------------------
+
 
 def scan_templates(template_dir: Path) -> dict[str, TemplateVersion]:
     """
@@ -204,28 +208,32 @@ def detect_drift(
 
         if local is None:
             # Template exists in upstream but not local (missing)
-            drifts.append(TemplateDrift(
-                name=name,
-                local_version=None,
-                upstream_version=upstream.version,
-                is_outdated=False,
-                is_missing=True,
-                breaking_changes=upstream.breaking_changes,
-                local_path=None,
-                upstream_path=upstream.path,
-            ))
+            drifts.append(
+                TemplateDrift(
+                    name=name,
+                    local_version=None,
+                    upstream_version=upstream.version,
+                    is_outdated=False,
+                    is_missing=True,
+                    breaking_changes=upstream.breaking_changes,
+                    local_path=None,
+                    upstream_path=upstream.path,
+                )
+            )
         elif compare_versions(local.version, upstream.version) < 0:
             # Local version is older than upstream (outdated)
-            drifts.append(TemplateDrift(
-                name=name,
-                local_version=local.version,
-                upstream_version=upstream.version,
-                is_outdated=True,
-                is_missing=False,
-                breaking_changes=upstream.breaking_changes,
-                local_path=local.path,
-                upstream_path=upstream.path,
-            ))
+            drifts.append(
+                TemplateDrift(
+                    name=name,
+                    local_version=local.version,
+                    upstream_version=upstream.version,
+                    is_outdated=True,
+                    is_missing=False,
+                    breaking_changes=upstream.breaking_changes,
+                    local_path=local.path,
+                    upstream_path=upstream.path,
+                )
+            )
 
     return drifts
 
@@ -233,6 +241,7 @@ def detect_drift(
 # ---------------------------------------------------------------------------
 # Reporting
 # ---------------------------------------------------------------------------
+
 
 def generate_drift_report(drifts: list[TemplateDrift]) -> str:
     """
@@ -248,7 +257,9 @@ def generate_drift_report(drifts: list[TemplateDrift]) -> str:
         return "✅ All templates are up-to-date!"
 
     lines = []
-    lines.append(f"⚠️  Template Drift Detected: {len(drifts)} template(s) need attention\n")
+    lines.append(
+        f"⚠️  Template Drift Detected: {len(drifts)} template(s) need attention\n"
+    )
 
     outdated = [d for d in drifts if d.is_outdated]
     missing = [d for d in drifts if d.is_missing]
@@ -257,13 +268,17 @@ def generate_drift_report(drifts: list[TemplateDrift]) -> str:
         lines.append(f"📊 Outdated templates ({len(outdated)}):")
         for drift in outdated:
             breaking = " 🔴 BREAKING" if drift.breaking_changes else ""
-            lines.append(f"  • {drift.name}: {drift.local_version} → {drift.upstream_version}{breaking}")
+            lines.append(
+                f"  • {drift.name}: {drift.local_version} → {drift.upstream_version}{breaking}"
+            )
         lines.append("")
 
     if missing:
         lines.append(f"❌ Missing templates ({len(missing)}):")
         for drift in missing:
-            lines.append(f"  • {drift.name}: v{drift.upstream_version} (not found in project)")
+            lines.append(
+                f"  • {drift.name}: v{drift.upstream_version} (not found in project)"
+            )
         lines.append("")
 
     lines.append("Run 'scaffold.py diff-template <name>' to see changes (Phase 2)")
@@ -304,6 +319,7 @@ def generate_drift_json(drifts: list[TemplateDrift]) -> dict:
 # ---------------------------------------------------------------------------
 # Template Base Storage (Phase 3: Three-Way Merge Support)
 # ---------------------------------------------------------------------------
+
 
 def save_template_base(
     project_dir: Path,
@@ -351,13 +367,15 @@ def save_template_base(
     # Write back to state file
     try:
         with state_path.open("w", encoding="utf-8") as f:
-            yaml.dump(state, f, allow_unicode=True, default_flow_style=False, sort_keys=False)
+            yaml.dump(
+                state, f, allow_unicode=True, default_flow_style=False, sort_keys=False
+            )
         log.info("✅ Saved base for %s (v%s) to scaffold state", template_name, version)
     except Exception as exc:
         log.error("Failed to save template base: %s", exc)
 
 
-def load_template_base(project_dir: Path, template_name: str) -> Optional[tuple[str, str]]:
+def load_template_base(project_dir: Path, template_name: str) -> tuple[str, str] | None:
     """
     Load base template content from .scaffold-state.yaml.
 

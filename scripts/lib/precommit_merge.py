@@ -12,10 +12,11 @@ Sprint 4 (P2 MEDIUM): Expansão do merge system para 90% coverage
 Feature: Pre-commit hooks não propagados em upgrades
 """
 
-from pathlib import Path
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
 import yaml
 
 from .config import CreatedItem
@@ -27,28 +28,32 @@ log = logging.getLogger(__name__)
 # Types and Data Classes
 # =============================================================================
 
+
 @dataclass
 class PreCommitHook:
     """Representa um hook dentro de um repo."""
+
     id: str
-    name: Optional[str]
-    args: List[str]
-    exclude: Optional[str]
-    files: Optional[str]
-    other: Dict[str, Any]  # Outros campos customizados
+    name: str | None
+    args: list[str]
+    exclude: str | None
+    files: str | None
+    other: dict[str, Any]  # Outros campos customizados
 
 
 @dataclass
 class PreCommitRepo:
     """Representa um repo com seus hooks."""
+
     repo: str
     rev: str
-    hooks: List[PreCommitHook]
+    hooks: list[PreCommitHook]
 
 
 # =============================================================================
 # PreCommitMerger
 # =============================================================================
+
 
 class PreCommitMerger:
     """
@@ -77,10 +82,7 @@ class PreCommitMerger:
         return file_path.name == ".pre-commit-config.yaml"
 
     def merge(
-        self,
-        existing_path: Path,
-        template_content: str,
-        interactive: bool = True
+        self, existing_path: Path, template_content: str, interactive: bool = True
     ) -> CreatedItem:
         """
         Faz merge inteligente do pre-commit config YAML.
@@ -110,7 +112,7 @@ class PreCommitMerger:
                     path=existing_path,
                     kind="file",
                     status="skipped",
-                    message="Estrutura YAML inválida"
+                    message="Estrutura YAML inválida",
                 )
 
             if not isinstance(template_data, dict) or "repos" not in template_data:
@@ -119,7 +121,7 @@ class PreCommitMerger:
                     path=existing_path,
                     kind="file",
                     status="skipped",
-                    message="Template YAML inválido"
+                    message="Template YAML inválido",
                 )
 
             # 3. Parse repos
@@ -137,7 +139,7 @@ class PreCommitMerger:
                     path=existing_path,
                     kind="file",
                     status="skipped",
-                    message="Nenhuma mudança necessária"
+                    message="Nenhuma mudança necessária",
                 )
 
             # 6. Backup do original
@@ -158,21 +160,17 @@ class PreCommitMerger:
                 merged_data,
                 default_flow_style=False,
                 allow_unicode=True,
-                sort_keys=False
+                sort_keys=False,
             )
             existing_path.write_text(merged_yaml, encoding="utf-8")
 
-            log.info(
-                "🔀 Merged %s: %s",
-                existing_path.name,
-                ", ".join(changes)
-            )
+            log.info("🔀 Merged %s: %s", existing_path.name, ", ".join(changes))
 
             return CreatedItem(
                 path=existing_path,
                 kind="file",
                 status="merged",
-                message=f"Merged: {', '.join(changes)}"
+                message=f"Merged: {', '.join(changes)}",
             )
 
         except yaml.YAMLError as e:
@@ -181,7 +179,7 @@ class PreCommitMerger:
                 path=existing_path,
                 kind="file",
                 status="error",
-                message=f"YAML error: {e}"
+                message=f"YAML error: {e}",
             )
         except Exception as e:
             log.error("❌ Erro ao mergear %s: %s", existing_path.name, e)
@@ -189,10 +187,10 @@ class PreCommitMerger:
                 path=existing_path,
                 kind="file",
                 status="error",
-                message=f"Merge error: {e}"
+                message=f"Merge error: {e}",
             )
 
-    def _parse_repos(self, repos_list: List[Dict[str, Any]]) -> List[PreCommitRepo]:
+    def _parse_repos(self, repos_list: list[dict[str, Any]]) -> list[PreCommitRepo]:
         """Parse lista de repos em estrutura tipada."""
         result = []
         for repo_dict in repos_list:
@@ -205,23 +203,26 @@ class PreCommitMerger:
                     args=hook_dict.get("args", []),
                     exclude=hook_dict.get("exclude"),
                     files=hook_dict.get("files"),
-                    other={k: v for k, v in hook_dict.items()
-                           if k not in ["id", "name", "args", "exclude", "files"]}
+                    other={
+                        k: v
+                        for k, v in hook_dict.items()
+                        if k not in ["id", "name", "args", "exclude", "files"]
+                    },
                 )
                 hooks.append(hook)
 
-            result.append(PreCommitRepo(
-                repo=repo_dict.get("repo", ""),
-                rev=repo_dict.get("rev", ""),
-                hooks=hooks
-            ))
+            result.append(
+                PreCommitRepo(
+                    repo=repo_dict.get("repo", ""),
+                    rev=repo_dict.get("rev", ""),
+                    hooks=hooks,
+                )
+            )
         return result
 
     def _merge_repos(
-        self,
-        existing: List[PreCommitRepo],
-        template: List[PreCommitRepo]
-    ) -> List[PreCommitRepo]:
+        self, existing: list[PreCommitRepo], template: list[PreCommitRepo]
+    ) -> list[PreCommitRepo]:
         """
         Merge repos: adiciona novos, atualiza existentes.
 
@@ -230,7 +231,7 @@ class PreCommitMerger:
         - Se repo existe, merge hooks
         - Se repo é novo, adiciona
         """
-        existing_by_url = {r.repo: r for r in existing}
+        {r.repo: r for r in existing}
         merged = []
 
         # Processar todos repos (manter ordem do existente)
@@ -249,11 +250,9 @@ class PreCommitMerger:
                 merged_hooks = self._merge_hooks(repo.hooks, template_repo.hooks)
                 # Usar rev mais recente (preferir template se diferente)
                 rev = template_repo.rev if template_repo.rev != repo.rev else repo.rev
-                merged.append(PreCommitRepo(
-                    repo=repo.repo,
-                    rev=rev,
-                    hooks=merged_hooks
-                ))
+                merged.append(
+                    PreCommitRepo(repo=repo.repo, rev=rev, hooks=merged_hooks)
+                )
             else:
                 # Repo customizado, preservar
                 merged.append(repo)
@@ -267,10 +266,8 @@ class PreCommitMerger:
         return merged
 
     def _merge_hooks(
-        self,
-        existing: List[PreCommitHook],
-        template: List[PreCommitHook]
-    ) -> List[PreCommitHook]:
+        self, existing: list[PreCommitHook], template: list[PreCommitHook]
+    ) -> list[PreCommitHook]:
         """
         Merge hooks dentro de um repo.
 
@@ -280,7 +277,7 @@ class PreCommitMerger:
         - Adicionar hooks novos do template
         - Merge args (união)
         """
-        existing_by_id = {h.id: h for h in existing}
+        {h.id: h for h in existing}
         merged = []
         seen = set()
 
@@ -296,14 +293,16 @@ class PreCommitMerger:
                 # Merge args (união, preservar ordem)
                 merged_args = list(dict.fromkeys(hook.args + template_hook.args))
                 # Preservar customizações do existente
-                merged.append(PreCommitHook(
-                    id=hook.id,
-                    name=hook.name or template_hook.name,
-                    args=merged_args,
-                    exclude=hook.exclude or template_hook.exclude,
-                    files=hook.files or template_hook.files,
-                    other={**template_hook.other, **hook.other}  # User wins
-                ))
+                merged.append(
+                    PreCommitHook(
+                        id=hook.id,
+                        name=hook.name or template_hook.name,
+                        args=merged_args,
+                        exclude=hook.exclude or template_hook.exclude,
+                        files=hook.files or template_hook.files,
+                        other={**template_hook.other, **hook.other},  # User wins
+                    )
+                )
             else:
                 # Hook customizado, preservar
                 merged.append(hook)
@@ -317,10 +316,8 @@ class PreCommitMerger:
         return merged
 
     def _detect_changes(
-        self,
-        original: List[PreCommitRepo],
-        merged: List[PreCommitRepo]
-    ) -> List[str]:
+        self, original: list[PreCommitRepo], merged: list[PreCommitRepo]
+    ) -> list[str]:
         """Detecta mudanças entre configurações."""
         changes = []
 
@@ -342,7 +339,9 @@ class PreCommitMerger:
             orig_repo = next((r for r in original if r.repo == repo.repo), None)
             if orig_repo:
                 for hook in repo.hooks:
-                    orig_hook = next((h for h in orig_repo.hooks if h.id == hook.id), None)
+                    orig_hook = next(
+                        (h for h in orig_repo.hooks if h.id == hook.id), None
+                    )
                     if orig_hook and orig_hook.args != hook.args:
                         if "args updated" not in changes:
                             changes.append("args updated")
@@ -359,7 +358,7 @@ class PreCommitMerger:
 
         return changes
 
-    def _repo_to_dict(self, repo: PreCommitRepo) -> Dict[str, Any]:
+    def _repo_to_dict(self, repo: PreCommitRepo) -> dict[str, Any]:
         """Converte PreCommitRepo de volta para dict YAML."""
         hooks_list = []
         for hook in repo.hooks:
@@ -376,8 +375,4 @@ class PreCommitMerger:
             hook_dict.update(hook.other)
             hooks_list.append(hook_dict)
 
-        return {
-            "repo": repo.repo,
-            "rev": repo.rev,
-            "hooks": hooks_list
-        }
+        return {"repo": repo.repo, "rev": repo.rev, "hooks": hooks_list}

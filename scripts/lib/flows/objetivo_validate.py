@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import sys
 from pathlib import Path
 
 from ..objetivo_parser import ObjetivoV2Parser
@@ -28,7 +27,9 @@ def flow_objetivo_validate(args: argparse.Namespace) -> int:
 
     # Check file exists
     if not file_path.exists():
-        console.print(f"\n  [bold red]❌ Erro:[/bold red] Arquivo não encontrado: {file_path}\n")
+        console.print(
+            f"\n  [bold red]❌ Erro:[/bold red] Arquivo não encontrado: {file_path}\n"
+        )
         return 1
 
     try:

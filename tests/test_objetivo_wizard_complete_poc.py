@@ -9,8 +9,9 @@ Execução:
 Gera arquivo de saída:
     /tmp/objetivo-poc-complete.yaml
 """
-from pathlib import Path
+
 import sys
+from pathlib import Path
 
 # Add scripts to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
@@ -40,7 +41,6 @@ def test_complete_objective_all_variables(tmp_path):
                 "executar deploys via interface web/CLI, com rollback automático em caso "
                 "de falha e monitoramento integrado."
             ),
-
             # Q2: Qual problema está sendo melhorado? (P0 condicional - apenas para "update")
             # Deixar vazio ou comentar se project_type="new"
             # "{{ANSWER_2}}": (
@@ -48,7 +48,6 @@ def test_complete_objective_all_variables(tmp_path):
             #     "Performance degrada em 50%, custos operacionais +R$ 30k/mês. "
             #     "Falta automação, padronização e observabilidade."
             # ),
-
             # Q3: O que está NO escopo? (P0 - obrigatório, multiline)
             "{{FEATURE}}": (
                 "Processamento automático de deploy com validação de pré-requisitos (P0)\n"
@@ -58,7 +57,6 @@ def test_complete_objective_all_variables(tmp_path):
                 "Notificações por email/Slack em eventos críticos (P2)\n"
                 "Dashboard de métricas e histórico de deploys (P1)"
             ),
-
             # Q4: Restrições técnicas? (P1 - opcional, multiline)
             "{{CONSTRAINT}}": (
                 "Budget: R$ 80k para desenvolvimento + R$ 5k/mês infraestrutura\n"
@@ -68,7 +66,6 @@ def test_complete_objective_all_variables(tmp_path):
                 "Disponibilidade: 99.9% SLA (máx 43min downtime/mês)\n"
                 "Segurança: autenticação via OAuth2 + RBAC"
             ),
-
             # Q5: Regras de negócio complexas? (P1 - opcional, multiline)
             "{{RULE}}": (
                 "Apenas usuários com role 'deployer' podem executar deploys em produção\n"
@@ -78,21 +75,18 @@ def test_complete_objective_all_variables(tmp_path):
                 "Logs de deploy devem ser retidos por 2 anos (compliance)\n"
                 "Rate limit: máximo 10 deploys simultâneos por cluster"
             ),
-
             # Q6: Tipo de solução técnica (P0 - obrigatório)
             "{{RESPONSE}}": (
                 "código Python 3.11+ com FastAPI, PostgreSQL para persistência, "
                 "Redis para cache/queue, Celery para tasks assíncronas, "
                 "Docker/Kubernetes para deploy, padrão hexagonal/clean architecture"
             ),
-
             # Q7: Padrão de documentação (P1 - opcional)
             "{{DOCSTYLE}}": (
                 "Google Style Docstrings com type hints completos, "
                 "Sphinx para geração de docs, ADRs para decisões arquiteturais, "
                 "OpenAPI/Swagger para documentação de API"
             ),
-
             # Q8: Infraestrutura necessária (P1 - opcional, multiline)
             "{{INFRASTRUCTURE}}": (
                 "Cluster Kubernetes 1.28+ em AWS EKS (3 nodes t3.medium)\n"
@@ -102,7 +96,6 @@ def test_complete_objective_all_variables(tmp_path):
                 "CloudWatch/Prometheus para monitoramento\n"
                 "Application Load Balancer com WAF habilitado"
             ),
-
             # Q9: Perfis/roles necessários (P1 - opcional, multiline)
             "{{PROFILE_ROLE_1}}": (
                 "backend-architect (Python/FastAPI expert, senior 5+ anos)\n"
@@ -111,7 +104,6 @@ def test_complete_objective_all_variables(tmp_path):
                 "qa-automation (pytest/integration tests, pleno)\n"
                 "tech-writer (documentação técnica, júnior)"
             ),
-
             # Q10: Resultados esperados mensuráveis (P0 - obrigatório, multiline)
             "{{EXPECTED_OUTCOME}}": (
                 "100% dos deploys via sistema automatizado (zero deploys manuais)\n"
@@ -123,7 +115,7 @@ def test_complete_objective_all_variables(tmp_path):
                 "SLA de 99.9% alcançado consistentemente\n"
                 "Zero incidentes de segurança relacionados a deploys"
             ),
-        }
+        },
     )
 
     # Executar wizard em modo não-interativo
@@ -141,7 +133,8 @@ def test_complete_objective_all_variables(tmp_path):
 
     # Validar que não há placeholders não substituídos
     import re
-    unreplaced = re.findall(r'\{\{[A-Z_0-9]+\}\}', content)
+
+    unreplaced = re.findall(r"\{\{[A-Z_0-9]+\}\}", content)
     assert not unreplaced, f"Placeholders não substituídos: {unreplaced}"
 
     # Validar que campos obrigatórios estão presentes (formato objetivo-init.yaml v2.0)
@@ -156,7 +149,9 @@ def test_complete_objective_all_variables(tmp_path):
     assert "Python 3.11+ com FastAPI" in content  # Q6 - RESPONSE
     assert "Google Style Docstrings" in content  # Q7 - DOCSTYLE
     assert "Cluster Kubernetes 1.28+" in content  # Q8 - INFRASTRUCTURE_1
-    assert "100% dos deploys via sistema automatizado" in content  # Q10 - EXPECTED_OUTCOME_1
+    assert (
+        "100% dos deploys via sistema automatizado" in content
+    )  # Q10 - EXPECTED_OUTCOME_1
 
     # Nota: CONSTRAINT e PROFILE_ROLE não estão no template atual
 
@@ -165,20 +160,20 @@ def test_complete_objective_all_variables(tmp_path):
     poc_output.write_text(content)
 
     print(f"\n{'='*80}")
-    print(f"✅ POC gerado com sucesso!")
+    print("✅ POC gerado com sucesso!")
     print(f"{'='*80}")
     print(f"📄 Arquivo gerado: {poc_output}")
     print(f"📊 Tamanho: {len(content)} bytes")
     print(f"📋 Linhas: {len(content.splitlines())}")
-    print(f"\n🔍 Preview (primeiras 30 linhas):")
+    print("\n🔍 Preview (primeiras 30 linhas):")
     print(f"{'='*80}")
     for i, line in enumerate(content.splitlines()[:30], 1):
         print(f"{i:3d} | {line}")
     print(f"{'='*80}")
-    print(f"\n💡 Use este arquivo como base para:")
-    print(f"   1. Validar template objetivo-init-template.yaml")
-    print(f"   2. Criar objetivo.yaml para projetos reais")
-    print(f"   3. Testar integração com SpecKit")
+    print("\n💡 Use este arquivo como base para:")
+    print("   1. Validar template objetivo-init-template.yaml")
+    print("   2. Criar objetivo.yaml para projetos reais")
+    print("   3. Testar integração com SpecKit")
     print(f"{'='*80}\n")
 
     # Retorna o path para uso em pytest
@@ -205,7 +200,7 @@ def test_minimal_objective_required_only(tmp_path):
             "{{FEATURE}}": "Feature básica 1\nFeature básica 2",
             "{{RESPONSE}}": "código Python básico",
             "{{EXPECTED_OUTCOME}}": "Sistema funcional\nTestes passando",
-        }
+        },
     )
 
     output_path = tmp_path / "objetivo-init-minimal.yaml"
@@ -220,7 +215,7 @@ def test_minimal_objective_required_only(tmp_path):
     poc_minimal.write_text(content)
 
     print(f"\n{'='*80}")
-    print(f"✅ POC Minimal gerado!")
+    print("✅ POC Minimal gerado!")
     print(f"📄 Arquivo: {poc_minimal}")
     print(f"{'='*80}\n")
 
@@ -239,25 +234,27 @@ if __name__ == "__main__":
     # POC 1: Completo com todas as variáveis
     try:
         test_complete_objective_all_variables(_standalone_dir)
-        print(f"✅ POC Completo gerado")
+        print("✅ POC Completo gerado")
     except Exception as e:
         print(f"❌ Erro no POC Completo: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 
     # POC 2: Minimal apenas P0
     try:
         test_minimal_objective_required_only(_standalone_dir)
-        print(f"✅ POC Minimal gerado")
+        print("✅ POC Minimal gerado")
     except Exception as e:
         print(f"❌ Erro no POC Minimal: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("🎯 Sucesso! 2 POCs gerados:")
     print("   - /tmp/objetivo-poc-complete.yaml (TODAS as variáveis)")
     print("   - /tmp/objetivo-poc-minimal.yaml (apenas P0 obrigatórias)")
-    print("="*80 + "\n")
+    print("=" * 80 + "\n")

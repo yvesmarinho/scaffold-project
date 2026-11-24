@@ -1,5 +1,5 @@
-<!-- Criado em: 24/11/2026 11:55 -->
-<!-- Modificado em: 24/11/2026 11:18 -->
+<!-- Criado em: 24/11/2026 11:18 -->
+<!-- Modificado em: 24/11/2026 15:00 -->
 
 # Inventário de templates do scaffold-project
 

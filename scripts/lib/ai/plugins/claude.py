@@ -5,7 +5,7 @@ NOME..: claude.py
 LANG..: Python3
 TITULO: Plugin de integração do Claude Code (Anthropic) no scaffold
 DATA..: 23/06/2026 10:00
-MODIFICADO: 23/06/2026 10:00
+MODIFICADO: 24/11/2026 15:00
 VERSÃO: 0.1.0
 HOST..: local
 LOCAL.: scripts/lib/ai/plugins/
@@ -31,7 +31,7 @@ from typing import TYPE_CHECKING
 from ..base import AIPlugin
 
 if TYPE_CHECKING:
-    from ...config import ProjectConfig, CreatedItem
+    from ...config import CreatedItem, ProjectConfig
 
 
 class ClaudePlugin(AIPlugin):
@@ -71,6 +71,7 @@ class ClaudePlugin(AIPlugin):
         :rtype: list[tuple[str, str]]
         """
         from ...project import get_claude_files
+
         return get_claude_files()
 
     def collect_config(self, defaults: dict) -> dict:
@@ -103,7 +104,7 @@ class ClaudePlugin(AIPlugin):
         """
         return {}
 
-    def setup(self, config: "ProjectConfig") -> list["CreatedItem"]:
+    def setup(self, config: ProjectConfig) -> list[CreatedItem]:
         """
         Executa setup completo do Claude Code em projeto recém-criado.
 
@@ -116,9 +117,10 @@ class ClaudePlugin(AIPlugin):
         :rtype: list[CreatedItem]
         """
         from ...project import copy_claude_config
+
         return list(copy_claude_config(config))
 
-    def upgrade(self, config: "ProjectConfig", force: bool = False) -> list["CreatedItem"]:
+    def upgrade(self, config: ProjectConfig, force: bool = False) -> list[CreatedItem]:
         """
         Re-aplica configuração do Claude Code em projeto existente.
 
@@ -130,4 +132,5 @@ class ClaudePlugin(AIPlugin):
         :rtype: list[CreatedItem]
         """
         from ...project import copy_claude_config
+
         return list(copy_claude_config(config, force=force))

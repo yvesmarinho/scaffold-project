@@ -12,7 +12,6 @@ Referência: scripts/git-hooks/pre-commit
 """
 
 import subprocess
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -104,7 +103,10 @@ def test_hook_blocks_auto_generated_title(git_repo):
     )
 
     assert result.returncode != 0, "Hook should block auto-generated file"
-    assert "__auto-generated-title.md" in result.stdout or "__auto-generated-title.md" in result.stderr
+    assert (
+        "__auto-generated-title.md" in result.stdout
+        or "__auto-generated-title.md" in result.stderr
+    )
 
 
 def test_hook_blocks_search_test_files(git_repo):
@@ -127,7 +129,10 @@ def test_hook_blocks_search_test_files(git_repo):
     )
 
     assert result.returncode != 0, "Hook should block search test file"
-    assert "__search-test-results.md" in result.stdout or "__search-test-results.md" in result.stderr
+    assert (
+        "__search-test-results.md" in result.stdout
+        or "__search-test-results.md" in result.stderr
+    )
 
 
 def test_hook_validates_frontmatter_invalid_category(git_repo):
@@ -158,7 +163,9 @@ Content here.
     )
 
     assert result.returncode != 0, "Hook should reject invalid category"
-    assert "categoria inválida" in result.stdout or "categoria inválida" in result.stderr
+    assert (
+        "categoria inválida" in result.stdout or "categoria inválida" in result.stderr
+    )
 
 
 def test_hook_validates_frontmatter_missing_closing(git_repo):
