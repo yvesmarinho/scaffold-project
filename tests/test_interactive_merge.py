@@ -6,7 +6,7 @@ Part of IMP-65 (Template Synchronization System) Phase 3.1.
 
 import textwrap
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -18,10 +18,10 @@ from scripts.lib.interactive_merge import (
 )
 from scripts.lib.template_merge import ConflictRegion, MergeResult
 
-
 # ---------------------------------------------------------------------------
 # Test Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def sample_conflict():
@@ -88,6 +88,7 @@ def merge_result_with_conflicts():
 # ---------------------------------------------------------------------------
 # Test Resolution Application
 # ---------------------------------------------------------------------------
+
 
 class TestApplyResolution:
     """Test applying resolution choices to merged content."""
@@ -243,6 +244,7 @@ class TestApplyResolution:
 # Test Validation
 # ---------------------------------------------------------------------------
 
+
 class TestValidation:
     """Test conflict validation functions."""
 
@@ -320,6 +322,7 @@ class TestValidation:
 # Test Resolution Choice
 # ---------------------------------------------------------------------------
 
+
 class TestResolutionChoice:
     """Test ResolutionChoice dataclass."""
 
@@ -340,6 +343,7 @@ class TestResolutionChoice:
 # ---------------------------------------------------------------------------
 # Integration Tests
 # ---------------------------------------------------------------------------
+
 
 class TestInteractiveResolution:
     """Test interactive resolution workflow (mocked input)."""
@@ -404,7 +408,9 @@ class TestInteractiveResolution:
         assert "<<<<<<< LOCAL" in resolved_content  # Markers still present
 
     @patch("scripts.lib.interactive_merge.Confirm.ask")
-    def test_cancel_interactive_resolution(self, mock_confirm, merge_result_with_conflicts):
+    def test_cancel_interactive_resolution(
+        self, mock_confirm, merge_result_with_conflicts
+    ):
         """Test cancelling interactive resolution."""
         mock_confirm.return_value = False
 
@@ -421,6 +427,7 @@ class TestInteractiveResolution:
 # ---------------------------------------------------------------------------
 # Edge Cases
 # ---------------------------------------------------------------------------
+
 
 class TestEdgeCases:
     """Test edge cases and error handling."""

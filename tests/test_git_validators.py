@@ -8,27 +8,28 @@ Valida:
 - Sugestões de nomes de branch
 """
 
-import pytest
-
 # Import do módulo a testar
 import sys
 from pathlib import Path
+
+import pytest
+
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 
 from lib.git_validators import (
-    validate_branch_name,
-    validate_commit_message,
-    is_protected_branch,
-    suggest_branch_name,
-    format_validation_errors,
     BranchType,
     CommitType,
+    format_validation_errors,
+    is_protected_branch,
+    suggest_branch_name,
+    validate_branch_name,
+    validate_commit_message,
 )
-
 
 # =============================================================================
 # Testes de Validação de Branch
 # =============================================================================
+
 
 class TestBranchNameValidation:
     """Testes para validate_branch_name()"""
@@ -103,7 +104,10 @@ class TestBranchNameValidation:
         result = validate_branch_name("feature/user@authentication")
 
         assert not result.is_valid
-        assert "caracteres" in " ".join(result.errors).lower() or "apenas" in " ".join(result.errors).lower()
+        assert (
+            "caracteres" in " ".join(result.errors).lower()
+            or "apenas" in " ".join(result.errors).lower()
+        )
 
     def test_warning_feature_without_issue(self):
         """Feature sem issue deve gerar warning"""
@@ -135,12 +139,15 @@ class TestBranchNameValidation:
         # Underscores não são permitidos, então gera erro (não warning)
         assert not result.is_valid
         assert len(result.errors) > 0
-        assert any("caracteres" in e.lower() or "apenas" in e.lower() for e in result.errors)
+        assert any(
+            "caracteres" in e.lower() or "apenas" in e.lower() for e in result.errors
+        )
 
 
 # =============================================================================
 # Testes de Validação de Commit
 # =============================================================================
+
 
 class TestCommitMessageValidation:
     """Testes para validate_commit_message()"""
@@ -188,12 +195,24 @@ BREAKING CHANGE: campo 'userId' renomeado para 'user_id'
         assert result.is_valid
         assert result.is_breaking
         # BREAKING CHANGE pode estar no body ou footer
-        assert (result.body and "BREAKING CHANGE" in result.body) or \
-               (result.footer and "BREAKING CHANGE" in result.footer)
+        assert (result.body and "BREAKING CHANGE" in result.body) or (
+            result.footer and "BREAKING CHANGE" in result.footer
+        )
 
     def test_valid_commit_types(self):
         """Todos os tipos válidos devem ser aceitos"""
-        valid_types = ["feat", "fix", "docs", "style", "refactor", "perf", "test", "chore", "ci", "build"]
+        valid_types = [
+            "feat",
+            "fix",
+            "docs",
+            "style",
+            "refactor",
+            "perf",
+            "test",
+            "chore",
+            "ci",
+            "build",
+        ]
 
         for commit_type in valid_types:
             result = validate_commit_message(f"{commit_type}: test message")
@@ -246,9 +265,8 @@ BREAKING CHANGE: campo 'userId' renomeado para 'user_id'
         """Mensagens vagas devem gerar warning"""
         result = validate_commit_message("fix: update")
 
-        # Pode ter warnings sobre mensagens vagas
-        # (teste pode passar mesmo sem warning dependendo da implementação)
-        pass  # apenas não deve crashar
+        assert result.is_valid, "mensagem vaga gera aviso, não erro"
+        assert any("vagas" in w for w in result.warnings), result.warnings
 
     def test_commit_with_body_and_footer(self):
         """Commit com body e footer deve ser parseado corretamente"""
@@ -272,6 +290,7 @@ Refs #456
 # =============================================================================
 # Testes de Funções Auxiliares
 # =============================================================================
+
 
 class TestHelperFunctions:
     """Testes para funções auxiliares"""
@@ -355,6 +374,7 @@ class TestHelperFunctions:
 # =============================================================================
 # Testes de Edge Cases
 # =============================================================================
+
 
 class TestEdgeCases:
     """Testes para casos extremos"""

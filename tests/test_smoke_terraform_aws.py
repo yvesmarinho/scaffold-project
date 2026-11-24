@@ -19,8 +19,6 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-import pytest
-
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 
 from lib.composer import (  # noqa: E402
@@ -44,9 +42,9 @@ _TEMPLATES_DIR = _PROJECT_ROOT / ".github" / "templates" / "terraform-aws"
 def test_terraform_aws_descriptor_loads() -> None:
     """terraform-aws descriptor é carregado por load_all_descriptors."""
     descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
-    assert "terraform-aws" in descriptors, (
-        f"terraform-aws não encontrado. Carregados: {list(descriptors.keys())}"
-    )
+    assert (
+        "terraform-aws" in descriptors
+    ), f"terraform-aws não encontrado. Carregados: {list(descriptors.keys())}"
 
 
 def test_terraform_aws_descriptor_has_required_fields() -> None:
@@ -109,7 +107,9 @@ def test_rds_template_no_public_access() -> None:
     rds_main = _TEMPLATES_DIR / "terraform" / "modules" / "rds" / "main.tf"
     assert rds_main.exists(), "modules/rds/main.tf não encontrado"
     content = rds_main.read_text()
-    assert "publicly_accessible" in content, "rds/main.tf não contém publicly_accessible"
+    assert (
+        "publicly_accessible" in content
+    ), "rds/main.tf não contém publicly_accessible"
     assert "false" in content, "rds/main.tf não define publicly_accessible = false"
 
 
@@ -125,7 +125,9 @@ def test_rds_no_hardcoded_password() -> None:
     """modules/rds/main.tf não deve conter senha hardcoded — usa random_password."""
     rds_main = _TEMPLATES_DIR / "terraform" / "modules" / "rds" / "main.tf"
     content = rds_main.read_text()
-    assert "random_password" in content, "rds/main.tf não usa random_password para a senha"
+    assert (
+        "random_password" in content
+    ), "rds/main.tf não usa random_password para a senha"
 
 
 def test_ecs_iam_no_wildcard_resource() -> None:
@@ -143,7 +145,9 @@ def test_versions_tf_pins_provider_version() -> None:
     assert versions_tf.exists(), "terraform/versions.tf não encontrado"
     content = versions_tf.read_text()
     assert "~>" in content, "versions.tf não usa constraint de versão (~>)"
-    assert "hashicorp/aws" in content, "versions.tf não declara o provider hashicorp/aws"
+    assert (
+        "hashicorp/aws" in content
+    ), "versions.tf não declara o provider hashicorp/aws"
 
 
 # ---------------------------------------------------------------------------
@@ -195,7 +199,9 @@ def test_compose_terraform_aws_idempotent(make_project_config) -> None:
     result2 = composer.compose(["terraform-aws"], cfg)
 
     assert result2.success
-    assert result2.created_count == 0, "Segunda composição criou arquivos — não é idempotente"
+    assert (
+        result2.created_count == 0
+    ), "Segunda composição criou arquivos — não é idempotente"
 
 
 def test_resolve_order_layer2_before_terraform_layer3() -> None:
@@ -204,6 +210,6 @@ def test_resolve_order_layer2_before_terraform_layer3() -> None:
     profiles = ["terraform-aws", "python-fastapi"]
     ordered = resolve_order(profiles, descriptors)
 
-    assert ordered.index("python-fastapi") < ordered.index("terraform-aws"), (
-        f"Esperado layer2 antes de layer3, got: {ordered}"
-    )
+    assert ordered.index("python-fastapi") < ordered.index(
+        "terraform-aws"
+    ), f"Esperado layer2 antes de layer3, got: {ordered}"

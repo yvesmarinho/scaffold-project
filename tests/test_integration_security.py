@@ -10,10 +10,10 @@ Verifica por template:
   3. Arquivo .env não está versionado (somente .env.example quando existir)
   4. YAML/TOML de configuração é válido (parseable sem erros)
 """
+
 from __future__ import annotations
 
 import re
-from pathlib import Path
 
 import pytest
 import yaml
@@ -26,26 +26,41 @@ from tests.helpers.fake_project import TEMPLATES_DIR, FakeProject, expand_templa
 
 # Regex que detectam secrets hardcoded típicos
 _SECRET_PATTERNS: list[tuple[str, str]] = [
-    (r'password\s*=\s*["\'][^"\']{4,}["\']',    "password atribuído inline"),
-    (r'secret_key\s*=\s*["\'][^"\']{4,}["\']',  "secret_key atribuído inline"),
-    (r'api_key\s*=\s*["\'][^"\']{8,}["\']',      "api_key atribuído inline"),
-    (r'AWS_SECRET_ACCESS_KEY\s*=\s*[A-Za-z0-9/+]{20,}', "AWS secret key hardcoded"),
-    (r'-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----', "chave privada no arquivo"),
+    (r'password\s*=\s*["\'][^"\']{4,}["\']', "password atribuído inline"),
+    (r'secret_key\s*=\s*["\'][^"\']{4,}["\']', "secret_key atribuído inline"),
+    (r'api_key\s*=\s*["\'][^"\']{8,}["\']', "api_key atribuído inline"),
+    (r"AWS_SECRET_ACCESS_KEY\s*=\s*[A-Za-z0-9/+]{20,}", "AWS secret key hardcoded"),
+    (r"-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----", "chave privada no arquivo"),
 ]
 
 # Extensões a escanear para secrets
-_SCAN_EXTS: frozenset[str] = frozenset({
-    ".py", ".ts", ".tsx", ".js", ".json", ".toml",
-    ".yml", ".yaml", ".env", ".sh", ".tf", ".tfvars",
-    ".md", "",  # Makefile, Dockerfile
-})
+_SCAN_EXTS: frozenset[str] = frozenset(
+    {
+        ".py",
+        ".ts",
+        ".tsx",
+        ".js",
+        ".json",
+        ".toml",
+        ".yml",
+        ".yaml",
+        ".env",
+        ".sh",
+        ".tf",
+        ".tfvars",
+        ".md",
+        "",  # Makefile, Dockerfile
+    }
+)
 
 # Arquivos que PODEM conter exemplos de token (não são secrets reais)
-_ALLOWLISTED_FILES: frozenset[str] = frozenset({
-    ".env.example",
-    "README.md",
-    "RUNBOOK.md",
-})
+_ALLOWLISTED_FILES: frozenset[str] = frozenset(
+    {
+        ".env.example",
+        "README.md",
+        "RUNBOOK.md",
+    }
+)
 
 # .gitignore deve cobrir estes padrões em templates que contenham código
 _GITIGNORE_REQUIRED: list[str] = [".env", "*.key", "*.pem"]
@@ -72,21 +87,27 @@ _PROFILES_WITH_GITIGNORE: list[str] = [
 
 # YAML/TOML de configuração a validar por perfil
 _CONFIG_FILES: dict[str, list[str]] = {
-    "python-fastapi":        ["pyproject.toml", "docker-compose.yml"],
-    "python-flask":          ["pyproject.toml", "docker-compose.yml"],
-    "typescript-next":       ["package.json", "docker-compose.yml", "tsconfig.json"],
-    "k8s-helm":              ["helm/Chart.yaml", "helm/values.yaml", "helm/values-staging.yaml", "helm/values-prod.yaml"],
-    "terraform-aws":         [],  # HCL — não validado com yaml
+    "python-fastapi": ["pyproject.toml", "docker-compose.yml"],
+    "python-flask": ["pyproject.toml", "docker-compose.yml"],
+    "typescript-next": ["package.json", "docker-compose.yml", "tsconfig.json"],
+    "k8s-helm": [
+        "helm/Chart.yaml",
+        "helm/values.yaml",
+        "helm/values-staging.yaml",
+        "helm/values-prod.yaml",
+    ],
+    "terraform-aws": [],  # HCL — não validado com yaml
     "data-pipeline-airflow": ["airflow/requirements-airflow.txt"],  # só estrutura
-    "data-warehouse-dbt":    [],
-    "lgpd-baseline":         [],
-    "soc2-baseline":         [],
+    "data-warehouse-dbt": [],
+    "lgpd-baseline": [],
+    "soc2-baseline": [],
 }
 
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _skip_if_missing(profile: str):
     if not (TEMPLATES_DIR / profile).is_dir():
@@ -113,14 +134,16 @@ def _scan_secrets(proj: FakeProject) -> list[str]:
                         rel = f.relative_to(proj.root)
                         violations.append(f"{rel}:{lineno}: {description}")
                         break  # uma violação por linha é suficiente
-        except Exception:
-            pass
+        except OSError as exc:
+            # arquivo ilegível não pode esconder segredo: registra como violação
+            violations.append(f"{f.relative_to(proj.root)}: ilegível ({exc})")
     return violations
 
 
 # ---------------------------------------------------------------------------
 # Fixture compartilhada: expande todos os templates uma vez por sessão
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture(scope="module", params=_ALL_PROFILES)
 def any_proj(request, tmp_path_factory) -> FakeProject:
@@ -134,15 +157,17 @@ def any_proj(request, tmp_path_factory) -> FakeProject:
 # Testes parametrizados — todos os templates
 # ---------------------------------------------------------------------------
 
+
 class TestAllTemplatesSecurityBaseline:
     """Checks de segurança que se aplicam a TODOS os templates disponíveis."""
 
     def test_no_hardcoded_secrets(self, any_proj: FakeProject):
         """Nenhum arquivo deve conter credenciais hardcoded."""
         violations = _scan_secrets(any_proj)
-        assert not violations, (
-            f"[{any_proj.profile}] Possíveis secrets detectados:\n"
-            + "\n".join(f"  {v}" for v in violations[:10])
+        assert (
+            not violations
+        ), f"[{any_proj.profile}] Possíveis secrets detectados:\n" + "\n".join(
+            f"  {v}" for v in violations[:10]
         )
 
     def test_no_dot_env_committed(self, any_proj: FakeProject):
@@ -156,18 +181,21 @@ class TestAllTemplatesSecurityBaseline:
     def test_no_private_keys(self, any_proj: FakeProject):
         """Nenhum arquivo .key, .pem ou .p12 deve existir."""
         bad_files = [
-            f for f in any_proj.root.rglob("*")
+            f
+            for f in any_proj.root.rglob("*")
             if f.is_file() and f.suffix in {".key", ".pem", ".p12", ".pfx", ".jks"}
         ]
-        assert not bad_files, (
-            f"[{any_proj.profile}] Chaves privadas encontradas: "
-            + ", ".join(str(f.relative_to(any_proj.root)) for f in bad_files)
+        assert (
+            not bad_files
+        ), f"[{any_proj.profile}] Chaves privadas encontradas: " + ", ".join(
+            str(f.relative_to(any_proj.root)) for f in bad_files
         )
 
 
 # ---------------------------------------------------------------------------
 # Testes específicos — templates com código executável (.gitignore obrigatório)
 # ---------------------------------------------------------------------------
+
 
 class TestGitignoreInCodeTemplates:
     """Templates com código devem ter .gitignore cobrindo padrões sensíveis."""
@@ -198,15 +226,17 @@ class TestGitignoreInCodeTemplates:
 # Testes de validade de YAML/JSON por perfil
 # ---------------------------------------------------------------------------
 
+
 class TestConfigFilesAreValid:
     """Arquivos de configuração devem ser parseáveis sem erros."""
 
-    @pytest.mark.parametrize("profile,config_file", [
-        (profile, cfg)
-        for profile, cfgs in _CONFIG_FILES.items()
-        for cfg in cfgs
-    ])
-    def test_config_file_parseable(self, tmp_path_factory, profile: str, config_file: str):
+    @pytest.mark.parametrize(
+        "profile,config_file",
+        [(profile, cfg) for profile, cfgs in _CONFIG_FILES.items() for cfg in cfgs],
+    )
+    def test_config_file_parseable(
+        self, tmp_path_factory, profile: str, config_file: str
+    ):
         _skip_if_missing(profile)
         proj = expand_template(profile, tmp_path_factory.mktemp(f"cfg_{profile}"))
 
@@ -226,6 +256,7 @@ class TestConfigFilesAreValid:
 
         elif suffix == ".json":
             import json
+
             try:
                 parsed = json.loads(content)
                 assert isinstance(parsed, (dict, list))

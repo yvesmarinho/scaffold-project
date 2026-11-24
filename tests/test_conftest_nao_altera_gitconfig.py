@@ -3,7 +3,7 @@
 NOME: test_conftest_nao_altera_gitconfig.py
 TITULO: A suíte de testes não pode alterar o ~/.gitconfig real do usuário
 DATA: 24/11/2026 14:34
-MODIFICADO: 24/11/2026 14:34
+MODIFICADO: 24/11/2026 15:00
 VERSÃO: 1.0.0
 DEPEND: pytest, git
 STATUS: DEV
@@ -86,3 +86,16 @@ def test_mock_subprocess_funciona(mock_subprocess) -> None:
     resultado = subprocess.run(["qualquer"])  # noqa: S603, S607
     assert resultado.stdout == "saida"
     assert mock.called
+
+
+def test_nenhum_teste_grava_identidade_global() -> None:
+    """Nenhum teste pode rodar `git config --global user.<x> <valor>` (escrita)."""
+    import re
+
+    escrita = re.compile(r'"--global",\s*"user\.(?:name|email)",\s*"')
+    achados = [
+        f"{arq.relative_to(_ROOT)}"
+        for arq in sorted((_ROOT / "tests").rglob("*.py"))
+        if escrita.search(arq.read_text(encoding="utf-8"))
+    ]
+    assert not achados, f"escrita na identidade git global: {achados}"

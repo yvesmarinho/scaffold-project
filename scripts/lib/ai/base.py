@@ -5,7 +5,7 @@ NOME..: base.py
 LANG..: Python3
 TITULO: Classe base abstrata para plugins de assistente de IA
 DATA..: 23/06/2026 10:00
-MODIFICADO: 23/06/2026 10:00
+MODIFICADO: 24/11/2026 15:00
 VERSÃO: 0.1.0
 HOST..: local
 LOCAL.: scripts/lib/ai/
@@ -35,7 +35,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..config import ProjectConfig, CreatedItem
+    from ..config import CreatedItem, ProjectConfig
 
 
 class AIPlugin(ABC):
@@ -126,7 +126,7 @@ class AIPlugin(ABC):
     # ------------------------------------------------------------------
 
     @abstractmethod
-    def setup(self, config: "ProjectConfig") -> list["CreatedItem"]:
+    def setup(self, config: ProjectConfig) -> list[CreatedItem]:
         """
         Executa toda a configuração deste AI em um projeto recém-criado.
 
@@ -139,7 +139,7 @@ class AIPlugin(ABC):
         """
         ...
 
-    def upgrade(self, config: "ProjectConfig", force: bool = False) -> list["CreatedItem"]:
+    def upgrade(self, config: ProjectConfig, force: bool = False) -> list[CreatedItem]:
         """
         Re-aplica a configuração deste AI a um projeto já existente (upgrade).
 

@@ -13,13 +13,14 @@ Uso nos testes:
         assert proj.file("Makefile").exists()
         proj.assert_no_placeholders()
 """
+
 from __future__ import annotations
 
 import re
 import shutil
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterator
 
 # ---------------------------------------------------------------------------
 # Paths base
@@ -33,56 +34,111 @@ TEMPLATES_DIR = _REPO_ROOT / ".github" / "templates"
 # ---------------------------------------------------------------------------
 
 _DEFAULT_VARS: dict[str, str] = {
-    "project_name":        "fake-project",
-    "project_title":       "Fake Project",
-    "description":         "Integration test fake project",
-    "author":              "Test Author",
-    "year":                "2026",
-    "domain":              "programming",
-    "language":            "python",
-    "github_repo":         "https://github.com/org/fake-project",
-    "python_version":      "3.12",
-    "node_version":        "22",
-    "chart_version":       "0.1.0",
-    "app_version":         "0.1.0",
-    "namespace":           "default",
-    "registry":            "ghcr.io/org",
+    "project_name": "fake-project",
+    "project_title": "Fake Project",
+    "description": "Integration test fake project",
+    "author": "Test Author",
+    "year": "2026",
+    "domain": "programming",
+    "language": "python",
+    "github_repo": "https://github.com/org/fake-project",
+    "python_version": "3.12",
+    "node_version": "22",
+    "chart_version": "0.1.0",
+    "app_version": "0.1.0",
+    "namespace": "default",
+    "registry": "ghcr.io/org",
 }
 
 # Extensões de arquivo que serão tratadas como texto (conteúdo expandido)
-_TEXT_SUFFIXES: frozenset[str] = frozenset({
-    ".py", ".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs",
-    ".json", ".toml", ".yml", ".yaml", ".md", ".txt",
-    ".sh", ".env", ".env.example", ".gitignore", ".dockerignore",
-    ".sql", ".tf", ".tfvars", ".hcl", ".cfg", ".ini", ".conf",
-    ".html", ".css", ".scss", "",  # Makefile, Dockerfile, etc.
-})
+_TEXT_SUFFIXES: frozenset[str] = frozenset(
+    {
+        ".py",
+        ".ts",
+        ".tsx",
+        ".js",
+        ".jsx",
+        ".mjs",
+        ".cjs",
+        ".json",
+        ".toml",
+        ".yml",
+        ".yaml",
+        ".md",
+        ".txt",
+        ".sh",
+        ".env",
+        ".env.example",
+        ".gitignore",
+        ".dockerignore",
+        ".sql",
+        ".tf",
+        ".tfvars",
+        ".hcl",
+        ".cfg",
+        ".ini",
+        ".conf",
+        ".html",
+        ".css",
+        ".scss",
+        "",  # Makefile, Dockerfile, etc.
+    }
+)
 
 # Nomes canônicos usados nos templates — só estes são expandidos/verificados.
 # Padrões como {children} (JSX), {req} (f-string) ou {high} (format-string de
 # CI) NÃO são placeholders de template e não devem disparar asserções.
-_KNOWN_PLACEHOLDER_NAMES: frozenset[str] = frozenset({
-    "project_name", "project_title", "description", "author",
-    "year", "domain", "language", "github_repo",
-    "python_version", "node_version",
-    "chart_version", "app_version", "namespace", "registry",
-})
+_KNOWN_PLACEHOLDER_NAMES: frozenset[str] = frozenset(
+    {
+        "project_name",
+        "project_title",
+        "description",
+        "author",
+        "year",
+        "domain",
+        "language",
+        "github_repo",
+        "python_version",
+        "node_version",
+        "chart_version",
+        "app_version",
+        "namespace",
+        "registry",
+    }
+)
 _PLACEHOLDER_RE = re.compile(
     r"\{(" + "|".join(re.escape(k) for k in _KNOWN_PLACEHOLDER_NAMES) + r")\}"
 )
 
 # Binários: não tentar decodificar
-_BINARY_SUFFIXES: frozenset[str] = frozenset({
-    ".png", ".jpg", ".jpeg", ".gif", ".ico", ".svg",
-    ".woff", ".woff2", ".ttf", ".eot",
-    ".zip", ".tar", ".gz", ".jar", ".db",
-    ".pdf", ".pyc", ".pyo",
-})
+_BINARY_SUFFIXES: frozenset[str] = frozenset(
+    {
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".gif",
+        ".ico",
+        ".svg",
+        ".woff",
+        ".woff2",
+        ".ttf",
+        ".eot",
+        ".zip",
+        ".tar",
+        ".gz",
+        ".jar",
+        ".db",
+        ".pdf",
+        ".pyc",
+        ".pyo",
+    }
+)
 
 
 # ---------------------------------------------------------------------------
 # FakeProject — resultado da expansão
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class FakeProject:
@@ -133,8 +189,9 @@ class FakeProject:
                 if matches:
                     rel = f.relative_to(self.root)
                     violations.append(f"{rel}: {matches[:5]}")
-            except Exception:
-                pass
+            except OSError as exc:
+                # arquivo ilegível não pode esconder violação: registra no relatório
+                violations.append(f"{f.relative_to(self.root)}: ilegível ({exc})")
         assert not violations, (
             f"Placeholders não substituídos encontrados em [{self.profile}]:\n"
             + "\n".join(f"  {v}" for v in violations)
@@ -149,19 +206,19 @@ class FakeProject:
             f"  (procurado em: {p})"
         )
 
-    def assert_file_contains(self, rel: str, pattern: str, *, regex: bool = False) -> None:
+    def assert_file_contains(
+        self, rel: str, pattern: str, *, regex: bool = False
+    ) -> None:
         """Falha se o arquivo não contiver o padrão (string ou regex)."""
         p = self.file(rel)
         assert p.exists(), f"[{self.profile}] Arquivo {rel} não encontrado"
         content = p.read_text(encoding="utf-8", errors="replace")
         if regex:
-            assert re.search(pattern, content), (
-                f"[{self.profile}] {rel} não contém o padrão `{pattern}`"
-            )
+            assert re.search(
+                pattern, content
+            ), f"[{self.profile}] {rel} não contém o padrão `{pattern}`"
         else:
-            assert pattern in content, (
-                f"[{self.profile}] {rel} não contém `{pattern}`"
-            )
+            assert pattern in content, f"[{self.profile}] {rel} não contém `{pattern}`"
 
     def assert_gitignore_covers(self, *patterns: str) -> None:
         """.gitignore deve conter cada um dos padrões informados."""
@@ -169,14 +226,13 @@ class FakeProject:
         assert gi.exists(), f"[{self.profile}] .gitignore ausente"
         content = gi.read_text(encoding="utf-8")
         for pat in patterns:
-            assert pat in content, (
-                f"[{self.profile}] .gitignore não cobre `{pat}`"
-            )
+            assert pat in content, f"[{self.profile}] .gitignore não cobre `{pat}`"
 
 
 # ---------------------------------------------------------------------------
 # expand_template — função principal
 # ---------------------------------------------------------------------------
+
 
 def expand_template(
     profile: str,
@@ -220,6 +276,7 @@ def expand_template(
 # ---------------------------------------------------------------------------
 # Helpers internos
 # ---------------------------------------------------------------------------
+
 
 def _expand_dir(root: Path, vars: dict[str, str]) -> None:
     """Substitui {placeholder} em todos os arquivos de texto dentro de root."""

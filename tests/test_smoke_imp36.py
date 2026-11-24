@@ -32,12 +32,8 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
-import tempfile
-import textwrap
 from datetime import date, timedelta
 from pathlib import Path
-
-import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 
@@ -87,7 +83,9 @@ class TestCheckStaleness:
     def _run(self, tested: date, threshold: int = 90) -> list[ValidationIssue]:
         r = _make_result("perfil-teste")
         all_data = _all_data_with_date(r, tested)
-        _check_staleness([r], all_data, threshold_days=threshold, reference_date=self.TODAY)
+        _check_staleness(
+            [r], all_data, threshold_days=threshold, reference_date=self.TODAY
+        )
         return r.warnings
 
     def test_data_atual_nao_gera_warning(self):
@@ -166,15 +164,21 @@ class TestCheckStaleness:
 class TestValidationReportStaleProfiles:
     TODAY = date(2026, 3, 14)
 
-    def _build_report(self, *profiles: tuple[str, date | None], threshold: int = 90) -> ValidationReport:
-        report = ValidationReport(descriptor_dir=Path("."), stale_days_threshold=threshold)
+    def _build_report(
+        self, *profiles: tuple[str, date | None], threshold: int = 90
+    ) -> ValidationReport:
+        report = ValidationReport(
+            descriptor_dir=Path("."), stale_days_threshold=threshold
+        )
         all_data: dict[str, dict] = {}
         for name, d in profiles:
             r = _make_result(name)
             report.results.append(r)
             all_data[r.file] = {"last_tested": d.isoformat()} if d else {}
         parsed = [r for r in report.results if r.file in all_data]
-        _check_staleness(parsed, all_data, threshold_days=threshold, reference_date=self.TODAY)
+        _check_staleness(
+            parsed, all_data, threshold_days=threshold, reference_date=self.TODAY
+        )
         return report
 
     def test_retorna_lista_nomes_stale(self):
@@ -229,9 +233,11 @@ class TestValidateDescriptorsIntegration:
         dest.mkdir()
         for src in _DESCRIPTORS_DIR.glob("*.yaml"):
             lines = [
-                f'{line.split(":", 1)[0]}: "{old}"'
-                if line.startswith(("last_tested:", "LAST_TESTED_DATE:"))
-                else line
+                (
+                    f'{line.split(":", 1)[0]}: "{old}"'
+                    if line.startswith(("last_tested:", "LAST_TESTED_DATE:"))
+                    else line
+                )
                 for line in src.read_text(encoding="utf-8").splitlines()
             ]
             (dest / src.name).write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -264,7 +270,13 @@ class TestValidateDescriptorsIntegration:
 class TestCLIValidateStaleness:
     def _run(self, *extra_args: str) -> subprocess.CompletedProcess:
         return subprocess.run(
-            [_PYTHON, str(_SCRIPTS_DIR / "scaffold.py"), "--validate", "--json", *extra_args],
+            [
+                _PYTHON,
+                str(_SCRIPTS_DIR / "scaffold.py"),
+                "--validate",
+                "--json",
+                *extra_args,
+            ],
             cwd=str(_PROJECT_ROOT),
             capture_output=True,
             text=True,

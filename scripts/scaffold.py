@@ -36,9 +36,16 @@ Separação de domínios:
 """
 
 from __future__ import annotations
-from lib.ui import console, show_banner, show_menu
+
+import argparse
+import sys
+import warnings
+from pathlib import Path
+
+from lib.config import SCAFFOLD_VERSION
 from lib.flows import (
     _load_descriptor,
+    flow_adopt,
     flow_check_links,
     flow_check_templates,
     flow_compose_profiles,
@@ -56,16 +63,10 @@ from lib.flows import (
     flow_objetivo_validate,
     flow_publish,
     flow_release,
-    flow_adopt,
     flow_upgrade,
     flow_validate,
 )
-from lib.config import SCAFFOLD_VERSION
-
-import argparse
-import sys
-import warnings
-from pathlib import Path
+from lib.ui import console, show_banner, show_menu
 
 # ---------------------------------------------------------------------------
 # Subcommand → flat-flag translation (IMP-44)
@@ -74,33 +75,34 @@ from pathlib import Path
 # Maps subcommand names to the flat flags they expand to.
 # The value is a list of strings that replace the subcommand word in sys.argv.
 _SUBCOMMAND_MAP: dict[str, list[str]] = {
-    "new":           ["--new"],
-    "check":         ["--check"],
+    "new": ["--new"],
+    "check": ["--check"],
     "check-templates": ["--check-templates"],
     "diff-template": ["--diff-template"],
     "merge-template": ["--merge-template"],
     "list-profiles": ["--list-profiles"],
-    "validate":      ["--validate"],
-    "dry-run":       ["--dry-run"],
+    "validate": ["--validate"],
+    "dry-run": ["--dry-run"],
     # next positional arg becomes the value
-    "compose":       ["--compose"],
-    "upgrade":       ["--upgrade"],
-    "adopt":         ["--adopt"],
-    "publish":       ["--publish"],
+    "compose": ["--compose"],
+    "upgrade": ["--upgrade"],
+    "adopt": ["--adopt"],
+    "publish": ["--publish"],
     # next positional arg becomes the value
-    "new-profile":   ["--new-profile"],
-    "infra":         ["--infra"],
+    "new-profile": ["--new-profile"],
+    "infra": ["--infra"],
     # next positional arg becomes the value
-    "release":       ["--release"],
-    "objetivo-init":     ["--objetivo-init"],
+    "release": ["--release"],
+    "objetivo-init": ["--objetivo-init"],
     "objetivo-validate": ["--objetivo-validate"],
     "objetivo-generate": ["--objetivo-generate"],
-    "objetivo-migrate":  ["--objetivo-migrate"],
+    "objetivo-migrate": ["--objetivo-migrate"],
 }
 
 # Subcommands that take a required value as the next positional argument
 _SUBCOMMAND_VALUE: frozenset[str] = frozenset(
-    {"compose", "new-profile", "release", "diff-template", "merge-template"})
+    {"compose", "new-profile", "release", "diff-template", "merge-template"}
+)
 
 
 def _translate_subcommand(argv: list[str]) -> tuple[list[str], bool]:
@@ -124,7 +126,7 @@ def _translate_subcommand(argv: list[str]) -> tuple[list[str], bool]:
         value_consumed = False
         for i, token in enumerate(rest):
             if not token.startswith("-") and not value_consumed:
-                new_argv = replacement + [token] + rest[i + 1:]
+                new_argv = replacement + [token] + rest[i + 1 :]
                 return new_argv, True
             new_rest.append(token)
         # No positional value found — pass as-is so argparse can error properly
@@ -297,8 +299,17 @@ def build_parser() -> argparse.ArgumentParser:
         "--profile-layer",
         metavar="LAYER",
         dest="profile_layer",
-        choices=["1", "2", "3", "4", "layer2",
-                 "layer3", "layer4", "transversal", "core"],
+        choices=[
+            "1",
+            "2",
+            "3",
+            "4",
+            "layer2",
+            "layer3",
+            "layer4",
+            "transversal",
+            "core",
+        ],
         default=None,
         help="camada do novo perfil (usar com --new-profile): 1|2|3|4|layer2|layer3|layer4|transversal|core",
     )
@@ -356,11 +367,10 @@ def build_parser() -> argparse.ArgumentParser:
     # Campos do projeto
     fields_group = parser.add_argument_group("campos do projeto")
     fields_group.add_argument(
-        "--name",        metavar="NAME",  help="nome kebab-case (obrigatório em --ci)")
-    fields_group.add_argument(
-        "--title",       metavar="TITLE", help="título legível")
-    fields_group.add_argument(
-        "--description", metavar="DESC",  help="descrição breve")
+        "--name", metavar="NAME", help="nome kebab-case (obrigatório em --ci)"
+    )
+    fields_group.add_argument("--title", metavar="TITLE", help="título legível")
+    fields_group.add_argument("--description", metavar="DESC", help="descrição breve")
     fields_group.add_argument(
         "--file",
         metavar="FILE",
@@ -402,8 +412,7 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="LANG",
         help="linguagem: python | typescript | go | other",
     )
-    fields_group.add_argument(
-        "--repo",       metavar="URL",  help="URL do repositório GitHub")
+    fields_group.add_argument("--repo", metavar="URL", help="URL do repositório GitHub")
     fields_group.add_argument(
         "--with-code-profile",
         metavar="PROFILE",
@@ -414,10 +423,18 @@ def build_parser() -> argparse.ArgumentParser:
             "  equivalente a: scaffold.py new ... && cd my-api && scaffold.py compose python-fastapi"
         ),
     )
-    fields_group.add_argument("--shared-dir", metavar="PATH",
-                              dest="shared_dir", help="caminho para .copilot-shared")
-    fields_group.add_argument("--target-dir", metavar="PATH",
-                              dest="target_dir", help="onde criar o projeto (default: cwd)")
+    fields_group.add_argument(
+        "--shared-dir",
+        metavar="PATH",
+        dest="shared_dir",
+        help="caminho para .copilot-shared",
+    )
+    fields_group.add_argument(
+        "--target-dir",
+        metavar="PATH",
+        dest="target_dir",
+        help="onde criar o projeto (default: cwd)",
+    )
     fields_group.add_argument(
         "--format",
         choices=["colored", "markdown", "html"],
@@ -470,18 +487,18 @@ def build_parser() -> argparse.ArgumentParser:
 # ---------------------------------------------------------------------------
 
 _LEGACY_FLAG_DEPRECATIONS: dict[str, str] = {
-    "--new":           "scaffold.py new",
-    "--check":         "scaffold.py check",
+    "--new": "scaffold.py new",
+    "--check": "scaffold.py check",
     "--list-profiles": "scaffold.py list-profiles",
-    "--validate":      "scaffold.py validate",
-    "--dry-run":       "scaffold.py dry-run",
-    "--compose":       "scaffold.py compose PROFILES",
-    "--upgrade":       "scaffold.py upgrade",
-    "--adopt":         "scaffold.py adopt",
-    "--publish":       "scaffold.py publish",
-    "--new-profile":   "scaffold.py new-profile NAME",
-    "--infra":         "scaffold.py infra",
-    "--release":       "scaffold.py release VERSION",
+    "--validate": "scaffold.py validate",
+    "--dry-run": "scaffold.py dry-run",
+    "--compose": "scaffold.py compose PROFILES",
+    "--upgrade": "scaffold.py upgrade",
+    "--adopt": "scaffold.py adopt",
+    "--publish": "scaffold.py publish",
+    "--new-profile": "scaffold.py new-profile NAME",
+    "--infra": "scaffold.py infra",
+    "--release": "scaffold.py release VERSION",
 }
 
 
@@ -526,7 +543,8 @@ def main() -> int:
             args.ci = True  # força modo não-interativo
         except Exception as exc:
             console.print(
-                f"\n  [bold red]❌ Erro ao carregar --config:[/bold red] {exc}\n")
+                f"\n  [bold red]❌ Erro ao carregar --config:[/bold red] {exc}\n"
+            )
             return 1
 
     # --validate: valida profile-descriptors e sai

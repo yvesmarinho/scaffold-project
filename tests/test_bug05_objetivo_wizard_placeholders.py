@@ -33,7 +33,7 @@ def test_simple_placeholder_replacement():
             "{{DESCRIPTION}}": "This is a test project for validating placeholder replacement",
             "{{RESPONSE}}": "Python 3.12+ with FastAPI and PostgreSQL",
             "{{DOCSTYLE}}": "Google Python Style Guide",
-        }
+        },
     )
 
     # Render template
@@ -64,7 +64,7 @@ def test_multiline_placeholder_expansion():
             "{{FEATURE}}": "Feature 1: User authentication\nFeature 2: Data processing\nFeature 3: API endpoints",
             "{{EXPECTED_OUTCOME}}": "100% test coverage\nZero security vulnerabilities\n<200ms response time",
             "{{INFRASTRUCTURE}}": "PostgreSQL database\nDocker containers\nNginx reverse proxy",
-        }
+        },
     )
 
     # Render template
@@ -76,14 +76,18 @@ def test_multiline_placeholder_expansion():
     assert "Feature 3: API endpoints" in content, "FEATURE_3 should be expanded"
 
     assert "100% test coverage" in content, "EXPECTED_OUTCOME_1 should be expanded"
-    assert "Zero security vulnerabilities" in content, "EXPECTED_OUTCOME_2 should be expanded"
+    assert (
+        "Zero security vulnerabilities" in content
+    ), "EXPECTED_OUTCOME_2 should be expanded"
 
     assert "PostgreSQL database" in content, "INFRASTRUCTURE_1 should be expanded"
     assert "Docker containers" in content, "INFRASTRUCTURE_2 should be expanded"
 
     # Verify NO unexpanded base placeholders remain
     assert "{{FEATURE}}" not in content, "Base FEATURE placeholder should be gone"
-    assert "{{EXPECTED_OUTCOME}}" not in content, "Base EXPECTED_OUTCOME placeholder should be gone"
+    assert (
+        "{{EXPECTED_OUTCOME}}" not in content
+    ), "Base EXPECTED_OUTCOME placeholder should be gone"
 
     print("✅ Multiline placeholder expansion works")
 
@@ -93,16 +97,15 @@ def test_default_placeholders():
     wizard = ObjetivoWizard()
 
     # Create minimal answers
-    answers = WizardAnswers(
-        project_name="test-project",
-        answers={}
-    )
+    answers = WizardAnswers(project_name="test-project", answers={})
 
     # Render template
     content = wizard._render_template(answers)
 
     # Verify defaults are applied
-    assert "Workflow baseado em objetivo.yaml" in content, "WORKFLOW_OBJETIVO should have default"
+    assert (
+        "Workflow baseado em objetivo.yaml" in content
+    ), "WORKFLOW_OBJETIVO should have default"
     assert "Geração automática" in content, "WORKFLOW_SPECIFY should have default"
 
     print("✅ Default placeholder values work")
@@ -126,7 +129,7 @@ def test_no_unreplaced_placeholders():
             "{{DOCSTYLE}}": "Google",
             "{{FEATURE}}": "Feature 1\nFeature 2\nFeature 3",
             "{{EXPECTED_OUTCOME}}": "Outcome 1\nOutcome 2\nOutcome 3",
-        }
+        },
     )
 
     # Render template
@@ -134,13 +137,14 @@ def test_no_unreplaced_placeholders():
 
     # Check for ANY unreplaced placeholders (regex pattern {{WORD}})
     import re
-    unreplaced = re.findall(r'\{\{[A-Z_0-9]+\}\}', content)
+
+    unreplaced = re.findall(r"\{\{[A-Z_0-9]+\}\}", content)
 
     if unreplaced:
         print(f"❌ Found unreplaced placeholders: {unreplaced}")
         print("\n--- Generated content (first 1000 chars) ---")
         print(content[:1000])
-        assert False, f"Template has unreplaced placeholders: {unreplaced}"
+        raise AssertionError(f"Template has unreplaced placeholders: {unreplaced}")
 
     print("✅ No unreplaced placeholders in output")
 

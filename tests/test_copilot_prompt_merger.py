@@ -14,21 +14,22 @@ Test strategy:
 - Test edge cases (no frontmatter, malformed YAML)
 """
 
-from pathlib import Path
-import pytest
-import tempfile
 import shutil
+import tempfile
+from pathlib import Path
+
+import pytest
 
 from scripts.lib.copilot_prompt_merge import (
     CopilotPromptMerger,
-    PromptFrontmatter,
     PromptContent,
+    PromptFrontmatter,
 )
-
 
 # =============================================================================
 # Fixtures
 # =============================================================================
+
 
 @pytest.fixture
 def temp_dir():
@@ -105,6 +106,7 @@ def merger():
 # Test 01: File Detection
 # =============================================================================
 
+
 def test_01_can_merge_detects_prompt_files(merger, temp_dir):
     """Test 01: can_merge() detecta corretamente arquivos .prompt.md."""
     # Criar estrutura .github/prompts/
@@ -114,8 +116,7 @@ def test_01_can_merge_detects_prompt_files(merger, temp_dir):
     # Casos positivos
     valid_prompt = prompts_dir / "session-start.prompt.md"
     valid_prompt.touch()
-    assert merger.can_merge(
-        valid_prompt), "Should detect .prompt.md in prompts/"
+    assert merger.can_merge(valid_prompt), "Should detect .prompt.md in prompts/"
 
     # Casos negativos
     wrong_ext = prompts_dir / "session-start.md"
@@ -125,13 +126,13 @@ def test_01_can_merge_detects_prompt_files(merger, temp_dir):
     wrong_dir = temp_dir / "docs" / "session-start.prompt.md"
     wrong_dir.parent.mkdir(parents=True)
     wrong_dir.touch()
-    assert not merger.can_merge(
-        wrong_dir), "Should reject prompts outside .github/"
+    assert not merger.can_merge(wrong_dir), "Should reject prompts outside .github/"
 
 
 # =============================================================================
 # Test 02-03: Parsing
 # =============================================================================
+
 
 def test_02_parse_yaml_frontmatter(merger, sample_prompt_v1):
     """Test 02: Parse YAML frontmatter corretamente."""
@@ -158,15 +159,16 @@ def test_03_parse_markdown_sections(merger, sample_prompt_v1):
 # Test 04-06: Merge Decision Logic
 # =============================================================================
 
-def test_04_should_merge_detects_description_update(merger, sample_prompt_v1, sample_prompt_v2):
+
+def test_04_should_merge_detects_description_update(
+    merger, sample_prompt_v1, sample_prompt_v2
+):
     """Test 04: Detecta atualização de description."""
     existing_fm, existing_md = merger._parse_prompt_file(sample_prompt_v1)
     template_fm, template_md = merger._parse_prompt_file(sample_prompt_v2)
 
     decision = merger._should_merge(
-        existing_fm, template_fm,
-        existing_md, template_md,
-        "session-start.prompt.md"
+        existing_fm, template_fm, existing_md, template_md, "session-start.prompt.md"
     )
 
     assert decision.should_merge, "Should merge when description enhanced"
@@ -176,15 +178,15 @@ def test_04_should_merge_detects_description_update(merger, sample_prompt_v1, sa
     assert "description" in change_text.lower() or "section" in change_text.lower()
 
 
-def test_05_should_merge_detects_new_sections(merger, sample_prompt_v1, sample_prompt_v2):
+def test_05_should_merge_detects_new_sections(
+    merger, sample_prompt_v1, sample_prompt_v2
+):
     """Test 05: Detecta novas seções no template."""
     existing_fm, existing_md = merger._parse_prompt_file(sample_prompt_v1)
     template_fm, template_md = merger._parse_prompt_file(sample_prompt_v2)
 
     decision = merger._should_merge(
-        existing_fm, template_fm,
-        existing_md, template_md,
-        "session-start.prompt.md"
+        existing_fm, template_fm, existing_md, template_md, "session-start.prompt.md"
     )
 
     assert decision.should_merge
@@ -197,9 +199,11 @@ def test_06_should_skip_if_already_updated(merger, sample_prompt_v2):
     template_fm, template_md = merger._parse_prompt_file(sample_prompt_v2)
 
     decision = merger._should_merge(
-        template_fm, template_fm,  # Existing == Template
-        template_md, template_md,
-        "session-start.prompt.md"
+        template_fm,
+        template_fm,  # Existing == Template
+        template_md,
+        template_md,
+        "session-start.prompt.md",
     )
 
     assert not decision.should_merge
@@ -209,6 +213,7 @@ def test_06_should_skip_if_already_updated(merger, sample_prompt_v2):
 # =============================================================================
 # Test 07-08: Frontmatter Merge
 # =============================================================================
+
 
 def test_07_merge_frontmatter_updates_mode(merger, sample_prompt_v1):
     """Test 07: Merge frontmatter atualiza mode."""
@@ -252,7 +257,10 @@ agent: generic-agent
 # Test 09-11: Markdown Content Merge
 # =============================================================================
 
-def test_09_merge_markdown_preserves_custom_sections(merger, sample_prompt_v1, sample_prompt_v2):
+
+def test_09_merge_markdown_preserves_custom_sections(
+    merger, sample_prompt_v1, sample_prompt_v2
+):
     """Test 09: Merge preserva seções customizadas."""
     existing_fm, existing_md = merger._parse_prompt_file(sample_prompt_v1)
     template_fm, template_md = merger._parse_prompt_file(sample_prompt_v2)
@@ -264,7 +272,9 @@ def test_09_merge_markdown_preserves_custom_sections(merger, sample_prompt_v1, s
     assert "custom example" in merged_md.sections["Custom Examples"].lower()
 
 
-def test_10_merge_markdown_adds_new_sections(merger, sample_prompt_v1, sample_prompt_v2):
+def test_10_merge_markdown_adds_new_sections(
+    merger, sample_prompt_v1, sample_prompt_v2
+):
     """Test 10: Merge adiciona novas seções ausentes."""
     existing_fm, existing_md = merger._parse_prompt_file(sample_prompt_v1)
     template_fm, template_md = merger._parse_prompt_file(sample_prompt_v2)
@@ -276,7 +286,9 @@ def test_10_merge_markdown_adds_new_sections(merger, sample_prompt_v1, sample_pr
     assert "guidelines" in merged_md.sections["Guidelines"].lower()
 
 
-def test_11_merge_markdown_updates_instructions(merger, sample_prompt_v1, sample_prompt_v2):
+def test_11_merge_markdown_updates_instructions(
+    merger, sample_prompt_v1, sample_prompt_v2
+):
     """Test 11: Merge atualiza seções de instruções."""
     existing_fm, existing_md = merger._parse_prompt_file(sample_prompt_v1)
     template_fm, template_md = merger._parse_prompt_file(sample_prompt_v2)
@@ -294,7 +306,10 @@ def test_11_merge_markdown_updates_instructions(merger, sample_prompt_v1, sample
 # Test 12-14: Full Integration
 # =============================================================================
 
-def test_12_full_merge_creates_backup(merger, temp_dir, sample_prompt_v1, sample_prompt_v2):
+
+def test_12_full_merge_creates_backup(
+    merger, temp_dir, sample_prompt_v1, sample_prompt_v2
+):
     """Test 12: Merge completo cria backup do arquivo original."""
     # Setup
     prompts_dir = temp_dir / ".github" / "prompts"
@@ -313,7 +328,9 @@ def test_12_full_merge_creates_backup(merger, temp_dir, sample_prompt_v1, sample
     assert backup_path.read_text(encoding="utf-8") == sample_prompt_v1
 
 
-def test_13_full_merge_generates_valid_prompt(merger, temp_dir, sample_prompt_v1, sample_prompt_v2):
+def test_13_full_merge_generates_valid_prompt(
+    merger, temp_dir, sample_prompt_v1, sample_prompt_v2
+):
     """Test 13: Merge gera prompt válido com frontmatter + conteúdo."""
     # Setup
     prompts_dir = temp_dir / ".github" / "prompts"
@@ -323,7 +340,7 @@ def test_13_full_merge_generates_valid_prompt(merger, temp_dir, sample_prompt_v1
     existing_path.write_text(sample_prompt_v1, encoding="utf-8")
 
     # Execute merge
-    result = merger.merge(existing_path, sample_prompt_v2, interactive=False)
+    merger.merge(existing_path, sample_prompt_v2, interactive=False)
 
     # Validar arquivo mesclado
     merged_content = existing_path.read_text(encoding="utf-8")
@@ -369,6 +386,7 @@ Updated instructions.
 # =============================================================================
 # Test 15-16: Edge Cases
 # =============================================================================
+
 
 def test_15_handles_malformed_yaml(merger):
     """Test 15: Handle YAML malformado gracefully."""

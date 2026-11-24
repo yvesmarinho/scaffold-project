@@ -11,10 +11,11 @@ Sprint 4 (P2 MEDIUM): Expansão do merge system para 90% coverage
 Feature: Issue templates não propagados em upgrades
 """
 
-from pathlib import Path
-from typing import Dict, Any, Optional, Tuple
-import re
 import logging
+import re
+from pathlib import Path
+from typing import Any
+
 import yaml
 
 from .config import CreatedItem
@@ -25,6 +26,7 @@ log = logging.getLogger(__name__)
 # =============================================================================
 # IssueTemplateMerger
 # =============================================================================
+
 
 class IssueTemplateMerger:
     """
@@ -50,16 +52,13 @@ class IssueTemplateMerger:
     def can_merge(self, file_path: Path) -> bool:
         """Verifica se é arquivo em .github/ISSUE_TEMPLATE/."""
         return (
-            ".github" in file_path.parts and
-            "ISSUE_TEMPLATE" in file_path.parts and
-            file_path.suffix in [".md", ".yml", ".yaml"]
+            ".github" in file_path.parts
+            and "ISSUE_TEMPLATE" in file_path.parts
+            and file_path.suffix in [".md", ".yml", ".yaml"]
         )
 
     def merge(
-        self,
-        existing_path: Path,
-        template_content: str,
-        interactive: bool = True
+        self, existing_path: Path, template_content: str, interactive: bool = True
     ) -> CreatedItem:
         """
         Faz merge inteligente do template.
@@ -78,16 +77,12 @@ class IssueTemplateMerger:
             if existing_path.suffix in [".yml", ".yaml"]:
                 # Config YAML puro
                 return self._merge_yaml(
-                    existing_path,
-                    existing_content,
-                    template_content
+                    existing_path, existing_content, template_content
                 )
             else:
                 # Markdown com frontmatter
                 return self._merge_markdown(
-                    existing_path,
-                    existing_content,
-                    template_content
+                    existing_path, existing_content, template_content
                 )
 
         except Exception as e:
@@ -96,14 +91,11 @@ class IssueTemplateMerger:
                 path=existing_path,
                 kind="file",
                 status="error",
-                message=f"Merge error: {e}"
+                message=f"Merge error: {e}",
             )
 
     def _merge_yaml(
-        self,
-        existing_path: Path,
-        existing_content: str,
-        template_content: str
+        self, existing_path: Path, existing_content: str, template_content: str
     ) -> CreatedItem:
         """Merge de arquivo YAML puro (config.yml)."""
         try:
@@ -120,7 +112,7 @@ class IssueTemplateMerger:
                     path=existing_path,
                     kind="file",
                     status="skipped",
-                    message="Nenhuma mudança necessária"
+                    message="Nenhuma mudança necessária",
                 )
 
             # Backup
@@ -133,17 +125,14 @@ class IssueTemplateMerger:
                 merged_data,
                 default_flow_style=False,
                 allow_unicode=True,
-                sort_keys=False
+                sort_keys=False,
             )
             existing_path.write_text(merged_yaml, encoding="utf-8")
 
             log.info("🔀 Merged %s (YAML)", existing_path.name)
 
             return CreatedItem(
-                path=existing_path,
-                kind="file",
-                status="merged",
-                message="YAML merged"
+                path=existing_path, kind="file", status="merged", message="YAML merged"
             )
 
         except yaml.YAMLError as e:
@@ -152,14 +141,11 @@ class IssueTemplateMerger:
                 path=existing_path,
                 kind="file",
                 status="error",
-                message=f"YAML error: {e}"
+                message=f"YAML error: {e}",
             )
 
     def _merge_markdown(
-        self,
-        existing_path: Path,
-        existing_content: str,
-        template_content: str
+        self, existing_path: Path, existing_content: str, template_content: str
     ) -> CreatedItem:
         """Merge de markdown com frontmatter."""
         # Parse frontmatter e corpo
@@ -167,7 +153,9 @@ class IssueTemplateMerger:
         template_fm, template_body = self._parse_frontmatter(template_content)
 
         # Merge frontmatter (user wins)
-        merged_fm = self._deep_merge(template_fm, existing_fm) if existing_fm else template_fm
+        merged_fm = (
+            self._deep_merge(template_fm, existing_fm) if existing_fm else template_fm
+        )
 
         # Decidir sobre corpo: se customizado significativamente, preservar
         similarity = self._calculate_similarity(existing_body, template_body)
@@ -188,7 +176,7 @@ class IssueTemplateMerger:
                 path=existing_path,
                 kind="file",
                 status="skipped",
-                message="Nenhuma mudança necessária"
+                message="Nenhuma mudança necessária",
             )
 
         # Backup
@@ -203,24 +191,24 @@ class IssueTemplateMerger:
         log.info(
             "🔀 Merged %s (frontmatter merged, body %s)",
             existing_path.name,
-            body_action
+            body_action,
         )
 
         return CreatedItem(
             path=existing_path,
             kind="file",
             status="merged",
-            message=f"Merged (body {body_action})"
+            message=f"Merged (body {body_action})",
         )
 
-    def _parse_frontmatter(self, content: str) -> Tuple[Optional[Dict[str, Any]], str]:
+    def _parse_frontmatter(self, content: str) -> tuple[dict[str, Any] | None, str]:
         """
         Parse frontmatter YAML e corpo markdown.
 
         Retorna: (frontmatter_dict, body_content)
         """
         # Regex para frontmatter: ---\n...\n---
-        match = re.match(r'^---\s*\n(.*?)\n---\s*\n(.*)$', content, re.DOTALL)
+        match = re.match(r"^---\s*\n(.*?)\n---\s*\n(.*)$", content, re.DOTALL)
 
         if match:
             frontmatter_str = match.group(1)
@@ -235,16 +223,13 @@ class IssueTemplateMerger:
             # Sem frontmatter
             return None, content
 
-    def _format_markdown(self, frontmatter: Optional[Dict[str, Any]], body: str) -> str:
+    def _format_markdown(self, frontmatter: dict[str, Any] | None, body: str) -> str:
         """Formata markdown com frontmatter."""
         if not frontmatter:
             return body
 
         fm_yaml = yaml.dump(
-            frontmatter,
-            default_flow_style=False,
-            allow_unicode=True,
-            sort_keys=False
+            frontmatter, default_flow_style=False, allow_unicode=True, sort_keys=False
         ).strip()
 
         return f"---\n{fm_yaml}\n---\n{body}"
@@ -275,14 +260,13 @@ class IssueTemplateMerger:
         return intersection / union if union > 0 else 0.0
 
     def _deep_merge(
-        self,
-        base: Dict[str, Any],
-        override: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, base: dict[str, Any], override: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Deep merge de dicts (user wins strategy).
         """
         import copy
+
         result = copy.deepcopy(base)
 
         for key, value in override.items():

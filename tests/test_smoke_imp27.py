@@ -27,8 +27,6 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-import pytest
-
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 
 from lib.composer import (  # noqa: E402
@@ -49,14 +47,15 @@ _SOC2_TPLDIR = _PROJECT_ROOT / ".github" / "templates" / "soc2-baseline"
 # lgpd-baseline
 # ===========================================================================
 
+
 class TestLgpdBaselineDescriptor:
 
     def test_descriptor_loads(self) -> None:
         """lgpd-baseline é carregado por load_all_descriptors."""
         descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
-        assert "lgpd-baseline" in descriptors, (
-            f"lgpd-baseline não encontrado. Carregados: {list(descriptors.keys())}"
-        )
+        assert (
+            "lgpd-baseline" in descriptors
+        ), f"lgpd-baseline não encontrado. Carregados: {list(descriptors.keys())}"
 
     def test_required_fields(self) -> None:
         """Descriptor contém name, layer, version, status, description."""
@@ -116,16 +115,16 @@ class TestLgpdBaselineTemplates:
     def test_data_mapping_has_base_legal_section(self) -> None:
         """DATA-MAPPING.md contém seção de bases legais (Art. 7º)."""
         content = (_LGPD_TPLDIR / "docs" / "lgpd" / "DATA-MAPPING.md").read_text()
-        assert "Base Legal" in content or "base legal" in content.lower(), (
-            "DATA-MAPPING.md não tem seção de bases legais"
-        )
+        assert (
+            "Base Legal" in content or "base legal" in content.lower()
+        ), "DATA-MAPPING.md não tem seção de bases legais"
 
     def test_data_mapping_references_article_37(self) -> None:
         """DATA-MAPPING.md referencia o Art. 37 (obrigatoriedade do registro)."""
         content = (_LGPD_TPLDIR / "docs" / "lgpd" / "DATA-MAPPING.md").read_text()
-        assert "Art. 37" in content or "37" in content, (
-            "DATA-MAPPING.md não referencia o Art. 37 da LGPD"
-        )
+        assert (
+            "Art. 37" in content or "37" in content
+        ), "DATA-MAPPING.md não referencia o Art. 37 da LGPD"
 
     def test_incident_response_references_anpd(self) -> None:
         """INCIDENT-RESPONSE.md menciona a ANPD."""
@@ -135,67 +134,82 @@ class TestLgpdBaselineTemplates:
     def test_incident_response_has_72h_deadline(self) -> None:
         """INCIDENT-RESPONSE.md menciona prazo de 72 horas para notificação."""
         content = (_LGPD_TPLDIR / "docs" / "lgpd" / "INCIDENT-RESPONSE.md").read_text()
-        assert "72" in content, (
-            "INCIDENT-RESPONSE.md não menciona o prazo de 72h para notificação"
-        )
+        assert (
+            "72" in content
+        ), "INCIDENT-RESPONSE.md não menciona o prazo de 72h para notificação"
 
     def test_secret_scan_uses_gitleaks(self) -> None:
         """secret-scan.yml usa Gitleaks para detecção de segredos."""
-        content = (_LGPD_TPLDIR / ".github" / "workflows" / "secret-scan.yml").read_text()
-        assert "gitleaks" in content.lower(), (
-            "secret-scan.yml não usa Gitleaks"
-        )
+        content = (
+            _LGPD_TPLDIR / ".github" / "workflows" / "secret-scan.yml"
+        ).read_text()
+        assert "gitleaks" in content.lower(), "secret-scan.yml não usa Gitleaks"
 
     def test_secret_scan_uses_trufflehog(self) -> None:
         """secret-scan.yml usa TruffleHog como scanner complementar."""
-        content = (_LGPD_TPLDIR / ".github" / "workflows" / "secret-scan.yml").read_text()
-        assert "trufflehog" in content.lower(), (
-            "secret-scan.yml não usa TruffleHog"
-        )
+        content = (
+            _LGPD_TPLDIR / ".github" / "workflows" / "secret-scan.yml"
+        ).read_text()
+        assert "trufflehog" in content.lower(), "secret-scan.yml não usa TruffleHog"
 
     def test_dsar_script_has_export_action(self) -> None:
         """data-subject-request.py expõe action 'export' (Art. 18, I/II)."""
-        content = (_LGPD_TPLDIR / "scripts" / "lgpd" / "data-subject-request.py").read_text()
+        content = (
+            _LGPD_TPLDIR / "scripts" / "lgpd" / "data-subject-request.py"
+        ).read_text()
         assert "export" in content, "DSAR script não tem ação 'export'"
 
     def test_dsar_script_has_delete_action(self) -> None:
         """data-subject-request.py expõe action 'delete' (Art. 18, VI)."""
-        content = (_LGPD_TPLDIR / "scripts" / "lgpd" / "data-subject-request.py").read_text()
+        content = (
+            _LGPD_TPLDIR / "scripts" / "lgpd" / "data-subject-request.py"
+        ).read_text()
         assert "delete" in content, "DSAR script não tem ação 'delete'"
 
     def test_dsar_script_has_anonymize_action(self) -> None:
         """data-subject-request.py expõe action 'anonymize' (Art. 12)."""
-        content = (_LGPD_TPLDIR / "scripts" / "lgpd" / "data-subject-request.py").read_text()
+        content = (
+            _LGPD_TPLDIR / "scripts" / "lgpd" / "data-subject-request.py"
+        ).read_text()
         assert "anonymize" in content, "DSAR script não tem ação 'anonymize'"
 
     def test_dsar_script_no_hardcoded_credentials(self) -> None:
         """data-subject-request.py não contém credenciais hardcoded."""
-        content = (_LGPD_TPLDIR / "scripts" / "lgpd" / "data-subject-request.py").read_text()
+        content = (
+            _LGPD_TPLDIR / "scripts" / "lgpd" / "data-subject-request.py"
+        ).read_text()
         # Não deve ter senhas/tokens hardcoded — acesso é via variável de ambiente
         import re
+
         hardcoded_patterns = [
             r'password\s*=\s*["\'][^"\']+["\']',
             r'secret\s*=\s*["\'][^"\']+["\']',
             r'token\s*=\s*["\'][^"\']+["\']',
         ]
         for pattern in hardcoded_patterns:
-            assert not re.search(pattern, content, re.IGNORECASE), (
-                f"Possível credencial hardcoded (padrão: {pattern!r})"
-            )
+            assert not re.search(
+                pattern, content, re.IGNORECASE
+            ), f"Possível credencial hardcoded (padrão: {pattern!r})"
 
     def test_makefile_lgpd_has_standard_targets(self) -> None:
         """Makefile.lgpd contém targets obrigatórios."""
         content = (_LGPD_TPLDIR / "Makefile.lgpd").read_text()
-        required = ["lgpd-check", "lgpd-scan-secrets", "lgpd-scan-deps", "lgpd-docs-check", "lgpd-report"]
+        required = [
+            "lgpd-check",
+            "lgpd-scan-secrets",
+            "lgpd-scan-deps",
+            "lgpd-docs-check",
+            "lgpd-report",
+        ]
         missing = [t for t in required if t not in content]
         assert not missing, f"Makefile.lgpd não tem targets: {missing}"
 
     def test_privacy_notice_has_titular_rights(self) -> None:
         """PRIVACY-NOTICE.md cobre os direitos dos titulares (Art. 18)."""
         content = (_LGPD_TPLDIR / "docs" / "lgpd" / "PRIVACY-NOTICE.md").read_text()
-        assert "Art. 18" in content or "direitos" in content.lower(), (
-            "PRIVACY-NOTICE.md não menciona os direitos dos titulares"
-        )
+        assert (
+            "Art. 18" in content or "direitos" in content.lower()
+        ), "PRIVACY-NOTICE.md não menciona os direitos dos titulares"
 
 
 class TestLgpdBaselineComposer:
@@ -203,25 +217,19 @@ class TestLgpdBaselineComposer:
     def test_no_conflicts_with_python_fastapi(self) -> None:
         """lgpd-baseline não conflita com python-fastapi."""
         descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
-        conflicts = check_conflicts(
-            ["python-fastapi", "lgpd-baseline"], descriptors
-        )
+        conflicts = check_conflicts(["python-fastapi", "lgpd-baseline"], descriptors)
         assert not conflicts, f"Conflitos inesperados: {conflicts}"
 
     def test_no_conflicts_with_terraform_aws(self) -> None:
         """lgpd-baseline não conflita com terraform-aws."""
         descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
-        conflicts = check_conflicts(
-            ["terraform-aws", "lgpd-baseline"], descriptors
-        )
+        conflicts = check_conflicts(["terraform-aws", "lgpd-baseline"], descriptors)
         assert not conflicts, f"Conflitos inesperados: {conflicts}"
 
     def test_no_conflicts_with_soc2_baseline(self) -> None:
         """lgpd-baseline não conflita com soc2-baseline."""
         descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
-        conflicts = check_conflicts(
-            ["lgpd-baseline", "soc2-baseline"], descriptors
-        )
+        conflicts = check_conflicts(["lgpd-baseline", "soc2-baseline"], descriptors)
         assert not conflicts, f"Conflitos inesperados: {conflicts}"
 
     def test_compose_creates_files(self, make_project_config) -> None:
@@ -245,39 +253,40 @@ class TestLgpdBaselineComposer:
         composer.compose(["lgpd-baseline"], cfg)
         result2 = composer.compose(["lgpd-baseline"], cfg)
         assert result2.success
-        assert result2.created_count == 0, (
-            f"Segunda composição não é idempotente: created={result2.created_count}"
-        )
+        assert (
+            result2.created_count == 0
+        ), f"Segunda composição não é idempotente: created={result2.created_count}"
 
     def test_resolve_order_layer2_before_layer4(self) -> None:
         """python-fastapi (layer2) deve vir antes de lgpd-baseline (layer4)."""
         descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
         ordered = resolve_order(["lgpd-baseline", "python-fastapi"], descriptors)
-        assert ordered.index("python-fastapi") < ordered.index("lgpd-baseline"), (
-            f"layer2 deve preceder layer4. Ordem: {ordered}"
-        )
+        assert ordered.index("python-fastapi") < ordered.index(
+            "lgpd-baseline"
+        ), f"layer2 deve preceder layer4. Ordem: {ordered}"
 
     def test_resolve_order_layer3_before_layer4(self) -> None:
         """k8s-helm (layer3) deve vir antes de lgpd-baseline (layer4)."""
         descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
         ordered = resolve_order(["lgpd-baseline", "k8s-helm"], descriptors)
-        assert ordered.index("k8s-helm") < ordered.index("lgpd-baseline"), (
-            f"layer3 deve preceder layer4. Ordem: {ordered}"
-        )
+        assert ordered.index("k8s-helm") < ordered.index(
+            "lgpd-baseline"
+        ), f"layer3 deve preceder layer4. Ordem: {ordered}"
 
 
 # ===========================================================================
 # soc2-baseline
 # ===========================================================================
 
+
 class TestSoc2BaselineDescriptor:
 
     def test_descriptor_loads(self) -> None:
         """soc2-baseline é carregado por load_all_descriptors."""
         descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
-        assert "soc2-baseline" in descriptors, (
-            f"soc2-baseline não encontrado. Carregados: {list(descriptors.keys())}"
-        )
+        assert (
+            "soc2-baseline" in descriptors
+        ), f"soc2-baseline não encontrado. Carregados: {list(descriptors.keys())}"
 
     def test_required_fields(self) -> None:
         """Descriptor contém name, layer, version, status, description."""
@@ -352,16 +361,16 @@ class TestSoc2BaselineTemplates:
     def test_security_policy_requires_mfa(self) -> None:
         """SECURITY-POLICY.md exige MFA para acesso a sistemas."""
         content = (_SOC2_TPLDIR / "docs" / "soc2" / "SECURITY-POLICY.md").read_text()
-        assert "MFA" in content or "multifator" in content.lower(), (
-            "SECURITY-POLICY.md não menciona MFA"
-        )
+        assert (
+            "MFA" in content or "multifator" in content.lower()
+        ), "SECURITY-POLICY.md não menciona MFA"
 
     def test_risk_assessment_has_risk_register(self) -> None:
         """RISK-ASSESSMENT.md contém registro de riscos com probabilidade e impacto."""
         content = (_SOC2_TPLDIR / "docs" / "soc2" / "RISK-ASSESSMENT.md").read_text()
-        assert "Probabilidade" in content or "Prob." in content, (
-            "RISK-ASSESSMENT.md não tem coluna de Probabilidade"
-        )
+        assert (
+            "Probabilidade" in content or "Prob." in content
+        ), "RISK-ASSESSMENT.md não tem coluna de Probabilidade"
         assert "Impacto" in content, "RISK-ASSESSMENT.md não tem coluna de Impacto"
 
     def test_risk_assessment_references_cc3(self) -> None:
@@ -371,24 +380,24 @@ class TestSoc2BaselineTemplates:
 
     def test_static_analysis_uses_codeql(self) -> None:
         """static-analysis.yml usa CodeQL (SAST)."""
-        content = (_SOC2_TPLDIR / ".github" / "workflows" / "static-analysis.yml").read_text()
-        assert "codeql" in content.lower(), (
-            "static-analysis.yml não usa CodeQL"
-        )
+        content = (
+            _SOC2_TPLDIR / ".github" / "workflows" / "static-analysis.yml"
+        ).read_text()
+        assert "codeql" in content.lower(), "static-analysis.yml não usa CodeQL"
 
     def test_static_analysis_uses_bandit(self) -> None:
         """static-analysis.yml usa Bandit para Python SAST."""
-        content = (_SOC2_TPLDIR / ".github" / "workflows" / "static-analysis.yml").read_text()
-        assert "bandit" in content.lower(), (
-            "static-analysis.yml não usa Bandit"
-        )
+        content = (
+            _SOC2_TPLDIR / ".github" / "workflows" / "static-analysis.yml"
+        ).read_text()
+        assert "bandit" in content.lower(), "static-analysis.yml não usa Bandit"
 
     def test_static_analysis_uses_trivy(self) -> None:
         """static-analysis.yml usa Trivy para container/filesystem scan."""
-        content = (_SOC2_TPLDIR / ".github" / "workflows" / "static-analysis.yml").read_text()
-        assert "trivy" in content.lower(), (
-            "static-analysis.yml não usa Trivy"
-        )
+        content = (
+            _SOC2_TPLDIR / ".github" / "workflows" / "static-analysis.yml"
+        ).read_text()
+        assert "trivy" in content.lower(), "static-analysis.yml não usa Trivy"
 
     def test_makefile_soc2_has_standard_targets(self) -> None:
         """Makefile.soc2 contém targets obrigatórios."""
@@ -411,17 +420,13 @@ class TestSoc2BaselineComposer:
     def test_no_conflicts_with_python_fastapi(self) -> None:
         """soc2-baseline não conflita com python-fastapi."""
         descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
-        conflicts = check_conflicts(
-            ["python-fastapi", "soc2-baseline"], descriptors
-        )
+        conflicts = check_conflicts(["python-fastapi", "soc2-baseline"], descriptors)
         assert not conflicts, f"Conflitos inesperados: {conflicts}"
 
     def test_no_conflicts_with_k8s_helm(self) -> None:
         """soc2-baseline não conflita com k8s-helm."""
         descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
-        conflicts = check_conflicts(
-            ["k8s-helm", "soc2-baseline"], descriptors
-        )
+        conflicts = check_conflicts(["k8s-helm", "soc2-baseline"], descriptors)
         assert not conflicts, f"Conflitos inesperados: {conflicts}"
 
     def test_compose_creates_files(self, make_project_config) -> None:
@@ -445,32 +450,28 @@ class TestSoc2BaselineComposer:
         composer.compose(["soc2-baseline"], cfg)
         result2 = composer.compose(["soc2-baseline"], cfg)
         assert result2.success
-        assert result2.created_count == 0, (
-            f"Segunda composição não é idempotente: created={result2.created_count}"
-        )
+        assert (
+            result2.created_count == 0
+        ), f"Segunda composição não é idempotente: created={result2.created_count}"
 
     def test_resolve_order_layer2_before_layer4(self) -> None:
         """python-fastapi (layer2) deve vir antes de soc2-baseline (layer4)."""
         descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
         ordered = resolve_order(["soc2-baseline", "python-fastapi"], descriptors)
-        assert ordered.index("python-fastapi") < ordered.index("soc2-baseline"), (
-            f"layer2 deve preceder layer4. Ordem: {ordered}"
-        )
+        assert ordered.index("python-fastapi") < ordered.index(
+            "soc2-baseline"
+        ), f"layer2 deve preceder layer4. Ordem: {ordered}"
 
     def test_resolve_order_layer3_before_layer4(self) -> None:
         """terraform-aws (layer3) deve vir antes de soc2-baseline (layer4)."""
         descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
         ordered = resolve_order(["soc2-baseline", "terraform-aws"], descriptors)
-        assert ordered.index("terraform-aws") < ordered.index("soc2-baseline"), (
-            f"layer3 deve preceder layer4. Ordem: {ordered}"
-        )
+        assert ordered.index("terraform-aws") < ordered.index(
+            "soc2-baseline"
+        ), f"layer3 deve preceder layer4. Ordem: {ordered}"
 
     def test_no_conflicts_between_both_compliance_profiles(self) -> None:
         """lgpd-baseline e soc2-baseline podem coexistir sem conflitos."""
         descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
-        conflicts = check_conflicts(
-            ["lgpd-baseline", "soc2-baseline"], descriptors
-        )
-        assert not conflicts, (
-            f"Dois perfis Layer 4 não devem conflitar: {conflicts}"
-        )
+        conflicts = check_conflicts(["lgpd-baseline", "soc2-baseline"], descriptors)
+        assert not conflicts, f"Dois perfis Layer 4 não devem conflitar: {conflicts}"

@@ -8,10 +8,10 @@ from pathlib import Path
 
 from .. import composer as _composer_module
 from .. import links, project, templates, vscode
+from ..ai import resolve_plugins
+from ..copilot_rules_consolidate import consolidate_copilot_rules
 from ..project import config_from_state, read_scaffold_state, write_scaffold_state
 from ..ui import console, print_final_summary
-from ..copilot_rules_consolidate import consolidate_copilot_rules
-from ..ai import resolve_plugins
 
 _PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 _PROFILE_DESCRIPTORS_DIR = _PROJECT_ROOT / "scaffold" / "profiles"
@@ -39,8 +39,8 @@ def _validate_and_fix_paths(
     Returns:
         state atualizado ou None se usuário cancelar
     """
-    from rich.prompt import Prompt
     import yaml
+    from rich.prompt import Prompt
 
     paths = state.get("paths", {})
     project_name = state.get("project", {}).get("name", "unknown")
@@ -93,12 +93,13 @@ def _validate_and_fix_paths(
     # Perguntar ao usuário o que fazer
     console.print("  [bold]Escolha uma opção:[/bold]\n")
     console.print(
-        "    [green]1[/green] - Usar path atual e atualizar .scaffold-state.yaml")
+        "    [green]1[/green] - Usar path atual e atualizar .scaffold-state.yaml"
+    )
     console.print(f"        [dim]{current_parent_resolved}[/dim]\n")
     console.print(
-        "    [yellow]2[/yellow] - Cancelar upgrade (execute do diretório salvo)")
-    console.print(
-        f"        [dim]{saved_target_resolved / project_name}[/dim]\n")
+        "    [yellow]2[/yellow] - Cancelar upgrade (execute do diretório salvo)"
+    )
+    console.print(f"        [dim]{saved_target_resolved / project_name}[/dim]\n")
 
     choice = Prompt.ask(
         "  Sua escolha",
@@ -177,10 +178,12 @@ def flow_upgrade(args: argparse.Namespace) -> int:
         )
         if profiles_applied:
             console.print(
-                f"  [dim]Perfis aplicados anteriormente: {', '.join(profiles_applied)}[/dim]")
+                f"  [dim]Perfis aplicados anteriormente: {', '.join(profiles_applied)}[/dim]"
+            )
         if force:
             console.print(
-                "  [yellow]⚠  --force: arquivos existentes serão sobrescritos.[/yellow]")
+                "  [yellow]⚠  --force: arquivos existentes serão sobrescritos.[/yellow]"
+            )
         console.print()
 
     results = []
@@ -189,6 +192,7 @@ def flow_upgrade(args: argparse.Namespace) -> int:
     # que warnings de setup (ex: symlink ausente) poluam o output JSON.
     if use_json:
         from rich.console import Console as _RichConsole
+
         _stderr_console = _RichConsole(stderr=True, highlight=False)
         links.console = _stderr_console  # type: ignore[attr-defined]
 
@@ -219,36 +223,42 @@ def flow_upgrade(args: argparse.Namespace) -> int:
         # Primeiro, detectar drift sem force
         drift_results = project.copy_speckit(cfg, force=False)
         drift_files = [
-            r for r in drift_results
-            if hasattr(r, "status") and r.status == "drift"
+            r for r in drift_results if hasattr(r, "status") and r.status == "drift"
         ]
 
         if drift_files and not use_json:
             console.print()
             console.print(
-                "  [yellow]⚠️  DRIFT DETECTADO EM ARQUIVOS DO TEMPLATE[/yellow]")
+                "  [yellow]⚠️  DRIFT DETECTADO EM ARQUIVOS DO TEMPLATE[/yellow]"
+            )
             console.print(
-                f"  [yellow]{len(drift_files)} arquivo(s) diferem do upstream:[/yellow]")
+                f"  [yellow]{len(drift_files)} arquivo(s) diferem do upstream:[/yellow]"
+            )
             console.print()
             for item in drift_files[:10]:  # Mostrar no máximo 10
                 console.print(f"    • [dim]{item.path.name}[/dim]")
             if len(drift_files) > 10:
-                console.print(
-                    f"    ... e mais {len(drift_files) - 10} arquivo(s)")
+                console.print(f"    ... e mais {len(drift_files) - 10} arquivo(s)")
             console.print()
             console.print("  [yellow]💡 Opções disponíveis:[/yellow]")
             console.print(
-                "    1. [cyan]--force ativado[/cyan]: arquivos serão backupados (.backup) e sobrescritos")
+                "    1. [cyan]--force ativado[/cyan]: arquivos serão backupados (.backup) e sobrescritos"
+            )
             console.print(
-                "    2. [cyan]Verificar manualmente[/cyan]: uv run scripts/scaffold.py --check-templates")
+                "    2. [cyan]Verificar manualmente[/cyan]: uv run scripts/scaffold.py --check-templates"
+            )
             console.print(
-                "    3. [cyan]Diff assistido[/cyan]: uv run scripts/scaffold.py --diff-template <arquivo>")
+                "    3. [cyan]Diff assistido[/cyan]: uv run scripts/scaffold.py --diff-template <arquivo>"
+            )
             console.print(
-                "    4. [cyan]Merge 3-way[/cyan]: uv run scripts/scaffold.py --merge-template <arquivo>")
+                "    4. [cyan]Merge 3-way[/cyan]: uv run scripts/scaffold.py --merge-template <arquivo>"
+            )
             console.print()
             console.print(
-                "  [yellow]⚠️  Prosseguindo com --force em 3 segundos...[/yellow]")
+                "  [yellow]⚠️  Prosseguindo com --force em 3 segundos...[/yellow]"
+            )
             import time
+
             time.sleep(3)
             console.print()
 
@@ -257,21 +267,21 @@ def flow_upgrade(args: argparse.Namespace) -> int:
 
     # BUG-16: Consolidação automática de .copilot-rules antes de copiar template
     if not use_json:
-        console.print(
-            "  [blue]🔀 Consolidando arquivos .copilot-rules...[/blue]")
+        console.print("  [blue]🔀 Consolidando arquivos .copilot-rules...[/blue]")
 
     # Consolidar múltiplos .copilot-rules*.md em um único arquivo
     consolidated_path = consolidate_copilot_rules(cfg.project_path)
     if consolidated_path:
         if not use_json:
-            console.print(
-                f"  [green]✅ Consolidado: {consolidated_path.name}[/green]")
-        results.append(project.CreatedItem(
-            path=consolidated_path,
-            kind="file",
-            status="merged",
-            message="Consolidação automática de múltiplos .copilot-rules*.md"
-        ))
+            console.print(f"  [green]✅ Consolidado: {consolidated_path.name}[/green]")
+        results.append(
+            project.CreatedItem(
+                path=consolidated_path,
+                kind="file",
+                status="merged",
+                message="Consolidação automática de múltiplos .copilot-rules*.md",
+            )
+        )
 
     # BUG-14: Session Support Libraries (scripts/lib/*.py dependencies)
     if not use_json:
@@ -295,8 +305,7 @@ def flow_upgrade(args: argparse.Namespace) -> int:
 
     # BUG-09: Templates de documentação
     if not use_json:
-        console.print(
-            "  [blue]📋 Verificando templates de documentação...[/blue]")
+        console.print("  [blue]📋 Verificando templates de documentação...[/blue]")
     results.extend(project.setup_project_docs(cfg, is_upgrade=True))
 
     if not use_json:
@@ -319,35 +328,33 @@ def flow_upgrade(args: argparse.Namespace) -> int:
         )
         if not use_json:
             console.print(
-                f"  [blue]🧩 Re-aplicando {len(profiles_applied)} perfil(is)...[/blue]")
+                f"  [blue]🧩 Re-aplicando {len(profiles_applied)} perfil(is)...[/blue]"
+            )
         compose_result = composer.compose(profiles_applied, cfg)
         # Converte CompositionItem → CreatedItem para o resumo
         for item in getattr(compose_result, "items", []):
             results.append(item)
         # IMP-29: Gera/verifica guia de combinação de perfis
         guide_item = templates.generate_profile_guide(
-            cfg, profiles_applied, composer.descriptors)
+            cfg, profiles_applied, composer.descriptors
+        )
         results.append(guide_item)
 
     # Atualiza state file com updated_at
     write_scaffold_state(cfg, profiles_applied=profiles_applied)
 
     if use_json:
-        created = [r for r in results if hasattr(
-            r, "status") and r.status == "created"]
-        skipped = [r for r in results if hasattr(
-            r, "status") and r.status == "skipped"]
-        drift = [r for r in results if hasattr(
-            r, "status") and r.status == "drift"]
-        errors = [r for r in results if hasattr(
-            r, "status") and r.status == "error"]
+        created = [r for r in results if hasattr(r, "status") and r.status == "created"]
+        skipped = [r for r in results if hasattr(r, "status") and r.status == "skipped"]
+        drift = [r for r in results if hasattr(r, "status") and r.status == "drift"]
+        errors = [r for r in results if hasattr(r, "status") and r.status == "error"]
         output = {
             "project": cfg.project_name,
             "upgrade": True,
             "created": len(created),
             "skipped": len(skipped),
             "drift": len(drift),
-            "errors":  len(errors),
+            "errors": len(errors),
             "profiles_applied": profiles_applied,
         }
         if drift:
@@ -357,24 +364,28 @@ def flow_upgrade(args: argparse.Namespace) -> int:
 
     # Resumo final (com logging automático se não for --no-log)
     save_log = not getattr(args, "no_log", False)
-    log_dir = Path(getattr(args, "log_dir", None)) if getattr(args, "log_dir", None) else None
-    print_final_summary(results, project_path=cfg.project_path, save_log=save_log, log_dir=log_dir)
+    log_dir = (
+        Path(getattr(args, "log_dir", None)) if getattr(args, "log_dir", None) else None
+    )
+    print_final_summary(
+        results, project_path=cfg.project_path, save_log=save_log, log_dir=log_dir
+    )
 
-    created = [r for r in results if hasattr(
-        r, "status") and r.status == "created"]
-    drift = [r for r in results if hasattr(
-        r, "status") and r.status == "drift"]
+    created = [r for r in results if hasattr(r, "status") and r.status == "created"]
+    drift = [r for r in results if hasattr(r, "status") and r.status == "drift"]
     errs = [r for r in results if hasattr(r, "status") and r.status == "error"]
 
     if errs:
         console.print(
-            f"  [bold red]❌ {len(errs)} erro(s) durante o upgrade.[/bold red]\n")
+            f"  [bold red]❌ {len(errs)} erro(s) durante o upgrade.[/bold red]\n"
+        )
         return 1
 
     if drift:
         console.print()
         console.print(
-            f"  [bold yellow]📊 DRIFT DETECTADO: {len(drift)} arquivo(s) diferem do template upstream[/bold yellow]")
+            f"  [bold yellow]📊 DRIFT DETECTADO: {len(drift)} arquivo(s) diferem do template upstream[/bold yellow]"
+        )
         console.print()
         console.print("  [yellow]Arquivos com drift:[/yellow]")
         for item in drift[:15]:
@@ -385,24 +396,28 @@ def flow_upgrade(args: argparse.Namespace) -> int:
         console.print("  [cyan]💡 Para atualizar os arquivos:[/cyan]")
         console.print()
         console.print(
-            "    [bold cyan]Opção 1 — Sobrescrever tudo (com backup):[/bold cyan]")
+            "    [bold cyan]Opção 1 — Sobrescrever tudo (com backup):[/bold cyan]"
+        )
         console.print("      uv run scripts/scaffold.py --upgrade --force")
         console.print()
-        console.print(
-            "    [bold cyan]Opção 2 — Verificar manualmente:[/bold cyan]")
+        console.print("    [bold cyan]Opção 2 — Verificar manualmente:[/bold cyan]")
         console.print("      uv run scripts/scaffold.py --check-templates")
         console.print()
         console.print("    [bold cyan]Opção 3 — Diff individual:[/bold cyan]")
         console.print(
-            "      uv run scripts/scaffold.py --diff-template .github/agents/session-manager.agent.md")
+            "      uv run scripts/scaffold.py --diff-template .github/agents/session-manager.agent.md"
+        )
         console.print()
         console.print(
-            "    [bold cyan]Opção 4 — Merge 3-way (preserva customizações):[/bold cyan]")
+            "    [bold cyan]Opção 4 — Merge 3-way (preserva customizações):[/bold cyan]"
+        )
         console.print(
-            "      uv run scripts/scaffold.py --merge-template .github/agents/session-manager.agent.md")
+            "      uv run scripts/scaffold.py --merge-template .github/agents/session-manager.agent.md"
+        )
         console.print()
         console.print(
-            "  [dim]Nota: Arquivos com drift NÃO foram modificados (use --force ou merge manual)[/dim]")
+            "  [dim]Nota: Arquivos com drift NÃO foram modificados (use --force ou merge manual)[/dim]"
+        )
         console.print()
         return 0
 

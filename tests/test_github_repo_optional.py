@@ -9,10 +9,11 @@ Ref: Feature solicitada 2026-04-29 — tornar repositório GitHub opcional
 """
 
 from pathlib import Path
+
 from scripts.lib.config import ProjectConfig
 from scripts.lib.project import (
-    generate_github_security_files,
     _apply_placeholders,
+    generate_github_security_files,
 )
 
 
@@ -136,7 +137,9 @@ def test_github_security_files_without_repo(tmp_path):
     assert not (project_dir / ".github" / "CODEOWNERS").exists()
     assert not (project_dir / ".github" / "dependabot.yml").exists()
     assert not (project_dir / ".github" / "workflows" / "security-scan.yml").exists()
-    assert not (project_dir / ".github" / "workflows" / "dependency-review.yml").exists()
+    assert not (
+        project_dir / ".github" / "workflows" / "dependency-review.yml"
+    ).exists()
 
 
 def test_github_security_files_detect_drift_without_force(tmp_path):
@@ -156,13 +159,17 @@ def test_github_security_files_detect_drift_without_force(tmp_path):
     project_dir.mkdir(parents=True, exist_ok=True)
 
     generate_github_security_files(config)
-    (project_dir / ".github" / "CODEOWNERS").write_text("* @custom-owner\n", encoding="utf-8")
+    (project_dir / ".github" / "CODEOWNERS").write_text(
+        "* @custom-owner\n", encoding="utf-8"
+    )
 
     results = generate_github_security_files(config, force=False)
 
     drift_paths = {result.path.name for result in results if result.status == "drift"}
     assert "CODEOWNERS" in drift_paths
-    assert (project_dir / ".github" / "CODEOWNERS").read_text(encoding="utf-8") == "* @custom-owner\n"
+    assert (project_dir / ".github" / "CODEOWNERS").read_text(
+        encoding="utf-8"
+    ) == "* @custom-owner\n"
 
 
 def test_github_security_files_refresh_with_force(tmp_path):
@@ -187,7 +194,10 @@ def test_github_security_files_refresh_with_force(tmp_path):
 
     results = generate_github_security_files(config, force=True)
 
-    assert any(result.path.name == "CODEOWNERS" and result.status == "created" for result in results)
+    assert any(
+        result.path.name == "CODEOWNERS" and result.status == "created"
+        for result in results
+    )
     assert codeowners.read_text(encoding="utf-8") != "* @custom-owner\n"
     assert (project_dir / ".github" / "CODEOWNERS.backup").exists()
 
@@ -238,4 +248,5 @@ def test_project_config_github_repo_empty_string():
 
 if __name__ == "__main__":
     import pytest
+
     pytest.main([__file__, "-v"])

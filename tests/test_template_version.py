@@ -9,11 +9,12 @@ Tests cover:
 - Report generation
 """
 
-import pytest
 from pathlib import Path
 from textwrap import dedent
-from scripts.lib import template_version
 
+import pytest
+
+from scripts.lib import template_version
 
 # ---------------------------------------------------------------------------
 # Unit Tests - Template Version Parsing
@@ -108,41 +109,50 @@ class TestTemplateVersionParsing:
 class TestVersionComparison:
     """Test parse_version_tuple() and compare_versions()."""
 
-    @pytest.mark.parametrize("version,expected", [
-        ("1.0.0", (1, 0, 0)),
-        ("2.15.3", (2, 15, 3)),
-        ("0.0.1", (0, 0, 1)),
-        ("10.20.30", (10, 20, 30)),
-    ])
+    @pytest.mark.parametrize(
+        "version,expected",
+        [
+            ("1.0.0", (1, 0, 0)),
+            ("2.15.3", (2, 15, 3)),
+            ("0.0.1", (0, 0, 1)),
+            ("10.20.30", (10, 20, 30)),
+        ],
+    )
     def test_parse_valid_versions(self, version: str, expected: tuple[int, int, int]):
         """Parse valid semantic versions."""
         result = template_version.parse_version_tuple(version)
         assert result == expected
 
-    @pytest.mark.parametrize("invalid_version", [
-        "1.0",          # Missing patch
-        "1.0.0.0",      # Too many segments
-        "v1.0.0",       # Prefix
-        "1.x.0",        # Non-numeric
-        "",             # Empty
-        "latest",       # Non-semver
-    ])
+    @pytest.mark.parametrize(
+        "invalid_version",
+        [
+            "1.0",  # Missing patch
+            "1.0.0.0",  # Too many segments
+            "v1.0.0",  # Prefix
+            "1.x.0",  # Non-numeric
+            "",  # Empty
+            "latest",  # Non-semver
+        ],
+    )
     def test_parse_invalid_versions(self, invalid_version: str):
         """Return None for invalid version strings."""
         result = template_version.parse_version_tuple(invalid_version)
         assert result is None
 
-    @pytest.mark.parametrize("v1,v2,expected", [
-        ("1.0.0", "1.0.0", 0),   # Equal
-        ("1.0.0", "1.0.1", -1),  # Patch bump
-        ("1.0.1", "1.0.0", 1),   # v1 newer
-        ("1.0.0", "1.1.0", -1),  # Minor bump
-        ("1.1.0", "1.0.0", 1),   # v1 newer
-        ("1.0.0", "2.0.0", -1),  # Major bump
-        ("2.0.0", "1.0.0", 1),   # v1 newer
-        ("0.0.1", "0.0.2", -1),  # Pre-1.0 versions
-        ("1.9.9", "2.0.0", -1),  # Edge case: major version bump
-    ])
+    @pytest.mark.parametrize(
+        "v1,v2,expected",
+        [
+            ("1.0.0", "1.0.0", 0),  # Equal
+            ("1.0.0", "1.0.1", -1),  # Patch bump
+            ("1.0.1", "1.0.0", 1),  # v1 newer
+            ("1.0.0", "1.1.0", -1),  # Minor bump
+            ("1.1.0", "1.0.0", 1),  # v1 newer
+            ("1.0.0", "2.0.0", -1),  # Major bump
+            ("2.0.0", "1.0.0", 1),  # v1 newer
+            ("0.0.1", "0.0.2", -1),  # Pre-1.0 versions
+            ("1.9.9", "2.0.0", -1),  # Edge case: major version bump
+        ],
+    )
     def test_compare_versions(self, v1: str, v2: str, expected: int):
         """Compare semantic versions correctly."""
         result = template_version.compare_versions(v1, v2)
@@ -225,7 +235,7 @@ class TestDriftDetection:
                 version="1.0.0",
                 last_updated="2026-04-14",
                 breaking_changes=False,
-                path=Path("/local/spec-template.md")
+                path=Path("/local/spec-template.md"),
             )
         }
         upstream = {
@@ -234,7 +244,7 @@ class TestDriftDetection:
                 version="1.0.0",
                 last_updated="2026-04-14",
                 breaking_changes=False,
-                path=Path("/upstream/spec-template.md")
+                path=Path("/upstream/spec-template.md"),
             )
         }
 
@@ -249,7 +259,7 @@ class TestDriftDetection:
                 version="1.0.0",
                 last_updated="2026-01-01",
                 breaking_changes=False,
-                path=Path("/local/spec-template.md")
+                path=Path("/local/spec-template.md"),
             )
         }
         upstream = {
@@ -258,7 +268,7 @@ class TestDriftDetection:
                 version="1.2.0",
                 last_updated="2026-04-14",
                 breaking_changes=False,
-                path=Path("/upstream/spec-template.md")
+                path=Path("/upstream/spec-template.md"),
             )
         }
 
@@ -280,7 +290,7 @@ class TestDriftDetection:
                 version="1.5.0",
                 last_updated="2025-12-01",
                 breaking_changes=False,
-                path=Path("/local/plan-template.md")
+                path=Path("/local/plan-template.md"),
             )
         }
         upstream = {
@@ -289,7 +299,7 @@ class TestDriftDetection:
                 version="2.0.0",
                 last_updated="2026-04-01",
                 breaking_changes=True,
-                path=Path("/upstream/plan-template.md")
+                path=Path("/upstream/plan-template.md"),
             )
         }
 
@@ -308,7 +318,7 @@ class TestDriftDetection:
                 version="1.0.0",
                 last_updated="2026-04-14",
                 breaking_changes=False,
-                path=Path("/upstream/new-template.md")
+                path=Path("/upstream/new-template.md"),
             )
         }
 
@@ -328,7 +338,7 @@ class TestDriftDetection:
                 version="0.9.0",
                 last_updated="2025-01-01",
                 breaking_changes=False,
-                path=Path("/local/old-template.md")
+                path=Path("/local/old-template.md"),
             ),
         }
         upstream = {
@@ -337,14 +347,14 @@ class TestDriftDetection:
                 version="1.5.0",
                 last_updated="2026-04-14",
                 breaking_changes=False,
-                path=Path("/upstream/old-template.md")
+                path=Path("/upstream/old-template.md"),
             ),
             "new-template": template_version.TemplateVersion(
                 name="new-template",
                 version="1.0.0",
                 last_updated="2026-04-14",
                 breaking_changes=False,
-                path=Path("/upstream/new-template.md")
+                path=Path("/upstream/new-template.md"),
             ),
         }
 
@@ -383,7 +393,7 @@ class TestReportGeneration:
                 is_missing=False,
                 breaking_changes=False,
                 local_path=Path("/local/spec-template.md"),
-                upstream_path=Path("/upstream/spec-template.md")
+                upstream_path=Path("/upstream/spec-template.md"),
             ),
             template_version.TemplateDrift(
                 name="new-template",
@@ -393,8 +403,8 @@ class TestReportGeneration:
                 is_missing=True,
                 breaking_changes=False,
                 local_path=None,
-                upstream_path=Path("/upstream/new-template.md")
-            )
+                upstream_path=Path("/upstream/new-template.md"),
+            ),
         ]
 
         report = template_version.generate_drift_report(drifts)
@@ -416,7 +426,7 @@ class TestReportGeneration:
                 is_missing=False,
                 breaking_changes=True,
                 local_path=Path("/local/spec-template.md"),
-                upstream_path=Path("/upstream/spec-template.md")
+                upstream_path=Path("/upstream/spec-template.md"),
             )
         ]
 

@@ -1,5 +1,5 @@
-<!-- Criado em: 24/11/2026 12:00 -->
-<!-- Modificado em: 24/11/2026 11:19 -->
+<!-- Criado em: 24/11/2026 11:19 -->
+<!-- Modificado em: 24/11/2026 15:00 -->
 
 # ADR-003: Separação dos templates de distribuição dos arquivos do próprio repositório
 

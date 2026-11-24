@@ -14,8 +14,9 @@ Usage:
 """
 
 import json
-import pytest
 from pathlib import Path
+
+import pytest
 
 # Path para test-workspace-fix
 TEST_WORKSPACE_FIX = Path("/home/yves_marinho/DevOps/Projetos/test-workspace-fix")
@@ -72,17 +73,17 @@ class TestBug20MCP:
             # Configuração HTTP nativa
             url = github_server.get("url")
             assert url, "Configuração HTTP deve ter campo 'url'"
-            assert "githubcopilot.com" in url or "github.com" in url, (
-                f"URL suspeita: {url}"
-            )
+            assert (
+                "githubcopilot.com" in url or "github.com" in url
+            ), f"URL suspeita: {url}"
         else:
             # Configuração via npx (também aceitável)
             command = github_server.get("command")
             args = github_server.get("args", [])
             assert command == "npx", f"Comando esperado 'npx', encontrado '{command}'"
-            assert "@modelcontextprotocol/server-github" in args, (
-                "Args devem incluir @modelcontextprotocol/server-github"
-            )
+            assert (
+                "@modelcontextprotocol/server-github" in args
+            ), "Args devem incluir @modelcontextprotocol/server-github"
 
     def test_github_server_no_obsolete_fields(self, workspace_path):
         """Verificar que campos obsoletos (stdio) foram removidos."""
@@ -117,16 +118,18 @@ class TestBug17TimeTracker:
             workspace_path / ".github" / "prompts" / "session-start.prompt.md",
             workspace_path / ".claude" / "commands" / "session-start..md",
         ]
-        prompt = next((candidate for candidate in candidates if candidate.exists()), None)
+        prompt = next(
+            (candidate for candidate in candidates if candidate.exists()), None
+        )
         assert prompt is not None, "Nenhum wrapper de session-start encontrado"
 
         content = prompt.read_text(encoding="utf-8")
-        assert "python scripts/session-manager.py start --json" in content, (
-            "Wrapper de session-start não usa scripts/session-manager.py"
-        )
-        assert "Passo 6.5" not in content, (
-            "Wrapper de session-start ainda contém fluxo legado numerado"
-        )
+        assert (
+            "python scripts/session-manager.py start --json" in content
+        ), "Wrapper de session-start não usa scripts/session-manager.py"
+        assert (
+            "Passo 6.5" not in content
+        ), "Wrapper de session-start ainda contém fluxo legado numerado"
 
     def test_session_manager_script_exists(self, workspace_path):
         """Verificar que session-manager.py foi deployado."""
@@ -136,9 +139,7 @@ class TestBug17TimeTracker:
     def test_session_time_directory_exists(self, workspace_path):
         """Verificar que diretório .session-time/ foi criado."""
         session_time_dir = workspace_path / ".session-time"
-        # Pode não existir se nunca foi executado, mas não deve dar erro
-        # Just check if it's accessible
-        assert workspace_path.exists(), "Workspace path deve existir"
+        assert session_time_dir.is_dir(), ".session-time/ não foi criado"
 
 
 class TestBug18ObjetivoYaml:
@@ -154,6 +155,7 @@ class TestBug18ObjetivoYaml:
         objetivo = workspace_path / "objetivo.yaml"
         try:
             import yaml
+
             with objetivo.open(encoding="utf-8") as f:
                 data = yaml.safe_load(f)
             assert isinstance(data, dict), "objetivo.yaml deve ser um objeto YAML"
@@ -164,15 +166,16 @@ class TestBug18ObjetivoYaml:
         """Verificar que objetivo.yaml contém informações do projeto."""
         objetivo = workspace_path / "objetivo.yaml"
         import yaml
+
         with objetivo.open(encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
         assert "project" in data, "objetivo.yaml deve ter seção 'project'"
         project = data["project"]
         assert "name" in project, "project deve ter campo 'name'"
-        assert project["name"] == "test-workspace-fix", (
-            f"Nome do projeto incorreto: {project.get('name')}"
-        )
+        assert (
+            project["name"] == "test-workspace-fix"
+        ), f"Nome do projeto incorreto: {project.get('name')}"
 
 
 class TestBug19GitValidators:
@@ -189,9 +192,9 @@ class TestBug19GitValidators:
         content = script.read_text(encoding="utf-8")
 
         # Check for basic Python syntax (no syntax errors on read)
-        assert "def " in content or "class " in content, (
-            "git_validators.py não contém funções ou classes Python"
-        )
+        assert (
+            "def " in content or "class " in content
+        ), "git_validators.py não contém funções ou classes Python"
 
 
 class TestCriticalFiles:
@@ -206,6 +209,7 @@ class TestCriticalFiles:
         """Verificar que .scaffold-state.yaml contém dados válidos."""
         state = workspace_path / ".scaffold-state.yaml"
         import yaml
+
         with state.open(encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
@@ -252,7 +256,9 @@ class TestScaffoldUpgradeLog:
         if not logs_dir.exists():
             pytest.skip("Diretório logs/ não existe")
 
-        scaffold_logs = sorted(logs_dir.glob("scaffold_*.log"), key=lambda p: p.stat().st_mtime)
+        scaffold_logs = sorted(
+            logs_dir.glob("scaffold_*.log"), key=lambda p: p.stat().st_mtime
+        )
         if not scaffold_logs:
             pytest.skip("Nenhum log de scaffold encontrado")
 
@@ -260,14 +266,15 @@ class TestScaffoldUpgradeLog:
         content = latest_log.read_text(encoding="utf-8")
 
         # Verificar que contém estatísticas de upgrade
-        assert "created:" in content or "skipped:" in content or "merged:" in content, (
-            f"Log {latest_log.name} não contém estatísticas de scaffold"
-        )
+        assert (
+            "created:" in content or "skipped:" in content or "merged:" in content
+        ), f"Log {latest_log.name} não contém estatísticas de scaffold"
 
 
 # ===========================================================================
 # Summary Report Generator
 # ===========================================================================
+
 
 @pytest.fixture(scope="session", autouse=True)
 def print_validation_summary(request):
@@ -275,12 +282,12 @@ def print_validation_summary(request):
     yield
 
     # This runs after all tests
-    if hasattr(request.config, 'pluginmanager'):
-        stats = request.config.pluginmanager.get_plugin('terminalreporter').stats
+    if hasattr(request.config, "pluginmanager"):
+        stats = request.config.pluginmanager.get_plugin("terminalreporter").stats
 
-        passed = len(stats.get('passed', []))
-        failed = len(stats.get('failed', []))
-        skipped = len(stats.get('skipped', []))
+        passed = len(stats.get("passed", []))
+        failed = len(stats.get("failed", []))
+        skipped = len(stats.get("skipped", []))
 
         print("\n" + "=" * 70)
         print("📊 RESUMO DA VALIDAÇÃO — test-workspace-fix")

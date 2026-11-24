@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 from ..objetivo_parser import ObjetivoV2Parser
 from ..objetivo_validator import ObjetivoValidator
@@ -28,7 +28,9 @@ def flow_objetivo_generate(args: argparse.Namespace) -> int:
 
     # Check input exists
     if not input_path.exists():
-        console.print(f"\n  [bold red]❌ Erro:[/bold red] Arquivo não encontrado: {input_path}\n")
+        console.print(
+            f"\n  [bold red]❌ Erro:[/bold red] Arquivo não encontrado: {input_path}\n"
+        )
         return 1
 
     try:
@@ -40,22 +42,26 @@ def flow_objetivo_generate(args: argparse.Namespace) -> int:
         errors, warnings = validator.validate(parsed)
 
         if errors:
-            console.print(f"\n  [bold red]❌ Erro:[/bold red] objetivo.yaml inválido:\n")
+            console.print("\n  [bold red]❌ Erro:[/bold red] objetivo.yaml inválido:\n")
             for err in errors:
                 console.print(f"  {err}")
-            console.print("\n  Execute 'scaffold.py objetivo-validate' para detalhes.\n")
+            console.print(
+                "\n  Execute 'scaffold.py objetivo-validate' para detalhes.\n"
+            )
             return 1
 
         # Generate technical YAML
         spec_yaml = _generate_spec_yaml(parsed, input_path, warnings)
 
         # Write to output
-        output_path.write_text(spec_yaml, encoding='utf-8')
+        output_path.write_text(spec_yaml, encoding="utf-8")
 
         # Success message
         console.print(f"\n  [green]✅ Gerado:[/green] {output_path}")
         if warnings:
-            console.print(f"  [yellow]⚠️  {len(warnings)} aviso(s)[/yellow] — revisar seções P1")
+            console.print(
+                f"  [yellow]⚠️  {len(warnings)} aviso(s)[/yellow] — revisar seções P1"
+            )
         console.print()
 
         return 0
@@ -67,7 +73,6 @@ def flow_objetivo_generate(args: argparse.Namespace) -> int:
 
 def _generate_spec_yaml(parsed, source_file: Path, warnings: list) -> str:
     """Gera conteúdo YAML técnico a partir de objetivo.yaml parseado."""
-    from .. import config
 
     # Extract frontmatter
     fm = parsed.frontmatter
@@ -97,21 +102,23 @@ def _generate_spec_yaml(parsed, source_file: Path, warnings: list) -> str:
     # Add profiles if auto-detect enabled
     generation = fm.get("generation", {})
     if generation.get("profiles_auto_detect", True):
-        lines.extend([
-            "profiles:",
-            f"  - {project.get('domain', 'programming')}",
-        ])
+        lines.extend(
+            [
+                "profiles:",
+                f"  - {project.get('domain', 'programming')}",
+            ]
+        )
 
         # Add language-specific profile
-        lang = project.get('language', 'python')
-        proj_type = project.get('type', 'backend-api')
+        lang = project.get("language", "python")
+        proj_type = project.get("type", "backend-api")
 
         # Map common combinations
         profile_map = {
-            ('python', 'backend-api'): 'python-fastapi',
-            ('typescript', 'frontend-spa'): 'typescript-next',
-            ('terraform', 'infrastructure-code'): 'terraform-aws',
-            ('helm', 'deployment-chart'): 'k8s-helm',
+            ("python", "backend-api"): "python-fastapi",
+            ("typescript", "frontend-spa"): "typescript-next",
+            ("terraform", "infrastructure-code"): "terraform-aws",
+            ("helm", "deployment-chart"): "k8s-helm",
         }
 
         profile_key = (lang, proj_type)
@@ -123,27 +130,30 @@ def _generate_spec_yaml(parsed, source_file: Path, warnings: list) -> str:
     # Add features from Section 3
     sections = parsed.sections
     if 3 in sections:
-        lines.extend([
-            "features:",
-        ])
+        lines.extend(
+            [
+                "features:",
+            ]
+        )
 
         # Extract "Incluído ✅" items from Section 3
         section_3 = sections[3]
         import re
-        included_pattern = r'\*\*Incluído ✅\*\*:?\s*\n((?:[-*]\s+.+\n?)+)'
+
+        included_pattern = r"\*\*Incluído ✅\*\*:?\s*\n((?:[-*]\s+.+\n?)+)"
         match = re.search(included_pattern, section_3, re.MULTILINE)
 
         if match:
             items_text = match.group(1)
-            items = re.findall(r'[-*]\s+(.+)', items_text)
+            items = re.findall(r"[-*]\s+(.+)", items_text)
 
             for item in items:
                 # Extract priority if present (P0|P1|P2)
-                priority_match = re.search(r'\(([P0-2]+)\)', item)
+                priority_match = re.search(r"\(([P0-2]+)\)", item)
                 priority = priority_match.group(1) if priority_match else "P1"
 
                 # Clean item text
-                item_clean = re.sub(r'\s*\([P0-2]+\)\s*', '', item).strip()
+                item_clean = re.sub(r"\s*\([P0-2]+\)\s*", "", item).strip()
 
                 lines.append(f"  - name: {item_clean}")
                 lines.append(f"    priority: {priority}")
@@ -152,14 +162,17 @@ def _generate_spec_yaml(parsed, source_file: Path, warnings: list) -> str:
 
     # Add personas from Section 5
     if 5 in sections:
-        lines.extend([
-            "personas:",
-        ])
+        lines.extend(
+            [
+                "personas:",
+            ]
+        )
 
         # Extract personas from Section 5
         section_5 = sections[5]
         import re
-        persona_pattern = r'\*\*([^*]+)\*\*\s*(?:\(([^)]+)\))?'
+
+        persona_pattern = r"\*\*([^*]+)\*\*\s*(?:\(([^)]+)\))?"
         personas = re.findall(persona_pattern, section_5)
 
         for persona_name, persona_role in personas[:3]:  # Limit to 3 personas
@@ -170,12 +183,14 @@ def _generate_spec_yaml(parsed, source_file: Path, warnings: list) -> str:
         lines.append("")
 
     # Add validation summary
-    lines.extend([
-        "validation:",
-        f"  level: {'strict' if not warnings else 'standard'}",
-        f"  warnings: {len(warnings)}",
-        f"  require_p0: true",
-        "",
-    ])
+    lines.extend(
+        [
+            "validation:",
+            f"  level: {'strict' if not warnings else 'standard'}",
+            f"  warnings: {len(warnings)}",
+            "  require_p0: true",
+            "",
+        ]
+    )
 
     return "\n".join(lines)

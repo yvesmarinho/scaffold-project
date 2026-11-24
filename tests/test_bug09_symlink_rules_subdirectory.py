@@ -10,12 +10,12 @@ Was looking at: .copilot-shared/.copilot-rules.md
 Fix: Updated scripts/lib/links.py to look in rules/ subdirectory
 """
 
-from pathlib import Path
-import tempfile
 import os
+import tempfile
+from pathlib import Path
 
+from scripts.lib.config import ProjectConfig
 from scripts.lib.links import setup_symlinks
-from scripts.lib.config import ProjectConfig, CreatedItem
 
 
 def test_symlink_points_to_rules_subdirectory():
@@ -59,20 +59,27 @@ def test_symlink_points_to_rules_subdirectory():
 
         result = results[0]
         assert result.kind == "symlink"
-        assert result.status == "created", f"Expected created, got {result.status}: {result.message}"
+        assert (
+            result.status == "created"
+        ), f"Expected created, got {result.status}: {result.message}"
 
         symlink = project_dir / ".copilot-rules.md"
         assert symlink.is_symlink(), "Symlink should be created"
 
         # Verify symlink points to correct location (in rules/ subdirectory)
         target = symlink.resolve()
-        assert target == copilot_rules, f"Symlink should point to {copilot_rules}, not {target}"
+        assert (
+            target == copilot_rules
+        ), f"Symlink should point to {copilot_rules}, not {target}"
 
         # Verify symlink is relative (portability)
         raw_target = os.readlink(symlink)
-        assert not Path(raw_target).is_absolute(
-        ), f"Symlink should be relative, got: {raw_target}"
-        assert "rules/.copilot-rules.md" in raw_target, f"Symlink should include rules/ subdirectory: {raw_target}"
+        assert not Path(
+            raw_target
+        ).is_absolute(), f"Symlink should be relative, got: {raw_target}"
+        assert (
+            "rules/.copilot-rules.md" in raw_target
+        ), f"Symlink should include rules/ subdirectory: {raw_target}"
 
 
 def test_symlink_skipped_when_file_missing_in_shared():
@@ -107,12 +114,18 @@ def test_symlink_skipped_when_file_missing_in_shared():
         # Assert
         assert len(results) == 1
         result = results[0]
-        assert result.status == "skipped", f"Should skip when file missing, got {result.status}"
-        assert "ausente em shared" in result.message, f"Message should mention missing file: {result.message}"
+        assert (
+            result.status == "skipped"
+        ), f"Should skip when file missing, got {result.status}"
+        assert (
+            "ausente em shared" in result.message
+        ), f"Message should mention missing file: {result.message}"
 
         # Symlink should NOT be created
         symlink = project_dir / ".copilot-rules.md"
-        assert not symlink.exists(), "Symlink should not be created when source file is missing"
+        assert (
+            not symlink.exists()
+        ), "Symlink should not be created when source file is missing"
 
 
 if __name__ == "__main__":

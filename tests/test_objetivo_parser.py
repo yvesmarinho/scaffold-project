@@ -13,9 +13,6 @@ Task: T010
 """
 
 import pytest
-import tempfile
-from pathlib import Path
-import yaml
 
 from scripts.lib.objetivo_parser import ObjetivoV2Parser, ParsedObjetivo
 
@@ -89,7 +86,7 @@ Depois: Automação completa
 - Segurança: OWASP Top 10
 """
         file_path = tmp_path / "objetivo.yaml"
-        file_path.write_text(content, encoding='utf-8')
+        file_path.write_text(content, encoding="utf-8")
         return file_path
 
     @pytest.fixture
@@ -106,7 +103,7 @@ project:
 Just some text here.
 """
         file_path = tmp_path / "frontmatter-only.yaml"
-        file_path.write_text(content, encoding='utf-8')
+        file_path.write_text(content, encoding="utf-8")
         return file_path
 
     @pytest.fixture
@@ -137,7 +134,7 @@ And more text after.
 Another section here.
 """
         file_path = tmp_path / "with-code.yaml"
-        file_path.write_text(content, encoding='utf-8')
+        file_path.write_text(content, encoding="utf-8")
         return file_path
 
     @pytest.fixture
@@ -166,7 +163,7 @@ More content here.
 - FastAPI
 """
         file_path = tmp_path / "with-tables.yaml"
-        file_path.write_text(content, encoding='utf-8')
+        file_path.write_text(content, encoding="utf-8")
         return file_path
 
     @pytest.fixture
@@ -180,7 +177,7 @@ project:
 ---
 """
         file_path = tmp_path / "invalid.yaml"
-        file_path.write_text(content, encoding='utf-8')
+        file_path.write_text(content, encoding="utf-8")
         return file_path
 
     @pytest.fixture
@@ -192,7 +189,7 @@ project:
 ---
 """
         file_path = tmp_path / "missing-version.yaml"
-        file_path.write_text(content, encoding='utf-8')
+        file_path.write_text(content, encoding="utf-8")
         return file_path
 
     @pytest.fixture
@@ -205,7 +202,7 @@ project:
 ---
 """
         file_path = tmp_path / "missing-name.yaml"
-        file_path.write_text(content, encoding='utf-8')
+        file_path.write_text(content, encoding="utf-8")
         return file_path
 
     # Test 1: Parse valid objetivo.yaml v2.0 (happy path)
@@ -302,7 +299,7 @@ project:
 - Back to level 1
 """
         file_path = tmp_path / "nested.yaml"
-        file_path.write_text(content, encoding='utf-8')
+        file_path.write_text(content, encoding="utf-8")
 
         parsed = parser.parse(file_path)
 
@@ -366,7 +363,7 @@ Content here.
 More content.
 """
         file_path = tmp_path / "empty-sections.yaml"
-        file_path.write_text(content, encoding='utf-8')
+        file_path.write_text(content, encoding="utf-8")
 
         parsed = parser.parse(file_path)
 

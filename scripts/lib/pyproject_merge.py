@@ -12,10 +12,10 @@ Sprint 3 (P1 HIGH): Resolve gap de pyproject.toml sem merge
 Bug fix: Dependencies e tool configs não propagados
 """
 
-from pathlib import Path
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
 
 try:
     import tomllib  # Python 3.11+
@@ -31,26 +31,30 @@ log = logging.getLogger(__name__)
 # Types and Data Classes
 # =============================================================================
 
+
 @dataclass
 class PyprojectContent:
     """Representa conteúdo de pyproject.toml."""
-    project: Dict[str, Any]  # [project] section
-    build_system: Dict[str, Any]  # [build-system] section
-    tool_configs: Dict[str, Dict[str, Any]]  # [tool.*] sections
-    raw_toml: Dict[str, Any]  # TOML completo
+
+    project: dict[str, Any]  # [project] section
+    build_system: dict[str, Any]  # [build-system] section
+    tool_configs: dict[str, dict[str, Any]]  # [tool.*] sections
+    raw_toml: dict[str, Any]  # TOML completo
 
 
 @dataclass
 class PyprojectMergeDecision:
     """Decisão de merge para pyproject.toml."""
+
     should_merge: bool
     reason: str
-    changes: List[str]
+    changes: list[str]
 
 
 # =============================================================================
 # PyprojectMerger
 # =============================================================================
+
 
 class PyprojectMerger:
     """
@@ -103,10 +107,7 @@ class PyprojectMerger:
         return file_path.name == "pyproject.toml"
 
     def merge(
-        self,
-        existing_path: Path,
-        template_content: str,
-        interactive: bool = True
+        self, existing_path: Path, template_content: str, interactive: bool = True
     ) -> CreatedItem:
         """
         Faz merge inteligente do pyproject.toml
@@ -130,25 +131,21 @@ class PyprojectMerger:
 
             # 3. Decisão de merge
             decision = self._should_merge(
-                existing_proj,
-                template_proj,
-                existing_path.name
+                existing_proj, template_proj, existing_path.name
             )
 
             if not decision.should_merge:
-                log.info("⏭️  Skip: %s (%s)",
-                         existing_path.name, decision.reason)
+                log.info("⏭️  Skip: %s (%s)", existing_path.name, decision.reason)
                 return CreatedItem(
                     path=existing_path,
                     kind="file",
                     status="skipped",
-                    message=decision.reason
+                    message=decision.reason,
                 )
 
             # 4. Merge [project]
             merged_project = self._merge_project_section(
-                existing_proj.project,
-                template_proj.project
+                existing_proj.project, template_proj.project
             )
 
             # 5. Merge [build-system]
@@ -156,8 +153,7 @@ class PyprojectMerger:
 
             # 6. Merge [tool.*]
             merged_tools = self._merge_tool_configs(
-                existing_proj.tool_configs,
-                template_proj.tool_configs
+                existing_proj.tool_configs, template_proj.tool_configs
             )
 
             # 7. Gerar TOML final
@@ -180,18 +176,19 @@ class PyprojectMerger:
             backup_path.write_text(existing_content, encoding="utf-8")
             existing_path.write_text(merged_content, encoding="utf-8")
 
-            changes_msg = "\n".join(
-                f"  - {change}" for change in decision.changes)
+            changes_msg = "\n".join(f"  - {change}" for change in decision.changes)
             log.info(
                 "✅ Merged: %s\n%s\n  Backup: %s",
-                existing_path.name, changes_msg, backup_path.name
+                existing_path.name,
+                changes_msg,
+                backup_path.name,
             )
 
             return CreatedItem(
                 path=existing_path,
                 kind="file",
                 status="merged",
-                message=f"Merged with {len(decision.changes)} changes (backup created)"
+                message=f"Merged with {len(decision.changes)} changes (backup created)",
             )
 
         except Exception as e:
@@ -200,7 +197,7 @@ class PyprojectMerger:
                 path=existing_path,
                 kind="file",
                 status="error",
-                message=f"Merge error: {str(e)}"
+                message=f"Merge error: {str(e)}",
             )
 
     # =========================================================================
@@ -229,7 +226,7 @@ class PyprojectMerger:
             project=toml_data.get("project", {}),
             build_system=toml_data.get("build-system", {}),
             tool_configs=tool_configs,
-            raw_toml=toml_data
+            raw_toml=toml_data,
         )
 
     # =========================================================================
@@ -240,7 +237,7 @@ class PyprojectMerger:
         self,
         existing_proj: PyprojectContent,
         template_proj: PyprojectContent,
-        filename: str
+        filename: str,
     ) -> PyprojectMergeDecision:
         """
         Decide se deve fazer merge baseado em novas dependencies/tools.
@@ -258,25 +255,32 @@ class PyprojectMerger:
         template_deps = set(template_proj.project.get("dependencies", []))
 
         # Comparar por nome de pacote (antes do >=, ==, etc.)
-        existing_pkg_names = {dep.split(">")[0].split("=")[0].split("<")[
-            0].strip() for dep in existing_deps}
-        template_pkg_names = {dep.split(">")[0].split("=")[0].split("<")[
-            0].strip() for dep in template_deps}
+        existing_pkg_names = {
+            dep.split(">")[0].split("=")[0].split("<")[0].strip()
+            for dep in existing_deps
+        }
+        template_pkg_names = {
+            dep.split(">")[0].split("=")[0].split("<")[0].strip()
+            for dep in template_deps
+        }
 
         new_deps = template_pkg_names - existing_pkg_names
         if new_deps:
             changes.append(f"Add {len(new_deps)} dependencies")
 
         # 2. Detectar novos optional-dependencies groups
-        existing_optional = set(existing_proj.project.get(
-            "optional-dependencies", {}).keys())
-        template_optional = set(template_proj.project.get(
-            "optional-dependencies", {}).keys())
+        existing_optional = set(
+            existing_proj.project.get("optional-dependencies", {}).keys()
+        )
+        template_optional = set(
+            template_proj.project.get("optional-dependencies", {}).keys()
+        )
         new_optional_groups = template_optional - existing_optional
 
         if new_optional_groups:
             changes.append(
-                f"Add {len(new_optional_groups)} optional-dependencies groups")
+                f"Add {len(new_optional_groups)} optional-dependencies groups"
+            )
 
         # 3. Detectar novas tool configs
         existing_tools = set(existing_proj.tool_configs.keys())
@@ -293,15 +297,13 @@ class PyprojectMerger:
         # Decisão final
         if not changes:
             return PyprojectMergeDecision(
-                should_merge=False,
-                reason="Pyproject already up-to-date",
-                changes=[]
+                should_merge=False, reason="Pyproject already up-to-date", changes=[]
             )
 
         return PyprojectMergeDecision(
             should_merge=True,
             reason=f"Template has updates ({len(changes)} changes)",
-            changes=changes
+            changes=changes,
         )
 
     # =========================================================================
@@ -309,10 +311,8 @@ class PyprojectMerger:
     # =========================================================================
 
     def _merge_project_section(
-        self,
-        existing: Dict[str, Any],
-        template: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, existing: dict[str, Any], template: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Merge [project] section com estratégia de preservar metadata.
 
@@ -343,8 +343,7 @@ class PyprojectMerger:
 
         # Adicionar dependencies do template que não existem
         for template_dep in template_deps:
-            pkg_name = template_dep.split(">")[0].split("=")[
-                0].split("<")[0].strip()
+            pkg_name = template_dep.split(">")[0].split("=")[0].split("<")[0].strip()
             if pkg_name not in existing_dep_map:
                 existing_dep_map[pkg_name] = template_dep
 
@@ -363,8 +362,7 @@ class PyprojectMerger:
             else:
                 # Grupo existe - merge dependencies
                 merged_optional[group] = self._merge_dependency_list(
-                    merged_optional[group],
-                    deps
+                    merged_optional[group], deps
                 )
 
         if merged_optional:
@@ -373,10 +371,8 @@ class PyprojectMerger:
         return merged
 
     def _merge_dependency_list(
-        self,
-        existing: List[str],
-        template: List[str]
-    ) -> List[str]:
+        self, existing: list[str], template: list[str]
+    ) -> list[str]:
         """Merge lista de dependencies (aditivo por nome de pacote)."""
         existing_set = set(existing)
         template_set = set(template)
@@ -389,18 +385,15 @@ class PyprojectMerger:
 
         # Adicionar ausentes do template
         for template_dep in template_set:
-            pkg_name = template_dep.split(">")[0].split("=")[
-                0].split("<")[0].strip()
+            pkg_name = template_dep.split(">")[0].split("=")[0].split("<")[0].strip()
             if pkg_name not in existing_map:
                 existing_map[pkg_name] = template_dep
 
         return sorted(existing_map.values())
 
     def _merge_tool_configs(
-        self,
-        existing: Dict[str, Dict[str, Any]],
-        template: Dict[str, Dict[str, Any]]
-    ) -> Dict[str, Dict[str, Any]]:
+        self, existing: dict[str, dict[str, Any]], template: dict[str, dict[str, Any]]
+    ) -> dict[str, dict[str, Any]]:
         """
         Merge [tool.*] sections com preservação de customizações.
 
@@ -419,20 +412,15 @@ class PyprojectMerger:
             elif tool_name in self.BEST_PRACTICE_TOOLS:
                 # Tool de best practice - merge configs
                 merged[tool_name] = self._merge_tool_config(
-                    merged[tool_name],
-                    tool_config,
-                    tool_name
+                    merged[tool_name], tool_config, tool_name
                 )
             # Else: preserve existing custom tool config
 
         return merged
 
     def _merge_tool_config(
-        self,
-        existing: Dict[str, Any],
-        template: Dict[str, Any],
-        tool_name: str
-    ) -> Dict[str, Any]:
+        self, existing: dict[str, Any], template: dict[str, Any], tool_name: str
+    ) -> dict[str, Any]:
         """
         Merge configuração de uma tool específica.
 
@@ -472,7 +460,7 @@ class PyprojectMerger:
 
         return merged
 
-    def _format_toml(self, data: Dict[str, Any]) -> str:
+    def _format_toml(self, data: dict[str, Any]) -> str:
         """
         Formata dict em TOML string.
 
@@ -532,7 +520,9 @@ class PyprojectMerger:
 
         return "\n".join(lines) + "\n"
 
-    def _format_tool_section(self, config: Dict[str, Any], indent: int = 0) -> List[str]:
+    def _format_tool_section(
+        self, config: dict[str, Any], indent: int = 0
+    ) -> list[str]:
         """Formata seção de tool recursivamente."""
         lines = []
         indent_str = "    " * indent
@@ -546,17 +536,16 @@ class PyprojectMerger:
             elif isinstance(value, list):
                 # Array
                 if all(isinstance(item, str) for item in value):
-                    lines.append(f'{indent_str}{key} = [')
+                    lines.append(f"{indent_str}{key} = [")
                     for item in value:
                         lines.append(f'{indent_str}    "{item}",')
-                    lines.append(f'{indent_str}]')
+                    lines.append(f"{indent_str}]")
                 else:
                     lines.append(f"{indent_str}{key} = {value}")
             elif isinstance(value, str):
                 lines.append(f'{indent_str}{key} = "{value}"')
             elif isinstance(value, bool):
-                lines.append(
-                    f"{indent_str}{key} = {'true' if value else 'false'}")
+                lines.append(f"{indent_str}{key} = {'true' if value else 'false'}")
             else:
                 lines.append(f"{indent_str}{key} = {value}")
 

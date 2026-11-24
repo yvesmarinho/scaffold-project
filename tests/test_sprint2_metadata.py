@@ -11,10 +11,6 @@ Tests:
 3. test_profiles_applied_correctness - Verifica conteúdo dos perfis
 """
 
-import tempfile
-from pathlib import Path
-import subprocess
-import yaml
 import pytest
 
 
@@ -39,11 +35,15 @@ def test_profiles_applied_populated(tmp_path):
 
     # Verificações
     assert len(all_profiles) > 0, "profiles_applied não deveria estar vazio"
-    assert domain_profile in all_profiles, f"Perfil de domínio '{domain_profile}' deveria estar presente"
+    assert (
+        domain_profile in all_profiles
+    ), f"Perfil de domínio '{domain_profile}' deveria estar presente"
 
     # Verifica que transversais estão incluídos
     for transversal in SPECKIT_TRANSVERSAL_PROFILES:
-        assert transversal in all_profiles, f"Perfil transversal '{transversal}' deveria estar presente"
+        assert (
+            transversal in all_profiles
+        ), f"Perfil transversal '{transversal}' deveria estar presente"
 
 
 def test_profiles_applied_with_extras():
@@ -70,7 +70,9 @@ def test_profiles_applied_with_extras():
 
     # Verifica ordem (domínio → extras → transversais)
     assert all_profiles.index(domain_profile) < all_profiles.index("terraform-aws")
-    assert all_profiles.index("terraform-aws") < all_profiles.index(SPECKIT_TRANSVERSAL_PROFILES[0])
+    assert all_profiles.index("terraform-aws") < all_profiles.index(
+        SPECKIT_TRANSVERSAL_PROFILES[0]
+    )
 
 
 def test_profiles_calculation_matches_ui():
@@ -95,8 +97,9 @@ def test_profiles_calculation_matches_ui():
         # Lógica de new_project.py (deveria ser idêntica)
         new_project_result = [domain_profile] + extras + SPECKIT_TRANSVERSAL_PROFILES
 
-        assert ui_result == new_project_result, \
-            f"Cálculo de perfis diverge entre ui.py e new_project.py para domínio '{domain}'"
+        assert (
+            ui_result == new_project_result
+        ), f"Cálculo de perfis diverge entre ui.py e new_project.py para domínio '{domain}'"
 
 
 def test_scaffold_state_yaml_structure():
@@ -129,13 +132,17 @@ def test_scaffold_state_yaml_structure():
 
     # Verificações
     for key in expected_keys:
-        assert key in sample_state, f"Campo '{key}' deveria estar presente em .scaffold-state.yaml"
+        assert (
+            key in sample_state
+        ), f"Campo '{key}' deveria estar presente em .scaffold-state.yaml"
 
-    assert isinstance(sample_state["profiles_applied"], list), \
-        "profiles_applied deveria ser uma lista"
+    assert isinstance(
+        sample_state["profiles_applied"], list
+    ), "profiles_applied deveria ser uma lista"
 
-    assert len(sample_state["profiles_applied"]) > 0, \
-        "profiles_applied NÃO deveria estar vazio (BUG-#2 fix)"
+    assert (
+        len(sample_state["profiles_applied"]) > 0
+    ), "profiles_applied NÃO deveria estar vazio (BUG-#2 fix)"
 
 
 @pytest.mark.integration
@@ -187,32 +194,34 @@ def test_commit_order_logic():
 
     Bug fix: BUG-#3 (ordem errada causava .scaffold-state.yaml untracked)
     """
-    # Este teste verifica a ordem lógica das operações
-    # A ordem correta é:
-    # 1. Criar todos os arquivos (incluindo .scaffold-state.yaml)
-    # 2. Fazer commit (git add . && git commit)
-    # 3. Criar tag
+    # Verifica a ordem REAL das chamadas no flow (antes, o teste só comparava
+    # uma lista escrita no próprio teste — tautologia).
+    import ast
+    from pathlib import Path
 
-    # Ordem ERRADA (antes do fix):
-    wrong_order = [
-        "git.create_initial_commit",  # Commit sem .scaffold-state.yaml
+    fonte = Path(__file__).resolve().parent.parent / "scripts/lib/flows/new_project.py"
+    linhas: dict[str, int] = {}
+    for no in ast.walk(ast.parse(fonte.read_text(encoding="utf-8"))):
+        if isinstance(no, ast.Call):
+            nome = ast.unparse(no.func)
+            if nome in (
+                "write_scaffold_state",
+                "git.create_initial_commit",
+                "git.tag_scaffold",
+            ):
+                linhas.setdefault(nome, no.lineno)
+
+    assert set(linhas) == {
+        "write_scaffold_state",
+        "git.create_initial_commit",
         "git.tag_scaffold",
-        "write_scaffold_state",  # Criado DEPOIS do commit (untracked)
-    ]
-
-    # Ordem CORRETA (após fix):
-    correct_order = [
-        "write_scaffold_state",  # Criar .scaffold-state.yaml PRIMEIRO
-        "git.create_initial_commit",  # Commit inclui .scaffold-state.yaml
-        "git.tag_scaffold",  # Tag aponta para commit completo
-    ]
-
-    # Verificar que ordem correta faz sentido logicamente
-    assert correct_order.index("write_scaffold_state") < correct_order.index("git.create_initial_commit"), \
-        "Estado deve ser escrito ANTES do commit"
-
-    assert correct_order.index("git.create_initial_commit") < correct_order.index("git.tag_scaffold"), \
-        "Commit deve ser criado ANTES da tag"
+    }, f"chamadas não encontradas em {fonte.name}: {linhas}"
+    assert (
+        linhas["write_scaffold_state"] < linhas["git.create_initial_commit"]
+    ), "Estado deve ser escrito ANTES do commit"
+    assert (
+        linhas["git.create_initial_commit"] < linhas["git.tag_scaffold"]
+    ), "Commit deve ser criado ANTES da tag"
 
 
 def test_profiles_not_empty_edge_cases():
@@ -224,7 +233,9 @@ def test_profiles_not_empty_edge_cases():
 
     # Caso 1: Domínio inválido (não existe em DOMAIN_DEFAULT_PROFILES)
     invalid_domain = "nonexistent"
-    domain_profile = DOMAIN_DEFAULT_PROFILES.get(invalid_domain, f"devops-{invalid_domain}")
+    domain_profile = DOMAIN_DEFAULT_PROFILES.get(
+        invalid_domain, f"devops-{invalid_domain}"
+    )
     all_profiles = [domain_profile] + [] + SPECKIT_TRANSVERSAL_PROFILES
 
     assert len(all_profiles) > 0

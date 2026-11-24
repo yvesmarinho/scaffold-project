@@ -8,24 +8,24 @@ Used by mem_save.py to prevent accidental storage of secrets in committed memori
 """
 
 import re
-from typing import List, Tuple
 
-# Patterns de detecção de secrets/PII
+# Patterns de detecção de secrets/PII (regex de DETECÇÃO, não segredos — bandit
+# B105 é falso positivo nas chaves abaixo)
 PATTERNS = {
     "api_key": r"(api[_-]?key|apikey)\s*[=:]\s*['\"]?([a-zA-Z0-9_-]{20,})['\"]?",
-    "token": r"(token|bearer)\s*[=:]\s*['\"]?([a-zA-Z0-9_-]{20,})['\"]?",
-    "password": r"(password|passwd|pwd)\s*[=:]\s*['\"]?([^\s'\"]+)['\"]?",
+    "token": r"(token|bearer)\s*[=:]\s*['\"]?([a-zA-Z0-9_-]{20,})['\"]?",  # nosec B105
+    "password": r"(password|passwd|pwd)\s*[=:]\s*['\"]?([^\s'\"]+)['\"]?",  # nosec B105
     "email": r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b",
     "ip_address": r"\b(?:\d{1,3}\.){3}\d{1,3}\b",
     "aws_key": r"AKIA[0-9A-Z]{16}",
-    "github_token": r"ghp_[a-zA-Z0-9]{36}",
+    "github_token": r"ghp_[a-zA-Z0-9]{36}",  # nosec B105
     "jwt": r"eyJ[a-zA-Z0-9_-]*\.eyJ[a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*",
     "private_key": r"-----BEGIN (RSA |EC )?PRIVATE KEY-----",
-    "slack_token": r"xox[baprs]-[0-9a-zA-Z]{10,48}",
+    "slack_token": r"xox[baprs]-[0-9a-zA-Z]{10,48}",  # nosec B105
 }
 
 
-def detect_secrets(text: str) -> List[Tuple[str, str]]:
+def detect_secrets(text: str) -> list[tuple[str, str]]:
     """Detect potential secrets/PII in text.
 
     Scans text for common patterns of sensitive information including:
@@ -50,13 +50,17 @@ def detect_secrets(text: str) -> List[Tuple[str, str]]:
         matches = re.finditer(pattern, text, re.IGNORECASE)
         for match in matches:
             # Extract the secret value (group 2 for key=value patterns, group 0 otherwise)
-            value = match.group(2) if match.lastindex and match.lastindex >= 2 else match.group(0)
+            value = (
+                match.group(2)
+                if match.lastindex and match.lastindex >= 2
+                else match.group(0)
+            )
             findings.append((name, value))
 
     return findings
 
 
-def sanitize(text: str, redact: bool = True) -> Tuple[str, List[str]]:
+def sanitize(text: str, redact: bool = True) -> tuple[str, list[str]]:
     """Sanitize text by removing/redacting secrets.
 
     Replaces or removes detected secrets from text to prevent accidental
@@ -93,12 +97,16 @@ def sanitize(text: str, redact: bool = True) -> Tuple[str, List[str]]:
                 else:
                     replacement = ""
 
-                sanitized = sanitized[:match.start()] + replacement + sanitized[match.end():]
+                sanitized = (
+                    sanitized[: match.start()] + replacement + sanitized[match.end() :]
+                )
 
     return sanitized, warnings
 
 
-def validate_safe(text: str, allow_emails: bool = False, allow_ips: bool = False) -> Tuple[bool, List[str]]:
+def validate_safe(
+    text: str, allow_emails: bool = False, allow_ips: bool = False
+) -> tuple[bool, list[str]]:
     """Validate that text is safe to store (no secrets detected).
 
     Args:
@@ -123,7 +131,7 @@ def validate_safe(text: str, allow_emails: bool = False, allow_ips: bool = False
 
     # Filter out allowed types
     filtered_findings = []
-    for pattern_name, value in findings:
+    for pattern_name, _value in findings:
         if allow_emails and pattern_name == "email":
             continue
         if allow_ips and pattern_name == "ip_address":

@@ -25,10 +25,10 @@ Example:
 """
 
 import re
-import yaml
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
+from pathlib import Path
+
+import yaml
 
 
 @dataclass
@@ -45,30 +45,31 @@ class BlockMetadata:
         breaking_changes: Whether this version has breaking changes
         changelog: Version history with changes
     """
+
     block_type: str
     block_name: str
     block_version: str
     last_updated: str
-    compatible_with: List[str]
-    dependencies: List[Dict[str, str]]
+    compatible_with: list[str]
+    dependencies: list[dict[str, str]]
     breaking_changes: bool
-    changelog: List[Dict[str, any]]
+    changelog: list[dict[str, any]]
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'BlockMetadata':
+    def from_dict(cls, data: dict) -> "BlockMetadata":
         """Create BlockMetadata from parsed YAML dict."""
         return cls(
-            block_type=data.get('block_type', ''),
-            block_name=data.get('block_name', ''),
-            block_version=data.get('block_version', ''),
-            last_updated=data.get('last_updated', ''),
-            compatible_with=data.get('compatible_with', []),
-            dependencies=data.get('dependencies', []),
-            breaking_changes=data.get('breaking_changes', False),
-            changelog=data.get('changelog', [])
+            block_type=data.get("block_type", ""),
+            block_name=data.get("block_name", ""),
+            block_version=data.get("block_version", ""),
+            last_updated=data.get("last_updated", ""),
+            compatible_with=data.get("compatible_with", []),
+            dependencies=data.get("dependencies", []),
+            breaking_changes=data.get("breaking_changes", False),
+            changelog=data.get("changelog", []),
         )
 
-    def validate(self) -> List[str]:
+    def validate(self) -> list[str]:
         """Validate block metadata.
 
         Returns:
@@ -78,18 +79,24 @@ class BlockMetadata:
 
         if not self.block_type:
             errors.append("Missing block_type")
-        elif self.block_type != 'template_fragment':
-            errors.append(f"Invalid block_type: {self.block_type} (must be 'template_fragment')")
+        elif self.block_type != "template_fragment":
+            errors.append(
+                f"Invalid block_type: {self.block_type} (must be 'template_fragment')"
+            )
 
         if not self.block_name:
             errors.append("Missing block_name")
-        elif not re.match(r'^[a-z][a-z0-9-]*$', self.block_name):
-            errors.append(f"Invalid block_name: {self.block_name} (must match ^[a-z][a-z0-9-]*$)")
+        elif not re.match(r"^[a-z][a-z0-9-]*$", self.block_name):
+            errors.append(
+                f"Invalid block_name: {self.block_name} (must match ^[a-z][a-z0-9-]*$)"
+            )
 
         if not self.block_version:
             errors.append("Missing block_version")
-        elif not re.match(r'^\d+\.\d+\.\d+$', self.block_version):
-            errors.append(f"Invalid block_version: {self.block_version} (must be semver x.y.z)")
+        elif not re.match(r"^\d+\.\d+\.\d+$", self.block_version):
+            errors.append(
+                f"Invalid block_version: {self.block_version} (must be semver x.y.z)"
+            )
 
         if not self.last_updated:
             errors.append("Missing last_updated")
@@ -110,22 +117,23 @@ class TemplateMetadata:
         last_updated: ISO date string
         blocks: List of block specifications (name, version, source)
     """
+
     template_version: str
     template_type: str
     last_updated: str
-    blocks: List[Dict[str, str]]
+    blocks: list[dict[str, str]]
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'TemplateMetadata':
+    def from_dict(cls, data: dict) -> "TemplateMetadata":
         """Create TemplateMetadata from parsed YAML dict."""
         return cls(
-            template_version=data.get('template_version', ''),
-            template_type=data.get('template_type', ''),
-            last_updated=data.get('last_updated', ''),
-            blocks=data.get('blocks', [])
+            template_version=data.get("template_version", ""),
+            template_type=data.get("template_type", ""),
+            last_updated=data.get("last_updated", ""),
+            blocks=data.get("blocks", []),
         )
 
-    def validate(self) -> List[str]:
+    def validate(self) -> list[str]:
         """Validate template metadata.
 
         Returns:
@@ -135,7 +143,7 @@ class TemplateMetadata:
 
         if not self.template_version:
             errors.append("Missing template_version")
-        elif not re.match(r'^\d+\.\d+\.\d+$', self.template_version):
+        elif not re.match(r"^\d+\.\d+\.\d+$", self.template_version):
             errors.append(f"Invalid template_version: {self.template_version}")
 
         # template_type is optional; if present, it can be any value
@@ -152,25 +160,29 @@ class TemplateMetadata:
 
 class BlockError(Exception):
     """Base exception for block-related errors."""
+
     pass
 
 
 class BlockNotFoundError(BlockError):
     """Raised when a required block cannot be found."""
+
     pass
 
 
 class BlockValidationError(BlockError):
     """Raised when block metadata validation fails."""
+
     pass
 
 
 class CompositionError(BlockError):
     """Raised when template composition fails."""
+
     pass
 
 
-def parse_frontmatter(content: str) -> Tuple[Optional[dict], str]:
+def parse_frontmatter(content: str) -> tuple[dict | None, str]:
     """Parse YAML frontmatter from markdown content.
 
     Args:
@@ -194,7 +206,7 @@ def parse_frontmatter(content: str) -> Tuple[Optional[dict], str]:
         '## Content here'
     """
     # Match YAML frontmatter: ---\n<yaml>\n---
-    pattern = r'^---\s*\n(.*?)\n---\s*\n(.*)$'
+    pattern = r"^---\s*\n(.*?)\n---\s*\n(.*)$"
     match = re.match(pattern, content, re.DOTALL)
 
     if not match:
@@ -207,10 +219,10 @@ def parse_frontmatter(content: str) -> Tuple[Optional[dict], str]:
         metadata = yaml.safe_load(yaml_text)
         return metadata, body
     except yaml.YAMLError as e:
-        raise BlockValidationError(f"YAML parse error: {e}")
+        raise BlockValidationError(f"YAML parse error: {e}") from e
 
 
-def load_block(block_path: Path) -> Tuple[BlockMetadata, str]:
+def load_block(block_path: Path) -> tuple[BlockMetadata, str]:
     """Load a block file and parse its metadata.
 
     Args:
@@ -234,7 +246,7 @@ def load_block(block_path: Path) -> Tuple[BlockMetadata, str]:
     if not block_path.exists():
         raise BlockNotFoundError(f"Block not found: {block_path}")
 
-    content = block_path.read_text(encoding='utf-8')
+    content = block_path.read_text(encoding="utf-8")
     metadata_dict, body = parse_frontmatter(content)
 
     if not metadata_dict:
@@ -245,12 +257,16 @@ def load_block(block_path: Path) -> Tuple[BlockMetadata, str]:
     # Validate metadata
     errors = metadata.validate()
     if errors:
-        raise BlockValidationError(f"Block validation failed for {block_path.name}: {'; '.join(errors)}")
+        raise BlockValidationError(
+            f"Block validation failed for {block_path.name}: {'; '.join(errors)}"
+        )
 
     return metadata, body
 
 
-def compose_template(template_path: Path, blocks_dir: Path, verbose: bool = False) -> str:
+def compose_template(
+    template_path: Path, blocks_dir: Path, verbose: bool = False
+) -> str:
     """Compose a template by resolving @include directives.
 
     This is the core function of the block system. It:
@@ -283,14 +299,16 @@ def compose_template(template_path: Path, blocks_dir: Path, verbose: bool = Fals
     if not template_path.exists():
         raise CompositionError(f"Template not found: {template_path}")
 
-    content = template_path.read_text(encoding='utf-8')
+    content = template_path.read_text(encoding="utf-8")
     metadata_dict, body = parse_frontmatter(content)
 
     if not metadata_dict:
         # Template without frontmatter - might be legacy monolithic template
         # Just return as-is (no composition needed)
         if verbose:
-            print(f"ℹ️  Template {template_path.name} has no frontmatter (legacy monolithic template)")
+            print(
+                f"ℹ️  Template {template_path.name} has no frontmatter (legacy monolithic template)"
+            )
         return content
 
     template_meta = TemplateMetadata.from_dict(metadata_dict)
@@ -301,13 +319,15 @@ def compose_template(template_path: Path, blocks_dir: Path, verbose: bool = Fals
         raise CompositionError(f"Template validation failed: {'; '.join(errors)}")
 
     # If not a composition template, return as-is
-    if template_meta.template_type != 'composition':
+    if template_meta.template_type != "composition":
         if verbose:
-            print(f"ℹ️  Template {template_path.name} is not a composition (type: {template_meta.template_type})")
+            print(
+                f"ℹ️  Template {template_path.name} is not a composition (type: {template_meta.template_type})"
+            )
         return content
 
     # Find all @include directives
-    include_pattern = r'<!--\s*@include\s+([^\s]+)\s*-->'
+    include_pattern = r"<!--\s*@include\s+([^\s]+)\s*-->"
     includes = re.findall(include_pattern, body)
 
     if verbose:
@@ -318,7 +338,7 @@ def compose_template(template_path: Path, blocks_dir: Path, verbose: bool = Fals
 
     if not includes:
         if verbose:
-            print(f"   ⚠️  No @include directives found")
+            print("   ⚠️  No @include directives found")
         return body  # Return body without frontmatter
 
     # Compose by replacing @include directives
@@ -336,12 +356,16 @@ def compose_template(template_path: Path, blocks_dir: Path, verbose: bool = Fals
             if include_file in loaded_blocks:
                 block_meta, block_content = loaded_blocks[include_file]
                 if verbose:
-                    print(f"     ✅ {block_meta.block_name} v{block_meta.block_version} (cached)")
+                    print(
+                        f"     ✅ {block_meta.block_name} v{block_meta.block_version} (cached)"
+                    )
             else:
                 block_meta, block_content = load_block(block_path)
                 loaded_blocks[include_file] = (block_meta, block_content)
                 if verbose:
-                    print(f"     ✅ {block_meta.block_name} v{block_meta.block_version}")
+                    print(
+                        f"     ✅ {block_meta.block_name} v{block_meta.block_version}"
+                    )
 
             # Replace the @include directive with block content
             directive = f"<!-- @include {include_file} -->"
@@ -349,14 +373,14 @@ def compose_template(template_path: Path, blocks_dir: Path, verbose: bool = Fals
             composed = composed.replace(directive, block_content.strip())
 
         except BlockNotFoundError as e:
-            raise CompositionError(f"Cannot compose {template_path.name}: {e}")
+            raise CompositionError(f"Cannot compose {template_path.name}: {e}") from e
         except BlockValidationError as e:
-            raise CompositionError(f"Cannot compose {template_path.name}: {e}")
+            raise CompositionError(f"Cannot compose {template_path.name}: {e}") from e
 
     return composed
 
 
-def get_template_blocks(template_path: Path) -> List[Dict[str, str]]:
+def get_template_blocks(template_path: Path) -> list[dict[str, str]]:
     """Get list of blocks declared in a template's frontmatter.
 
     Args:
@@ -375,7 +399,7 @@ def get_template_blocks(template_path: Path) -> List[Dict[str, str]]:
     if not template_path.exists():
         return []
 
-    content = template_path.read_text(encoding='utf-8')
+    content = template_path.read_text(encoding="utf-8")
     metadata_dict, _ = parse_frontmatter(content)
 
     if not metadata_dict:
@@ -385,7 +409,7 @@ def get_template_blocks(template_path: Path) -> List[Dict[str, str]]:
     return template_meta.blocks
 
 
-def validate_block_file(block_path: Path) -> Tuple[bool, List[str]]:
+def validate_block_file(block_path: Path) -> tuple[bool, list[str]]:
     """Validate a block file.
 
     Args:

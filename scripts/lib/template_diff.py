@@ -14,7 +14,6 @@ import difflib
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 log = logging.getLogger(__name__)
 
@@ -23,14 +22,16 @@ log = logging.getLogger(__name__)
 # Data Classes
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class TemplateDiffResult:
     """Result of comparing local and upstream template."""
+
     template_name: str
     local_path: Path
     upstream_path: Path
-    local_version: Optional[str]
-    upstream_version: Optional[str]
+    local_version: str | None
+    upstream_version: str | None
     has_differences: bool
     unified_diff: str
     html_diff: str
@@ -42,6 +43,7 @@ class TemplateDiffResult:
 # ---------------------------------------------------------------------------
 # Diff Generation
 # ---------------------------------------------------------------------------
+
 
 def generate_unified_diff(
     local_content: str,
@@ -140,10 +142,11 @@ def calculate_diff_stats(unified_diff: str) -> dict[str, int]:
 # Customization Detection
 # ---------------------------------------------------------------------------
 
+
 def detect_customizations(
     local_content: str,
     upstream_content: str,
-    base_version: Optional[str] = None,
+    base_version: str | None = None,
 ) -> bool:
     """
     Detect if local template has customizations beyond upstream changes.
@@ -165,12 +168,15 @@ def detect_customizations(
     upstream_lines = set(upstream_content.splitlines())
 
     local_only = local_lines - upstream_lines
-    upstream_only = upstream_lines - local_lines
+    upstream_lines - local_lines
 
     # Filter out frontmatter differences (version metadata)
     local_only_filtered = {
-        line for line in local_only
-        if not line.strip().startswith(("template_version:", "last_updated:", "breaking_changes:"))
+        line
+        for line in local_only
+        if not line.strip().startswith(
+            ("template_version:", "last_updated:", "breaking_changes:")
+        )
     }
 
     # If local has unique content beyond version metadata, it's customized
@@ -181,10 +187,11 @@ def detect_customizations(
 # Impact Report Generation
 # ---------------------------------------------------------------------------
 
+
 def generate_impact_report(
     template_name: str,
-    local_version: Optional[str],
-    upstream_version: Optional[str],
+    local_version: str | None,
+    upstream_version: str | None,
     stats: dict[str, int],
     customizations_detected: bool,
 ) -> str:
@@ -234,8 +241,12 @@ def generate_impact_report(
     lines.append("Recommendations:")
     if customizations_detected:
         lines.append("  1. Review diff carefully to identify your customizations")
-        lines.append("  2. Create backup: cp template.md template.md.backup-$(date +%Y%m%d)")
-        lines.append("  3. Manually merge upstream changes while preserving customizations")
+        lines.append(
+            "  2. Create backup: cp template.md template.md.backup-$(date +%Y%m%d)"
+        )
+        lines.append(
+            "  3. Manually merge upstream changes while preserving customizations"
+        )
         lines.append("  4. Test workflow with new template version")
     else:
         lines.append("  1. Review changes to understand improvements")
@@ -249,11 +260,12 @@ def generate_impact_report(
 # Main Diff Function
 # ---------------------------------------------------------------------------
 
+
 def diff_templates(
     local_path: Path,
     upstream_path: Path,
-    local_version: Optional[str] = None,
-    upstream_version: Optional[str] = None,
+    local_version: str | None = None,
+    upstream_version: str | None = None,
 ) -> TemplateDiffResult:
     """
     Compare local and upstream templates and generate comprehensive diff.
@@ -312,6 +324,7 @@ def diff_templates(
 # Output Formatters
 # ---------------------------------------------------------------------------
 
+
 def format_diff_colored(diff_result: TemplateDiffResult) -> str:
     """
     Format diff with ANSI color codes for terminal output.
@@ -342,7 +355,9 @@ def format_diff_colored(diff_result: TemplateDiffResult) -> str:
     # Version info
     lines.append(f"{BOLD}Versions:{RESET}")
     lines.append(f"  Local:    {YELLOW}{diff_result.local_version or 'unknown'}{RESET}")
-    lines.append(f"  Upstream: {GREEN}{diff_result.upstream_version or 'unknown'}{RESET}")
+    lines.append(
+        f"  Upstream: {GREEN}{diff_result.upstream_version or 'unknown'}{RESET}"
+    )
     lines.append("")
 
     # Statistics
@@ -405,7 +420,9 @@ def format_diff_markdown(diff_result: TemplateDiffResult) -> str:
     lines.append(f"- **Local Version**: {diff_result.local_version or 'unknown'}")
     lines.append(f"- **Upstream Version**: {diff_result.upstream_version or 'unknown'}")
     lines.append(f"- **Has Differences**: {diff_result.has_differences}")
-    lines.append(f"- **Customizations Detected**: {diff_result.customizations_detected}\n")
+    lines.append(
+        f"- **Customizations Detected**: {diff_result.customizations_detected}\n"
+    )
 
     # Statistics
     stats = diff_result.stats

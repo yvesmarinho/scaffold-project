@@ -24,8 +24,6 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-import pytest
-
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 
 from lib.composer import load_all_descriptors  # noqa: E402
@@ -43,6 +41,7 @@ _DESCRIPTORS_DIR = _PROJECT_ROOT / "profile-descriptors"
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _get_descriptors() -> dict[str, dict]:
     return load_all_descriptors(_DESCRIPTORS_DIR)
@@ -81,7 +80,9 @@ class TestLayerHelpers:
         assert "Layer 3" in _layer_display_name(3)
 
     def test_layer_display_layer4(self) -> None:
-        assert "Layer 4" in _layer_display_name(4) or "Compliance" in _layer_display_name(4)
+        assert "Layer 4" in _layer_display_name(
+            4
+        ) or "Compliance" in _layer_display_name(4)
 
 
 # ===========================================================================
@@ -107,7 +108,9 @@ class TestComputeComboSlug:
     def test_core_plus_transversal_returns_core(self) -> None:
         """devops-programming + devops-security → 'core' (nenhum layer2+)."""
         descriptors = _get_descriptors()
-        slug = _compute_combo_slug(["devops-programming", "devops-security"], descriptors)
+        slug = _compute_combo_slug(
+            ["devops-programming", "devops-security"], descriptors
+        )
         assert slug == "core"
 
     def test_empty_list_returns_core(self) -> None:
@@ -140,8 +143,12 @@ class TestComputeComboSlug:
     def test_core_excluded_from_multi_profile_slug(self) -> None:
         """devops-programming é excluído do slug quando combinado com layer2."""
         descriptors = _get_descriptors()
-        slug = _compute_combo_slug(["devops-programming", "python-fastapi"], descriptors)
-        assert slug == "python-fastapi", f"'devops-programming' não deveria aparecer no slug: {slug}"
+        slug = _compute_combo_slug(
+            ["devops-programming", "python-fastapi"], descriptors
+        )
+        assert (
+            slug == "python-fastapi"
+        ), f"'devops-programming' não deveria aparecer no slug: {slug}"
 
 
 # ===========================================================================
@@ -156,7 +163,9 @@ class TestGenerateProfileGuideCreation:
         cfg = make_project_config("programming", "python")
         descriptors = _get_descriptors()
         result = generate_profile_guide(cfg, ["python-fastapi"], descriptors)
-        assert result.status == "created", f"Esperado 'created', obtido '{result.status}': {result.message}"
+        assert (
+            result.status == "created"
+        ), f"Esperado 'created', obtido '{result.status}': {result.message}"
 
     def test_file_placed_in_docs_directory(self, make_project_config) -> None:
         """Arquivo é criado em docs/ do projeto destino."""
@@ -164,7 +173,9 @@ class TestGenerateProfileGuideCreation:
         descriptors = _get_descriptors()
         result = generate_profile_guide(cfg, ["python-fastapi"], descriptors)
         assert result.status == "created"
-        assert result.path.parent.name == "docs", f"Esperado em docs/, obtido: {result.path.parent}"
+        assert (
+            result.path.parent.name == "docs"
+        ), f"Esperado em docs/, obtido: {result.path.parent}"
 
     def test_filename_matches_combo_slug(self, make_project_config) -> None:
         """Nome do arquivo é PROFILE-GUIDE-{slug}.md."""
@@ -172,9 +183,9 @@ class TestGenerateProfileGuideCreation:
         descriptors = _get_descriptors()
         result = generate_profile_guide(cfg, ["python-fastapi"], descriptors)
         assert result.status == "created"
-        assert result.path.name == "PROFILE-GUIDE-python-fastapi.md", (
-            f"Nome inesperado: {result.path.name}"
-        )
+        assert (
+            result.path.name == "PROFILE-GUIDE-python-fastapi.md"
+        ), f"Nome inesperado: {result.path.name}"
 
     def test_idempotent_second_call_skipped(self, make_project_config) -> None:
         """Segunda chamada retorna status 'skipped' sem sobrescrever."""
@@ -182,7 +193,9 @@ class TestGenerateProfileGuideCreation:
         descriptors = _get_descriptors()
         generate_profile_guide(cfg, ["python-fastapi"], descriptors)
         result2 = generate_profile_guide(cfg, ["python-fastapi"], descriptors)
-        assert result2.status == "skipped", f"Esperado 'skipped', obtido: '{result2.status}'"
+        assert (
+            result2.status == "skipped"
+        ), f"Esperado 'skipped', obtido: '{result2.status}'"
 
     def test_empty_profiles_returns_skipped(self, make_project_config) -> None:
         """Lista vazia de perfis retorna 'skipped' sem criar arquivo."""
@@ -204,7 +217,9 @@ class TestGenerateProfileGuideCreation:
         """Combo python-fastapi + lgpd-baseline gera PROFILE-GUIDE-python-fastapi-lgpd-baseline.md."""
         cfg = make_project_config("programming", "python")
         descriptors = _get_descriptors()
-        result = generate_profile_guide(cfg, ["python-fastapi", "lgpd-baseline"], descriptors)
+        result = generate_profile_guide(
+            cfg, ["python-fastapi", "lgpd-baseline"], descriptors
+        )
         assert result.status == "created"
         assert result.path.name == "PROFILE-GUIDE-python-fastapi-lgpd-baseline.md"
 
@@ -256,23 +271,25 @@ class TestGenerateProfileGuideContent:
         """Guia contém as regras de segurança 'enforces' do descriptor."""
         content = self._guide_content(make_project_config, ["python-fastapi"])
         # python-fastapi.yaml tem "SECRET_KEY" em security.enforces
-        assert "SECRET_KEY" in content, "Regra de segurança 'SECRET_KEY' não encontrada no guia"
+        assert (
+            "SECRET_KEY" in content
+        ), "Regra de segurança 'SECRET_KEY' não encontrada no guia"
 
     def test_contains_requires_section(self, make_project_config) -> None:
         """Guia lista pré-requisitos do descriptor."""
         content = self._guide_content(make_project_config, ["python-fastapi"])
         assert "Pré-requisitos" in content
         # python-fastapi requer python >= 3.11
-        assert "python" in content.lower() or "uv" in content.lower(), (
-            "Pré-requisitos do python-fastapi não encontrados"
-        )
+        assert (
+            "python" in content.lower() or "uv" in content.lower()
+        ), "Pré-requisitos do python-fastapi não encontrados"
 
     def test_contains_references_for_python_tag(self, make_project_config) -> None:
         """Guia contém referências para a tag 'python'."""
         content = self._guide_content(make_project_config, ["python-fastapi"])
-        assert "Python" in content and "docs.python.org" in content, (
-            "Referência Python não encontrada"
-        )
+        assert (
+            "Python" in content and "docs.python.org" in content
+        ), "Referência Python não encontrada"
 
     def test_multi_profile_contains_all_profiles(self, make_project_config) -> None:
         """Guia de combo contém nomes de todos os perfis aplicados."""
@@ -290,4 +307,6 @@ class TestGenerateProfileGuideContent:
         # python-fastapi: SECRET_KEY, lgpd-baseline: LGPD / ANPD-related
         assert "SECRET_KEY" in content, "Regras de segurança de python-fastapi ausentes"
         # lgpd-baseline deve ter alguma regra de segurança
-        assert "lgpd-baseline" in content, "Seção lgpd-baseline ausente no guia de combo"
+        assert (
+            "lgpd-baseline" in content
+        ), "Seção lgpd-baseline ausente no guia de combo"

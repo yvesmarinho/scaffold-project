@@ -23,7 +23,7 @@ import json
 import logging
 import os
 import sys
-from datetime import date, datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 # ---------------------------------------------------------------------------
@@ -39,6 +39,7 @@ log = logging.getLogger("lgpd-dsar")
 # ---------------------------------------------------------------------------
 # Conexão com banco de dados — adapte para sua stack
 # ---------------------------------------------------------------------------
+
 
 def get_db_connection() -> Any:
     """
@@ -65,13 +66,14 @@ def get_db_connection() -> Any:
 # Funções de auditoria
 # ---------------------------------------------------------------------------
 
+
 def audit_log(action: str, subject_id: str, operator: str, details: str) -> None:
     """
     Registra ação no log de auditoria.
     Em produção, persista este log em armazenamento imutável (S3, CloudWatch, etc.).
     """
     entry = {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "action": action,
         "subject_id": _mask_id(subject_id),  # nunca logue IDs em clear text no stdout
         "operator": operator,
@@ -90,6 +92,7 @@ def _mask_id(subject_id: str) -> str:
 # ---------------------------------------------------------------------------
 # Operações de titular
 # ---------------------------------------------------------------------------
+
 
 def export_subject_data(subject_id: str) -> dict[str, Any]:
     """
@@ -167,6 +170,7 @@ def list_pending_requests() -> list[dict[str, Any]]:
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="LGPD — Atendimento de Direitos dos Titulares (Art. 18)",
@@ -235,20 +239,30 @@ def main() -> int:
             audit_log("export", args.subject_id, args.operator, "Exportação concluída")
 
         elif args.action == "delete":
-            audit_log("delete_start", args.subject_id, args.operator, "Início da deleção")
+            audit_log(
+                "delete_start", args.subject_id, args.operator, "Início da deleção"
+            )
             result = delete_subject_data(args.subject_id)
             print(f"Deleção concluída: {result}")
             audit_log("delete_done", args.subject_id, args.operator, str(result))
 
         elif args.action == "anonymize":
-            audit_log("anonymize_start", args.subject_id, args.operator, "Início da anonimização")
+            audit_log(
+                "anonymize_start",
+                args.subject_id,
+                args.operator,
+                "Início da anonimização",
+            )
             result = anonymize_subject_data(args.subject_id)
             print(f"Anonimização concluída: {result}")
             audit_log("anonymize_done", args.subject_id, args.operator, str(result))
 
     except NotImplementedError as exc:
         print(f"\n❌ Não implementado: {exc}\n", file=sys.stderr)
-        print("   Adapte este script para sua stack antes de usar em produção.", file=sys.stderr)
+        print(
+            "   Adapte este script para sua stack antes de usar em produção.",
+            file=sys.stderr,
+        )
         return 2
     except RuntimeError as exc:
         print(f"\n❌ Erro de configuração: {exc}\n", file=sys.stderr)

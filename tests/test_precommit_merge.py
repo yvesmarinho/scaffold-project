@@ -5,8 +5,9 @@ Testes unitários para PreCommitMerger.
 """
 
 from pathlib import Path
-import pytest
+
 import yaml
+
 from scripts.lib.precommit_merge import PreCommitMerger
 
 
@@ -218,7 +219,9 @@ class TestPreCommitMerger:
         result = merger.merge(existing, content, interactive=False)
 
         assert result.status == "skipped"
-        assert "mudan" in result.message.lower()  # Aceita "sem mudanças" ou "nenhuma mudança"
+        assert (
+            "mudan" in result.message.lower()
+        )  # Aceita "sem mudanças" ou "nenhuma mudança"
 
     def test_creates_backup(self, tmp_path):
         """Teste: Cria backup antes de mergear."""

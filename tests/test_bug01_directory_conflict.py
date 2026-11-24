@@ -8,7 +8,7 @@ Com a fix implementada:
 """
 
 from pathlib import Path
-import pytest
+
 from scripts.lib.ui import _validate_directory_conflict
 
 

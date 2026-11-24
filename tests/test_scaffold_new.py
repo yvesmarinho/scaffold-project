@@ -55,18 +55,7 @@ def temp_workspace(tmp_path: Path) -> Path:
     workspace = tmp_path / "test-new-project"
     workspace.mkdir(parents=True, exist_ok=True)
 
-    # Configurar Git globalmente para este teste
-    # (necessário para scaffold new criar commits)
-    subprocess.run(
-        ["git", "config", "--global", "user.email", "test@example.com"],
-        check=False,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "config", "--global", "user.name", "Test User"],
-        check=False,
-        capture_output=True,
-    )
+    # Identidade git: GIT_CONFIG_GLOBAL temporário da sessão (tests/conftest.py)
 
     return workspace
 
@@ -126,7 +115,9 @@ def test_scaffold_new_basic(scaffold_script: Path, temp_workspace: Path):
     assert (temp_workspace / "src").is_dir(), "src/ não criado"
 
     # Verificar arquivos críticos
-    assert (temp_workspace / ".scaffold-state.yaml").is_file(), ".scaffold-state.yaml ausente"
+    assert (
+        temp_workspace / ".scaffold-state.yaml"
+    ).is_file(), ".scaffold-state.yaml ausente"
     assert (temp_workspace / "README.md").is_file(), "README.md ausente"
     assert (temp_workspace / ".gitignore").is_file(), ".gitignore ausente"
     # Note: pyproject.toml não é criado por padrão - depende do profile/language específico
@@ -196,7 +187,9 @@ def test_scaffold_new_vscode_config(scaffold_script: Path, temp_workspace: Path)
     assert len(servers) >= 2, f"Poucos MCP servers: {len(servers)} (esperado >= 2)"
 
     # Verificar que nenhum servidor usa type="stdio" obsoleto
-    stdio_servers = [name for name, cfg in servers.items() if cfg.get("type") == "stdio"]
+    stdio_servers = [
+        name for name, cfg in servers.items() if cfg.get("type") == "stdio"
+    ]
     assert not stdio_servers, f"Servidores com type='stdio' obsoleto: {stdio_servers}"
 
 
@@ -329,23 +322,29 @@ def test_scaffold_new_scaffold_state(scaffold_script: Path, temp_workspace: Path
         state = yaml.safe_load(f)
 
     # DEBUG: ver conteúdo real do state file
-    print(f"\n=== .scaffold-state.yaml content ===")
+    print("\n=== .scaffold-state.yaml content ===")
     print(yaml.dump(state, indent=2))
 
     # Verificar estrutura do state file (.scaffold-state.yaml v1.0+)
     # Estrutura: project.name, project.domain, project.language, created_at, profiles_applied
     assert "project" in state, "project section ausente"
-    assert state["project"]["name"] == "test-new-project", f"project.name incorreto: {state['project']['name']}"
-    assert state["project"]["domain"] == "programming", f"project.domain incorreto: {state['project']['domain']}"
-    assert state["project"]["language"] == "python", f"project.language incorreto: {state['project']['language']}"
+    assert (
+        state["project"]["name"] == "test-new-project"
+    ), f"project.name incorreto: {state['project']['name']}"
+    assert (
+        state["project"]["domain"] == "programming"
+    ), f"project.domain incorreto: {state['project']['domain']}"
+    assert (
+        state["project"]["language"] == "python"
+    ), f"project.language incorreto: {state['project']['language']}"
     assert "created_at" in state, "created_at ausente"
     assert "profiles_applied" in state, "profiles_applied ausente"
 
     # Verificar que perfil devops-programming foi aplicado
     profiles = state["profiles_applied"]
-    assert "devops-programming" in profiles or "python" in [p.lower() for p in profiles], (
-        f"Perfil programming/Python ausente: {profiles}"
-    )
+    assert "devops-programming" in profiles or "python" in [
+        p.lower() for p in profiles
+    ], f"Perfil programming/Python ausente: {profiles}"
 
 
 def test_scaffold_new_git_initialized(scaffold_script: Path, temp_workspace: Path):
@@ -434,17 +433,7 @@ def test_scaffold_new_combinations(
 
     Verifica que scaffold new executa sem erro para diferentes domínios e linguagens.
     """
-    # Configurar Git globalmente (necessário para scaffold new criar commits)
-    subprocess.run(
-        ["git", "config", "--global", "user.email", "test@example.com"],
-        check=False,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "config", "--global", "user.name", "Test User"],
-        check=False,
-        capture_output=True,
-    )
+    # Identidade git: GIT_CONFIG_GLOBAL temporário da sessão (tests/conftest.py)
 
     workspace = tmp_path / f"test-{domain}-{language}"
     workspace.mkdir(parents=True, exist_ok=True)

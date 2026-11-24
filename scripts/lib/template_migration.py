@@ -12,18 +12,18 @@ block-based modular template system, including:
 Part of IMP-65 Phase 4.4: Migration & Compatibility
 """
 
-import re
 import shutil
-import yaml
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Set
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
+
+import yaml
 
 
 @dataclass
 class CustomSection:
     """Represents a customized section in a template."""
+
     header: str
     content: str
     line_start: int
@@ -35,12 +35,13 @@ class CustomSection:
 @dataclass
 class MigrationReport:
     """Results of a template migration operation."""
+
     template_name: str
     backup_path: Path
-    blocks_created: List[str]
-    patches_created: List[str]
+    blocks_created: list[str]
+    patches_created: list[str]
     custom_sections_found: int
-    warnings: List[str]
+    warnings: list[str]
     timestamp: str
 
 
@@ -77,7 +78,7 @@ class TemplateMigrator:
         shutil.copy2(template_path, backup_path)
         return backup_path
 
-    def detect_standard_sections(self, content: str) -> Set[str]:
+    def detect_standard_sections(self, content: str) -> set[str]:
         """
         Identify standard template sections (headers).
 
@@ -121,21 +122,19 @@ class TemplateMigrator:
         }
 
         found_headers = set()
-        for line in content.split('\n'):
+        for line in content.split("\n"):
             line = line.strip()
-            if line.startswith('#'):
+            if line.startswith("#"):
                 # Extract header up to any trailing markers
-                header = line.split('{')[0].strip()
+                header = line.split("{")[0].strip()
                 if header in standard_headers:
                     found_headers.add(header)
 
         return found_headers
 
     def extract_custom_sections(
-        self,
-        content: str,
-        standard_sections: Set[str]
-    ) -> List[CustomSection]:
+        self, content: str, standard_sections: set[str]
+    ) -> list[CustomSection]:
         """
         Extract sections that appear to be customizations.
 
@@ -147,15 +146,15 @@ class TemplateMigrator:
             List of custom sections found
         """
         custom_sections = []
-        lines = content.split('\n')
+        lines = content.split("\n")
 
         i = 0
         while i < len(lines):
             line = lines[i].strip()
 
             # Check if this is a header
-            if line.startswith('#'):
-                header = line.split('{')[0].strip()
+            if line.startswith("#"):
+                header = line.split("{")[0].strip()
 
                 # If not a standard header, it's likely custom
                 if header not in standard_sections:
@@ -165,23 +164,27 @@ class TemplateMigrator:
                     i += 1
 
                     while i < len(lines):
-                        if lines[i].strip().startswith('#'):
+                        if lines[i].strip().startswith("#"):
                             break
                         content_lines.append(lines[i])
                         i += 1
 
                     # Get context
-                    context_before = '\n'.join(lines[max(0, section_start-3):section_start])
-                    context_after = '\n'.join(lines[i:min(len(lines), i+3)])
+                    context_before = "\n".join(
+                        lines[max(0, section_start - 3) : section_start]
+                    )
+                    context_after = "\n".join(lines[i : min(len(lines), i + 3)])
 
-                    custom_sections.append(CustomSection(
-                        header=header,
-                        content='\n'.join(content_lines),
-                        line_start=section_start + 1,  # 1-indexed
-                        line_end=i,  # 1-indexed
-                        context_before=context_before,
-                        context_after=context_after
-                    ))
+                    custom_sections.append(
+                        CustomSection(
+                            header=header,
+                            content="\n".join(content_lines),
+                            line_start=section_start + 1,  # 1-indexed
+                            line_end=i,  # 1-indexed
+                            context_before=context_before,
+                            context_after=context_after,
+                        )
+                    )
                     continue
 
             i += 1
@@ -189,11 +192,8 @@ class TemplateMigrator:
         return custom_sections
 
     def generate_patch_from_section(
-        self,
-        section: CustomSection,
-        template_name: str,
-        patch_number: int
-    ) -> Tuple[str, str]:
+        self, section: CustomSection, template_name: str, patch_number: int
+    ) -> tuple[str, str]:
         """
         Generate a patch file from a custom section.
 
@@ -207,18 +207,18 @@ class TemplateMigrator:
         """
         # Generate patch metadata
         today = datetime.now().strftime("%Y-%m-%d")
-        patch_name = section.header.strip('#').strip().lower().replace(' ', '-')
+        patch_name = section.header.strip("#").strip().lower().replace(" ", "-")
 
         # Create patch frontmatter
         frontmatter = {
-            'patch_name': f"custom-{patch_name}",
-            'version': '1.0.0',
-            'target_template': template_name,
-            'target_block': None,  # To be determined during application
-            'created': today,
-            'description': f"Custom section: {section.header}",
-            'author': 'migration-tool',
-            'tags': ['migrated', 'custom']
+            "patch_name": f"custom-{patch_name}",
+            "version": "1.0.0",
+            "target_template": template_name,
+            "target_block": None,  # To be determined during application
+            "created": today,
+            "description": f"Custom section: {section.header}",
+            "author": "migration-tool",
+            "tags": ["migrated", "custom"],
         }
 
         # Determine operation type and anchor
@@ -226,7 +226,11 @@ class TemplateMigrator:
         # Otherwise use PREPEND or APPEND based on position
         if section.context_before.strip():
             # Find last header in context_before as anchor
-            anchor_lines = [l for l in section.context_before.split('\n') if l.strip().startswith('#')]
+            anchor_lines = [
+                linha
+                for linha in section.context_before.split("\n")
+                if linha.strip().startswith("#")
+            ]
             if anchor_lines:
                 anchor = anchor_lines[-1].strip()
                 operation_type = "AFTER"
@@ -239,12 +243,14 @@ class TemplateMigrator:
 
         # Build patch content
         patch_content = "---\n"
-        patch_content += yaml.dump(frontmatter, default_flow_style=False, sort_keys=False)
+        patch_content += yaml.dump(
+            frontmatter, default_flow_style=False, sort_keys=False
+        )
         patch_content += "---\n\n"
         patch_content += f"@@ {operation_type}: {anchor}\n"
         patch_content += section.content.rstrip()
-        if not section.content.endswith('\n'):
-            patch_content += '\n'
+        if not section.content.endswith("\n"):
+            patch_content += "\n"
         patch_content += "@@ END\n"
 
         # Generate filename
@@ -255,8 +261,8 @@ class TemplateMigrator:
     def migrate_template(
         self,
         template_path: Path,
-        template_name: Optional[str] = None,
-        dry_run: bool = False
+        template_name: str | None = None,
+        dry_run: bool = False,
     ) -> MigrationReport:
         """
         Migrate a monolithic template to modular system.
@@ -276,7 +282,7 @@ class TemplateMigrator:
             template_name = template_path.stem
 
         # Read template
-        content = template_path.read_text(encoding='utf-8')
+        content = template_path.read_text(encoding="utf-8")
 
         # Initialize report
         report = MigrationReport(
@@ -286,7 +292,7 @@ class TemplateMigrator:
             patches_created=[],
             custom_sections_found=0,
             warnings=[],
-            timestamp=datetime.now().isoformat()
+            timestamp=datetime.now().isoformat(),
         )
 
         # Create backup
@@ -315,12 +321,12 @@ class TemplateMigrator:
 
                 if not dry_run:
                     patch_path = template_patches_dir / patch_filename
-                    patch_path.write_text(patch_content, encoding='utf-8')
+                    patch_path.write_text(patch_content, encoding="utf-8")
 
                 report.patches_created.append(patch_filename)
 
         # Check if template has @include directives (already modular)
-        if '@include' in content:
+        if "@include" in content:
             report.warnings.append(
                 "Template already contains @include directives. "
                 "It may already be using the modular system."
@@ -336,9 +342,7 @@ class TemplateMigrator:
         return report
 
     def generate_migration_guide(
-        self,
-        report: MigrationReport,
-        output_path: Optional[Path] = None
+        self, report: MigrationReport, output_path: Path | None = None
     ) -> str:
         """
         Generate human-readable migration guide for a template.
@@ -400,12 +404,12 @@ See `docs/MODULAR_TEMPLATES.md` for detailed migration instructions.
 """
 
         if output_path:
-            output_path.write_text(guide, encoding='utf-8')
+            output_path.write_text(guide, encoding="utf-8")
 
         return guide
 
 
-def list_templates(templates_dir: Path) -> List[Path]:
+def list_templates(templates_dir: Path) -> list[Path]:
     """
     Find all markdown templates in directory.
 
@@ -430,7 +434,7 @@ def main():
         sys.exit(1)
 
     template_path = Path(sys.argv[1])
-    dry_run = '--dry-run' in sys.argv
+    dry_run = "--dry-run" in sys.argv
 
     project_root = Path.cwd()
     migrator = TemplateMigrator(project_root)
@@ -442,7 +446,7 @@ def main():
     try:
         report = migrator.migrate_template(template_path, dry_run=dry_run)
 
-        print(f"\n✅ Migration complete!")
+        print("\n✅ Migration complete!")
         print(f"   Custom sections: {report.custom_sections_found}")
         print(f"   Patches created: {len(report.patches_created)}")
 
@@ -450,7 +454,7 @@ def main():
             print(f"   Backup: {report.backup_path}")
 
         if report.warnings:
-            print(f"\n⚠️  Warnings:")
+            print("\n⚠️  Warnings:")
             for warning in report.warnings:
                 print(f"   - {warning}")
 
@@ -463,5 +467,5 @@ def main():
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

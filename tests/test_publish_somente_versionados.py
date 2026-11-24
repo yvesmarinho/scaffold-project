@@ -2,8 +2,8 @@
 """
 NOME: test_publish_somente_versionados.py
 TITULO: --publish empacota só arquivos versionados quando a raiz é um repo git
-DATA: 24/11/2026 13:00
-MODIFICADO: 24/11/2026 12:42
+DATA: 24/11/2026 12:42
+MODIFICADO: 24/11/2026 15:00
 VERSÃO: 1.0.0
 DEPEND: pytest, git
 STATUS: DEV
@@ -65,14 +65,24 @@ def _rel(root: Path) -> set[str]:
 def repo(tmp_path: Path) -> Path:
     root = _arvore(tmp_path / "repo")
     _git(root, "init", "-q")
-    _git(root, "add", "scripts/scaffold.py", "scripts/lib/flows/x.py", ".claude/skills/oficial/SKILL.md")
+    _git(
+        root,
+        "add",
+        "scripts/scaffold.py",
+        "scripts/lib/flows/x.py",
+        ".claude/skills/oficial/SKILL.md",
+    )
     _git(root, "commit", "-q", "-m", "init")
     return root
 
 
 def test_repo_git_inclui_versionados(repo: Path) -> None:
     rel = _rel(repo)
-    assert {"scripts/scaffold.py", "scripts/lib/flows/x.py", ".claude/skills/oficial/SKILL.md"} <= rel
+    assert {
+        "scripts/scaffold.py",
+        "scripts/lib/flows/x.py",
+        ".claude/skills/oficial/SKILL.md",
+    } <= rel
 
 
 def test_repo_git_exclui_nao_versionados(repo: Path) -> None:

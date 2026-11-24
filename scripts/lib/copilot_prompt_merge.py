@@ -11,11 +11,12 @@ Sprint 2 (P0 HIGH): Resolve gap de 26 prompts sem merge
 Bug fix: Prompt engineering improvements não propagados
 """
 
-from pathlib import Path
-from typing import Dict, List, Any, Tuple, Optional
-from dataclasses import dataclass
 import logging
 import re
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
 import yaml
 
 from .config import CreatedItem
@@ -27,14 +28,16 @@ log = logging.getLogger(__name__)
 # Types and Data Classes
 # =============================================================================
 
+
 @dataclass
 class PromptFrontmatter:
     """Representa o frontmatter YAML de um prompt."""
+
     raw_yaml: str
-    parsed: Dict[str, Any]
-    mode: Optional[str] = None
-    description: Optional[str] = None
-    agent: Optional[str] = None
+    parsed: dict[str, Any]
+    mode: str | None = None
+    description: str | None = None
+    agent: str | None = None
 
     def __post_init__(self):
         """Extrai campos comuns do frontmatter."""
@@ -47,21 +50,24 @@ class PromptFrontmatter:
 @dataclass
 class PromptContent:
     """Representa conteúdo markdown de um prompt (após frontmatter)."""
-    sections: Dict[str, str]  # heading -> content
+
+    sections: dict[str, str]  # heading -> content
     raw_content: str
 
 
 @dataclass
 class PromptMergeDecision:
     """Decisão de merge para um prompt."""
+
     should_merge: bool
     reason: str
-    changes: List[str]
+    changes: list[str]
 
 
 # =============================================================================
 # CopilotPromptMerger
 # =============================================================================
+
 
 class CopilotPromptMerger:
     """
@@ -109,18 +115,15 @@ class CopilotPromptMerger:
     def can_merge(self, file_path: Path) -> bool:
         """Verifica se é um arquivo .prompt.md na pasta prompts."""
         return (
-            file_path.suffix == ".md" and
-            ".prompt" in file_path.name and
-            file_path.parent.name == "prompts" and
-            len(file_path.parts) >= 3 and
-            ".github" in file_path.parts
+            file_path.suffix == ".md"
+            and ".prompt" in file_path.name
+            and file_path.parent.name == "prompts"
+            and len(file_path.parts) >= 3
+            and ".github" in file_path.parts
         )
 
     def merge(
-        self,
-        existing_path: Path,
-        template_content: str,
-        interactive: bool = True
+        self, existing_path: Path, template_content: str, interactive: bool = True
     ) -> CreatedItem:
         """
         Faz merge inteligente do arquivo .prompt.md
@@ -136,28 +139,23 @@ class CopilotPromptMerger:
         try:
             # 1. Parse existente
             existing_content = existing_path.read_text(encoding="utf-8")
-            existing_fm, existing_md = self._parse_prompt_file(
-                existing_content)
+            existing_fm, existing_md = self._parse_prompt_file(existing_content)
 
             # 2. Parse template
-            template_fm, template_md = self._parse_prompt_file(
-                template_content)
+            template_fm, template_md = self._parse_prompt_file(template_content)
 
             # 3. Decisão de merge
             decision = self._should_merge(
-                existing_fm, template_fm,
-                existing_md, template_md,
-                existing_path.name
+                existing_fm, template_fm, existing_md, template_md, existing_path.name
             )
 
             if not decision.should_merge:
-                log.info("⏭️  Skip: %s (%s)",
-                         existing_path.name, decision.reason)
+                log.info("⏭️  Skip: %s (%s)", existing_path.name, decision.reason)
                 return CreatedItem(
                     path=existing_path,
                     kind="file",
                     status="skipped",
-                    message=decision.reason
+                    message=decision.reason,
                 )
 
             # 4. Merge frontmatter
@@ -167,26 +165,26 @@ class CopilotPromptMerger:
             merged_md = self._merge_markdown_content(existing_md, template_md)
 
             # 6. Gerar arquivo final
-            merged_content = self._reconstruct_prompt_file(
-                merged_fm, merged_md)
+            merged_content = self._reconstruct_prompt_file(merged_fm, merged_md)
 
             # 7. Backup e save
             backup_path = existing_path.with_suffix(".md.backup")
             backup_path.write_text(existing_content, encoding="utf-8")
             existing_path.write_text(merged_content, encoding="utf-8")
 
-            changes_msg = "\n".join(
-                f"  - {change}" for change in decision.changes)
+            changes_msg = "\n".join(f"  - {change}" for change in decision.changes)
             log.info(
                 "✅ Merged: %s\n%s\n  Backup: %s",
-                existing_path.name, changes_msg, backup_path.name
+                existing_path.name,
+                changes_msg,
+                backup_path.name,
             )
 
             return CreatedItem(
                 path=existing_path,
                 kind="file",
                 status="merged",
-                message=f"Merged with {len(decision.changes)} changes (backup created)"
+                message=f"Merged with {len(decision.changes)} changes (backup created)",
             )
 
         except Exception as e:
@@ -195,14 +193,16 @@ class CopilotPromptMerger:
                 path=existing_path,
                 kind="file",
                 status="error",
-                message=f"Merge error: {str(e)}"
+                message=f"Merge error: {str(e)}",
             )
 
     # =========================================================================
     # Parsing Methods
     # =========================================================================
 
-    def _parse_prompt_file(self, content: str) -> Tuple[PromptFrontmatter, PromptContent]:
+    def _parse_prompt_file(
+        self, content: str
+    ) -> tuple[PromptFrontmatter, PromptContent]:
         """
         Parse arquivo .prompt.md em frontmatter YAML e conteúdo markdown.
 
@@ -227,11 +227,11 @@ class CopilotPromptMerger:
             # Sem frontmatter válido - tratar como markdown puro
             return (
                 PromptFrontmatter(raw_yaml="", parsed={}),
-                self._parse_markdown_sections(content)
+                self._parse_markdown_sections(content),
             )
 
         raw_yaml = match.group(1)
-        markdown_content = content[match.end():]
+        markdown_content = content[match.end() :]
 
         try:
             parsed_yaml = yaml.safe_load(raw_yaml)
@@ -267,8 +267,7 @@ class CopilotPromptMerger:
             if heading_match:
                 # Salvar seção anterior
                 if current_heading:
-                    sections[current_heading] = "\n".join(
-                        current_content).strip()
+                    sections[current_heading] = "\n".join(current_content).strip()
 
                 # Iniciar nova seção
                 current_heading = heading_match.group(2).strip()
@@ -294,7 +293,7 @@ class CopilotPromptMerger:
         template_fm: PromptFrontmatter,
         existing_md: PromptContent,
         template_md: PromptContent,
-        filename: str
+        filename: str,
     ) -> PromptMergeDecision:
         """
         Decide se deve fazer merge baseado em mudanças de conteúdo.
@@ -341,21 +340,18 @@ class CopilotPromptMerger:
                             instruction_updates += 1
 
         if instruction_updates > 0:
-            changes.append(
-                f"Update {instruction_updates} instruction sections")
+            changes.append(f"Update {instruction_updates} instruction sections")
 
         # Decisão final
         if not changes:
             return PromptMergeDecision(
-                should_merge=False,
-                reason="Prompt already up-to-date",
-                changes=[]
+                should_merge=False, reason="Prompt already up-to-date", changes=[]
             )
 
         return PromptMergeDecision(
             should_merge=True,
             reason=f"Template has updates ({len(changes)} changes)",
-            changes=changes
+            changes=changes,
         )
 
     # =========================================================================
@@ -363,10 +359,8 @@ class CopilotPromptMerger:
     # =========================================================================
 
     def _merge_frontmatter(
-        self,
-        existing: PromptFrontmatter,
-        template: PromptFrontmatter
-    ) -> Dict[str, Any]:
+        self, existing: PromptFrontmatter, template: PromptFrontmatter
+    ) -> dict[str, Any]:
         """
         Merge frontmatter YAML com estratégia de atualização.
 
@@ -402,9 +396,7 @@ class CopilotPromptMerger:
         return merged
 
     def _merge_markdown_content(
-        self,
-        existing: PromptContent,
-        template: PromptContent
+        self, existing: PromptContent, template: PromptContent
     ) -> PromptContent:
         """
         Merge conteúdo markdown preservando exemplos customizados.
@@ -423,9 +415,7 @@ class CopilotPromptMerger:
                 pattern in heading for pattern in self.INSTRUCTION_SECTIONS
             )
             # Verificar se é seção custom
-            is_custom = any(
-                pattern in heading for pattern in self.CUSTOM_SECTIONS
-            )
+            is_custom = any(pattern in heading for pattern in self.CUSTOM_SECTIONS)
 
             if is_instruction and not is_custom:
                 # Seção de instrução - atualizar
@@ -438,9 +428,7 @@ class CopilotPromptMerger:
         return PromptContent(sections=merged_sections, raw_content="")
 
     def _reconstruct_prompt_file(
-        self,
-        frontmatter: Dict[str, Any],
-        content: PromptContent
+        self, frontmatter: dict[str, Any], content: PromptContent
     ) -> str:
         """
         Reconstrói arquivo .prompt.md a partir de frontmatter e conteúdo.
@@ -461,10 +449,7 @@ class CopilotPromptMerger:
         """
         # Gerar YAML frontmatter
         yaml_str = yaml.dump(
-            frontmatter,
-            default_flow_style=False,
-            allow_unicode=True,
-            sort_keys=False
+            frontmatter, default_flow_style=False, allow_unicode=True, sort_keys=False
         )
 
         # Gerar conteúdo markdown

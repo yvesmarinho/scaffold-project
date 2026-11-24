@@ -11,10 +11,10 @@ Sprint 4 (P2 MEDIUM): Expansão do merge system para 90% coverage
 Feature: VS Code debug/task configs não propagados em upgrades
 """
 
-from pathlib import Path
-from typing import Dict, List, Any, Optional
 import json
 import logging
+from pathlib import Path
+from typing import Any
 
 from .config import CreatedItem
 
@@ -24,6 +24,7 @@ log = logging.getLogger(__name__)
 # =============================================================================
 # VSCodeConfigMerger
 # =============================================================================
+
 
 class VSCodeConfigMerger:
     """
@@ -51,15 +52,12 @@ class VSCodeConfigMerger:
     def can_merge(self, file_path: Path) -> bool:
         """Verifica se é launch.json ou tasks.json em .vscode/."""
         return (
-            file_path.name in ["launch.json", "tasks.json"] and
-            ".vscode" in file_path.parts
+            file_path.name in ["launch.json", "tasks.json"]
+            and ".vscode" in file_path.parts
         )
 
     def merge(
-        self,
-        existing_path: Path,
-        template_content: str,
-        interactive: bool = True
+        self, existing_path: Path, template_content: str, interactive: bool = True
     ) -> CreatedItem:
         """
         Faz merge inteligente do config JSON.
@@ -92,7 +90,7 @@ class VSCodeConfigMerger:
                     path=existing_path,
                     kind="file",
                     status="skipped",
-                    message="Tipo de arquivo não suportado"
+                    message="Tipo de arquivo não suportado",
                 )
 
             # Validar estrutura
@@ -103,9 +101,7 @@ class VSCodeConfigMerger:
 
             # 4. Merge items
             merged_items, changes = self._merge_items(
-                existing_data[items_key],
-                template_data[items_key],
-                id_field
+                existing_data[items_key], template_data[items_key], id_field
             )
 
             if not changes:
@@ -114,7 +110,7 @@ class VSCodeConfigMerger:
                     path=existing_path,
                     kind="file",
                     status="skipped",
-                    message="Nenhuma mudança necessária"
+                    message="Nenhuma mudança necessária",
                 )
 
             # 5. Backup do original
@@ -130,17 +126,13 @@ class VSCodeConfigMerger:
             merged_json = json.dumps(merged_data, indent=2, ensure_ascii=False)
             existing_path.write_text(merged_json + "\n", encoding="utf-8")
 
-            log.info(
-                "🔀 Merged %s: %s",
-                existing_path.name,
-                ", ".join(changes)
-            )
+            log.info("🔀 Merged %s: %s", existing_path.name, ", ".join(changes))
 
             return CreatedItem(
                 path=existing_path,
                 kind="file",
                 status="merged",
-                message=f"Merged: {', '.join(changes)}"
+                message=f"Merged: {', '.join(changes)}",
             )
 
         except json.JSONDecodeError as e:
@@ -149,7 +141,7 @@ class VSCodeConfigMerger:
                 path=existing_path,
                 kind="file",
                 status="error",
-                message=f"JSON error: {e}"
+                message=f"JSON error: {e}",
             )
         except Exception as e:
             log.error("❌ Erro ao mergear %s: %s", existing_path.name, e)
@@ -157,22 +149,22 @@ class VSCodeConfigMerger:
                 path=existing_path,
                 kind="file",
                 status="error",
-                message=f"Merge error: {e}"
+                message=f"Merge error: {e}",
             )
 
     def _merge_items(
         self,
-        existing: List[Dict[str, Any]],
-        template: List[Dict[str, Any]],
-        id_field: str
-    ) -> tuple[List[Dict[str, Any]], List[str]]:
+        existing: list[dict[str, Any]],
+        template: list[dict[str, Any]],
+        id_field: str,
+    ) -> tuple[list[dict[str, Any]], list[str]]:
         """
         Merge items (configurations ou tasks).
 
         Retorna: (merged_items, changes_list)
         """
         changes = []
-        existing_by_id = {item.get(id_field): item for item in existing if id_field in item}
+        {item.get(id_field): item for item in existing if id_field in item}
         merged = []
         seen = set()
 
@@ -188,8 +180,7 @@ class VSCodeConfigMerger:
 
             # Verificar se há versão no template
             template_item = next(
-                (t for t in template if t.get(id_field) == item_id),
-                None
+                (t for t in template if t.get(id_field) == item_id), None
             )
 
             if template_item:
@@ -211,16 +202,15 @@ class VSCodeConfigMerger:
         return merged, changes
 
     def _deep_merge(
-        self,
-        base: Dict[str, Any],
-        override: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, base: dict[str, Any], override: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Deep merge de dicts (user wins strategy).
 
         Template wins para novos campos, user wins para conflitos.
         """
         import copy
+
         result = copy.deepcopy(override)  # Start with template
 
         for key, value in base.items():

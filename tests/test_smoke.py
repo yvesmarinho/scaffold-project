@@ -28,18 +28,18 @@ from lib.templates import (  # noqa: E402
 # Combos domínio × linguagem (cobrem os 9 casos do backlog)
 # ---------------------------------------------------------------------------
 COMBOS: list[tuple[str, str]] = [
-    ("programming",     "python"),
-    ("programming",     "typescript"),
-    ("programming",     "go"),
-    ("programming",     "other"),
-    ("infrastructure",  "python"),
-    ("infrastructure",  "typescript"),
-    ("infrastructure",  "go"),
-    ("analysis",        "python"),
-    ("analysis",        "typescript"),
+    ("programming", "python"),
+    ("programming", "typescript"),
+    ("programming", "go"),
+    ("programming", "other"),
+    ("infrastructure", "python"),
+    ("infrastructure", "typescript"),
+    ("infrastructure", "go"),
+    ("analysis", "python"),
+    ("analysis", "typescript"),
 ]
 
-COMBO_IDS = [f"{d}__{l}" for d, l in COMBOS]
+COMBO_IDS = [f"{d}__{lang}" for d, lang in COMBOS]
 
 
 # ---------------------------------------------------------------------------
@@ -48,42 +48,50 @@ COMBO_IDS = [f"{d}__{l}" for d, l in COMBOS]
 
 
 @pytest.mark.parametrize("domain,language", COMBOS, ids=COMBO_IDS)
-def test_copilot_rules_smoke_created(make_project_config, domain: str, language: str) -> None:
+def test_copilot_rules_smoke_created(
+    make_project_config, domain: str, language: str
+) -> None:
     """Arquivo .copilot-rules-*.md é criado com status 'created'."""
     cfg = make_project_config(domain, language)
     result = generate_copilot_rules(cfg)
 
-    assert result.status == "created", (
-        f"[{domain}×{language}] status={result.status!r}: {result.message}"
-    )
+    assert (
+        result.status == "created"
+    ), f"[{domain}×{language}] status={result.status!r}: {result.message}"
 
 
 @pytest.mark.parametrize("domain,language", COMBOS, ids=COMBO_IDS)
-def test_copilot_rules_smoke_content(make_project_config, domain: str, language: str) -> None:
+def test_copilot_rules_smoke_content(
+    make_project_config, domain: str, language: str
+) -> None:
     """Conteúdo gerado tem placeholders resolvidos e informações corretas."""
     cfg = make_project_config(domain, language)
     result = generate_copilot_rules(cfg)
     content = result.path.read_text(encoding="utf-8")
 
     assert len(content) > 200, f"[{domain}×{language}] conteúdo suspeitosamente curto"
-    assert cfg.project_name in content, f"[{domain}×{language}] project_name não substituído"
-    assert "{{" not in content, (
-        f"[{domain}×{language}] placeholder não-resolvido encontrado no output"
-    )
+    assert (
+        cfg.project_name in content
+    ), f"[{domain}×{language}] project_name não substituído"
+    assert (
+        "{{" not in content
+    ), f"[{domain}×{language}] placeholder não-resolvido encontrado no output"
     assert domain in content, f"[{domain}×{language}] domínio ausente no output"
     assert language in content, f"[{domain}×{language}] linguagem ausente no output"
 
 
 @pytest.mark.parametrize("domain,language", COMBOS, ids=COMBO_IDS)
-def test_copilot_rules_smoke_idempotent(make_project_config, domain: str, language: str) -> None:
+def test_copilot_rules_smoke_idempotent(
+    make_project_config, domain: str, language: str
+) -> None:
     """Segunda chamada retorna status 'skipped' (não sobrescreve)."""
     cfg = make_project_config(domain, language)
     generate_copilot_rules(cfg)  # primeira vez: cria
     result2 = generate_copilot_rules(cfg)  # segunda vez: skip
 
-    assert result2.status == "skipped", (
-        f"[{domain}×{language}] arquivo existente deveria ser pulado, got={result2.status!r}"
-    )
+    assert (
+        result2.status == "skipped"
+    ), f"[{domain}×{language}] arquivo existente deveria ser pulado, got={result2.status!r}"
 
 
 # ---------------------------------------------------------------------------
@@ -99,9 +107,9 @@ def test_copilot_instructions_smoke_created(
     cfg = make_project_config(domain, language)
     result = generate_copilot_instructions(cfg)
 
-    assert result.status == "created", (
-        f"[{domain}×{language}] status={result.status!r}: {result.message}"
-    )
+    assert (
+        result.status == "created"
+    ), f"[{domain}×{language}] status={result.status!r}: {result.message}"
 
 
 @pytest.mark.parametrize("domain,language", COMBOS, ids=COMBO_IDS)
@@ -115,10 +123,12 @@ def test_copilot_instructions_smoke_content(
 
     assert len(content) > 200, f"[{domain}×{language}] conteúdo suspeitosamente curto"
     assert cfg.project_name in content, f"[{domain}×{language}] project_name ausente"
-    assert "applyTo" in content, f"[{domain}×{language}] YAML frontmatter 'applyTo' ausente"
-    assert "{{" not in content, (
-        f"[{domain}×{language}] placeholder não-resolvido encontrado"
-    )
+    assert (
+        "applyTo" in content
+    ), f"[{domain}×{language}] YAML frontmatter 'applyTo' ausente"
+    assert (
+        "{{" not in content
+    ), f"[{domain}×{language}] placeholder não-resolvido encontrado"
 
 
 @pytest.mark.parametrize("domain,language", COMBOS, ids=COMBO_IDS)
@@ -130,6 +140,6 @@ def test_copilot_instructions_smoke_idempotent(
     generate_copilot_instructions(cfg)
     result2 = generate_copilot_instructions(cfg)
 
-    assert result2.status == "skipped", (
-        f"[{domain}×{language}] esperado 'skipped', got={result2.status!r}"
-    )
+    assert (
+        result2.status == "skipped"
+    ), f"[{domain}×{language}] esperado 'skipped', got={result2.status!r}"

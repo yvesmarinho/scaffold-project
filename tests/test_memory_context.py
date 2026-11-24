@@ -3,20 +3,20 @@
 import json
 import subprocess
 import sys
-from pathlib import Path
 from datetime import datetime, timedelta
+from pathlib import Path
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from scripts.lib.memory import Memory, MemoryStore, SearchResult
 from scripts.mem_context import (
-    extract_keywords,
+    ContextSource,
     analyze_context,
     calculate_relevance,
+    extract_keywords,
     search_with_context,
-    ContextSource,
 )
-from scripts.lib.memory import Memory, MemoryStore, SearchResult
 
 
 def test_extract_keywords_basic():
@@ -221,7 +221,9 @@ def test_calculate_relevance_category_bonus():
     keywords = [("test", 1.0, "query")]
     sources = [ContextSource(type="query", value="test", weight=1.0)]
 
-    project_rel, project_reasons = calculate_relevance(project_result, keywords, sources)
+    project_rel, project_reasons = calculate_relevance(
+        project_result, keywords, sources
+    )
     team_rel, team_reasons = calculate_relevance(team_result, keywords, sources)
 
     # Project should have higher bonus than team
@@ -313,7 +315,9 @@ def test_cli_task_mode():
     output = json.loads(result.stdout)
     assert output["success"] is True
     # Should have task in context sources
-    task_source = next((s for s in output["context_sources"] if s["type"] == "task"), None)
+    task_source = next(
+        (s for s in output["context_sources"] if s["type"] == "task"), None
+    )
     assert task_source is not None
     assert task_source["value"] == "IMP-60"
 

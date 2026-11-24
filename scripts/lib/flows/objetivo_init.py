@@ -12,7 +12,9 @@ from ..objetivo_wizard import ObjetivoWizard, WizardAnswers
 from ..ui import console
 
 
-def _log_objetivo_init(output_path: Path, answers: WizardAnswers, success: bool, error_msg: str = None):
+def _log_objetivo_init(
+    output_path: Path, answers: WizardAnswers, success: bool, error_msg: str = None
+):
     """
     Log objetivo-init operation to logs/scaffolds.yaml (BUG-001 Fix #3).
 
@@ -32,7 +34,7 @@ def _log_objetivo_init(output_path: Path, answers: WizardAnswers, success: bool,
 
         # Load existing log
         if log_file.exists():
-            with log_file.open('r', encoding='utf-8') as f:
+            with log_file.open("r", encoding="utf-8") as f:
                 data = yaml.safe_load(f) or {}
         else:
             data = {}
@@ -62,7 +64,7 @@ def _log_objetivo_init(output_path: Path, answers: WizardAnswers, success: bool,
         data["scaffolds"].append(entry)
 
         # Save
-        with log_file.open('w', encoding='utf-8') as f:
+        with log_file.open("w", encoding="utf-8") as f:
             yaml.dump(data, f, default_flow_style=False, sort_keys=False)
 
     except Exception as e:
@@ -94,8 +96,12 @@ def flow_objetivo_init(args: argparse.Namespace) -> int:
 
     # Check if file already exists
     if output_path.exists():
-        response = input(f"\n⚠️  {output_path} já existe. Sobrescrever? [y/N]: ").strip().lower()
-        if response not in ['y', 'yes', 's', 'sim']:
+        response = (
+            input(f"\n⚠️  {output_path} já existe. Sobrescrever? [y/N]: ")
+            .strip()
+            .lower()
+        )
+        if response not in ["y", "yes", "s", "sim"]:
             console.print("\n  [yellow]Cancelado.[/yellow]\n")
             return 1
 
@@ -103,7 +109,7 @@ def flow_objetivo_init(args: argparse.Namespace) -> int:
     from_file = getattr(args, "from_file", None)
     if from_file:
         try:
-            with open(from_file, 'r', encoding='utf-8') as f:
+            with open(from_file, encoding="utf-8") as f:
                 data = json.load(f)
 
             answers = WizardAnswers.from_dict(data)
@@ -116,16 +122,30 @@ def flow_objetivo_init(args: argparse.Namespace) -> int:
             return result
 
         except FileNotFoundError:
-            console.print(f"\n  [bold red]❌ Erro:[/bold red] Arquivo não encontrado: {from_file}\n")
-            _log_objetivo_init(output_path, WizardAnswers(), success=False, error_msg=f"File not found: {from_file}")
+            console.print(
+                f"\n  [bold red]❌ Erro:[/bold red] Arquivo não encontrado: {from_file}\n"
+            )
+            _log_objetivo_init(
+                output_path,
+                WizardAnswers(),
+                success=False,
+                error_msg=f"File not found: {from_file}",
+            )
             return 1
         except json.JSONDecodeError as e:
             console.print(f"\n  [bold red]❌ Erro JSON:[/bold red] {e}\n")
-            _log_objetivo_init(output_path, WizardAnswers(), success=False, error_msg=f"JSON decode error: {e}")
+            _log_objetivo_init(
+                output_path,
+                WizardAnswers(),
+                success=False,
+                error_msg=f"JSON decode error: {e}",
+            )
             return 1
         except Exception as e:
             console.print(f"\n  [bold red]❌ Erro:[/bold red] {e}\n")
-            _log_objetivo_init(output_path, WizardAnswers(), success=False, error_msg=str(e))
+            _log_objetivo_init(
+                output_path, WizardAnswers(), success=False, error_msg=str(e)
+            )
             return 1
 
     # Mode 2: Template-only (copy without wizard)
@@ -134,14 +154,19 @@ def flow_objetivo_init(args: argparse.Namespace) -> int:
         try:
             wizard = ObjetivoWizard()
             if not wizard.template_path.exists():
-                console.print(f"\n  [bold red]❌ Erro:[/bold red] Template não encontrado: {wizard.template_path}\n")
+                console.print(
+                    f"\n  [bold red]❌ Erro:[/bold red] Template não encontrado: {wizard.template_path}\n"
+                )
                 return 1
 
             import shutil
+
             shutil.copy2(wizard.template_path, output_path)
 
             console.print(f"\n  [green]✅ Template copiado:[/green] {output_path}")
-            console.print("  [dim]Edite o arquivo e preencha os campos manualmente.[/dim]\n")
+            console.print(
+                "  [dim]Edite o arquivo e preencha os campos manualmente.[/dim]\n"
+            )
 
             # BUG-001 Fix #3: Log operation (template mode)
             template_answers = WizardAnswers(created_by=os.getenv("USER", "unknown"))
@@ -152,7 +177,9 @@ def flow_objetivo_init(args: argparse.Namespace) -> int:
         except Exception as e:
             console.print(f"\n  [bold red]❌ Erro:[/bold red] {e}\n")
             template_answers = WizardAnswers()
-            _log_objetivo_init(output_path, template_answers, success=False, error_msg=str(e))
+            _log_objetivo_init(
+                output_path, template_answers, success=False, error_msg=str(e)
+            )
             return 1
 
     # Mode 3: Interactive wizard (default)

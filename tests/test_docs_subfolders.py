@@ -3,7 +3,7 @@
 NOME: test_docs_subfolders.py
 TITULO: Sub-pastas padrão de docs/ no projeto gerado
 DATA: 09/11/2026 17:10
-MODIFICADO: 09/11/2026 17:07
+MODIFICADO: 24/11/2026 15:00
 VERSÃO: 1.0.0
 DEPEND: pytest
 STATUS: DEV
@@ -39,12 +39,26 @@ EXPECTED = [
 def generated(tmp_path_factory: pytest.TempPathFactory) -> Path:
     target = tmp_path_factory.mktemp("docs-sub")
     result = subprocess.run(
-        [sys.executable, str(_SCAFFOLD), "new", "--ci", "--name", "demo-docs",
-         "--domain", "programming", "--language", "python", "--target-dir", str(target)],
-        capture_output=True, text=True, timeout=120,
+        [
+            sys.executable,
+            str(_SCAFFOLD),
+            "new",
+            "--ci",
+            "--name",
+            "demo-docs",
+            "--domain",
+            "programming",
+            "--language",
+            "python",
+            "--target-dir",
+            str(target),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=120,
     )
     assert result.returncode == 0, result.stderr[-500:]
-    projects = [p for p in target.rglob(".scaffold-state.yaml")]
+    projects = list(target.rglob(".scaffold-state.yaml"))
     assert projects, "projeto não gerado"
     return projects[0].parent
 

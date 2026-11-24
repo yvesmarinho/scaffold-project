@@ -37,7 +37,6 @@ import sqlite3
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 # ============================================================================
 # Configuration
@@ -67,6 +66,7 @@ def _db_path() -> Path:
     """Caminho do índice SQLite (cache regenerável)."""
     return _memory_root() / "index" / "memory.db"
 
+
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
@@ -83,11 +83,11 @@ class Memory:
     title: str
     content: str
     category: str = "project"  # project, team, sessions
-    tags: List[str] = field(default_factory=list)
-    file_path: Optional[Path] = None
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-    memory_id: Optional[int] = None
+    tags: list[str] = field(default_factory=list)
+    file_path: Path | None = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+    memory_id: int | None = None
 
     def __post_init__(self):
         """Validate and normalize fields."""
@@ -139,7 +139,7 @@ class SearchResult:
     file_path: Path
     title: str
     category: str
-    tags: List[str]
+    tags: list[str]
     updated_at: datetime
     score: float  # FTS5 BM25 rank
     snippet: str = ""  # Relevant text excerpt
@@ -172,8 +172,7 @@ class MemoryStore:
         conn.execute("PRAGMA journal_mode=WAL")  # Concurrency support
 
         # Main table
-        conn.execute(
-            """
+        conn.execute("""
             CREATE TABLE IF NOT EXISTS memories (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 file_path TEXT NOT NULL UNIQUE,
@@ -185,12 +184,10 @@ class MemoryStore:
                 updated_at TEXT NOT NULL,
                 hash TEXT NOT NULL
             )
-        """
-        )
+        """)
 
         # FTS5 virtual table for full-text search
-        conn.execute(
-            """
+        conn.execute("""
             CREATE VIRTUAL TABLE IF NOT EXISTS memories_fts USING fts5(
                 title,
                 content,
@@ -199,12 +196,10 @@ class MemoryStore:
                 content_rowid=id,
                 tokenize='porter unicode61'
             )
-        """
-        )
+        """)
 
         # Triggers to keep FTS5 in sync
-        conn.executescript(
-            """
+        conn.executescript("""
             DROP TRIGGER IF EXISTS memories_ai;
             DROP TRIGGER IF EXISTS memories_au;
             DROP TRIGGER IF EXISTS memories_ad;
@@ -222,12 +217,13 @@ class MemoryStore:
             CREATE TRIGGER memories_ad AFTER DELETE ON memories BEGIN
                 DELETE FROM memories_fts WHERE rowid=old.id;
             END;
-        """
-        )
+        """)
 
         # Indices for performance
         conn.execute("CREATE INDEX IF NOT EXISTS idx_category ON memories(category)")
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_updated_at ON memories(updated_at DESC)")
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_updated_at ON memories(updated_at DESC)"
+        )
 
         conn.commit()
         log.debug("Database initialized: %s", self.db_path)
@@ -286,10 +282,10 @@ class MemoryStore:
     def search(
         self,
         query: str,
-        category: Optional[str] = None,
-        tags: Optional[List[str]] = None,
+        category: str | None = None,
+        tags: list[str] | None = None,
         limit: int = 10,
-    ) -> List[SearchResult]:
+    ) -> list[SearchResult]:
         """Search memories with FTS5 ranking.
 
         Args:
@@ -302,8 +298,7 @@ class MemoryStore:
             List of SearchResult ordered by relevance
         """
         # Build SQL query
-        sql_parts = [
-            """
+        sql_parts = ["""
             SELECT
                 m.id,
                 m.file_path,
@@ -315,8 +310,7 @@ class MemoryStore:
             FROM memories_fts
             INNER JOIN memories m ON memories_fts.rowid = m.id
             WHERE memories_fts MATCH ?
-        """
-        ]
+        """]
         params = [query]
 
         if category:
@@ -402,7 +396,11 @@ class MemoryStore:
                     title=frontmatter.get("title", md_file.stem),
                     content=body,
                     category=frontmatter.get("category", "project"),
-                    tags=frontmatter.get("tags", "").split(",") if frontmatter.get("tags") else [],
+                    tags=(
+                        frontmatter.get("tags", "").split(",")
+                        if frontmatter.get("tags")
+                        else []
+                    ),
                     file_path=md_file,
                 )
 
@@ -417,7 +415,7 @@ class MemoryStore:
         return count
 
     @staticmethod
-    def _parse_markdown(content: str) -> Tuple[Dict[str, str], str]:
+    def _parse_markdown(content: str) -> tuple[dict[str, str], str]:
         """Parse frontmatter and body from markdown."""
         frontmatter = {}
         body = content
@@ -437,14 +435,16 @@ class MemoryStore:
 
         return frontmatter, body
 
-    def get_stats(self) -> Dict[str, int]:
+    def get_stats(self) -> dict[str, int]:
         """Get memory statistics."""
         stats = {}
 
         cursor = self.conn.execute("SELECT COUNT(*) FROM memories")
         stats["total"] = cursor.fetchone()[0]
 
-        cursor = self.conn.execute("SELECT category, COUNT(*) FROM memories GROUP BY category")
+        cursor = self.conn.execute(
+            "SELECT category, COUNT(*) FROM memories GROUP BY category"
+        )
         for row in cursor.fetchall():
             stats[f"category_{row[0]}"] = row[1]
 

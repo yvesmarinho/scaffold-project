@@ -3,7 +3,7 @@
 NOME: test_objetivo_v2_architecture_naming.py
 TITULO: objetivo v2 — seções de Arquitetura e Padrões de Nomenclatura
 DATA: 09/11/2026 17:25
-MODIFICADO: 09/11/2026 17:11
+MODIFICADO: 24/11/2026 15:00
 VERSÃO: 1.0.0
 DEPEND: pytest
 STATUS: DEV
@@ -17,7 +17,11 @@ from __future__ import annotations
 
 import pytest
 
-from scripts.lib.objetivo_wizard import ObjetivoWizard, WizardAnswers, naming_conventions
+from scripts.lib.objetivo_wizard import (
+    ObjetivoWizard,
+    WizardAnswers,
+    naming_conventions,
+)
 
 
 def _render(language: str, **overrides: str) -> str:

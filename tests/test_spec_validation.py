@@ -11,27 +11,24 @@ Tests cover:
 - Error handling and suggestions
 """
 
-import json
-import tempfile
-from pathlib import Path
 from textwrap import dedent
 
 import pytest
 import yaml
 
 from scripts.lib.spec_validate import (
-    SpecValidator,
-    ValidationResult,
-    ValidationIssue,
     Layer,
     Severity,
-    validate_feature
+    SpecValidator,
+    ValidationIssue,
+    ValidationResult,
+    validate_feature,
 )
-
 
 # ============================================================================
 # Fixtures
 # ============================================================================
+
 
 @pytest.fixture
 def temp_feature_dir(tmp_path):
@@ -45,23 +42,17 @@ def temp_feature_dir(tmp_path):
 def minimal_objetivo_yaml():
     """Minimal valid objetivo.yaml content"""
     return {
-        "feature": {
-            "id": "TEST-001",
-            "name": "Test Feature",
-            "created": "2026-04-14"
-        },
+        "feature": {"id": "TEST-001", "name": "Test Feature", "created": "2026-04-14"},
         "negocio": {
             "problema": {
                 "descricao": "Test problem description with enough length to pass validation",
                 "impacto_atual": "Impact if not solved with sufficient detail",
-                "stakeholders": ["Developers", "Product Managers"]
+                "stakeholders": ["Developers", "Product Managers"],
             },
             "valor": {
                 "objetivos_estrategicos": ["Objective 1"],
-                "metricas_sucesso": [
-                    {"metric": "Test metric", "target": "100%"}
-                ]
-            }
+                "metricas_sucesso": [{"metric": "Test metric", "target": "100%"}],
+            },
         },
         "produto": {
             "visao_alto_nivel": "High level product vision in one sentence.",
@@ -69,21 +60,18 @@ def minimal_objetivo_yaml():
                 {
                     "name": "Developer",
                     "needs": "Needs faster development workflow",
-                    "pain_points": "Current workflow is slow and error-prone"
+                    "pain_points": "Current workflow is slow and error-prone",
                 }
             ],
             "jornadas_criticas": [
                 {
                     "journey": "Complete feature implementation",
                     "priority": "P1",
-                    "value": "Enables core functionality"
+                    "value": "Enables core functionality",
                 }
-            ]
+            ],
         },
-        "metadata": {
-            "owner": "Test Owner",
-            "team": "Test Team"
-        }
+        "metadata": {"owner": "Test Owner", "team": "Test Team"},
     }
 
 
@@ -152,6 +140,7 @@ def minimal_plan_md():
 # ============================================================================
 # Test Layer 1 (Business) → Layer 2 (Product) Validation
 # ============================================================================
+
 
 class TestBusinessToProduct:
     """Test L1→L2 validation (objetivo.yaml → spec.md)"""
@@ -222,9 +211,9 @@ class TestBusinessToProduct:
 
     def test_vision_too_long(self, temp_feature_dir, minimal_objetivo_yaml):
         """Should warn if product vision > 3 sentences"""
-        minimal_objetivo_yaml["produto"]["visao_alto_nivel"] = (
-            "First sentence. Second sentence. Third sentence. Fourth sentence. Fifth sentence."
-        )
+        minimal_objetivo_yaml["produto"][
+            "visao_alto_nivel"
+        ] = "First sentence. Second sentence. Third sentence. Fourth sentence. Fifth sentence."
 
         objetivo_file = temp_feature_dir / "objetivo.yaml"
         objetivo_file.write_text(yaml.dump(minimal_objetivo_yaml))
@@ -274,6 +263,7 @@ class TestBusinessToProduct:
 # ============================================================================
 # Test Layer 2 (Product) → Layer 3 (Architecture) Validation
 # ============================================================================
+
 
 class TestProductToArchitecture:
     """Test L2→L3 validation (spec.md → plan.md)"""
@@ -365,7 +355,9 @@ class TestProductToArchitecture:
         result = validator.validate_layer_transition("product", "architecture")
 
         assert result.passed
-        assert any("functional requirement" in w.message.lower() for w in result.warnings)
+        assert any(
+            "functional requirement" in w.message.lower() for w in result.warnings
+        )
 
     def test_valid_spec_passes(self, temp_feature_dir, minimal_spec_md):
         """Should pass with valid spec.md"""
@@ -403,6 +395,7 @@ class TestProductToArchitecture:
 # Test Layer 3 (Architecture) → Layer 4 (Implementation) Validation
 # ============================================================================
 
+
 class TestArchitectureToImplementation:
     """Test L3→L4 validation (plan.md → tasks.md)"""
 
@@ -424,7 +417,9 @@ class TestArchitectureToImplementation:
         result = validator.validate_layer_transition("architecture", "implementation")
 
         assert result.passed  # Warning, not blocking
-        assert any("No Architecture Decision Records" in w.message for w in result.warnings)
+        assert any(
+            "No Architecture Decision Records" in w.message for w in result.warnings
+        )
 
     def test_adr_missing_alternatives(self, temp_feature_dir):
         """Should warn if ADR missing 'Alternatives Considered'"""
@@ -443,8 +438,10 @@ class TestArchitectureToImplementation:
         result = validator.validate_layer_transition("architecture", "implementation")
 
         assert result.passed
-        assert any("ADR-001" in w.message and "Alternatives" in w.message
-                  for w in result.warnings)
+        assert any(
+            "ADR-001" in w.message and "Alternatives" in w.message
+            for w in result.warnings
+        )
 
     def test_no_component_design_warning(self, temp_feature_dir):
         """Should warn if no component design section"""
@@ -482,7 +479,9 @@ class TestArchitectureToImplementation:
         result = validator.validate_layer_transition("architecture", "implementation")
 
         assert result.passed
-        assert any("implementation strategy" in w.message.lower() for w in result.warnings)
+        assert any(
+            "implementation strategy" in w.message.lower() for w in result.warnings
+        )
 
     def test_valid_plan_passes(self, temp_feature_dir, minimal_plan_md):
         """Should pass with valid plan.md"""
@@ -505,7 +504,9 @@ class TestArchitectureToImplementation:
 
         assert any("Architecture Decision Records" in i.message for i in result.infos)
 
-    def test_references_decisoes_iniciais(self, temp_feature_dir, minimal_objetivo_yaml, minimal_plan_md):
+    def test_references_decisoes_iniciais(
+        self, temp_feature_dir, minimal_objetivo_yaml, minimal_plan_md
+    ):
         """Should check if plan.md references objetivo.yaml decisoes_iniciais"""
         # Add decisoes_iniciais to objetivo.yaml
         minimal_objetivo_yaml["decisoes_iniciais"] = [
@@ -529,15 +530,14 @@ class TestArchitectureToImplementation:
 # Test Validation Result Output
 # ============================================================================
 
+
 class TestValidationResult:
     """Test ValidationResult formatting and reporting"""
 
     def test_summary_passed(self):
         """Should format passed summary correctly"""
         result = ValidationResult(
-            layer_from=Layer.BUSINESS,
-            layer_to=Layer.PRODUCT,
-            passed=True
+            layer_from=Layer.BUSINESS, layer_to=Layer.PRODUCT, passed=True
         )
 
         summary = result.summary()
@@ -547,16 +547,16 @@ class TestValidationResult:
     def test_summary_failed(self):
         """Should format failed summary correctly"""
         result = ValidationResult(
-            layer_from=Layer.BUSINESS,
-            layer_to=Layer.PRODUCT,
-            passed=False
+            layer_from=Layer.BUSINESS, layer_to=Layer.PRODUCT, passed=False
         )
-        result.add_issue(ValidationIssue(
-            severity=Severity.ERROR,
-            layer=Layer.BUSINESS,
-            rule="test-rule",
-            message="Test error"
-        ))
+        result.add_issue(
+            ValidationIssue(
+                severity=Severity.ERROR,
+                layer=Layer.BUSINESS,
+                rule="test-rule",
+                message="Test error",
+            )
+        )
 
         summary = result.summary()
         assert "❌ FAILED" in summary
@@ -565,29 +565,33 @@ class TestValidationResult:
     def test_detailed_report_includes_all_sections(self):
         """Should include errors, warnings, and info in detailed report"""
         result = ValidationResult(
-            layer_from=Layer.BUSINESS,
-            layer_to=Layer.PRODUCT,
-            passed=False
+            layer_from=Layer.BUSINESS, layer_to=Layer.PRODUCT, passed=False
         )
 
-        result.add_issue(ValidationIssue(
-            severity=Severity.ERROR,
-            layer=Layer.BUSINESS,
-            rule="error-rule",
-            message="Error message"
-        ))
-        result.add_issue(ValidationIssue(
-            severity=Severity.WARNING,
-            layer=Layer.BUSINESS,
-            rule="warning-rule",
-            message="Warning message"
-        ))
-        result.add_issue(ValidationIssue(
-            severity=Severity.INFO,
-            layer=Layer.BUSINESS,
-            rule="info-rule",
-            message="Info message"
-        ))
+        result.add_issue(
+            ValidationIssue(
+                severity=Severity.ERROR,
+                layer=Layer.BUSINESS,
+                rule="error-rule",
+                message="Error message",
+            )
+        )
+        result.add_issue(
+            ValidationIssue(
+                severity=Severity.WARNING,
+                layer=Layer.BUSINESS,
+                rule="warning-rule",
+                message="Warning message",
+            )
+        )
+        result.add_issue(
+            ValidationIssue(
+                severity=Severity.INFO,
+                layer=Layer.BUSINESS,
+                rule="info-rule",
+                message="Info message",
+            )
+        )
 
         report = result.detailed_report()
         assert "ERRORS (blocking)" in report
@@ -602,16 +606,14 @@ class TestValidationResult:
 # Test Validation Convenience Function
 # ============================================================================
 
+
 def test_validate_feature_convenience(temp_feature_dir, minimal_objetivo_yaml):
     """Test validate_feature() convenience function"""
     objetivo_file = temp_feature_dir / "objetivo.yaml"
     objetivo_file.write_text(yaml.dump(minimal_objetivo_yaml))
 
     passed, result = validate_feature(
-        temp_feature_dir,
-        "business",
-        "product",
-        verbose=False
+        temp_feature_dir, "business", "product", verbose=False
     )
 
     assert passed is True
@@ -622,6 +624,7 @@ def test_validate_feature_convenience(temp_feature_dir, minimal_objetivo_yaml):
 # ============================================================================
 # Test Invalid Transitions
 # ============================================================================
+
 
 def test_invalid_layer_transition(temp_feature_dir):
     """Should error on invalid layer transition"""

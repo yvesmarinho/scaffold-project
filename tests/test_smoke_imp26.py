@@ -23,8 +23,6 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-import pytest
-
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 
 from lib.composer import (  # noqa: E402
@@ -45,21 +43,24 @@ _DBT_TPLDIR = _PROJECT_ROOT / ".github" / "templates" / "data-warehouse-dbt"
 # data-pipeline-airflow
 # ===========================================================================
 
+
 class TestDataPipelineAirflowDescriptor:
 
     def test_descriptor_loads(self) -> None:
         """data-pipeline-airflow é carregado por load_all_descriptors."""
         descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
-        assert "data-pipeline-airflow" in descriptors, (
-            f"data-pipeline-airflow não encontrado. Carregados: {list(descriptors.keys())}"
-        )
+        assert (
+            "data-pipeline-airflow" in descriptors
+        ), f"data-pipeline-airflow não encontrado. Carregados: {list(descriptors.keys())}"
 
     def test_required_fields(self) -> None:
         """Descriptor contém name, layer, version, status, description."""
         descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
         desc = descriptors["data-pipeline-airflow"]
         for field in ("name", "layer", "version", "status", "description"):
-            assert field in desc, f"Campo '{field}' ausente no descriptor data-pipeline-airflow"
+            assert (
+                field in desc
+            ), f"Campo '{field}' ausente no descriptor data-pipeline-airflow"
 
     def test_layer_is_3(self) -> None:
         """data-pipeline-airflow deve declarar layer 3."""
@@ -121,9 +122,9 @@ class TestDataPipelineAirflowTemplates:
         content = dag_file.read_text().lower()
         forbidden = ["password=", "secret=", "api_key=", "token="]
         found = [kw for kw in forbidden if kw in content and "env_var" not in content]
-        assert not found, (
-            f"DAG template contém credencial potencialmente hardcoded: {found}"
-        )
+        assert (
+            not found
+        ), f"DAG template contém credencial potencialmente hardcoded: {found}"
 
     def test_docker_compose_no_plaintext_password(self) -> None:
         """docker-compose.airflow.yml não deve expor senhas em plaintext."""
@@ -131,13 +132,13 @@ class TestDataPipelineAirflowTemplates:
         assert dc_file.exists(), "docker-compose.airflow.yml não encontrado"
         content = dc_file.read_text()
         # Password must come from secrets or env, not hardcoded
-        assert "POSTGRES_PASSWORD_FILE" in content or "secrets:" in content, (
-            "docker-compose.airflow.yml deve usar Docker Secrets ou arquivo para credenciais"
-        )
+        assert (
+            "POSTGRES_PASSWORD_FILE" in content or "secrets:" in content
+        ), "docker-compose.airflow.yml deve usar Docker Secrets ou arquivo para credenciais"
         # Must NOT have plain POSTGRES_PASSWORD: somevalue (without _FILE or env_var)
-        assert "POSTGRES_PASSWORD: airflow" not in content, (
-            "docker-compose.airflow.yml não deve ter senha Postgres em plaintext"
-        )
+        assert (
+            "POSTGRES_PASSWORD: airflow" not in content
+        ), "docker-compose.airflow.yml não deve ter senha Postgres em plaintext"
 
     def test_makefile_has_standard_targets(self) -> None:
         """Makefile.airflow deve conter targets essenciais."""
@@ -153,9 +154,9 @@ class TestDataPipelineAirflowTemplates:
         assert env_file.exists(), ".env.airflow.example não encontrado"
         content = env_file.read_text()
         # Must contain placeholder hints, not real-looking keys
-        assert "your-" in content or "change-me" in content, (
-            ".env.airflow.example deve conter placeholders claros"
-        )
+        assert (
+            "your-" in content or "change-me" in content
+        ), ".env.airflow.example deve conter placeholders claros"
 
 
 class TestDataPipelineAirflowComposer:
@@ -197,38 +198,43 @@ class TestDataPipelineAirflowComposer:
         composer.compose(["data-pipeline-airflow"], cfg)
         result2 = composer.compose(["data-pipeline-airflow"], cfg)
         assert result2.success
-        assert result2.created_count == 0, (
-            f"Segunda composição não é idempotente: created={result2.created_count}"
-        )
+        assert (
+            result2.created_count == 0
+        ), f"Segunda composição não é idempotente: created={result2.created_count}"
 
     def test_resolve_order_layer2_before_layer3(self) -> None:
         """python-fastapi (layer2) deve vir antes de data-pipeline-airflow (layer3)."""
         descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
-        ordered = resolve_order(["data-pipeline-airflow", "python-fastapi"], descriptors)
-        assert ordered.index("python-fastapi") < ordered.index("data-pipeline-airflow"), (
-            f"layer2 deve preceder layer3. Ordem: {ordered}"
+        ordered = resolve_order(
+            ["data-pipeline-airflow", "python-fastapi"], descriptors
         )
+        assert ordered.index("python-fastapi") < ordered.index(
+            "data-pipeline-airflow"
+        ), f"layer2 deve preceder layer3. Ordem: {ordered}"
 
 
 # ===========================================================================
 # data-warehouse-dbt
 # ===========================================================================
 
+
 class TestDataWarehouseDbtDescriptor:
 
     def test_descriptor_loads(self) -> None:
         """data-warehouse-dbt é carregado por load_all_descriptors."""
         descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
-        assert "data-warehouse-dbt" in descriptors, (
-            f"data-warehouse-dbt não encontrado. Carregados: {list(descriptors.keys())}"
-        )
+        assert (
+            "data-warehouse-dbt" in descriptors
+        ), f"data-warehouse-dbt não encontrado. Carregados: {list(descriptors.keys())}"
 
     def test_required_fields(self) -> None:
         """Descriptor contém name, layer, version, status, description."""
         descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
         desc = descriptors["data-warehouse-dbt"]
         for field in ("name", "layer", "version", "status", "description"):
-            assert field in desc, f"Campo '{field}' ausente no descriptor data-warehouse-dbt"
+            assert (
+                field in desc
+            ), f"Campo '{field}' ausente no descriptor data-warehouse-dbt"
 
     def test_layer_is_3(self) -> None:
         """data-warehouse-dbt deve declarar layer 3."""
@@ -283,13 +289,13 @@ class TestDataWarehouseDbtTemplates:
         profiles = _DBT_TPLDIR / "dbt" / "profiles.yml.example"
         assert profiles.exists(), "profiles.yml.example não encontrado"
         content = profiles.read_text()
-        assert "env_var(" in content, (
-            "profiles.yml.example deve usar env_var() para credentials"
-        )
+        assert (
+            "env_var(" in content
+        ), "profiles.yml.example deve usar env_var() para credentials"
         # Must NOT have a real-looking password value
-        assert "password: secret" not in content, (
-            "profiles.yml.example contém senha hardcoded"
-        )
+        assert (
+            "password: secret" not in content
+        ), "profiles.yml.example contém senha hardcoded"
 
     def test_staging_model_uses_source_macro(self) -> None:
         """Staging model deve referenciar a fonte com {{ source() }}."""
@@ -303,7 +309,9 @@ class TestDataWarehouseDbtTemplates:
         mart_sql = _DBT_TPLDIR / "dbt" / "models" / "marts" / "mart_example.sql"
         assert mart_sql.exists(), "mart_example.sql não encontrado"
         content = mart_sql.read_text()
-        assert "ref(" in content, "Mart model deve usar {{ ref() }} para referenciar staging"
+        assert (
+            "ref(" in content
+        ), "Mart model deve usar {{ ref() }} para referenciar staging"
 
     def test_staging_yml_has_schema_tests(self) -> None:
         """stg_example.yml deve declarar testes: unique, not_null."""
@@ -318,18 +326,18 @@ class TestDataWarehouseDbtTemplates:
         macro = _DBT_TPLDIR / "dbt" / "macros" / "generate_schema_name.sql"
         assert macro.exists(), "macros/generate_schema_name.sql não encontrado"
         content = macro.read_text()
-        assert "macro generate_schema_name" in content, (
-            "Macro deve declarar 'macro generate_schema_name'"
-        )
+        assert (
+            "macro generate_schema_name" in content
+        ), "Macro deve declarar 'macro generate_schema_name'"
 
     def test_singular_test_returns_rows_on_failure(self) -> None:
         """Singular test deve retornar rows à falhar (padrão dbt)."""
         test_sql = _DBT_TPLDIR / "dbt" / "tests" / "assert_no_negative_amounts.sql"
         assert test_sql.exists(), "tests/assert_no_negative_amounts.sql não encontrado"
         content = test_sql.read_text()
-        assert "select" in content.lower(), (
-            "Singular test deve ser uma query SELECT (rows = falha no dbt)"
-        )
+        assert (
+            "select" in content.lower()
+        ), "Singular test deve ser uma query SELECT (rows = falha no dbt)"
 
     def test_makefile_has_standard_targets(self) -> None:
         """Makefile.dbt deve conter targets essenciais."""
@@ -378,17 +386,17 @@ class TestDataWarehouseDbtComposer:
         composer.compose(["data-warehouse-dbt"], cfg)
         result2 = composer.compose(["data-warehouse-dbt"], cfg)
         assert result2.success
-        assert result2.created_count == 0, (
-            f"Segunda composição não é idempotente: created={result2.created_count}"
-        )
+        assert (
+            result2.created_count == 0
+        ), f"Segunda composição não é idempotente: created={result2.created_count}"
 
     def test_resolve_order_layer2_before_layer3(self) -> None:
         """python-fastapi (layer2) deve vir antes de data-warehouse-dbt (layer3)."""
         descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
         ordered = resolve_order(["data-warehouse-dbt", "python-fastapi"], descriptors)
-        assert ordered.index("python-fastapi") < ordered.index("data-warehouse-dbt"), (
-            f"layer2 deve preceder layer3. Ordem: {ordered}"
-        )
+        assert ordered.index("python-fastapi") < ordered.index(
+            "data-warehouse-dbt"
+        ), f"layer2 deve preceder layer3. Ordem: {ordered}"
 
     def test_no_conflicts_between_both_data_profiles(self) -> None:
         """data-pipeline-airflow e data-warehouse-dbt podem coexistir."""
@@ -397,6 +405,4 @@ class TestDataWarehouseDbtComposer:
             ["python-fastapi", "data-pipeline-airflow", "data-warehouse-dbt"],
             descriptors,
         )
-        assert not conflicts, (
-            f"Os dois perfis de dados conflitam: {conflicts}"
-        )
+        assert not conflicts, f"Os dois perfis de dados conflitam: {conflicts}"

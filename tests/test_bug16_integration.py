@@ -11,11 +11,9 @@ Cenário:
 4. Verificar que customizações foram preservadas E melhorias do template adicionadas
 """
 
-import pytest
-from pathlib import Path
 import json
-import shutil
-import subprocess
+
+import pytest
 
 
 @pytest.fixture
@@ -52,7 +50,9 @@ profiles_applied: []
 created_at: "2026-05-21T10:00:00"
 updated_at: "2026-05-21T10:00:00"
 """
-    (test_project_dir / ".scaffold-state.yaml").write_text(state_content, encoding="utf-8")
+    (test_project_dir / ".scaffold-state.yaml").write_text(
+        state_content, encoding="utf-8"
+    )
 
     return test_project_dir
 
@@ -68,7 +68,7 @@ def test_json_merge_preserves_customizations(create_test_project):
     user_settings = {
         "editor.rulers": [120],  # Customização do usuário
         "python.linting.enabled": True,  # Customização do usuário
-        "files.autoSave": "afterDelay"  # Customização do usuário
+        "files.autoSave": "afterDelay",  # Customização do usuário
     }
     settings_file.write_text(json.dumps(user_settings, indent=2), encoding="utf-8")
 
@@ -76,7 +76,7 @@ def test_json_merge_preserves_customizations(create_test_project):
     template_settings = {
         "editor.rulers": [80],  # Template default (user-wins deve preservar 120)
         "editor.formatOnSave": True,  # Nova feature do template
-        "chat.mcp.autostart": True  # Nova feature do template
+        "chat.mcp.autostart": True,  # Nova feature do template
     }
 
     # 3. Executar merge via JSONMerger (simula upgrade)
@@ -86,19 +86,23 @@ def test_json_merge_preserves_customizations(create_test_project):
     result = merger.merge(
         existing_path=settings_file,
         template_content=json.dumps(template_settings, indent=2),
-        interactive=False
+        interactive=False,
     )
 
     # 4. Validar resultado
     assert result.status == "created", f"Expected created (merge), got {result.status}"
-    assert "Merged" in result.message or "customizations" in result.message, "Not a merge operation"
+    assert (
+        "Merged" in result.message or "customizations" in result.message
+    ), "Not a merge operation"
 
     # 5. Ler arquivo mergeado
     merged_settings = json.loads(settings_file.read_text(encoding="utf-8"))
 
     # 6. Verificar preservação de customizações (user-wins)
     # Nota: Arrays fazem união (deepmerge behavior), não user-wins absoluto
-    assert 120 in merged_settings["editor.rulers"], "User customization value not present"
+    assert (
+        120 in merged_settings["editor.rulers"]
+    ), "User customization value not present"
     assert merged_settings["python.linting.enabled"] is True, "User customization lost"
     assert merged_settings["files.autoSave"] == "afterDelay", "User customization lost"
 
@@ -119,25 +123,19 @@ def test_workspace_merge_preserves_folders(create_test_project):
         "folders": [
             {"path": "."},
             {"path": "../shared-libs"},  # Customização do usuário
-            {"path": "../tools"}  # Customização do usuário
+            {"path": "../tools"},  # Customização do usuário
         ],
-        "settings": {
-            "editor.rulers": [120]  # Customização do usuário
-        }
+        "settings": {"editor.rulers": [120]},  # Customização do usuário
     }
     workspace_file.write_text(json.dumps(user_workspace, indent=2), encoding="utf-8")
 
     # 2. Simular template com novas configs
     template_workspace = {
-        "folders": [
-            {"path": "."}
-        ],
-        "settings": {
-            "editor.formatOnSave": True  # Nova feature do template
-        },
+        "folders": [{"path": "."}],
+        "settings": {"editor.formatOnSave": True},  # Nova feature do template
         "extensions": {
             "recommendations": ["ms-python.python"]  # Nova extensão do template
-        }
+        },
     }
 
     # 3. Executar merge via WorkspaceMerger
@@ -147,12 +145,14 @@ def test_workspace_merge_preserves_folders(create_test_project):
     result = merger.merge(
         existing_path=workspace_file,
         template_content=json.dumps(template_workspace, indent=2),
-        interactive=False
+        interactive=False,
     )
 
     # 4. Validar resultado
     assert result.status == "created", f"Expected created (merge), got {result.status}"
-    assert "Merged" in result.message or "customizations" in result.message, "Not a merge operation"
+    assert (
+        "Merged" in result.message or "customizations" in result.message
+    ), "Not a merge operation"
 
     # 5. Ler arquivo mergeado
     merged_workspace = json.loads(workspace_file.read_text(encoding="utf-8"))
@@ -166,10 +166,14 @@ def test_workspace_merge_preserves_folders(create_test_project):
 
     # 7. Verificar settings (user-wins + template additions)
     assert merged_workspace["settings"]["editor.rulers"] == [120], "User setting lost"
-    assert merged_workspace["settings"]["editor.formatOnSave"] is True, "Template setting not added"
+    assert (
+        merged_workspace["settings"]["editor.formatOnSave"] is True
+    ), "Template setting not added"
 
     # 8. Verificar extensões
-    assert "ms-python.python" in merged_workspace["extensions"]["recommendations"], "Template extension not added"
+    assert (
+        "ms-python.python" in merged_workspace["extensions"]["recommendations"]
+    ), "Template extension not added"
 
 
 def test_copilot_rules_consolidation(create_test_project):
@@ -183,20 +187,29 @@ def test_copilot_rules_consolidation(create_test_project):
     file2 = project_dir / ".copilot-strict-rules.md"
     file3 = project_dir / "copilot-instructions.md"
 
-    file1.write_text("""## Regra A
+    file1.write_text(
+        """## Regra A
 Conteúdo A.
 
 ## Regra B
 Conteúdo B.
-""", encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
 
-    file2.write_text("""## Regra C
+    file2.write_text(
+        """## Regra C
 Conteúdo C (strict).
-""", encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
 
-    file3.write_text("""## Regra D
+    file3.write_text(
+        """## Regra D
 Conteúdo D (instructions).
-""", encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
 
     # 2. Executar consolidação
     from scripts.lib.copilot_rules_consolidate import consolidate_copilot_rules
@@ -206,7 +219,9 @@ Conteúdo D (instructions).
 
     # 3. Validar resultado
     assert result is not None, "Consolidation returned None"
-    assert result == project_dir / ".copilot-rules.md", "Wrong consolidation output path"
+    assert (
+        result == project_dir / ".copilot-rules.md"
+    ), "Wrong consolidation output path"
 
     # 4. Verificar que arquivo consolidado existe
     assert result.exists(), "Consolidated file not created"

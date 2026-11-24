@@ -5,25 +5,26 @@ Tests for template_migration.py - Template migration to modular system.
 Part of IMP-65 Phase 4.4: Migration & Compatibility
 """
 
+import sys
+from datetime import datetime
+from pathlib import Path
+
 import pytest
 import yaml
-from pathlib import Path
-from datetime import datetime
 
-import sys
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts" / "lib"))
 
 from template_migration import (
-    TemplateMigrator,
     CustomSection,
     MigrationReport,
-    list_templates
+    TemplateMigrator,
+    list_templates,
 )
-
 
 # ============================================================================
 # Fixtures
 # ============================================================================
+
 
 @pytest.fixture
 def temp_project(tmp_path):
@@ -110,6 +111,7 @@ Out of scope content.
 # ============================================================================
 # TemplateMigrator Tests
 # ============================================================================
+
 
 def test_migrator_initialization(temp_project):
     """Test migrator initializes with correct paths."""
@@ -208,7 +210,7 @@ def test_generate_patch_from_section(migrator):
         line_start=10,
         line_end=13,
         context_before="## User Scenarios\n\nUser scenarios content.",
-        context_after="## Success Criteria\n\nSuccess criteria."
+        context_after="## Success Criteria\n\nSuccess criteria.",
     )
 
     filename, content = migrator.generate_patch_from_section(
@@ -229,10 +231,10 @@ def test_generate_patch_from_section(migrator):
     assert len(parts) >= 3
     metadata = yaml.safe_load(parts[1])
 
-    assert metadata['patch_name'] == "custom-my-custom-section"
-    assert metadata['version'] == "1.0.0"
-    assert metadata['target_template'] == "spec-template"
-    assert 'migrated' in metadata['tags']
+    assert metadata["patch_name"] == "custom-my-custom-section"
+    assert metadata["version"] == "1.0.0"
+    assert metadata["target_template"] == "spec-template"
+    assert "migrated" in metadata["tags"]
 
 
 def test_generate_patch_with_no_context(migrator):
@@ -243,12 +245,10 @@ def test_generate_patch_with_no_context(migrator):
         line_start=1,
         line_end=3,
         context_before="",
-        context_after="## Next Section"
+        context_after="## Next Section",
     )
 
-    filename, content = migrator.generate_patch_from_section(
-        section, "template", 1
-    )
+    filename, content = migrator.generate_patch_from_section(section, "template", 1)
 
     # Should use PREPEND since no context before
     assert "@@ PREPEND: START" in content or "@@ AFTER:" in content
@@ -273,7 +273,9 @@ def test_migrate_template_dry_run(migrator, temp_project, sample_monolithic_temp
     assert not migrator.backups_dir.exists()
 
 
-def test_migrate_template_creates_patches(migrator, temp_project, sample_monolithic_template):
+def test_migrate_template_creates_patches(
+    migrator, temp_project, sample_monolithic_template
+):
     """Test actual migration creates patch files."""
     template_path = temp_project / "templates" / "test.md"
     template_path.write_text(sample_monolithic_template)
@@ -305,7 +307,9 @@ def test_migrate_template_creates_patches(migrator, temp_project, sample_monolit
         assert "@@ END" in content
 
 
-def test_migrate_template_no_customizations(migrator, temp_project, sample_standard_template):
+def test_migrate_template_no_customizations(
+    migrator, temp_project, sample_standard_template
+):
     """Test migration of template with no customizations."""
     template_path = temp_project / "templates" / "standard.md"
     template_path.write_text(sample_standard_template)
@@ -317,15 +321,15 @@ def test_migrate_template_no_customizations(migrator, temp_project, sample_stand
     assert report.backup_path is not None  # Backup still created
 
 
-def test_migrate_template_custom_name(migrator, temp_project, sample_monolithic_template):
+def test_migrate_template_custom_name(
+    migrator, temp_project, sample_monolithic_template
+):
     """Test migration with custom template name."""
     template_path = temp_project / "templates" / "file.md"
     template_path.write_text(sample_monolithic_template)
 
     report = migrator.migrate_template(
-        template_path,
-        template_name="my-custom-name",
-        dry_run=False
+        template_path, template_name="my-custom-name", dry_run=False
     )
 
     assert report.template_name == "my-custom-name"
@@ -396,7 +400,6 @@ Content 6
     template_path.write_text(content)
 
     # Override standard sections for test
-    migrator_standard = migrator.detect_standard_sections
 
     def mock_standard(content):
         return {f"## Section {i}" for i in range(1, 7)}
@@ -418,7 +421,7 @@ def test_generate_migration_guide(migrator):
         patches_created=["001-custom.patch", "002-another.patch"],
         custom_sections_found=2,
         warnings=["Warning 1", "Warning 2"],
-        timestamp=datetime.now().isoformat()
+        timestamp=datetime.now().isoformat(),
     )
 
     guide = migrator.generate_migration_guide(report)
@@ -441,7 +444,7 @@ def test_generate_migration_guide_no_patches(migrator):
         patches_created=[],
         custom_sections_found=0,
         warnings=[],
-        timestamp=datetime.now().isoformat()
+        timestamp=datetime.now().isoformat(),
     )
 
     guide = migrator.generate_migration_guide(report)
@@ -459,7 +462,7 @@ def test_generate_migration_guide_to_file(migrator, temp_project):
         patches_created=["001-test.patch"],
         custom_sections_found=1,
         warnings=[],
-        timestamp=datetime.now().isoformat()
+        timestamp=datetime.now().isoformat(),
     )
 
     output_path = temp_project / "guide.md"
@@ -472,6 +475,7 @@ def test_generate_migration_guide_to_file(migrator, temp_project):
 # ============================================================================
 # Helper Functions Tests
 # ============================================================================
+
 
 def test_list_templates_empty(temp_project):
     """Test listing templates in empty directory."""
@@ -526,6 +530,7 @@ def test_list_templates_nonexistent_dir(temp_project):
 # ============================================================================
 # Integration Tests
 # ============================================================================
+
 
 def test_full_migration_workflow(migrator, temp_project):
     """Test complete migration workflow."""
@@ -614,7 +619,7 @@ More standard content.
     template_path = temp_project / "templates" / "test.md"
     template_path.write_text(template_content)
 
-    report = migrator.migrate_template(template_path, dry_run=False)
+    migrator.migrate_template(template_path, dry_run=False)
 
     # Find the generated patch
     patches_dir = migrator.patches_dir / "test"
@@ -631,5 +636,5 @@ More standard content.
     assert 'return "code block"' in patch_content
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

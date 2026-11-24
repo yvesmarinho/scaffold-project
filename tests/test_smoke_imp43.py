@@ -37,7 +37,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
 import yaml
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
@@ -71,13 +70,13 @@ _ORIGINAL_DESCRIPTORS = {
 
 
 def _make_args(**kwargs) -> argparse.Namespace:
-    defaults = dict(
-        new_profile=None,
-        profile_layer="layer2",
-        ci=True,
-        json_output=True,
-        force=False,
-    )
+    defaults = {
+        "new_profile": None,
+        "profile_layer": "layer2",
+        "ci": True,
+        "json_output": True,
+        "force": False,
+    }
     defaults.update(kwargs)
     return argparse.Namespace(**defaults)
 
@@ -93,6 +92,7 @@ def _cleanup(*names: str) -> None:
 # ===========================================================================
 # Unit — flow_new_profile
 # ===========================================================================
+
 
 class TestFlowNewProfile:
 
@@ -177,7 +177,9 @@ class TestFlowNewProfile:
 
     def test_existing_profile_force_overwrites(self):
         flow_new_profile(_make_args(new_profile=_TEST_NAME, profile_layer="layer2"))
-        rc = flow_new_profile(_make_args(new_profile=_TEST_NAME, profile_layer="layer3", force=True))
+        rc = flow_new_profile(
+            _make_args(new_profile=_TEST_NAME, profile_layer="layer3", force=True)
+        )
         assert rc == 0
         data = yaml.safe_load((_DESCRIPTORS_DIR / f"{_TEST_NAME}.yaml").read_text())
         assert data["layer"] == "layer3"
@@ -189,6 +191,7 @@ class TestFlowNewProfile:
     def test_json_output_success(self):
         import contextlib
         import io
+
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
             rc = flow_new_profile(_make_args(new_profile=_TEST_NAME, json_output=True))
@@ -200,6 +203,7 @@ class TestFlowNewProfile:
     def test_json_output_has_yaml_and_md_paths(self):
         import contextlib
         import io
+
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
             flow_new_profile(_make_args(new_profile=_TEST_NAME, json_output=True))
@@ -218,6 +222,7 @@ class TestFlowNewProfile:
 # CLI — subprocesso
 # ===========================================================================
 
+
 class TestCLINewProfile:
 
     def setup_method(self):
@@ -229,66 +234,131 @@ class TestCLINewProfile:
     def test_help_mentions_new_profile(self):
         result = subprocess.run(
             [*_SCAFFOLD, "--help"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
         assert "--new-profile" in result.stdout
 
     def test_cli_json_success(self):
         result = subprocess.run(
-            [*_SCAFFOLD, "--new-profile", _CLI_NAME, "--profile-layer", "layer2", "--ci", "--json"],
-            capture_output=True, text=True,
+            [
+                *_SCAFFOLD,
+                "--new-profile",
+                _CLI_NAME,
+                "--profile-layer",
+                "layer2",
+                "--ci",
+                "--json",
+            ],
+            capture_output=True,
+            text=True,
         )
         data = json.loads(result.stdout)
         assert data["success"] is True
 
     def test_cli_json_correct_name(self):
         result = subprocess.run(
-            [*_SCAFFOLD, "--new-profile", _CLI_NAME, "--profile-layer", "layer2", "--ci", "--json"],
-            capture_output=True, text=True,
+            [
+                *_SCAFFOLD,
+                "--new-profile",
+                _CLI_NAME,
+                "--profile-layer",
+                "layer2",
+                "--ci",
+                "--json",
+            ],
+            capture_output=True,
+            text=True,
         )
         data = json.loads(result.stdout)
         assert data["name"] == _CLI_NAME
 
     def test_cli_creates_yaml_on_disk(self):
         subprocess.run(
-            [*_SCAFFOLD, "--new-profile", _CLI_NAME, "--profile-layer", "layer2", "--ci", "--json"],
-            capture_output=True, text=True,
+            [
+                *_SCAFFOLD,
+                "--new-profile",
+                _CLI_NAME,
+                "--profile-layer",
+                "layer2",
+                "--ci",
+                "--json",
+            ],
+            capture_output=True,
+            text=True,
         )
         assert (_DESCRIPTORS_DIR / f"{_CLI_NAME}.yaml").exists()
 
     def test_cli_creates_md_on_disk(self):
         subprocess.run(
-            [*_SCAFFOLD, "--new-profile", _CLI_NAME, "--profile-layer", "layer2", "--ci", "--json"],
-            capture_output=True, text=True,
+            [
+                *_SCAFFOLD,
+                "--new-profile",
+                _CLI_NAME,
+                "--profile-layer",
+                "layer2",
+                "--ci",
+                "--json",
+            ],
+            capture_output=True,
+            text=True,
         )
         assert (_DESCRIPTORS_DIR / f"{_CLI_NAME}.md").exists()
 
     def test_cli_exit_code_zero(self):
         result = subprocess.run(
-            [*_SCAFFOLD, "--new-profile", _CLI_NAME, "--profile-layer", "layer2", "--ci", "--json"],
-            capture_output=True, text=True,
+            [
+                *_SCAFFOLD,
+                "--new-profile",
+                _CLI_NAME,
+                "--profile-layer",
+                "layer2",
+                "--ci",
+                "--json",
+            ],
+            capture_output=True,
+            text=True,
         )
         assert result.returncode == 0
 
     def test_cli_invalid_name_nonzero(self):
         result = subprocess.run(
             [*_SCAFFOLD, "--new-profile", "INVALID NAME", "--ci", "--json"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
         assert result.returncode != 0
 
     def test_cli_json_output_has_yaml_path(self):
         result = subprocess.run(
-            [*_SCAFFOLD, "--new-profile", _CLI_NAME, "--profile-layer", "layer2", "--ci", "--json"],
-            capture_output=True, text=True,
+            [
+                *_SCAFFOLD,
+                "--new-profile",
+                _CLI_NAME,
+                "--profile-layer",
+                "layer2",
+                "--ci",
+                "--json",
+            ],
+            capture_output=True,
+            text=True,
         )
         data = json.loads(result.stdout)
         assert Path(data["yaml"]).exists()
 
     def test_cli_json_output_has_md_path(self):
         result = subprocess.run(
-            [*_SCAFFOLD, "--new-profile", _CLI_NAME, "--profile-layer", "layer2", "--ci", "--json"],
-            capture_output=True, text=True,
+            [
+                *_SCAFFOLD,
+                "--new-profile",
+                _CLI_NAME,
+                "--profile-layer",
+                "layer2",
+                "--ci",
+                "--json",
+            ],
+            capture_output=True,
+            text=True,
         )
         data = json.loads(result.stdout)
         assert Path(data["md"]).exists()
@@ -297,6 +367,7 @@ class TestCLINewProfile:
 # ===========================================================================
 # Validação automática — 13 originais continuam ok após --new-profile
 # ===========================================================================
+
 
 class TestValidateAfterNewProfile:
 
@@ -313,6 +384,12 @@ class TestValidateAfterNewProfile:
         flow_new_profile(_make_args(new_profile=_TEST_NAME))
         report = validate_descriptors(_DESCRIPTORS_DIR)
 
-        original_results = [r for r in report.results if r.name in _ORIGINAL_DESCRIPTORS]
-        errors = [(r.name, i.field, i.message) for r in original_results for i in r.errors]
-        assert errors == [], f"Erros em descritores originais após new-profile: {errors}"
+        original_results = [
+            r for r in report.results if r.name in _ORIGINAL_DESCRIPTORS
+        ]
+        errors = [
+            (r.name, i.field, i.message) for r in original_results for i in r.errors
+        ]
+        assert (
+            errors == []
+        ), f"Erros em descritores originais após new-profile: {errors}"

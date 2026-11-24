@@ -10,7 +10,6 @@ Valida:
 
 from __future__ import annotations
 
-import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
@@ -22,10 +21,10 @@ from scripts.lib.ui import (
     _get_profile_description,
 )
 
-
 # ---------------------------------------------------------------------------
 # Tests: _get_compatible_layer2_profiles (Phase 1)
 # ---------------------------------------------------------------------------
+
 
 class TestGetCompatibleLayer2Profiles:
     """Testa filtragem de perfis Layer 2 por domain + language."""
@@ -54,8 +53,7 @@ class TestGetCompatibleLayer2Profiles:
         assert len(profiles) >= 1
         # Se terraform-aws estiver configurado corretamente, deve aparecer
         has_infra_profile = any(
-            "terraform" in p or "k8s" in p or "helm" in p
-            for p in profiles
+            "terraform" in p or "k8s" in p or "helm" in p for p in profiles
         )
         assert has_infra_profile
 
@@ -120,6 +118,7 @@ class TestGetCompatibleLayer2Profiles:
 # Tests: _get_profile_description (Phase 1)
 # ---------------------------------------------------------------------------
 
+
 class TestGetProfileDescription:
     """Testa descrições amigáveis de perfis."""
 
@@ -139,6 +138,7 @@ class TestGetProfileDescription:
 # ---------------------------------------------------------------------------
 # Tests: Integration (Phase 2)
 # ---------------------------------------------------------------------------
+
 
 class TestWithCodeProfileIntegration:
     """Testa flag --with-code-profile no comando new."""
@@ -170,6 +170,7 @@ class TestWithCodeProfileIntegration:
 # Tests: Regression (Phase 4)
 # ---------------------------------------------------------------------------
 
+
 class TestRegression:
     """Testes de regressão - garantir que funcionalidades antigas ainda funcionam."""
 
@@ -199,6 +200,7 @@ class TestRegression:
 # ---------------------------------------------------------------------------
 # Tests: Edge Cases
 # ---------------------------------------------------------------------------
+
 
 class TestEdgeCases:
     """Casos extremos e validações de erro."""

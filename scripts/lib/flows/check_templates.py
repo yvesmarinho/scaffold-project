@@ -13,7 +13,6 @@ Compara versões de templates em .specify/templates/ e reporta:
 import argparse
 import json
 import logging
-import sys
 from pathlib import Path
 
 from ..template_version import (
@@ -82,7 +81,9 @@ def flow_check_templates(args: argparse.Namespace) -> int:
             console.print(json.dumps(result, indent=2))
         else:
             console.print(f"\n[bold red]❌ Error:[/bold red] {msg}")
-            console.print(f"   Hint: This project may not have been created with SpecKit templates\n")
+            console.print(
+                "   Hint: This project may not have been created with SpecKit templates\n"
+            )
         return 2
 
     # Scan templates
@@ -112,10 +113,12 @@ def flow_check_templates(args: argparse.Namespace) -> int:
         result["local_count"] = len(local_templates)
         console.print(json.dumps(result, indent=2))
     else:
-        console.print(f"\n[bold]Template Drift Detection[/bold]")
+        console.print("\n[bold]Template Drift Detection[/bold]")
         console.print(f"  Upstream: {upstream_dir}")
         console.print(f"  Local:    {local_dir}")
-        console.print(f"  Templates scanned: {len(upstream_templates)} upstream, {len(local_templates)} local\n")
+        console.print(
+            f"  Templates scanned: {len(upstream_templates)} upstream, {len(local_templates)} local\n"
+        )
 
         report = generate_drift_report(drifts)
         console.print(report)

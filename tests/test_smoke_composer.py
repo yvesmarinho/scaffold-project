@@ -14,8 +14,6 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-import pytest
-
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 
 from lib.composer import (  # noqa: E402
@@ -42,10 +40,21 @@ _TEMPLATES_DIR = _PROJECT_ROOT / ".github" / "templates"
 def test_load_all_descriptors_returns_known_profiles() -> None:
     """Carrega os descritores reais e encontra os perfis conhecidos."""
     descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
-    expected = {"devops-programming", "python-fastapi", "python-flask", "typescript-next", "k8s-helm", "terraform-aws", "data-pipeline-airflow", "data-warehouse-dbt", "lgpd-baseline", "soc2-baseline"}
-    assert expected.issubset(set(descriptors.keys())), (
-        f"Perfis esperados não encontrados. Carregados: {list(descriptors.keys())}"
-    )
+    expected = {
+        "devops-programming",
+        "python-fastapi",
+        "python-flask",
+        "typescript-next",
+        "k8s-helm",
+        "terraform-aws",
+        "data-pipeline-airflow",
+        "data-warehouse-dbt",
+        "lgpd-baseline",
+        "soc2-baseline",
+    }
+    assert expected.issubset(
+        set(descriptors.keys())
+    ), f"Perfis esperados não encontrados. Carregados: {list(descriptors.keys())}"
 
 
 def test_load_all_descriptors_have_name_field() -> None:
@@ -66,9 +75,9 @@ def test_resolve_order_core_before_layer2() -> None:
     profiles = ["typescript-next", "devops-programming"]
     ordered = resolve_order(profiles, descriptors)
 
-    assert ordered.index("devops-programming") < ordered.index("typescript-next"), (
-        f"Esperado core antes de layer2, got: {ordered}"
-    )
+    assert ordered.index("devops-programming") < ordered.index(
+        "typescript-next"
+    ), f"Esperado core antes de layer2, got: {ordered}"
 
 
 def test_resolve_order_stable_with_single_profile() -> None:
@@ -168,11 +177,13 @@ def test_compose_skips_existing_files(make_project_config) -> None:
         descriptors_dir=_DESCRIPTORS_DIR,
         project_root=_PROJECT_ROOT,
     )
-    composer.compose(["typescript-next"], cfg)   # 1ª vez
+    composer.compose(["typescript-next"], cfg)  # 1ª vez
     result2 = composer.compose(["typescript-next"], cfg)  # 2ª vez
 
     assert result2.success
-    assert result2.created_count == 0, "Segunda composição não deve criar novos arquivos"
+    assert (
+        result2.created_count == 0
+    ), "Segunda composição não deve criar novos arquivos"
 
 
 # ---------------------------------------------------------------------------
@@ -194,7 +205,9 @@ def test_compose_nonexistent_profile_returns_error(make_project_config) -> None:
     assert result.created_count == 0
 
 
-def test_compose_conflict_returns_error_without_creating_files(make_project_config) -> None:
+def test_compose_conflict_returns_error_without_creating_files(
+    make_project_config,
+) -> None:
     """Conflito detectado antes de qualquer operação — nenhum arquivo deve ser criado."""
     cfg = make_project_config("programming", "python")
     composer = ProfileComposer(
@@ -204,9 +217,15 @@ def test_compose_conflict_returns_error_without_creating_files(make_project_conf
     result = composer.compose(["python-fastapi", "python-flask"], cfg)
 
     assert not result.success
-    assert "onflito" in result.errors[0], f"Mensagem de conflito inesperada: {result.errors}"
-    assert result.created_count == 0, "Conflito deve abortar antes de criar qualquer arquivo"
-    assert result.rolled_back == [], "Rollback não deve ser acionado para conflito preventivo"
+    assert (
+        "onflito" in result.errors[0]
+    ), f"Mensagem de conflito inesperada: {result.errors}"
+    assert (
+        result.created_count == 0
+    ), "Conflito deve abortar antes de criar qualquer arquivo"
+    assert (
+        result.rolled_back == []
+    ), "Rollback não deve ser acionado para conflito preventivo"
 
 
 # ---------------------------------------------------------------------------

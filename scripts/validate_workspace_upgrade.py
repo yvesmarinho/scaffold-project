@@ -41,13 +41,13 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import List, Tuple
 
 try:
     import yaml
 except ImportError:
     print("⚠️  PyYAML não instalado. Instalando...")
     import subprocess
+
     subprocess.check_call([sys.executable, "-m", "pip", "install", "pyyaml"])
     import yaml
 
@@ -56,8 +56,10 @@ except ImportError:
 # Validation Result Classes
 # ===========================================================================
 
+
 class ValidationResult:
     """Resultado de uma validação individual."""
+
     def __init__(self, name: str, passed: bool, message: str = "", details: str = ""):
         self.name = name
         self.passed = passed
@@ -71,9 +73,10 @@ class ValidationResult:
 
 class ValidationSuite:
     """Conjunto de validações agrupadas."""
+
     def __init__(self, name: str):
         self.name = name
-        self.results: List[ValidationResult] = []
+        self.results: list[ValidationResult] = []
 
     def add(self, result: ValidationResult):
         self.results.append(result)
@@ -105,6 +108,7 @@ class ValidationSuite:
 # Validators
 # ===========================================================================
 
+
 def validate_bug20_mcp(workspace: Path, verbose: bool = False) -> ValidationSuite:
     """Validar correção do BUG-20: MCP GitHub HTTP migration."""
     suite = ValidationSuite("BUG-20: MCP GitHub HTTP Migration")
@@ -113,11 +117,11 @@ def validate_bug20_mcp(workspace: Path, verbose: bool = False) -> ValidationSuit
 
     # Check 1: Arquivo existe
     if not mcp_file.exists():
-        suite.add(ValidationResult(
-            "mcp.json exists",
-            False,
-            ".vscode/mcp.json não encontrado"
-        ))
+        suite.add(
+            ValidationResult(
+                "mcp.json exists", False, ".vscode/mcp.json não encontrado"
+            )
+        )
         return suite
     suite.add(ValidationResult("mcp.json exists", True, str(mcp_file)))
 
@@ -127,22 +131,18 @@ def validate_bug20_mcp(workspace: Path, verbose: bool = False) -> ValidationSuit
             mcp_config = json.load(f)
         suite.add(ValidationResult("mcp.json valid JSON", True))
     except json.JSONDecodeError as e:
-        suite.add(ValidationResult(
-            "mcp.json valid JSON",
-            False,
-            f"JSON inválido: {e}"
-        ))
+        suite.add(ValidationResult("mcp.json valid JSON", False, f"JSON inválido: {e}"))
         return suite
 
     # Check 3: Verificar todos os MCP servers configurados
     # CORREÇÃO #1: Schema MCP usa "servers", não "mcpServers"
     mcp_servers = mcp_config.get("servers", mcp_config.get("mcpServers", {}))
     server_count = len(mcp_servers)
-    suite.add(ValidationResult(
-        "MCP servers count",
-        True,
-        f"{server_count} servidor(es) configurado(s)"
-    ))
+    suite.add(
+        ValidationResult(
+            "MCP servers count", True, f"{server_count} servidor(es) configurado(s)"
+        )
+    )
 
     # Check 4: Validar cada servidor MCP
     stdio_servers = []
@@ -152,20 +152,24 @@ def validate_bug20_mcp(workspace: Path, verbose: bool = False) -> ValidationSuit
             stdio_servers.append(server_name)
 
     if stdio_servers:
-        suite.add(ValidationResult(
-            "No stdio servers (all HTTP/npx)",
-            False,
-            f"Servidores com type='stdio' obsoleto: {', '.join(stdio_servers)}",
-            f"Arquivo: {mcp_file}\n"
-            f"Esperado: type='http' ou comando 'npx'\n"
-            f"Ação: Execute 'scaffold upgrade --force' novamente"
-        ))
+        suite.add(
+            ValidationResult(
+                "No stdio servers (all HTTP/npx)",
+                False,
+                f"Servidores com type='stdio' obsoleto: {', '.join(stdio_servers)}",
+                f"Arquivo: {mcp_file}\n"
+                f"Esperado: type='http' ou comando 'npx'\n"
+                f"Ação: Execute 'scaffold upgrade --force' novamente",
+            )
+        )
     else:
-        suite.add(ValidationResult(
-            "No stdio servers (all HTTP/npx)",
-            True,
-            "Todos os servidores usam HTTP ou npx"
-        ))
+        suite.add(
+            ValidationResult(
+                "No stdio servers (all HTTP/npx)",
+                True,
+                "Todos os servidores usam HTTP ou npx",
+            )
+        )
 
     # Check 5: Validar servidor GitHub especificamente (se existir)
     github_server = mcp_servers.get("github")
@@ -180,16 +184,22 @@ def validate_bug20_mcp(workspace: Path, verbose: bool = False) -> ValidationSuit
             if "github" in url.lower():
                 suite.add(ValidationResult("GitHub HTTP URL valid", True, url))
             else:
-                suite.add(ValidationResult("GitHub HTTP URL valid", False, f"URL suspeita: {url}"))
+                suite.add(
+                    ValidationResult(
+                        "GitHub HTTP URL valid", False, f"URL suspeita: {url}"
+                    )
+                )
 
             # Não deve ter campos CLI obsoletos
             obsolete = [f for f in ["command", "args", "env"] if f in github_server]
             if obsolete:
-                suite.add(ValidationResult(
-                    "GitHub: no obsolete CLI fields",
-                    False,
-                    f"Campos CLI encontrados: {obsolete}"
-                ))
+                suite.add(
+                    ValidationResult(
+                        "GitHub: no obsolete CLI fields",
+                        False,
+                        f"Campos CLI encontrados: {obsolete}",
+                    )
+                )
             else:
                 suite.add(ValidationResult("GitHub: no obsolete CLI fields", True))
 
@@ -199,18 +209,22 @@ def validate_bug20_mcp(workspace: Path, verbose: bool = False) -> ValidationSuit
             if command == "npx":
                 suite.add(ValidationResult("GitHub npx wrapper", True, "Usando npx"))
             else:
-                suite.add(ValidationResult("GitHub npx wrapper", False, f"Comando: {command}"))
+                suite.add(
+                    ValidationResult("GitHub npx wrapper", False, f"Comando: {command}")
+                )
     else:
-        suite.add(ValidationResult(
-            "GitHub server configured",
-            True,
-            "Não configurado (OK se intencional)"
-        ))
+        suite.add(
+            ValidationResult(
+                "GitHub server configured", True, "Não configurado (OK se intencional)"
+            )
+        )
 
     return suite
 
 
-def validate_bug001_objetivo_init(workspace: Path, verbose: bool = False) -> ValidationSuite:
+def validate_bug001_objetivo_init(
+    workspace: Path, verbose: bool = False
+) -> ValidationSuite:
     """Validar correção do BUG-001: scaffold objetivo-init 3 issues."""
     suite = ValidationSuite("BUG-001: Scaffold Objetivo-Init 3 Issues")
 
@@ -218,11 +232,13 @@ def validate_bug001_objetivo_init(workspace: Path, verbose: bool = False) -> Val
 
     # Check 1: objetivo.yaml existe
     if not objetivo.exists():
-        suite.add(ValidationResult(
-            "objetivo.yaml exists",
-            False,
-            "Arquivo não encontrado (BUG-001 Fix #1 não pode ser validado)"
-        ))
+        suite.add(
+            ValidationResult(
+                "objetivo.yaml exists",
+                False,
+                "Arquivo não encontrado (BUG-001 Fix #1 não pode ser validado)",
+            )
+        )
         # Ainda tentar validar Fix #3 (logs)
     else:
         suite.add(ValidationResult("objetivo.yaml exists", True))
@@ -240,58 +256,72 @@ def validate_bug001_objetivo_init(workspace: Path, verbose: bool = False) -> Val
                 has_sphinx = "Sphinx" in docstyle or "sphinx" in docstyle
                 is_default = has_google or has_sphinx
 
-                suite.add(ValidationResult(
-                    "Fix #1: docstyle populated",
-                    True,
-                    f"Docstyle: {docstyle[:50]}{'...' if len(docstyle) > 50 else ''}",
-                    f"Default Google/Sphinx: {is_default}"
-                ))
+                suite.add(
+                    ValidationResult(
+                        "Fix #1: docstyle populated",
+                        True,
+                        f"Docstyle: {docstyle[:50]}{'...' if len(docstyle) > 50 else ''}",
+                        f"Default Google/Sphinx: {is_default}",
+                    )
+                )
             else:
-                suite.add(ValidationResult(
-                    "Fix #1: docstyle populated",
-                    False,
-                    "Campo 'docstyle' vazio ou ausente"
-                ))
+                suite.add(
+                    ValidationResult(
+                        "Fix #1: docstyle populated",
+                        False,
+                        "Campo 'docstyle' vazio ou ausente",
+                    )
+                )
 
             # Check 3: Fix #2 - out-scope condicional (não aparece linha vazia)
             has_empty_outscope = bool(
-                "out-scope:" in content and
-                ('out-scope: ""' in content or 'out-scope: {{OUT_SCOPE}}' in content or
-                 'out-scope:\n' in content or '- out-scope:\n' in content)
+                "out-scope:" in content
+                and (
+                    'out-scope: ""' in content
+                    or "out-scope: {{OUT_SCOPE}}" in content
+                    or "out-scope:\n" in content
+                    or "- out-scope:\n" in content
+                )
             )
 
             if has_empty_outscope:
-                suite.add(ValidationResult(
-                    "Fix #2: no empty out-scope line",
-                    False,
-                    "Linha vazia de out-scope encontrada (deveria ser omitida)"
-                ))
+                suite.add(
+                    ValidationResult(
+                        "Fix #2: no empty out-scope line",
+                        False,
+                        "Linha vazia de out-scope encontrada (deveria ser omitida)",
+                    )
+                )
             else:
                 # Verificar se out-scope existe com valor
                 has_outscope = "out-scope:" in content
-                suite.add(ValidationResult(
-                    "Fix #2: no empty out-scope line",
-                    True,
-                    f"Out-scope: {'presente com valor' if has_outscope else 'omitido (correto)'}"
-                ))
+                suite.add(
+                    ValidationResult(
+                        "Fix #2: no empty out-scope line",
+                        True,
+                        f"Out-scope: {'presente com valor' if has_outscope else 'omitido (correto)'}",
+                    )
+                )
 
         except Exception as e:
-            suite.add(ValidationResult(
-                "Fix #1/#2: objetivo.yaml parsing",
-                False,
-                f"Erro ao processar: {e}"
-            ))
+            suite.add(
+                ValidationResult(
+                    "Fix #1/#2: objetivo.yaml parsing", False, f"Erro ao processar: {e}"
+                )
+            )
 
     # Check 4: Fix #3 - Logging em logs/scaffolds.yaml
     # CORREÇÃO #2: Este arquivo é criado por objetivo-init, pode não existir se nunca executou
     scaffolds_log = workspace / "logs" / "scaffolds.yaml"
 
     if not scaffolds_log.exists():
-        suite.add(ValidationResult(
-            "Fix #3: logs/scaffolds.yaml exists",
-            True,
-            "Arquivo não encontrado (OK se nunca executou objetivo-init)"
-        ))
+        suite.add(
+            ValidationResult(
+                "Fix #3: logs/scaffolds.yaml exists",
+                True,
+                "Arquivo não encontrado (OK se nunca executou objetivo-init)",
+            )
+        )
         # Retornar early pois não tem log para validar
         return suite
     else:
@@ -303,7 +333,8 @@ def validate_bug001_objetivo_init(workspace: Path, verbose: bool = False) -> Val
 
             # Procurar entradas de objetivo-init
             objetivo_entries = [
-                entry for entry in log_data
+                entry
+                for entry in log_data
                 if isinstance(entry, dict) and entry.get("operation") == "objetivo-init"
             ]
 
@@ -311,38 +342,46 @@ def validate_bug001_objetivo_init(workspace: Path, verbose: bool = False) -> Val
                 latest = objetivo_entries[-1]
                 project_name = latest.get("project_name", "N/A")
                 timestamp = latest.get("timestamp", "N/A")
-                suite.add(ValidationResult(
-                    "Fix #3: objetivo-init logged",
-                    True,
-                    f"Última entrada: {project_name} em {timestamp}"
-                ))
+                suite.add(
+                    ValidationResult(
+                        "Fix #3: objetivo-init logged",
+                        True,
+                        f"Última entrada: {project_name} em {timestamp}",
+                    )
+                )
             else:
-                suite.add(ValidationResult(
-                    "Fix #3: objetivo-init logged",
-                    False,
-                    f"Nenhuma entrada 'objetivo-init' em {len(log_data)} registros"
-                ))
+                suite.add(
+                    ValidationResult(
+                        "Fix #3: objetivo-init logged",
+                        False,
+                        f"Nenhuma entrada 'objetivo-init' em {len(log_data)} registros",
+                    )
+                )
         except Exception as e:
-            suite.add(ValidationResult(
-                "Fix #3: logs parsing",
-                False,
-                f"Erro ao processar log: {e}"
-            ))
+            suite.add(
+                ValidationResult(
+                    "Fix #3: logs parsing", False, f"Erro ao processar log: {e}"
+                )
+            )
 
     return suite
 
 
-def validate_bug17_timetracker(workspace: Path, verbose: bool = False) -> ValidationSuite:
+def validate_bug17_timetracker(
+    workspace: Path, verbose: bool = False
+) -> ValidationSuite:
     """Validar correção do BUG-17: session-time-tracker deployment."""
     suite = ValidationSuite("BUG-17: Session Time Tracker Deployment")
 
     # Check 1: Script existe
     script = workspace / "scripts" / "session-time-tracker.py"
-    suite.add(ValidationResult(
-        "session-time-tracker.py exists",
-        script.exists(),
-        str(script) if script.exists() else "Arquivo não encontrado"
-    ))
+    suite.add(
+        ValidationResult(
+            "session-time-tracker.py exists",
+            script.exists(),
+            str(script) if script.exists() else "Arquivo não encontrado",
+        )
+    )
 
     # Check 2: wrapper de início de sessão existe e usa o CLI canônico
     candidates = [
@@ -351,40 +390,58 @@ def validate_bug17_timetracker(workspace: Path, verbose: bool = False) -> Valida
     ]
     prompt = next((candidate for candidate in candidates if candidate.exists()), None)
     if prompt is None:
-        suite.add(ValidationResult(
-            "session-start wrapper exists",
-            False,
-            "Nenhum wrapper de session-start encontrado"
-        ))
+        suite.add(
+            ValidationResult(
+                "session-start wrapper exists",
+                False,
+                "Nenhum wrapper de session-start encontrado",
+            )
+        )
         return suite
 
     content = prompt.read_text(encoding="utf-8")
     has_session_manager = "python scripts/session-manager.py --json start" in content
     if not has_session_manager:
-        suite.add(ValidationResult(
-            "session-start uses session-manager CLI",
-            False,
-            "Comando canônico do session-manager não encontrado"
-        ))
+        suite.add(
+            ValidationResult(
+                "session-start uses session-manager CLI",
+                False,
+                "Comando canônico do session-manager não encontrado",
+            )
+        )
         return suite
 
-    suite.add(ValidationResult("session-start uses session-manager CLI", True, str(prompt)))
+    suite.add(
+        ValidationResult("session-start uses session-manager CLI", True, str(prompt))
+    )
 
     # Check 3: session-manager.py deve estar deployado junto com o tracker
     manager_script = workspace / "scripts" / "session-manager.py"
-    suite.add(ValidationResult(
-        "session-manager.py deployed",
-        manager_script.exists(),
-        str(manager_script) if manager_script.exists() else "Arquivo não encontrado"
-    ))
+    suite.add(
+        ValidationResult(
+            "session-manager.py deployed",
+            manager_script.exists(),
+            (
+                str(manager_script)
+                if manager_script.exists()
+                else "Arquivo não encontrado"
+            ),
+        )
+    )
 
     # Check 4: prompt curto, sem fluxo legado numerado
     has_legacy_step = "Passo 6.5" in content
-    suite.add(ValidationResult(
-        "session-start legacy step removed",
-        not has_legacy_step,
-        "Prompt enxuto sem passo 6.5 legado" if not has_legacy_step else "Prompt ainda contém passo 6.5 legado",
-    ))
+    suite.add(
+        ValidationResult(
+            "session-start legacy step removed",
+            not has_legacy_step,
+            (
+                "Prompt enxuto sem passo 6.5 legado"
+                if not has_legacy_step
+                else "Prompt ainda contém passo 6.5 legado"
+            ),
+        )
+    )
 
     return suite
 
@@ -397,11 +454,11 @@ def validate_bug18_objetivo(workspace: Path, verbose: bool = False) -> Validatio
 
     # Check 1: Arquivo existe
     if not objetivo.exists():
-        suite.add(ValidationResult(
-            "objetivo.yaml exists",
-            False,
-            "Arquivo não encontrado na raiz"
-        ))
+        suite.add(
+            ValidationResult(
+                "objetivo.yaml exists", False, "Arquivo não encontrado na raiz"
+            )
+        )
         return suite
     suite.add(ValidationResult("objetivo.yaml exists", True, str(objetivo)))
 
@@ -416,38 +473,51 @@ def validate_bug18_objetivo(workspace: Path, verbose: bool = False) -> Validatio
             project_name = data["project"].get("name", "")
             # Verificar que nome foi preenchido (não está vazio nem é placeholder)
             is_valid = bool(project_name) and project_name != "CHANGE_ME"
-            suite.add(ValidationResult(
-                "project info present",
-                is_valid,
-                f"Nome: {project_name}" if is_valid else f"Nome inválido: '{project_name}'"
-            ))
+            suite.add(
+                ValidationResult(
+                    "project info present",
+                    is_valid,
+                    (
+                        f"Nome: {project_name}"
+                        if is_valid
+                        else f"Nome inválido: '{project_name}'"
+                    ),
+                )
+            )
         else:
-            suite.add(ValidationResult(
-                "project info present",
-                False,
-                "Seção 'project' ausente"
-            ))
+            suite.add(
+                ValidationResult(
+                    "project info present", False, "Seção 'project' ausente"
+                )
+            )
     except yaml.YAMLError as e:
-        suite.add(ValidationResult(
-            "objetivo.yaml valid YAML",
-            False,
-            f"YAML inválido: {e}"
-        ))
+        suite.add(
+            ValidationResult("objetivo.yaml valid YAML", False, f"YAML inválido: {e}")
+        )
 
     return suite
 
 
-def validate_bug11_session_init(workspace: Path, verbose: bool = False) -> ValidationSuite:
+def validate_bug11_session_init(
+    workspace: Path, verbose: bool = False
+) -> ValidationSuite:
     """Validar correção do BUG-11: session systems initialization."""
     suite = ValidationSuite("BUG-11: Session Systems Initialization")
 
     # Check 1: .session-time/history.csv (OK se ausente, criado no primeiro session-start)
     history_csv = workspace / ".session-time" / "history.csv"
-    suite.add(ValidationResult(
-        ".session-time/history.csv exists",
-        history_csv.exists() or True,  # Sempre PASS - criado apenas após session-start-first
-        f"{history_csv.stat().st_size} bytes" if history_csv.exists() else "Ausente (OK se não inicializado)"
-    ))
+    suite.add(
+        ValidationResult(
+            ".session-time/history.csv exists",
+            history_csv.exists()
+            or True,  # Sempre PASS - criado apenas após session-start-first
+            (
+                f"{history_csv.stat().st_size} bytes"
+                if history_csv.exists()
+                else "Ausente (OK se não inicializado)"
+            ),
+        )
+    )
 
     # Check 2-3: Scripts de sessão (registros vivem no vault Obsidian via MCP)
     session_scripts = [
@@ -457,42 +527,54 @@ def validate_bug11_session_init(workspace: Path, verbose: bool = False) -> Valid
 
     for script_name in session_scripts:
         script = workspace / "scripts" / script_name
-        suite.add(ValidationResult(
-            f"{script_name} deployed",
-            script.exists(),
-            "OK" if script.exists() else "Ausente"
-        ))
+        suite.add(
+            ValidationResult(
+                f"{script_name} deployed",
+                script.exists(),
+                "OK" if script.exists() else "Ausente",
+            )
+        )
 
     return suite
 
 
-def validate_bug12_memory_init(workspace: Path, verbose: bool = False) -> ValidationSuite:
+def validate_bug12_memory_init(
+    workspace: Path, verbose: bool = False
+) -> ValidationSuite:
     """Validar correção do BUG-12: memory system initialization."""
     suite = ValidationSuite("BUG-12: Memory System Initialization")
 
     # Check 1: .memory/index/memory.db
     memory_db = workspace / ".memory" / "index" / "memory.db"
-    suite.add(ValidationResult(
-        ".memory/index/memory.db exists",
-        memory_db.exists() or True,  # OK se não executou create_memory_structure
-        f"{memory_db.stat().st_size} bytes" if memory_db.exists() else "Ausente (OK se não executou create_memory_structure)"
-    ))
+    suite.add(
+        ValidationResult(
+            ".memory/index/memory.db exists",
+            memory_db.exists() or True,  # OK se não executou create_memory_structure
+            (
+                f"{memory_db.stat().st_size} bytes"
+                if memory_db.exists()
+                else "Ausente (OK se não executou create_memory_structure)"
+            ),
+        )
+    )
 
     # Check 2-5: Estrutura de diretórios
     memory_dirs = [
         (".memory/memories/project", "project memories"),
         (".memory/memories/team", "team memories"),
         (".memory/memories/sessions", "session memories"),
-        (".memory/memories/.templates", "memory templates")
+        (".memory/memories/.templates", "memory templates"),
     ]
 
     for dir_path, dir_desc in memory_dirs:
         mem_dir = workspace / dir_path
-        suite.add(ValidationResult(
-            f"{dir_desc} dir",
-            mem_dir.exists() or True,  # OK se não inicializado
-            "OK" if mem_dir.exists() else "Ausente (OK se não inicializado)"
-        ))
+        suite.add(
+            ValidationResult(
+                f"{dir_desc} dir",
+                mem_dir.exists() or True,  # OK se não inicializado
+                "OK" if mem_dir.exists() else "Ausente (OK se não inicializado)",
+            )
+        )
 
     # Check 6-10: Scripts de memory (5 arquivos)
     memory_scripts = [
@@ -500,31 +582,37 @@ def validate_bug12_memory_init(workspace: Path, verbose: bool = False) -> Valida
         "mem_context.py",
         "mem_search.py",
         "mem_save.py",
-        "test_memory_smoke.py"
+        "test_memory_smoke.py",
     ]
 
     for script_name in memory_scripts:
         script = workspace / "scripts" / script_name
-        suite.add(ValidationResult(
-            f"{script_name} deployed",
-            script.exists(),
-            "OK" if script.exists() else "Ausente"
-        ))
+        suite.add(
+            ValidationResult(
+                f"{script_name} deployed",
+                script.exists(),
+                "OK" if script.exists() else "Ausente",
+            )
+        )
 
     return suite
 
 
-def validate_bug13_copilot_instructions(workspace: Path, verbose: bool = False) -> ValidationSuite:
+def validate_bug13_copilot_instructions(
+    workspace: Path, verbose: bool = False
+) -> ValidationSuite:
     """Validar correção do BUG-13: copilot-instructions.md deployment."""
     suite = ValidationSuite("BUG-13: Copilot Instructions Deployment")
 
     # Check 1: .github/copilot-instructions.md existe
     copilot_inst = workspace / ".github" / "copilot-instructions.md"
-    suite.add(ValidationResult(
-        "copilot-instructions.md exists",
-        copilot_inst.exists(),
-        str(copilot_inst) if copilot_inst.exists() else "Arquivo ausente"
-    ))
+    suite.add(
+        ValidationResult(
+            "copilot-instructions.md exists",
+            copilot_inst.exists(),
+            str(copilot_inst) if copilot_inst.exists() else "Arquivo ausente",
+        )
+    )
 
     if not copilot_inst.exists():
         return suite
@@ -534,24 +622,34 @@ def validate_bug13_copilot_instructions(workspace: Path, verbose: bool = False) 
     has_frontmatter = content.startswith("---")
     has_applyto = 'applyTo: "**"' in content or "applyTo:" in content
 
-    suite.add(ValidationResult(
-        "has applyTo frontmatter",
-        has_frontmatter and has_applyto,
-        "Frontmatter com applyTo" if (has_frontmatter and has_applyto) else "Sem applyTo"
-    ))
+    suite.add(
+        ValidationResult(
+            "has applyTo frontmatter",
+            has_frontmatter and has_applyto,
+            (
+                "Frontmatter com applyTo"
+                if (has_frontmatter and has_applyto)
+                else "Sem applyTo"
+            ),
+        )
+    )
 
     # Check 3: Conteúdo P0 presente
     has_p0 = "P0" in content or "CRÍTICO" in content
-    suite.add(ValidationResult(
-        "P0 rules present",
-        has_p0,
-        "Regras P0 encontradas" if has_p0 else "Sem regras P0"
-    ))
+    suite.add(
+        ValidationResult(
+            "P0 rules present",
+            has_p0,
+            "Regras P0 encontradas" if has_p0 else "Sem regras P0",
+        )
+    )
 
     return suite
 
 
-def validate_bug16_merge_strategy(workspace: Path, verbose: bool = False) -> ValidationSuite:
+def validate_bug16_merge_strategy(
+    workspace: Path, verbose: bool = False
+) -> ValidationSuite:
     """Validar correção do BUG-16: merge strategy para JSON/workspace."""
     suite = ValidationSuite("BUG-16: JSON/Workspace Merge Strategy")
 
@@ -559,23 +657,37 @@ def validate_bug16_merge_strategy(workspace: Path, verbose: bool = False) -> Val
     vscode_dir = workspace / ".vscode"
     backups = list(vscode_dir.glob("*.backup")) if vscode_dir.exists() else []
 
-    suite.add(ValidationResult(
-        "backups created",
-        len(backups) > 0,
-        f"{len(backups)} arquivo(s) backup" if backups else "Nenhum backup (OK se upgrade não sobrescreveu)"
-    ))
+    suite.add(
+        ValidationResult(
+            "backups created",
+            len(backups) > 0,
+            (
+                f"{len(backups)} arquivo(s) backup"
+                if backups
+                else "Nenhum backup (OK se upgrade não sobrescreveu)"
+            ),
+        )
+    )
 
     # Check 2: .copilot-rules consolidado (único arquivo ou symlink)
     copilot_rules = list(workspace.glob(".copilot-rules*.md"))
     # Filtrar symlinks
     copilot_rules_real = [f for f in copilot_rules if not f.is_symlink()]
-    is_single_or_symlink = len(copilot_rules) == 1 or (len(copilot_rules_real) == 1 and len(copilot_rules) > 1)
+    is_single_or_symlink = len(copilot_rules) == 1 or (
+        len(copilot_rules_real) == 1 and len(copilot_rules) > 1
+    )
 
-    suite.add(ValidationResult(
-        ".copilot-rules consolidated",
-        is_single_or_symlink,
-        f"1 arquivo (OK)" if len(copilot_rules) == 1 else f"{len(copilot_rules)} arquivos ({len(copilot_rules_real)} reais)"
-    ))
+    suite.add(
+        ValidationResult(
+            ".copilot-rules consolidated",
+            is_single_or_symlink,
+            (
+                "1 arquivo (OK)"
+                if len(copilot_rules) == 1
+                else f"{len(copilot_rules)} arquivos ({len(copilot_rules_real)} reais)"
+            ),
+        )
+    )
 
     # Check 3: settings.json é JSON válido
     settings = workspace / ".vscode" / "settings.json"
@@ -583,9 +695,13 @@ def validate_bug16_merge_strategy(workspace: Path, verbose: bool = False) -> Val
         try:
             with settings.open() as f:
                 data = json.load(f)
-            suite.add(ValidationResult("settings.json valid", True, f"{len(data)} campos"))
+            suite.add(
+                ValidationResult("settings.json valid", True, f"{len(data)} campos")
+            )
         except Exception as e:
-            suite.add(ValidationResult("settings.json valid", False, f"JSON inválido: {e}"))
+            suite.add(
+                ValidationResult("settings.json valid", False, f"JSON inválido: {e}")
+            )
     else:
         suite.add(ValidationResult("settings.json valid", False, "Arquivo ausente"))
 
@@ -604,7 +720,9 @@ def validate_bug16_merge_strategy(workspace: Path, verbose: bool = False) -> Val
     return suite
 
 
-def validate_bug19_gitvalidators(workspace: Path, verbose: bool = False) -> ValidationSuite:
+def validate_bug19_gitvalidators(
+    workspace: Path, verbose: bool = False
+) -> ValidationSuite:
     """Validar correção do BUG-19: git_validators.py deployment."""
     suite = ValidationSuite("BUG-19: Git Validators Deployment")
 
@@ -612,22 +730,24 @@ def validate_bug19_gitvalidators(workspace: Path, verbose: bool = False) -> Vali
 
     # Check 1: Arquivo existe
     if not script.exists():
-        suite.add(ValidationResult(
-            "git_validators.py exists",
-            False,
-            "Arquivo não encontrado"
-        ))
+        suite.add(
+            ValidationResult(
+                "git_validators.py exists", False, "Arquivo não encontrado"
+            )
+        )
         return suite
     suite.add(ValidationResult("git_validators.py exists", True, str(script)))
 
     # Check 2: É módulo Python válido
     content = script.read_text(encoding="utf-8")
     has_python_code = "def " in content or "class " in content
-    suite.add(ValidationResult(
-        "contains Python code",
-        has_python_code,
-        "Funções/classes encontradas" if has_python_code else "Sem código Python"
-    ))
+    suite.add(
+        ValidationResult(
+            "contains Python code",
+            has_python_code,
+            "Funções/classes encontradas" if has_python_code else "Sem código Python",
+        )
+    )
 
     return suite
 
@@ -649,23 +769,37 @@ def validate_critical_files(workspace: Path, verbose: bool = False) -> Validatio
             required = ["scaffold_version", "updated_at", "project"]
             has_required = all(k in data for k in required)
 
-            suite.add(ValidationResult(
-                ".scaffold-state.yaml structure",
-                has_required,
-                "Campos obrigatórios presentes" if has_required else f"Campos ausentes: {[k for k in required if k not in data]}"
-            ))
+            suite.add(
+                ValidationResult(
+                    ".scaffold-state.yaml structure",
+                    has_required,
+                    (
+                        "Campos obrigatórios presentes"
+                        if has_required
+                        else f"Campos ausentes: {[k for k in required if k not in data]}"
+                    ),
+                )
+            )
 
             # Validar conteúdo dos campos
             if has_required:
                 project_name = data.get("project", {}).get("name")
                 has_project_name = bool(project_name)
-                suite.add(ValidationResult(
-                    ".scaffold-state.yaml content",
-                    has_project_name,
-                    f"Nome do projeto: {project_name}" if has_project_name else "Nome do projeto ausente"
-                ))
+                suite.add(
+                    ValidationResult(
+                        ".scaffold-state.yaml content",
+                        has_project_name,
+                        (
+                            f"Nome do projeto: {project_name}"
+                            if has_project_name
+                            else "Nome do projeto ausente"
+                        ),
+                    )
+                )
         except Exception as e:
-            suite.add(ValidationResult(".scaffold-state.yaml parsing", False, f"Erro: {e}"))
+            suite.add(
+                ValidationResult(".scaffold-state.yaml parsing", False, f"Erro: {e}")
+            )
     else:
         suite.add(ValidationResult(".scaffold-state.yaml", False, "Arquivo ausente"))
 
@@ -678,17 +812,21 @@ def validate_critical_files(workspace: Path, verbose: bool = False) -> Validatio
         has_p0 = "P0" in content or "CRÍTICO" in content
         has_rules = "NUNCA" in content or "PROIBIDO" in content
 
-        suite.add(ValidationResult(
-            ".copilot-rules.md",
-            True,
-            f"{rules.stat().st_size} bytes"
-        ))
+        suite.add(
+            ValidationResult(".copilot-rules.md", True, f"{rules.stat().st_size} bytes")
+        )
 
-        suite.add(ValidationResult(
-            ".copilot-rules.md content",
-            has_p0 and has_rules,
-            "Regras P0 presentes" if (has_p0 and has_rules) else "Conteúdo incompleto"
-        ))
+        suite.add(
+            ValidationResult(
+                ".copilot-rules.md content",
+                has_p0 and has_rules,
+                (
+                    "Regras P0 presentes"
+                    if (has_p0 and has_rules)
+                    else "Conteúdo incompleto"
+                ),
+            )
+        )
     else:
         suite.add(ValidationResult(".copilot-rules.md", False, "Ausente ou vazio"))
 
@@ -705,11 +843,13 @@ def validate_critical_files(workspace: Path, verbose: bool = False) -> Validatio
             has_python = "python." in str(settings_data)
             has_files_exclude = "files.exclude" in settings_data
 
-            suite.add(ValidationResult(
-                ".vscode/settings.json content",
-                has_python or has_files_exclude,
-                f"Configurações: {len(settings_data)} campos"
-            ))
+            suite.add(
+                ValidationResult(
+                    ".vscode/settings.json content",
+                    has_python or has_files_exclude,
+                    f"Configurações: {len(settings_data)} campos",
+                )
+            )
         except Exception as e:
             suite.add(ValidationResult(".vscode/settings.json", False, f"Erro: {e}"))
     else:
@@ -733,20 +873,24 @@ def validate_scaffold_logs(workspace: Path, verbose: bool = False) -> Validation
         return suite
 
     latest_log = max(scaffold_logs, key=lambda p: p.stat().st_mtime)
-    suite.add(ValidationResult(
-        "latest scaffold log",
-        True,
-        f"{latest_log.name} ({latest_log.stat().st_size} bytes)"
-    ))
+    suite.add(
+        ValidationResult(
+            "latest scaffold log",
+            True,
+            f"{latest_log.name} ({latest_log.stat().st_size} bytes)",
+        )
+    )
 
     # Verificar conteúdo
     content = latest_log.read_text(encoding="utf-8")
     has_stats = any(word in content for word in ["created:", "skipped:", "merged:"])
-    suite.add(ValidationResult(
-        "log contains stats",
-        has_stats,
-        "Estatísticas encontradas" if has_stats else "Sem estatísticas"
-    ))
+    suite.add(
+        ValidationResult(
+            "log contains stats",
+            has_stats,
+            "Estatísticas encontradas" if has_stats else "Sem estatísticas",
+        )
+    )
 
     return suite
 
@@ -754,6 +898,7 @@ def validate_scaffold_logs(workspace: Path, verbose: bool = False) -> Validation
 # ===========================================================================
 # Main
 # ===========================================================================
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -763,13 +908,9 @@ def main():
         "workspace",
         nargs="?",
         default="/home/yves_marinho/DevOps/Projetos/test-workspace-fix",
-        help="Path para o workspace (padrão: test-workspace-fix)"
+        help="Path para o workspace (padrão: test-workspace-fix)",
     )
-    parser.add_argument(
-        "-v", "--verbose",
-        action="store_true",
-        help="Saída detalhada"
-    )
+    parser.add_argument("-v", "--verbose", action="store_true", help="Saída detalhada")
     args = parser.parse_args()
 
     workspace = Path(args.workspace).resolve()
@@ -778,7 +919,9 @@ def main():
     print("🔍 VALIDAÇÃO DE SCAFFOLD UPGRADE")
     print("=" * 70)
     print(f"Workspace: {workspace}")
-    print(f"Data: {__import__('datetime').datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(
+        f"Data: {__import__('datetime').datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    )
     print()
 
     if not workspace.exists():
@@ -825,10 +968,14 @@ def main():
         print("=" * 70)
         print("\n💡 Próximos passos:")
         print("  1. Revisar falhas acima")
-        print("  2. Se BUG-20, 001, 11, 12, 13, 16 falharam: Execute 'scaffold upgrade --force'")
+        print(
+            "  2. Se BUG-20, 001, 11, 12, 13, 16 falharam: Execute 'scaffold upgrade --force'"
+        )
         print("  3. Se BUG-17/18/19 falharam: Verifique se commits foram aplicados")
         print("  4. Se logs falharam: Verifique se scaffold upgrade foi executado")
-        print("  5. Para BUG-11/12: Execute scripts de inicialização se databases ausentes")
+        print(
+            "  5. Para BUG-11/12: Execute scripts de inicialização se databases ausentes"
+        )
         print()
         return 1
 

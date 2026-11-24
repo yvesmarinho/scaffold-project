@@ -7,9 +7,8 @@ Tests both interactive and non-interactive wizard modes with mocked stdin.
 import json
 import subprocess
 import sys
-from io import StringIO
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -114,7 +113,7 @@ created_by: "{{CREATED_BY}}"
 
 {{ANSWER_5}}
 """,
-            encoding='utf-8'
+            encoding="utf-8",
         )
 
         return ObjetivoWizard(template_path=template_path)
@@ -152,7 +151,7 @@ created_by: "{{CREATED_BY}}"
             required=True,
         )
 
-        with patch('builtins.input', return_value="Test answer"):
+        with patch("builtins.input", return_value="Test answer"):
             answer = wizard._ask_question(question)
 
         assert answer == "Test answer"
@@ -171,7 +170,7 @@ created_by: "{{CREATED_BY}}"
         )
 
         # First empty, then valid answer
-        with patch('builtins.input', side_effect=["", "Valid answer"]):
+        with patch("builtins.input", side_effect=["", "Valid answer"]):
             answer = wizard._ask_question(question)
 
         assert answer == "Valid answer"
@@ -189,7 +188,7 @@ created_by: "{{CREATED_BY}}"
             required=False,
         )
 
-        with patch('builtins.input', return_value=""):
+        with patch("builtins.input", return_value=""):
             answer = wizard._ask_question(question)
 
         assert answer is None
@@ -208,7 +207,7 @@ created_by: "{{CREATED_BY}}"
         )
 
         # Simulate: line1, line2, empty, empty (terminate)
-        with patch('builtins.input', side_effect=["Line 1", "Line 2", "", ""]):
+        with patch("builtins.input", side_effect=["Line 1", "Line 2", "", ""]):
             answer = wizard._ask_question(question)
 
         assert answer == "Line 1\nLine 2"
@@ -266,7 +265,7 @@ created_by: "{{CREATED_BY}}"
         assert exit_code == 0
         assert output_file.exists()
 
-        content = output_file.read_text(encoding='utf-8')
+        content = output_file.read_text(encoding="utf-8")
         assert 'name: "test-api"' in content
         assert "API for testing" in content
 
@@ -287,7 +286,7 @@ created_by: "{{CREATED_BY}}"
         wizard.save_draft(draft_file)
 
         assert draft_file.exists()
-        content = draft_file.read_text(encoding='utf-8')
+        content = draft_file.read_text(encoding="utf-8")
         assert 'name: "draft-project"' in content
         assert "Partial answer" in content
 
@@ -352,7 +351,7 @@ class TestScaffoldIntegration:
             },
         }
 
-        answers_file.write_text(json.dumps(answers_data, indent=2), encoding='utf-8')
+        answers_file.write_text(json.dumps(answers_data, indent=2), encoding="utf-8")
 
         result = subprocess.run(
             [

@@ -1,5 +1,5 @@
-<!-- Criado em: 24/11/2026 11:35 -->
-<!-- Modificado em: 24/11/2026 11:13 -->
+<!-- Criado em: 24/11/2026 11:13 -->
+<!-- Modificado em: 24/11/2026 15:00 -->
 
 # Shell integration do terminal VS Code (zsh)
 

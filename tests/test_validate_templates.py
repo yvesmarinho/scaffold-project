@@ -10,15 +10,19 @@ Tests:
 - Variable validation
 """
 
+import importlib.util
 import json
+import sys
 import tempfile
 from pathlib import Path
-import sys
-import importlib.util
 
 # Load validate-templates.py module dynamically (has hyphen in name)
-validate_templates_path = Path(__file__).parent.parent / "scripts" / "validate-templates.py"
-spec = importlib.util.spec_from_file_location("validate_templates", validate_templates_path)
+validate_templates_path = (
+    Path(__file__).parent.parent / "scripts" / "validate-templates.py"
+)
+spec = importlib.util.spec_from_file_location(
+    "validate_templates", validate_templates_path
+)
 validate_templates = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(validate_templates)
 

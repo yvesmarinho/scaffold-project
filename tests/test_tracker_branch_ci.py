@@ -2,8 +2,8 @@
 """
 NOME: test_tracker_branch_ci.py
 TITULO: session-time-tracker em detached HEAD / sem TTY (ambiente de CI)
-DATA: 24/11/2026 10:25
-MODIFICADO: 24/11/2026 10:24
+DATA: 24/11/2026 10:24
+MODIFICADO: 24/11/2026 15:00
 VERSÃO: 1.0.0
 DEPEND: pytest, git
 STATUS: DEV
@@ -111,22 +111,43 @@ def test_branch_fora_do_padrao_sem_tty_recusa_sem_traceback(tmp_path: Path) -> N
 
 @pytest.mark.parametrize(
     "arquivo",
-    ["tests/test_session_time_tracker.py", "tests/test_isolamento_memory_session_time.py"],
+    [
+        "tests/test_session_time_tracker.py",
+        "tests/test_isolamento_memory_session_time.py",
+    ],
 )
-def test_suite_do_tracker_independe_da_branch_real(tmp_path: Path, arquivo: str) -> None:
+def test_suite_do_tracker_independe_da_branch_real(
+    tmp_path: Path, arquivo: str
+) -> None:
     """Roda a suíte do tracker numa cópia do repo em branch fora da convenção."""
     copia = tmp_path / "copia"
     shutil.copytree(
         _PROJECT_ROOT,
         copia,
         ignore=shutil.ignore_patterns(
-            ".git", ".venv", "graphify-out", "htmlcov", "logs", "tmp", "*cache*", "node_modules"
+            ".git",
+            ".venv",
+            "graphify-out",
+            "htmlcov",
+            "logs",
+            "tmp",
+            "*cache*",
+            "node_modules",
         ),
     )
     _git(copia, "init", "-q", "-b", "Nome_Ruim")
     _git(copia, "commit", "-q", "--allow-empty", "-m", "init")
     result = subprocess.run(  # noqa: S603
-        [sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "--no-cov", arquivo],
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            "--no-cov",
+            arquivo,
+        ],
         capture_output=True,
         text=True,
         cwd=copia,

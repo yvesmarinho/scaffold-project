@@ -6,7 +6,6 @@ Part of IMP-65 (Template Synchronization System) Phase 2.
 
 import argparse
 import logging
-import sys
 from pathlib import Path
 
 from .. import template_diff, template_version
@@ -69,15 +68,12 @@ def flow_diff_template(args: argparse.Namespace) -> int:
         local_dir = target_dir / ".specify" / "templates"
 
         if not upstream_dir.exists():
-            console.print(
-                f"[red]❌ Upstream templates not found: {upstream_dir}[/red]")
+            console.print(f"[red]❌ Upstream templates not found: {upstream_dir}[/red]")
             return 2
 
         if not local_dir.exists():
-            console.print(
-                f"[red]❌ Local templates not found: {local_dir}[/red]")
-            console.print(
-                "Are you in a project directory created with scaffold.py?")
+            console.print(f"[red]❌ Local templates not found: {local_dir}[/red]")
+            console.print("Are you in a project directory created with scaffold.py?")
             return 1
 
         local_path = local_dir / template_name
@@ -87,19 +83,18 @@ def flow_diff_template(args: argparse.Namespace) -> int:
 
     if not local_path.exists():
         console.print(f"[red]❌ Local template not found: {local_path}[/red]")
-        console.print(f"\nAvailable local templates:")
+        console.print("\nAvailable local templates:")
         for tmpl in sorted(local_dir.glob("*.md")):
             console.print(f"  - {tmpl.name}")
         return 1
 
     if not upstream_path.exists():
-        console.print(
-            f"[red]❌ Upstream template not found: {upstream_path}[/red]")
+        console.print(f"[red]❌ Upstream template not found: {upstream_path}[/red]")
         console.print("This template may have been removed from upstream.")
         return 1
 
     # Parse versions
-    console.print(f"Parsing template versions...")
+    console.print("Parsing template versions...")
     local_info = template_version.parse_template_version(local_path)
     upstream_info = template_version.parse_template_version(upstream_path)
 
@@ -117,8 +112,8 @@ def flow_diff_template(args: argparse.Namespace) -> int:
 
     # Check if there are any differences
     if not diff_result.has_differences:
-        console.print(f"\n[green]✅ No differences found![/green]")
-        console.print(f"Local and upstream templates are identical.")
+        console.print("\n[green]✅ No differences found![/green]")
+        console.print("Local and upstream templates are identical.")
         return 0
 
     # Determine output format

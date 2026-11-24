@@ -15,8 +15,8 @@ import json
 import logging
 from pathlib import Path
 
-from .config import CreatedItem, DomainType, LanguageType, ProjectConfig
 from . import file_merge
+from .config import CreatedItem, ProjectConfig
 
 log = logging.getLogger(__name__)
 
@@ -96,7 +96,6 @@ LANGUAGE_EXTENSIONS: dict[str, list[str]] = {
 _SETTINGS_GLOBAL: dict = {
     # Idioma e regionalização
     "locale.language": "pt-br",
-
     # GitHub Copilot e MCP
     "chat.mcp.autostart": True,
     "github.copilot.chat.enableMcp": True,
@@ -111,13 +110,11 @@ _SETTINGS_GLOBAL: dict = {
         ".specify/scripts/bash/": True,
         ".specify/scripts/powershell/": True,
     },
-
     # Terminal — shell integration (detecção de comandos, decorações de
     # sucesso/erro, navegação entre comandos). Fallback manual para zsh em
     # docs/guides/VSCODE_SHELL_INTEGRATION.md.
     "terminal.integrated.shellIntegration.enabled": True,
     "terminal.integrated.shellIntegration.decorationsEnabled": "both",
-
     # Configurações gerais do editor
     "editor.tabSize": 4,
     "editor.insertSpaces": True,
@@ -216,14 +213,22 @@ _ALL_MCP_SERVERS: dict[str, dict] = {
         "type": "stdio",
         "command": "docker",
         "args": [
-            "run", "-i", "--rm",
-            "-e", "GITHUB_PERSONAL_ACCESS_TOKEN=${input:github-token}",
+            "run",
+            "-i",
+            "--rm",
+            "-e",
+            "GITHUB_PERSONAL_ACCESS_TOKEN=${input:github-token}",
             "ghcr.io/github/github-mcp-server:1.4.0",
         ],
     },
     "sqlite": {
         "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-sqlite", "--db-path", ".data/db.sqlite"],
+        "args": [
+            "-y",
+            "@modelcontextprotocol/server-sqlite",
+            "--db-path",
+            ".data/db.sqlite",
+        ],
     },
     "brave-search": {
         "command": "npx",
@@ -247,11 +252,29 @@ _ALL_MCP_SERVERS: dict[str, dict] = {
 }
 
 _MCP_BY_DOMAIN: dict[str, list[str]] = {
-    "programming":    ["memory", "sequential-thinking", "obsidian-rest", "filesystem", "github"],
-    "infrastructure": ["memory", "sequential-thinking", "obsidian-rest", "filesystem", "github",
-                       "sqlite"],
-    "analysis":       ["memory", "sequential-thinking", "obsidian-rest", "filesystem", "sqlite",
-                       "brave-search"],
+    "programming": [
+        "memory",
+        "sequential-thinking",
+        "obsidian-rest",
+        "filesystem",
+        "github",
+    ],
+    "infrastructure": [
+        "memory",
+        "sequential-thinking",
+        "obsidian-rest",
+        "filesystem",
+        "github",
+        "sqlite",
+    ],
+    "analysis": [
+        "memory",
+        "sequential-thinking",
+        "obsidian-rest",
+        "filesystem",
+        "sqlite",
+        "brave-search",
+    ],
 }
 
 # Padrões que identificam servidores GitHub não-oficiais (via npx args)
@@ -269,6 +292,7 @@ _OFFICIAL_GITHUB_DOCKER_IMAGE = "ghcr.io/github/github-mcp-server"
 # ---------------------------------------------------------------------------
 # Normalização do servidor GitHub MCP
 # ---------------------------------------------------------------------------
+
 
 def normalize_github_mcp(servers: dict) -> tuple[dict, list[str]]:
     """
@@ -327,10 +351,7 @@ def normalize_github_mcp(servers: dict) -> tuple[dict, list[str]]:
             for arg in args
             # Excluir imagem Docker oficial: ghcr.io/github/github-mcp-server
             if _OFFICIAL_GITHUB_DOCKER_IMAGE not in arg
-        ) or (
-            "github" in url.lower()
-            and url != official_url
-        )
+        ) or ("github" in url.lower() and url != official_url)
 
         if is_unofficial_github:
             changes.append(
@@ -375,6 +396,7 @@ def _apply_github_normalization(mcp_path: Path) -> None:
 # Funções públicas
 # ---------------------------------------------------------------------------
 
+
 def generate_settings(config: ProjectConfig) -> CreatedItem:
     """
     Gera `.vscode/settings.json` personalizado pela linguagem e domínio.
@@ -418,9 +440,14 @@ def generate_mcp(config: ProjectConfig) -> CreatedItem:
     dest = config.project_path / ".vscode" / "mcp.json"
 
     server_names = _MCP_BY_DOMAIN.get(
-        config.domain, ["memory", "sequential-thinking", "obsidian-rest", "filesystem", "github"])
-    servers = {name: _ALL_MCP_SERVERS[name]
-               for name in server_names if name in _ALL_MCP_SERVERS}
+        config.domain,
+        ["memory", "sequential-thinking", "obsidian-rest", "filesystem", "github"],
+    )
+    servers = {
+        name: _ALL_MCP_SERVERS[name]
+        for name in server_names
+        if name in _ALL_MCP_SERVERS
+    }
 
     payload: dict = {"servers": servers}
 
@@ -430,8 +457,9 @@ def generate_mcp(config: ProjectConfig) -> CreatedItem:
             existing = json.loads(dest.read_text(encoding="utf-8"))
             if "inputs" in existing:
                 payload["inputs"] = existing["inputs"]
-        except Exception:
-            pass
+        except Exception as exc:
+            # mcp.json existente ilegível: segue sem preservar "inputs" (como antes)
+            log.debug("inputs de %s não preservados: %s", dest, exc)
         # FIX BUG P0: Usar merge_or_skip ao invés de skip incondicional
         template_content = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
         result = file_merge.merge_or_skip(dest, template_content, interactive=False)
@@ -480,6 +508,7 @@ def generate_extensions(config: ProjectConfig) -> CreatedItem:
 # ---------------------------------------------------------------------------
 # Auxiliar interno
 # ---------------------------------------------------------------------------
+
 
 def generate_tasks(config: ProjectConfig) -> CreatedItem:
     """
@@ -665,13 +694,20 @@ def generate_workspace(config: ProjectConfig) -> CreatedItem:
     """
     dest = config.project_path / f"{config.project_name}.code-workspace"
     if dest.exists():
-        return CreatedItem(path=dest, kind="file", status="skipped", message="já existe")
+        return CreatedItem(
+            path=dest, kind="file", status="skipped", message="já existe"
+        )
 
     # Get MCP servers for this domain
     server_names = _MCP_BY_DOMAIN.get(
-        config.domain, ["memory", "sequential-thinking", "obsidian-rest", "filesystem", "github"])
-    mcp_servers = {name: _ALL_MCP_SERVERS[name]
-                   for name in server_names if name in _ALL_MCP_SERVERS}
+        config.domain,
+        ["memory", "sequential-thinking", "obsidian-rest", "filesystem", "github"],
+    )
+    mcp_servers = {
+        name: _ALL_MCP_SERVERS[name]
+        for name in server_names
+        if name in _ALL_MCP_SERVERS
+    }
 
     # Get settings for this language/domain
     settings: dict = {}
@@ -679,19 +715,19 @@ def generate_workspace(config: ProjectConfig) -> CreatedItem:
     settings.update(_SETTINGS_BY_LANGUAGE.get(config.language, {}))
 
     # Add base settings
-    settings.update({
-        "editor.formatOnSave": True,
-        "editor.rulers": [88, 120],
-        "files.trimTrailingWhitespace": True,
-        "files.insertFinalNewline": True,
-    })
+    settings.update(
+        {
+            "editor.formatOnSave": True,
+            "editor.rulers": [88, 120],
+            "files.trimTrailingWhitespace": True,
+            "files.insertFinalNewline": True,
+        }
+    )
 
     workspace_config = {
         "folders": [{"path": "."}],
         "settings": settings,
-        "mcp": {
-            "servers": mcp_servers
-        },
+        "mcp": {"servers": mcp_servers},
         "tasks": {
             "version": "2.0.0",
             "tasks": [
@@ -700,56 +736,53 @@ def generate_workspace(config: ProjectConfig) -> CreatedItem:
                     "type": "shell",
                     "command": "make install-deps",
                     "group": "build",
-                    "problemMatcher": []
+                    "problemMatcher": [],
                 },
                 {
                     "label": "make: dev",
                     "type": "shell",
                     "command": "make dev",
                     "group": {"kind": "build", "isDefault": True},
-                    "problemMatcher": []
+                    "problemMatcher": [],
                 },
                 {
                     "label": "make: build",
                     "type": "shell",
                     "command": "make build",
                     "group": "build",
-                    "problemMatcher": []
+                    "problemMatcher": [],
                 },
                 {
                     "label": "make: test",
                     "type": "shell",
                     "command": "make test",
                     "group": {"kind": "test", "isDefault": True},
-                    "problemMatcher": []
+                    "problemMatcher": [],
                 },
                 {
                     "label": "make: lint",
                     "type": "shell",
                     "command": "make lint",
                     "group": "test",
-                    "problemMatcher": []
+                    "problemMatcher": [],
                 },
                 {
                     "label": "make: format",
                     "type": "shell",
                     "command": "make format",
                     "group": "build",
-                    "problemMatcher": []
+                    "problemMatcher": [],
                 },
                 {
                     "label": "make: clean",
                     "type": "shell",
                     "command": "make clean",
                     "group": "build",
-                    "problemMatcher": []
-                }
-            ]
+                    "problemMatcher": [],
+                },
+            ],
         },
-        "launch": {
-            "version": "0.2.0",
-            "configurations": []
-        }
+        "launch": {"version": "0.2.0", "configurations": []},
     }
 
     return _write_json(dest, workspace_config)
@@ -759,12 +792,14 @@ def generate_workspace(config: ProjectConfig) -> CreatedItem:
 # Auxiliar interno
 # ---------------------------------------------------------------------------
 
+
 def _write_json(dest: Path, data: dict) -> CreatedItem:
     """Serializa dict como JSON formatado e grava em dest."""
     try:
         dest.parent.mkdir(parents=True, exist_ok=True)
-        dest.write_text(json.dumps(
-            data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        dest.write_text(
+            json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+        )
         return CreatedItem(path=dest, kind="file", status="created")
     except OSError as e:
         return CreatedItem(path=dest, kind="file", status="error", message=str(e))

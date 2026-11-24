@@ -46,7 +46,6 @@ Cobertura:
 
 from __future__ import annotations
 
-import importlib
 import json
 import subprocess
 import sys
@@ -58,7 +57,6 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 
 # Re-import after path insert to get the module fresh
-import scaffold as _scaffold_mod  # noqa: E402
 from scaffold import (  # noqa: E402
     _SUBCOMMAND_MAP,
     _SUBCOMMAND_VALUE,
@@ -85,17 +83,21 @@ def _cleanup(*names: str) -> None:
 # Unit — _translate_subcommand
 # ===========================================================================
 
+
 class TestTranslateSubcommand:
-    @pytest.mark.parametrize("subcmd,expected_flag", [
-        ("validate",      "--validate"),
-        ("check",         "--check"),
-        ("list-profiles", "--list-profiles"),
-        ("upgrade",       "--upgrade"),
-        ("publish",       "--publish"),
-        ("new",           "--new"),
-        ("infra",         "--infra"),
-        ("dry-run",       "--dry-run"),
-    ])
+    @pytest.mark.parametrize(
+        "subcmd,expected_flag",
+        [
+            ("validate", "--validate"),
+            ("check", "--check"),
+            ("list-profiles", "--list-profiles"),
+            ("upgrade", "--upgrade"),
+            ("publish", "--publish"),
+            ("new", "--new"),
+            ("infra", "--infra"),
+            ("dry-run", "--dry-run"),
+        ],
+    )
     def test_simple_subcommand_translated(self, subcmd, expected_flag):
         result, was_sub = _translate_subcommand([subcmd])
         assert was_sub is True
@@ -123,7 +125,9 @@ class TestTranslateSubcommand:
         assert "--json" in result
 
     def test_extra_flags_preserved_with_value(self):
-        result, was_sub = _translate_subcommand(["new-profile", "my-name", "--profile-layer", "layer2"])
+        result, was_sub = _translate_subcommand(
+            ["new-profile", "my-name", "--profile-layer", "layer2"]
+        )
         assert was_sub is True
         assert result == ["--new-profile", "my-name", "--profile-layer", "layer2"]
 
@@ -148,7 +152,17 @@ class TestTranslateSubcommand:
         assert was_sub is False
 
     def test_dry_run_with_fields(self):
-        argv = ["dry-run", "--ci", "--name", "foo", "--domain", "programming", "--language", "python", "--json"]
+        argv = [
+            "dry-run",
+            "--ci",
+            "--name",
+            "foo",
+            "--domain",
+            "programming",
+            "--language",
+            "python",
+            "--json",
+        ]
         result, was_sub = _translate_subcommand(argv)
         assert was_sub is True
         assert "--dry-run" in result
@@ -157,8 +171,18 @@ class TestTranslateSubcommand:
 
     def test_subcommand_map_complete(self):
         """Verify all required subcommands from IMP-44 spec are present."""
-        required = {"new", "check", "list-profiles", "validate", "dry-run",
-                    "compose", "upgrade", "publish", "new-profile", "infra"}
+        required = {
+            "new",
+            "check",
+            "list-profiles",
+            "validate",
+            "dry-run",
+            "compose",
+            "upgrade",
+            "publish",
+            "new-profile",
+            "infra",
+        }
         assert required.issubset(_SUBCOMMAND_MAP.keys())
 
     def test_value_subcommands_set(self):
@@ -171,6 +195,7 @@ class TestTranslateSubcommand:
 # ===========================================================================
 # Unit — _warn_legacy_flags
 # ===========================================================================
+
 
 class TestWarnLegacyFlags:
     def test_validate_flag_warns(self):
@@ -196,7 +221,7 @@ class TestWarnLegacyFlags:
         """'validate' (subcommand form) must NOT trigger a deprecation warning."""
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            _warn_legacy_flags(["validate"])   # no leading --
+            _warn_legacy_flags(["validate"])  # no leading --
         assert not any(issubclass(x.category, DeprecationWarning) for x in w)
 
     def test_no_flags_no_warning(self):
@@ -209,7 +234,9 @@ class TestWarnLegacyFlags:
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             _warn_legacy_flags(["--validate", "--json", "--list-profiles"])
-        messages = [str(x.message) for x in w if issubclass(x.category, DeprecationWarning)]
+        messages = [
+            str(x.message) for x in w if issubclass(x.category, DeprecationWarning)
+        ]
         assert any("--validate" in m for m in messages)
         assert any("--list-profiles" in m for m in messages)
 
@@ -226,11 +253,13 @@ class TestWarnLegacyFlags:
 # CLI subcomandos (subprocesso)
 # ===========================================================================
 
+
 class TestCLISubcommands:
     def test_list_profiles_subcommand_returns_json(self):
         result = subprocess.run(
             [*_SCAFFOLD, "list-profiles", "--json"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
         data = json.loads(result.stdout)
         assert isinstance(data, list)
@@ -239,14 +268,16 @@ class TestCLISubcommands:
     def test_list_profiles_subcommand_exit_zero(self):
         result = subprocess.run(
             [*_SCAFFOLD, "list-profiles", "--json"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
         assert result.returncode == 0
 
     def test_validate_subcommand_json_valid(self):
         result = subprocess.run(
             [*_SCAFFOLD, "validate", "--json"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
         data = json.loads(result.stdout)
         assert data["valid"] is True
@@ -254,29 +285,43 @@ class TestCLISubcommands:
     def test_validate_subcommand_exit_zero(self):
         result = subprocess.run(
             [*_SCAFFOLD, "validate", "--json"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
         assert result.returncode == 0
 
     def test_validate_subcommand_no_deprecation_warning(self):
         result = subprocess.run(
             [*_SCAFFOLD, "validate", "--json"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
         assert "DeprecationWarning" not in result.stderr
 
     def test_list_profiles_subcommand_no_deprecation_warning(self):
         result = subprocess.run(
             [*_SCAFFOLD, "list-profiles", "--json"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
         assert "DeprecationWarning" not in result.stderr
 
     def test_dry_run_subcommand_json(self):
         result = subprocess.run(
-            [*_SCAFFOLD, "dry-run", "--ci", "--name", "imp44-dry",
-             "--domain", "programming", "--language", "python", "--json"],
-            capture_output=True, text=True,
+            [
+                *_SCAFFOLD,
+                "dry-run",
+                "--ci",
+                "--name",
+                "imp44-dry",
+                "--domain",
+                "programming",
+                "--language",
+                "python",
+                "--json",
+            ],
+            capture_output=True,
+            text=True,
         )
         data = json.loads(result.stdout)
         assert data.get("dry_run") is True
@@ -284,7 +329,8 @@ class TestCLISubcommands:
     def test_check_subcommand_no_crash(self):
         result = subprocess.run(
             [*_SCAFFOLD, "check"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
         # exit code 0 (all links ok) or 1 (missing links) — both acceptable
         assert result.returncode in (0, 1)
@@ -293,9 +339,17 @@ class TestCLISubcommands:
         _cleanup(_TEST_PROFILE)
         try:
             result = subprocess.run(
-                [*_SCAFFOLD, "new-profile", _TEST_PROFILE,
-                 "--profile-layer", "layer2", "--ci", "--json"],
-                capture_output=True, text=True,
+                [
+                    *_SCAFFOLD,
+                    "new-profile",
+                    _TEST_PROFILE,
+                    "--profile-layer",
+                    "layer2",
+                    "--ci",
+                    "--json",
+                ],
+                capture_output=True,
+                text=True,
             )
             data = json.loads(result.stdout)
             assert data["success"] is True
@@ -308,11 +362,13 @@ class TestCLISubcommands:
 # Compatibilidade legada (subprocesso)
 # ===========================================================================
 
+
 class TestLegacyFlagCompatibility:
     def test_legacy_list_profiles_json_still_works(self):
         result = subprocess.run(
             [*_SCAFFOLD, "--list-profiles", "--json"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
         assert result.returncode == 0
         data = json.loads(result.stdout)
@@ -321,7 +377,8 @@ class TestLegacyFlagCompatibility:
     def test_legacy_validate_json_still_works(self):
         result = subprocess.run(
             [*_SCAFFOLD, "--validate", "--json"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
         assert result.returncode == 0
         data = json.loads(result.stdout)
@@ -330,41 +387,54 @@ class TestLegacyFlagCompatibility:
     def test_legacy_list_profiles_emits_deprecation(self):
         result = subprocess.run(
             [*_SCAFFOLD, "--list-profiles", "--json"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
-        assert "DeprecationWarning" in result.stderr or "deprecated" in result.stderr.lower()
+        assert (
+            "DeprecationWarning" in result.stderr
+            or "deprecated" in result.stderr.lower()
+        )
 
     def test_legacy_validate_emits_deprecation(self):
         result = subprocess.run(
             [*_SCAFFOLD, "--validate", "--json"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
-        assert "DeprecationWarning" in result.stderr or "deprecated" in result.stderr.lower()
+        assert (
+            "DeprecationWarning" in result.stderr
+            or "deprecated" in result.stderr.lower()
+        )
 
 
 # ===========================================================================
 # Equivalência: subcommand == legacy flag (output idêntico)
 # ===========================================================================
 
+
 class TestSubcommandEquivalence:
     def test_list_profiles_output_identical(self):
         sub = subprocess.run(
             [*_SCAFFOLD, "list-profiles", "--json"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
         leg = subprocess.run(
             [*_SCAFFOLD, "--list-profiles", "--json"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
         assert json.loads(sub.stdout) == json.loads(leg.stdout)
 
     def test_validate_output_identical(self):
         sub = subprocess.run(
             [*_SCAFFOLD, "validate", "--json"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
         leg = subprocess.run(
             [*_SCAFFOLD, "--validate", "--json"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
         assert json.loads(sub.stdout) == json.loads(leg.stdout)

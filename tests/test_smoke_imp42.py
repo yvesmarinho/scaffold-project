@@ -53,6 +53,7 @@ _CI_TEMPLATE = _PROJECT_ROOT / ".github" / "workflows" / "ci-template.yml"
 # Helpers
 # ===========================================================================
 
+
 def _makefile(profile: str) -> Path:
     return _TEMPLATES / profile / "Makefile"
 
@@ -64,6 +65,7 @@ def _descriptor(name: str) -> dict:
 # ===========================================================================
 # Makefiles — sbom: target presence
 # ===========================================================================
+
 
 class TestMakefileSbomTarget:
     @pytest.mark.parametrize("profile", ["python-fastapi", "python-flask"])
@@ -78,35 +80,43 @@ class TestMakefileSbomTarget:
     @pytest.mark.parametrize("profile", ["python-fastapi", "python-flask"])
     def test_cyclonedx_bom_in_python_sbom(self, profile):
         content = _makefile(profile).read_text()
-        assert "cyclonedx" in content, f"cyclonedx not referenced in {profile}/Makefile sbom target"
+        assert (
+            "cyclonedx" in content
+        ), f"cyclonedx not referenced in {profile}/Makefile sbom target"
 
     def test_cyclonedx_npm_in_typescript_sbom(self):
         content = _makefile("typescript-next").read_text()
-        assert "cyclonedx-npm" in content, "cyclonedx-npm not referenced in typescript-next/Makefile"
+        assert (
+            "cyclonedx-npm" in content
+        ), "cyclonedx-npm not referenced in typescript-next/Makefile"
 
     @pytest.mark.parametrize("profile", ["python-fastapi", "python-flask"])
     def test_sbom_in_phony_python(self, profile):
         content = _makefile(profile).read_text()
-        phony_line = next(l for l in content.splitlines() if ".PHONY:" in l)
+        phony_line = next(linha for linha in content.splitlines() if ".PHONY:" in linha)
         assert "sbom" in phony_line, f"sbom missing from .PHONY in {profile}/Makefile"
 
     def test_sbom_in_phony_typescript(self):
-        lines = _makefile("typescript-next").read_text().splitlines()
-        phony_lines = " ".join(l for l in lines if ".PHONY:" in l or (lines[max(0, lines.index(l)-1):lines.index(l)] and ".PHONY" in lines[max(0, lines.index(l)-1)]))
         content = _makefile("typescript-next").read_text()
-        phony_block = content[content.find(".PHONY:"):content.find(".PHONY:") + 200]
-        assert "sbom" in phony_block, "sbom missing from .PHONY in typescript-next/Makefile"
+        phony_block = content[content.find(".PHONY:") : content.find(".PHONY:") + 200]
+        assert (
+            "sbom" in phony_block
+        ), "sbom missing from .PHONY in typescript-next/Makefile"
 
     @pytest.mark.parametrize("profile", ["python-fastapi", "python-flask"])
     def test_ci_target_includes_sbom_python(self, profile):
         content = _makefile(profile).read_text()
-        ci_line = next((l for l in content.splitlines() if l.startswith("ci:")), None)
+        ci_line = next(
+            (linha for linha in content.splitlines() if linha.startswith("ci:")), None
+        )
         assert ci_line is not None, f"ci: target missing in {profile}/Makefile"
         assert "sbom" in ci_line, f"sbom not in ci: target of {profile}/Makefile"
 
     def test_ci_target_includes_sbom_typescript(self):
         content = _makefile("typescript-next").read_text()
-        ci_line = next((l for l in content.splitlines() if l.startswith("ci:")), None)
+        ci_line = next(
+            (linha for linha in content.splitlines() if linha.startswith("ci:")), None
+        )
         assert ci_line is not None, "ci: target missing in typescript-next/Makefile"
         assert "sbom" in ci_line, "sbom not in ci: target of typescript-next/Makefile"
 
@@ -115,6 +125,7 @@ class TestMakefileSbomTarget:
 # Profile descriptors — security.enforces CC8
 # ===========================================================================
 
+
 class TestDescriptorCC8Enforces:
     def _get_enforces(self, descriptor: dict) -> list[dict]:
         sec = descriptor.get("security", {})
@@ -122,54 +133,72 @@ class TestDescriptorCC8Enforces:
 
     def _has_cc8_sbom(self, enforces: list[dict]) -> bool:
         return any(
-            isinstance(e, dict) and e.get("control") == "CC8" and "sbom" in e.get("description", "").lower()
+            isinstance(e, dict)
+            and e.get("control") == "CC8"
+            and "sbom" in e.get("description", "").lower()
             for e in enforces
         )
 
-    @pytest.mark.parametrize("name", ["python-fastapi", "python-flask", "typescript-next"])
+    @pytest.mark.parametrize(
+        "name", ["python-fastapi", "python-flask", "typescript-next"]
+    )
     def test_layer2_descriptor_has_cc8_sbom(self, name):
         d = _descriptor(name)
         enforces = self._get_enforces(d)
-        assert self._has_cc8_sbom(enforces), (
-            f"{name}.yaml: no CC8 SBOM entry found in security.enforces"
-        )
+        assert self._has_cc8_sbom(
+            enforces
+        ), f"{name}.yaml: no CC8 SBOM entry found in security.enforces"
 
     def test_soc2_baseline_has_cc8_sbom(self):
         d = _descriptor("soc2-baseline")
         enforces = self._get_enforces(d)
-        assert self._has_cc8_sbom(enforces), (
-            "soc2-baseline.yaml: no CC8 SBOM entry found in security.enforces"
-        )
+        assert self._has_cc8_sbom(
+            enforces
+        ), "soc2-baseline.yaml: no CC8 SBOM entry found in security.enforces"
 
-    @pytest.mark.parametrize("name", ["python-fastapi", "python-flask", "typescript-next"])
+    @pytest.mark.parametrize(
+        "name", ["python-fastapi", "python-flask", "typescript-next"]
+    )
     def test_cc8_sbom_entry_is_automated(self, name):
         d = _descriptor(name)
         enforces = self._get_enforces(d)
         cc8_sbom = next(
-            (e for e in enforces if isinstance(e, dict) and e.get("control") == "CC8" and "sbom" in e.get("description", "").lower()),
+            (
+                e
+                for e in enforces
+                if isinstance(e, dict)
+                and e.get("control") == "CC8"
+                and "sbom" in e.get("description", "").lower()
+            ),
             None,
         )
         assert cc8_sbom is not None, f"{name}: CC8 SBOM enforces entry not found"
-        assert cc8_sbom.get("automated") is True, f"{name}: CC8 SBOM entry should be automated=true"
+        assert (
+            cc8_sbom.get("automated") is True
+        ), f"{name}: CC8 SBOM entry should be automated=true"
 
 
 # ===========================================================================
 # Profile descriptors — ci_targets
 # ===========================================================================
 
+
 class TestDescriptorCiTargets:
-    @pytest.mark.parametrize("name", ["python-fastapi", "python-flask", "typescript-next"])
+    @pytest.mark.parametrize(
+        "name", ["python-fastapi", "python-flask", "typescript-next"]
+    )
     def test_sbom_in_ci_targets(self, name):
         d = _descriptor(name)
         ci_targets = d.get("ci_targets", [])
-        assert "sbom" in ci_targets, (
-            f"{name}.yaml: 'sbom' not listed in ci_targets (got: {ci_targets})"
-        )
+        assert (
+            "sbom" in ci_targets
+        ), f"{name}.yaml: 'sbom' not listed in ci_targets (got: {ci_targets})"
 
 
 # ===========================================================================
 # Profile descriptors — generates / templates reference sbom.json
 # ===========================================================================
+
 
 class TestDescriptorSbomFileReference:
     @pytest.mark.parametrize("name", ["python-fastapi", "python-flask"])
@@ -177,22 +206,23 @@ class TestDescriptorSbomFileReference:
         d = _descriptor(name)
         files = d.get("generates", {}).get("files", [])
         paths = [f.get("path", "") for f in files]
-        assert "sbom.json" in paths, (
-            f"{name}.yaml: sbom.json not found in generates.files (got: {paths})"
-        )
+        assert (
+            "sbom.json" in paths
+        ), f"{name}.yaml: sbom.json not found in generates.files (got: {paths})"
 
     def test_sbom_json_in_typescript_templates(self):
         d = _descriptor("typescript-next")
         templates = d.get("templates", [])
         paths = [t.get("path", "") for t in templates]
-        assert "sbom.json" in paths, (
-            f"typescript-next.yaml: sbom.json not found in templates (got: {paths})"
-        )
+        assert (
+            "sbom.json" in paths
+        ), f"typescript-next.yaml: sbom.json not found in templates (got: {paths})"
 
 
 # ===========================================================================
 # CI workflow
 # ===========================================================================
+
 
 class TestCiWorkflowSbom:
     def test_ci_template_has_sbom_verification_step(self):
@@ -207,6 +237,6 @@ class TestCiWorkflowSbom:
 
     def test_ci_template_sbom_grep_command(self):
         content = _CI_TEMPLATE.read_text()
-        assert 'grep -q "^sbom:"' in content, (
-            "ci-template.yml should verify sbom target via grep"
-        )
+        assert (
+            'grep -q "^sbom:"' in content
+        ), "ci-template.yml should verify sbom target via grep"

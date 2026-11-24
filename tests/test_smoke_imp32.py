@@ -55,9 +55,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
-import yaml
-
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 
 from lib.validate import (  # noqa: E402
@@ -108,25 +105,31 @@ class TestProfileResult:
         assert r.status == "warning"
 
     def test_status_error_when_has_errors(self):
-        r = self._make([
-            ValidationIssue("name", "error", "vazio"),
-            ValidationIssue("layer", "warning", "ausente"),
-        ])
+        r = self._make(
+            [
+                ValidationIssue("name", "error", "vazio"),
+                ValidationIssue("layer", "warning", "ausente"),
+            ]
+        )
         assert r.status == "error"
 
     def test_errors_filters_errors_only(self):
-        r = self._make([
-            ValidationIssue("name", "error", "vazio"),
-            ValidationIssue("layer", "warning", "ausente"),
-        ])
+        r = self._make(
+            [
+                ValidationIssue("name", "error", "vazio"),
+                ValidationIssue("layer", "warning", "ausente"),
+            ]
+        )
         assert len(r.errors) == 1
         assert r.errors[0].severity == "error"
 
     def test_warnings_filters_warnings_only(self):
-        r = self._make([
-            ValidationIssue("name", "error", "vazio"),
-            ValidationIssue("layer", "warning", "ausente"),
-        ])
+        r = self._make(
+            [
+                ValidationIssue("name", "error", "vazio"),
+                ValidationIssue("layer", "warning", "ausente"),
+            ]
+        )
         assert len(r.warnings) == 1
         assert r.warnings[0].severity == "warning"
 
@@ -271,29 +274,50 @@ class TestValidateDescriptor:
 
     def test_enforces_missing_required_fields_gives_error(self):
         """enforces com objeto parcial (sem 'automated') gera error."""
-        data = self._min_valid_with_enforces([
-            {"control": "CWE-312", "description": "Desc", "tool": "manual", "severity": "high"},
-        ])
+        data = self._min_valid_with_enforces(
+            [
+                {
+                    "control": "CWE-312",
+                    "description": "Desc",
+                    "tool": "manual",
+                    "severity": "high",
+                },
+            ]
+        )
         r = _validate_descriptor(data, Path("test.yaml"))
         fields = [i.field for i in r.errors]
         assert "security.enforces" in fields
 
     def test_enforces_invalid_severity_gives_error(self):
         """enforces com severity inválida gera error."""
-        data = self._min_valid_with_enforces([
-            {"control": "CWE-312", "description": "Desc", "tool": "manual",
-             "severity": "ultra-critical", "automated": False},
-        ])
+        data = self._min_valid_with_enforces(
+            [
+                {
+                    "control": "CWE-312",
+                    "description": "Desc",
+                    "tool": "manual",
+                    "severity": "ultra-critical",
+                    "automated": False,
+                },
+            ]
+        )
         r = _validate_descriptor(data, Path("test.yaml"))
         msgs = [i.message for i in r.errors if i.field == "security.enforces"]
         assert any("severity" in m for m in msgs)
 
     def test_enforces_valid_item_no_issues(self):
         """enforces com objeto completo e válido não gera issue."""
-        data = self._min_valid_with_enforces([
-            {"control": "OWASP-A06", "description": "bandit scan",
-             "tool": "bandit", "severity": "high", "automated": True},
-        ])
+        data = self._min_valid_with_enforces(
+            [
+                {
+                    "control": "OWASP-A06",
+                    "description": "bandit scan",
+                    "tool": "bandit",
+                    "severity": "high",
+                    "automated": True,
+                },
+            ]
+        )
         r = _validate_descriptor(data, Path("test.yaml"))
         sec_issues = [i for i in r.issues if i.field == "security.enforces"]
         assert sec_issues == []
@@ -301,10 +325,17 @@ class TestValidateDescriptor:
     def test_enforces_all_severities_accepted(self):
         """Todas as severidades válidas são aceitas."""
         for sev in ("critical", "high", "medium", "low"):
-            data = self._min_valid_with_enforces([
-                {"control": "CC6.1", "description": "desc", "tool": "trivy",
-                 "severity": sev, "automated": True},
-            ])
+            data = self._min_valid_with_enforces(
+                [
+                    {
+                        "control": "CC6.1",
+                        "description": "desc",
+                        "tool": "trivy",
+                        "severity": sev,
+                        "automated": True,
+                    },
+                ]
+            )
             r = _validate_descriptor(data, Path(f"test-{sev}.yaml"))
             sec_errors = [i for i in r.errors if i.field == "security.enforces"]
             assert sec_errors == [], f"severity '{sev}' gerou erro inesperado"
@@ -334,7 +365,9 @@ class TestCrossValidate:
         r1 = ProfileResult(name="profile-a", file="profile-a.yaml")
         all_data = {"profile-a.yaml": {"combines_with": ["ghost-profile"]}}
         _cross_validate([r1], all_data)
-        assert any(i.field == "combines_with" and i.severity == "warning" for i in r1.issues)
+        assert any(
+            i.field == "combines_with" and i.severity == "warning" for i in r1.issues
+        )
 
     def test_duplicate_name_gives_error(self):
         r1 = ProfileResult(name="dup", file="dup-1.yaml")
@@ -391,7 +424,8 @@ class TestValidateCLI:
     def _run(self, *extra_args: str, **kwargs) -> subprocess.CompletedProcess:
         return subprocess.run(
             [_PYTHON, str(_SCRIPTS_DIR / "scaffold.py"), "--validate", *extra_args],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
             cwd=str(_PROJECT_ROOT),
             **kwargs,
         )
@@ -399,9 +433,12 @@ class TestValidateCLI:
     def test_help_mentions_validate(self):
         proc = subprocess.run(
             [_PYTHON, str(_SCRIPTS_DIR / "scaffold.py"), "--help"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
-        assert "--validate" in proc.stdout, f"--validate ausente no --help; stdout: {proc.stdout}"
+        assert (
+            "--validate" in proc.stdout
+        ), f"--validate ausente no --help; stdout: {proc.stdout}"
 
     def test_validate_exits_zero(self):
         proc = self._run()

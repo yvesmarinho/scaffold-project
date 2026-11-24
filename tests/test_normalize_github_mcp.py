@@ -13,11 +13,12 @@ Cobre:
 """
 
 import json
-import pytest
-from pathlib import Path
 
-from scripts.lib.vscode import normalize_github_mcp, _apply_github_normalization, _ALL_MCP_SERVERS
-
+from scripts.lib.vscode import (
+    _ALL_MCP_SERVERS,
+    _apply_github_normalization,
+    normalize_github_mcp,
+)
 
 OFFICIAL = _ALL_MCP_SERVERS["github"]
 OFFICIAL_URL = OFFICIAL["url"]  # https://api.githubcopilot.com/mcp/
@@ -27,11 +28,18 @@ OFFICIAL_URL = OFFICIAL["url"]  # https://api.githubcopilot.com/mcp/
 # normalize_github_mcp() — testes unitários
 # ---------------------------------------------------------------------------
 
+
 class TestNormalizeGithubMcp:
 
     def test_oficial_sem_mudancas(self):
         """Servidor github já oficial não gera mudanças."""
-        servers = {"github": OFFICIAL, "memory": {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-memory"]}}
+        servers = {
+            "github": OFFICIAL,
+            "memory": {
+                "command": "npx",
+                "args": ["-y", "@modelcontextprotocol/server-memory"],
+            },
+        }
         result, changes = normalize_github_mcp(servers)
         assert result["github"] == OFFICIAL
         assert "memory" in result
@@ -39,7 +47,9 @@ class TestNormalizeGithubMcp:
 
     def test_github_url_errada_substituido(self):
         """Servidor github com URL diferente é substituído."""
-        servers = {"github": {"type": "http", "url": "https://unofficial.example.com/mcp/"}}
+        servers = {
+            "github": {"type": "http", "url": "https://unofficial.example.com/mcp/"}
+        }
         result, changes = normalize_github_mcp(servers)
         assert result["github"] == OFFICIAL
         assert len(changes) == 1
@@ -72,7 +82,10 @@ class TestNormalizeGithubMcp:
     def test_entrada_nao_github_com_args_unofficial_removida(self):
         """Entrada com nome diferente mas args de servidor GitHub unofficial é removida."""
         servers = {
-            "memory": {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-memory"]},
+            "memory": {
+                "command": "npx",
+                "args": ["-y", "@modelcontextprotocol/server-memory"],
+            },
             "github-old": {
                 "command": "npx",
                 "args": ["-y", "@modelcontextprotocol/server-github"],
@@ -87,7 +100,10 @@ class TestNormalizeGithubMcp:
     def test_entrada_com_url_github_nao_oficial_removida(self):
         """Entrada com URL apontando para github (não-oficial) é removida."""
         servers = {
-            "memory": {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-memory"]},
+            "memory": {
+                "command": "npx",
+                "args": ["-y", "@modelcontextprotocol/server-memory"],
+            },
             "gh-unofficial": {
                 "type": "http",
                 "url": "https://github.example.com/mcp/",
@@ -101,9 +117,18 @@ class TestNormalizeGithubMcp:
     def test_servidores_normais_preservados(self):
         """Servidores não-relacionados ao github são preservados."""
         servers = {
-            "memory": {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-memory"]},
-            "sequential-thinking": {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]},
-            "filesystem": {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-filesystem", "."]},
+            "memory": {
+                "command": "npx",
+                "args": ["-y", "@modelcontextprotocol/server-memory"],
+            },
+            "sequential-thinking": {
+                "command": "npx",
+                "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+            },
+            "filesystem": {
+                "command": "npx",
+                "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
+            },
             "github": OFFICIAL,
         }
         result, changes = normalize_github_mcp(servers)
@@ -113,7 +138,10 @@ class TestNormalizeGithubMcp:
     def test_sem_entrada_github_preserva_resto(self):
         """Ausência do servidor github não causa erro e outros servidores são preservados."""
         servers = {
-            "memory": {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-memory"]},
+            "memory": {
+                "command": "npx",
+                "args": ["-y", "@modelcontextprotocol/server-memory"],
+            },
         }
         result, changes = normalize_github_mcp(servers)
         assert result == servers
@@ -127,7 +155,10 @@ class TestNormalizeGithubMcp:
                 "command": "npx",
                 "args": ["-y", "mcp-server-github"],
             },
-            "memory": {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-memory"]},
+            "memory": {
+                "command": "npx",
+                "args": ["-y", "@modelcontextprotocol/server-memory"],
+            },
         }
         result, changes = normalize_github_mcp(servers)
         assert result["github"] == OFFICIAL
@@ -140,12 +171,21 @@ class TestNormalizeGithubMcp:
 # _apply_github_normalization() — testes com arquivo em disco
 # ---------------------------------------------------------------------------
 
+
 class TestApplyGithubNormalization:
 
     def test_arquivo_ja_oficial_nao_alterado(self, tmp_path):
         """Arquivo com servidor oficial não é reescrito."""
         mcp_file = tmp_path / "mcp.json"
-        original = {"servers": {"github": OFFICIAL, "memory": {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-memory"]}}}
+        original = {
+            "servers": {
+                "github": OFFICIAL,
+                "memory": {
+                    "command": "npx",
+                    "args": ["-y", "@modelcontextprotocol/server-memory"],
+                },
+            }
+        }
         mcp_file.write_text(json.dumps(original, indent=2) + "\n")
         mtime_before = mcp_file.stat().st_mtime
 
@@ -159,8 +199,14 @@ class TestApplyGithubNormalization:
         mcp_file = tmp_path / "mcp.json"
         data = {
             "servers": {
-                "memory": {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-memory"]},
-                "github": {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-github"]},
+                "memory": {
+                    "command": "npx",
+                    "args": ["-y", "@modelcontextprotocol/server-memory"],
+                },
+                "github": {
+                    "command": "npx",
+                    "args": ["-y", "@modelcontextprotocol/server-github"],
+                },
             }
         }
         mcp_file.write_text(json.dumps(data, indent=2) + "\n")

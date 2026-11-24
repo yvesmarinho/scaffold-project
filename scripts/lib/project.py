@@ -10,8 +10,10 @@ import logging
 import os
 import shutil
 import subprocess
+from datetime import UTC
 from pathlib import Path
 
+from . import file_merge, vscode
 from .config import (
     DOMAIN_DEFAULT_PROFILES,
     SPECKIT_SYNC_DATE,
@@ -19,8 +21,6 @@ from .config import (
     CreatedItem,
     ProjectConfig,
 )
-from . import vscode
-from . import file_merge
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 log = logging.getLogger(__name__)
@@ -46,16 +46,18 @@ PLACEHOLDERS = {
 def _apply_placeholders(text: str, config: ProjectConfig) -> str:
     """Substitui todos os placeholders pelo valor real da config."""
     # Valor para GitHub repo: mostrar link se configurado, senão "(não configurado)"
-    github_repo_display = config.github_repo if config.github_repo else "(não configurado)"
+    github_repo_display = (
+        config.github_repo if config.github_repo else "(não configurado)"
+    )
 
     replacements = {
-        "{{PROJECT_NAME}}":        config.project_name,
-        "{{PROJECT_TITLE}}":       config.project_title,
+        "{{PROJECT_NAME}}": config.project_name,
+        "{{PROJECT_TITLE}}": config.project_title,
         "{{PROJECT_DESCRIPTION}}": config.description,
-        "{{CREATED_AT}}":          config.created_at,
-        "{{DOMAIN}}":              config.domain,
-        "{{LANGUAGE}}":            config.language,
-        "{{GITHUB_REPO}}":         github_repo_display,
+        "{{CREATED_AT}}": config.created_at,
+        "{{DOMAIN}}": config.domain,
+        "{{LANGUAGE}}": config.language,
+        "{{GITHUB_REPO}}": github_repo_display,
     }
     for key, value in replacements.items():
         text = text.replace(key, value)
@@ -2115,6 +2117,7 @@ DIRS_TO_CREATE = DIRS_BASE + DIRS_COPILOT
 # Arquivos a criar: (caminho relativo, conteúdo_template)
 # ---------------------------------------------------------------------------
 
+
 def get_claude_files() -> list[tuple[str, str]]:
     """
     Retorna os templates de arquivos exclusivos do Claude Code.
@@ -2126,36 +2129,36 @@ def get_claude_files() -> list[tuple[str, str]]:
     :rtype: list[tuple[str, str]]
     """
     return [
-        ("CLAUDE.md",             _CLAUDE_MD),
+        ("CLAUDE.md", _CLAUDE_MD),
         (".claude/settings.json", _CLAUDE_SETTINGS_JSON),
     ]
 
 
 # Arquivos base (presentes em todos os projetos, independente de AI)
 FILES_BASE: list[tuple[str, str]] = [
-    ("README.md",                  _README_MD),
-    ("docs/INDEX.md",              _DOCS_INDEX_MD),
-    ("docs/TODO.md",               _DOCS_TODO_MD),
-    ("docs/TODAY_ACTIVITIES.md",   _DOCS_TODAY_ACTIVITIES_MD),
+    ("README.md", _README_MD),
+    ("docs/INDEX.md", _DOCS_INDEX_MD),
+    ("docs/TODO.md", _DOCS_TODO_MD),
+    ("docs/TODAY_ACTIVITIES.md", _DOCS_TODAY_ACTIVITIES_MD),
     ("docs/architecture/README.md", _DOCS_ARCHITECTURE_README),
-    ("docs/debates/README.md",     _DOCS_DEBATES_README),
-    ("docs/decisions/README.md",   _DOCS_DECISIONS_README),
-    ("docs/guides/README.md",      _DOCS_GUIDES_README),
+    ("docs/debates/README.md", _DOCS_DEBATES_README),
+    ("docs/decisions/README.md", _DOCS_DECISIONS_README),
+    ("docs/guides/README.md", _DOCS_GUIDES_README),
     ("docs/retrospectives/README.md", _DOCS_RETROSPECTIVES_README),
-    ("docs/bugs/README.md",        _DOCS_BUGS_README),
+    ("docs/bugs/README.md", _DOCS_BUGS_README),
     ("docs/implementations/README.md", _DOCS_IMPLEMENTATIONS_README),
-    ("docs/templates/README.md",   _DOCS_TEMPLATES_README),
-    (".gitignore",                 _GITIGNORE),
-    (".secrets/README.md",         _SECRETS_README),
-    (".secrets/SECURITY.md",       _SECRETS_SECURITY_MD),
+    ("docs/templates/README.md", _DOCS_TEMPLATES_README),
+    (".gitignore", _GITIGNORE),
+    (".secrets/README.md", _SECRETS_README),
+    (".secrets/SECURITY.md", _SECRETS_SECURITY_MD),
     (".git-hooks/pre-commit.secrets", _PRE_COMMIT_SECRETS_HOOK),
     # .vscode/mcp.json e settings.json são gerados dinamicamente por vscode.py (IMP-64)
-    ("Makefile",                   _MAKEFILE),
-    ("scripts/logs/.gitkeep",      ""),
-    ("logs/README.md",             _LOGS_README),
-    ("tmp/README.md",              _TMP_README),
-    (".memory/README.md",          _MEMORY_README),
-    (".session-time/README.md",    _SESSION_TIME_README),
+    ("Makefile", _MAKEFILE),
+    ("scripts/logs/.gitkeep", ""),
+    ("logs/README.md", _LOGS_README),
+    ("tmp/README.md", _TMP_README),
+    (".memory/README.md", _MEMORY_README),
+    (".session-time/README.md", _SESSION_TIME_README),
 ]
 
 # Mantido para retrocompatibilidade (inclui arquivos Claude)
@@ -2165,6 +2168,7 @@ FILES_TO_CREATE: list[tuple[str, str]] = FILES_BASE + get_claude_files()
 # ---------------------------------------------------------------------------
 # Função principal
 # ---------------------------------------------------------------------------
+
 
 def create_structure(config: ProjectConfig) -> list[CreatedItem]:
     """
@@ -2196,19 +2200,32 @@ def create_structure(config: ProjectConfig) -> list[CreatedItem]:
     for dir_rel in dirs:
         dir_path = base / dir_rel
         if dir_path.exists():
-            results.append(CreatedItem(
-                path=dir_path, kind="dir", status="skipped",
-            ))
+            results.append(
+                CreatedItem(
+                    path=dir_path,
+                    kind="dir",
+                    status="skipped",
+                )
+            )
         else:
             try:
                 dir_path.mkdir(parents=True, exist_ok=True)
-                results.append(CreatedItem(
-                    path=dir_path, kind="dir", status="created",
-                ))
+                results.append(
+                    CreatedItem(
+                        path=dir_path,
+                        kind="dir",
+                        status="created",
+                    )
+                )
             except OSError as e:
-                results.append(CreatedItem(
-                    path=dir_path, kind="dir", status="error", message=str(e),
-                ))
+                results.append(
+                    CreatedItem(
+                        path=dir_path,
+                        kind="dir",
+                        status="error",
+                        message=str(e),
+                    )
+                )
 
     # 2. Arquivos
     for file_rel, template in all_files:
@@ -2220,10 +2237,14 @@ def create_structure(config: ProjectConfig) -> list[CreatedItem]:
                 content = _prepare_content(template, file_rel, config)
                 file_path.write_text(content, encoding="utf-8")
                 file_path.chmod(0o755)  # rwxr-xr-x
-                results.append(CreatedItem(
-                    path=file_path, kind="file", status="updated",
-                    message="hook de segurança atualizado com versão mais recente"
-                ))
+                results.append(
+                    CreatedItem(
+                        path=file_path,
+                        kind="file",
+                        status="updated",
+                        message="hook de segurança atualizado com versão mais recente",
+                    )
+                )
                 continue
 
             # NOVO: Tentar merge inteligente ao invés de skip incondicional
@@ -2232,7 +2253,7 @@ def create_structure(config: ProjectConfig) -> list[CreatedItem]:
             merge_result = file_merge.merge_or_skip(
                 file_path=file_path,
                 template_content=content,
-                interactive=False  # Modo CI (não interativo por padrão)
+                interactive=False,  # Modo CI (não interativo por padrão)
             )
             results.append(merge_result)
             continue
@@ -2241,13 +2262,22 @@ def create_structure(config: ProjectConfig) -> list[CreatedItem]:
             content = _prepare_content(template, file_rel, config)
             file_path.parent.mkdir(parents=True, exist_ok=True)
             file_path.write_text(content, encoding="utf-8")
-            results.append(CreatedItem(
-                path=file_path, kind="file", status="created",
-            ))
+            results.append(
+                CreatedItem(
+                    path=file_path,
+                    kind="file",
+                    status="created",
+                )
+            )
         except OSError as e:
-            results.append(CreatedItem(
-                path=file_path, kind="file", status="error", message=str(e),
-            ))
+            results.append(
+                CreatedItem(
+                    path=file_path,
+                    kind="file",
+                    status="error",
+                    message=str(e),
+                )
+            )
 
     # 3. [nome].code-workspace (nome dinâmico) - agora com MCP integrado
     ws_result = vscode.generate_workspace(config)
@@ -2277,10 +2307,10 @@ _SPECKIT_TEMPLATES = _TEMPLATE_ROOT / "scaffold" / "templates" / "speckit"
 
 # Mapeamento ai_assistant → integração(ões) do specify CLI
 _AI_TO_SPECIFY: dict[str, list[str]] = {
-    "claude":  ["claude"],
+    "claude": ["claude"],
     "copilot": ["copilot"],
-    "both":    ["claude", "copilot"],
-    "none":    [],
+    "both": ["claude", "copilot"],
+    "none": [],
 }
 
 # Integração do specify → binário do agente que o `specify init` exige no PATH.
@@ -2330,29 +2360,35 @@ def run_speckit_init(config: ProjectConfig) -> list[CreatedItem]:
                 stdin=subprocess.DEVNULL,  # evita hanging quando stdin é um TTY interativo
             )
             if proc.returncode == 0:
-                results.append(CreatedItem(
-                    path=config.project_path / ".specify",
-                    kind="dir",
-                    status="created",
-                    message=f"specify init --integration {integration}",
-                ))
+                results.append(
+                    CreatedItem(
+                        path=config.project_path / ".specify",
+                        kind="dir",
+                        status="created",
+                        message=f"specify init --integration {integration}",
+                    )
+                )
             else:
                 output_diag = (proc.stderr or proc.stdout or "")[:400]
                 log.error("specify init falhou (%s):\n%s", integration, output_diag)
-                results.append(CreatedItem(
+                results.append(
+                    CreatedItem(
+                        path=config.project_path / ".specify",
+                        kind="dir",
+                        status="error",
+                        message=f"specify init --integration {integration}: {output_diag[:200]}",
+                    )
+                )
+        except (FileNotFoundError, subprocess.TimeoutExpired) as exc:
+            log.error("Erro ao executar specify init: %s", exc)
+            results.append(
+                CreatedItem(
                     path=config.project_path / ".specify",
                     kind="dir",
                     status="error",
-                    message=f"specify init --integration {integration}: {output_diag[:200]}",
-                ))
-        except (FileNotFoundError, subprocess.TimeoutExpired) as exc:
-            log.error("Erro ao executar specify init: %s", exc)
-            results.append(CreatedItem(
-                path=config.project_path / ".specify",
-                kind="dir",
-                status="error",
-                message=f"specify não encontrado ou timeout: {exc}",
-            ))
+                    message=f"specify não encontrado ou timeout: {exc}",
+                )
+            )
 
     return results
 
@@ -2387,20 +2423,23 @@ def copy_speckit(config: ProjectConfig, force: bool = False) -> list[CreatedItem
     domain_profile = DOMAIN_DEFAULT_PROFILES.get(config.domain)
     if domain_profile:
         result = _copy_domain_profile(
-            _TEMPLATE_ROOT, base, domain_profile, errors, force=force)
+            _TEMPLATE_ROOT, base, domain_profile, errors, force=force
+        )
         results.append(result)
 
     # 2) extras selecionados pelo utilizador (D-21)
     for profile_name in config.extra_profiles:
         if profile_name != domain_profile:  # evita duplicata
             result = _copy_domain_profile(
-                _TEMPLATE_ROOT, base, profile_name, errors, force=force)
+                _TEMPLATE_ROOT, base, profile_name, errors, force=force
+            )
             results.append(result)
 
     # 3) transversais — sempre copiados (D-20)
     for profile_name in SPECKIT_TRANSVERSAL_PROFILES:
         result = _copy_domain_profile(
-            _TEMPLATE_ROOT, base, profile_name, errors, force=force)
+            _TEMPLATE_ROOT, base, profile_name, errors, force=force
+        )
         results.append(result)
 
     if errors:
@@ -2412,6 +2451,7 @@ def copy_speckit(config: ProjectConfig, force: bool = False) -> list[CreatedItem
 # ---------------------------------------------------------------------------
 # Custom Agents — etapa independente do SpecKit, por assistente de IA
 # ---------------------------------------------------------------------------
+
 
 def copy_custom_agents(config: ProjectConfig, force: bool = False) -> list[CreatedItem]:
     """
@@ -2456,7 +2496,9 @@ def copy_custom_agents(config: ProjectConfig, force: bool = False) -> list[Creat
         results.append(result)
 
     if errors:
-        log.warning("⚠️  %d erro(s) ao copiar agents customizados: %s", len(errors), errors)
+        log.warning(
+            "⚠️  %d erro(s) ao copiar agents customizados: %s", len(errors), errors
+        )
 
     return results
 
@@ -2464,6 +2506,7 @@ def copy_custom_agents(config: ProjectConfig, force: bool = False) -> list[Creat
 # ---------------------------------------------------------------------------
 # Objetivo.yaml Patching — adicionar campos ausentes durante upgrade
 # ---------------------------------------------------------------------------
+
 
 def _patch_objetivo_yaml(dst_objetivo: Path, src_template: Path) -> CreatedItem:
     """
@@ -2495,7 +2538,7 @@ def _patch_objetivo_yaml(dst_objetivo: Path, src_template: Path) -> CreatedItem:
                 path=dst_objetivo,
                 kind="file",
                 status="skipped",
-                message="Campo docstyle já presente"
+                message="Campo docstyle já presente",
             )
 
         # Ler template para extrair valor default de docstyle
@@ -2515,7 +2558,7 @@ def _patch_objetivo_yaml(dst_objetivo: Path, src_template: Path) -> CreatedItem:
                 path=dst_objetivo,
                 kind="file",
                 status="skipped",
-                message="Template sem docstyle"
+                message="Template sem docstyle",
             )
 
         # Encontrar onde inserir: após success_statement ou problema/statement
@@ -2527,7 +2570,9 @@ def _patch_objetivo_yaml(dst_objetivo: Path, src_template: Path) -> CreatedItem:
             if "success_statement:" in line:
                 # Encontrar próxima linha não-vazia após success_statement
                 j = i + 1
-                while j < len(lines) and (not lines[j].strip() or lines[j].strip().startswith("#")):
+                while j < len(lines) and (
+                    not lines[j].strip() or lines[j].strip().startswith("#")
+                ):
                     j += 1
                 # Se próxima linha é stakeholders:, inserir antes
                 if j < len(lines) and "stakeholders:" in lines[j]:
@@ -2543,7 +2588,7 @@ def _patch_objetivo_yaml(dst_objetivo: Path, src_template: Path) -> CreatedItem:
                 path=dst_objetivo,
                 kind="file",
                 status="skipped",
-                message="Ponto de inserção não encontrado"
+                message="Ponto de inserção não encontrado",
             )
 
         # Inserir docstyle
@@ -2562,16 +2607,13 @@ def _patch_objetivo_yaml(dst_objetivo: Path, src_template: Path) -> CreatedItem:
             path=dst_objetivo,
             kind="file",
             status="updated",
-            message=f"Campo docstyle adicionado (backup: {backup_path.name})"
+            message=f"Campo docstyle adicionado (backup: {backup_path.name})",
         )
 
     except Exception as exc:
         log.warning("⚠️  Erro ao fazer patch de objetivo.yaml: %s", exc)
         return CreatedItem(
-            path=dst_objetivo,
-            kind="file",
-            status="error",
-            message=str(exc)
+            path=dst_objetivo, kind="file", status="error", message=str(exc)
         )
 
 
@@ -2579,7 +2621,10 @@ def _patch_objetivo_yaml(dst_objetivo: Path, src_template: Path) -> CreatedItem:
 # Templates de documentação — setup inicial do projeto
 # ---------------------------------------------------------------------------
 
-def setup_project_docs(config: ProjectConfig, is_upgrade: bool = False) -> list[CreatedItem]:
+
+def setup_project_docs(
+    config: ProjectConfig, is_upgrade: bool = False
+) -> list[CreatedItem]:
     """
     Configura templates de documentação do projeto.
 
@@ -2610,8 +2655,7 @@ def setup_project_docs(config: ProjectConfig, is_upgrade: bool = False) -> list[
     src_templates = _TEMPLATE_ROOT / "scaffold" / "templates" / "docs"
 
     if not src_templates.is_dir():
-        log.warning("⚠️  Diretório de origem não encontrado: %s",
-                    src_templates)
+        log.warning("⚠️  Diretório de origem não encontrado: %s", src_templates)
         return results
 
     # 1. objetivo.yaml (raiz, com substituições)
@@ -2626,24 +2670,35 @@ def setup_project_docs(config: ProjectConfig, is_upgrade: bool = False) -> list[
             content = src_objetivo.read_text(encoding="utf-8")
             # Substituir placeholders
             content = content.replace(
-                'name: "CHANGE_ME"', f'name: "{config.project_name}"')
+                'name: "CHANGE_ME"', f'name: "{config.project_name}"'
+            )
             content = content.replace(
-                'summary: "CHANGE_ME (1-2 linhas)"', f'summary: "{config.description}"')
+                'summary: "CHANGE_ME (1-2 linhas)"', f'summary: "{config.description}"'
+            )
             content = content.replace(
-                'problem_statement: "CHANGE_ME (qual dor real será resolvida?)"', f'problem_statement: "{config.description}"')
+                'problem_statement: "CHANGE_ME (qual dor real será resolvida?)"',
+                f'problem_statement: "{config.description}"',
+            )
             content = content.replace(
-                'team_or_person: "CHANGE_ME"', f'team_or_person: "{config.project_name} team"')
+                'team_or_person: "CHANGE_ME"',
+                f'team_or_person: "{config.project_name} team"',
+            )
             content = content.replace(
-                '- "CHANGE_ME"', f'- "{config.project_name} owner"')
+                '- "CHANGE_ME"', f'- "{config.project_name} owner"'
+            )
 
             dst_objetivo.write_text(content, encoding="utf-8")
             log.info("✅ criado: objetivo.yaml")
-            results.append(CreatedItem(path=dst_objetivo,
-                           kind="file", status="created"))
+            results.append(
+                CreatedItem(path=dst_objetivo, kind="file", status="created")
+            )
     except OSError as exc:
         log.warning("⚠️  erro ao criar objetivo.yaml: %s", exc)
-        results.append(CreatedItem(path=dst_objetivo,
-                       kind="file", status="error", message=str(exc)))
+        results.append(
+            CreatedItem(
+                path=dst_objetivo, kind="file", status="error", message=str(exc)
+            )
+        )
 
     # 2. mcp-questions.yaml (raiz, cópia direta)
     src_mcp = src_templates / "mcp-questions-template.yaml"
@@ -2657,6 +2712,7 @@ def setup_project_docs(config: ProjectConfig, is_upgrade: bool = False) -> list[
 # ---------------------------------------------------------------------------
 # Session Support Libraries — módulos compartilhados necessários para scripts
 # ---------------------------------------------------------------------------
+
 
 def copy_session_libs(config: ProjectConfig, force: bool = False) -> list[CreatedItem]:
     """
@@ -2715,7 +2771,10 @@ def copy_session_libs(config: ProjectConfig, force: bool = False) -> list[Create
 # Session Scripts — cópia de scripts de rastreamento para novo projeto
 # ---------------------------------------------------------------------------
 
-def copy_session_scripts(config: ProjectConfig, force: bool = False) -> list[CreatedItem]:
+
+def copy_session_scripts(
+    config: ProjectConfig, force: bool = False
+) -> list[CreatedItem]:
     """
     Copia scripts de rastreamento de sessão para o novo projeto.
 
@@ -2752,7 +2811,9 @@ def copy_session_scripts(config: ProjectConfig, force: bool = False) -> list[Cre
     return results
 
 
-def copy_memory_scripts(config: ProjectConfig, force: bool = False) -> list[CreatedItem]:
+def copy_memory_scripts(
+    config: ProjectConfig, force: bool = False
+) -> list[CreatedItem]:
     """
     Copia scripts do memory system para o novo projeto.
 
@@ -2797,7 +2858,9 @@ def copy_memory_scripts(config: ProjectConfig, force: bool = False) -> list[Crea
     return results
 
 
-def copy_utility_scripts(config: ProjectConfig, force: bool = False) -> list[CreatedItem]:
+def copy_utility_scripts(
+    config: ProjectConfig, force: bool = False
+) -> list[CreatedItem]:
     """
     Copia scripts shell utilitários para o novo projeto.
 
@@ -2840,13 +2903,17 @@ def copy_utility_scripts(config: ProjectConfig, force: bool = False) -> list[Cre
                 dst_script.chmod(0o755)
                 log.debug("✅ Permissões executáveis aplicadas: %s", dst_script.name)
             except OSError as exc:
-                log.warning("⚠️  Não foi possível aplicar chmod 755 em %s: %s", dst_script, exc)
+                log.warning(
+                    "⚠️  Não foi possível aplicar chmod 755 em %s: %s", dst_script, exc
+                )
         results.append(result)
 
     return results
 
 
-def copy_copilot_instructions(config: ProjectConfig, force: bool = False) -> list[CreatedItem]:
+def copy_copilot_instructions(
+    config: ProjectConfig, force: bool = False
+) -> list[CreatedItem]:
     """
     Copia arquivos de instruções customizadas do Copilot para o novo projeto.
 
@@ -2936,7 +3003,9 @@ def copy_claude_config(config: ProjectConfig, force: bool = False) -> list[Creat
     return results
 
 
-def copy_github_templates(config: ProjectConfig, force: bool = False) -> list[CreatedItem]:
+def copy_github_templates(
+    config: ProjectConfig, force: bool = False
+) -> list[CreatedItem]:
     """
     Copia templates de GitHub Best Practices para o novo projeto.
 
@@ -2970,7 +3039,9 @@ def copy_github_templates(config: ProjectConfig, force: bool = False) -> list[Cr
 
     # Mapeamento de variáveis customizadas para templates GitHub
     github_owner_repo = config.github_repo if config.github_repo else "owner/repo"
-    github_parts = github_owner_repo.split("/") if "/" in github_owner_repo else ["owner", "repo"]
+    github_parts = (
+        github_owner_repo.split("/") if "/" in github_owner_repo else ["owner", "repo"]
+    )
 
     template_vars = {
         "{{ project_name }}": config.project_name,
@@ -2984,7 +3055,9 @@ def copy_github_templates(config: ProjectConfig, force: bool = False) -> list[Cr
     # 1. CONTRIBUTING.md → raiz (com substituição de variáveis)
     src_contributing = src_root / "CONTRIBUTING.md"
     dst_contributing = base / "CONTRIBUTING.md"
-    result = _copy_file_with_vars(src_contributing, dst_contributing, template_vars, force=force)
+    result = _copy_file_with_vars(
+        src_contributing, dst_contributing, template_vars, force=force
+    )
     results.append(result)
 
     # 2. PULL_REQUEST_TEMPLATE.md → .github/
@@ -2996,7 +3069,9 @@ def copy_github_templates(config: ProjectConfig, force: bool = False) -> list[Cr
     # 3. CODEOWNERS → .github/
     src_codeowners = src_root / "CODEOWNERS"
     dst_codeowners = base / ".github" / "CODEOWNERS"
-    result = _copy_file_with_vars(src_codeowners, dst_codeowners, template_vars, force=force)
+    result = _copy_file_with_vars(
+        src_codeowners, dst_codeowners, template_vars, force=force
+    )
     results.append(result)
 
     # 4. BRANCH_PROTECTION_SETUP.md → docs/
@@ -3008,7 +3083,13 @@ def copy_github_templates(config: ProjectConfig, force: bool = False) -> list[Cr
     # === P2 Templates ===
 
     # 5. Issue templates → .github/ISSUE_TEMPLATE/ (.yml da base-configs + .md do template root)
-    issue_templates_yml = ["bug_report.yml", "feature_request.yml", "documentation.yml", "question.yml", "config.yml"]
+    issue_templates_yml = [
+        "bug_report.yml",
+        "feature_request.yml",
+        "documentation.yml",
+        "question.yml",
+        "config.yml",
+    ]
     for template_name in issue_templates_yml:
         src_issue = src_root / "ISSUE_TEMPLATE" / template_name
         dst_issue = base / ".github" / "ISSUE_TEMPLATE" / template_name
@@ -3024,7 +3105,9 @@ def copy_github_templates(config: ProjectConfig, force: bool = False) -> list[Cr
     # 6. GitHub Actions workflows → .github/workflows/
     src_workflow = src_root / "workflows" / "git-validation.yml"
     dst_workflow = base / ".github" / "workflows" / "git-validation.yml"
-    result = _copy_file_with_vars(src_workflow, dst_workflow, template_vars, force=force)
+    result = _copy_file_with_vars(
+        src_workflow, dst_workflow, template_vars, force=force
+    )
     results.append(result)
 
     # 7. Git hooks → scripts/git-hooks/
@@ -3037,7 +3120,9 @@ def copy_github_templates(config: ProjectConfig, force: bool = False) -> list[Cr
             dst_hook.chmod(0o755)
             log.debug("✅ Permissões executáveis aplicadas: %s", dst_hook.name)
         except OSError as exc:
-            log.warning("⚠️  Não foi possível aplicar chmod 755 em %s: %s", dst_hook, exc)
+            log.warning(
+                "⚠️  Não foi possível aplicar chmod 755 em %s: %s", dst_hook, exc
+            )
     results.append(result)
 
     # 8. Badge guide → .github/BADGES.md
@@ -3056,17 +3141,16 @@ def copy_github_templates(config: ProjectConfig, force: bool = False) -> list[Cr
             dst_script.chmod(0o755)
             log.debug("✅ Permissões executáveis aplicadas: %s", dst_script.name)
         except OSError as exc:
-            log.warning("⚠️  Não foi possível aplicar chmod 755 em %s: %s", dst_script, exc)
+            log.warning(
+                "⚠️  Não foi possível aplicar chmod 755 em %s: %s", dst_script, exc
+            )
     results.append(result)
 
     return results
 
 
 def _copy_file_with_vars(
-    src: Path,
-    dst: Path,
-    template_vars: dict[str, str],
-    force: bool = False
+    src: Path, dst: Path, template_vars: dict[str, str], force: bool = False
 ) -> CreatedItem:
     """
     Copia arquivo aplicando substituição de variáveis.
@@ -3164,7 +3248,7 @@ def _copy_file(src: Path, dst: Path, force: bool = False) -> CreatedItem:
             path=dst,
             kind="symlink",
             status="skipped",
-            message=f"Preservado symlink → {dst.resolve()}"
+            message=f"Preservado symlink → {dst.resolve()}",
         )
 
     # Ler conteúdo do template
@@ -3181,11 +3265,15 @@ def _copy_file(src: Path, dst: Path, force: bool = False) -> CreatedItem:
     if dst.exists():
         # BUG-16: Tentar merge inteligente primeiro (antes de force)
         # Verificar se há merger disponível para este tipo de arquivo
-        merge_result = file_merge.merge_or_skip(dst, template_content, interactive=False)
+        merge_result = file_merge.merge_or_skip(
+            dst, template_content, interactive=False
+        )
 
         if merge_result.status == "merged" or merge_result.status == "created":
             # Merge bem-sucedido via sistema de merge inteligente
-            log.info("🔀 merged via %s", merge_result.message or "intelligent merge system")
+            log.info(
+                "🔀 merged via %s", merge_result.message or "intelligent merge system"
+            )
             return merge_result
 
         # Se chegou aqui, não há merger disponível ou merge foi skipped
@@ -3199,13 +3287,15 @@ def _copy_file(src: Path, dst: Path, force: bool = False) -> CreatedItem:
             if not force:
                 log.warning(
                     "📊 drift detectado: %s (upstream: %s, local: %s)",
-                    dst.name, src_hash, dst_hash
+                    dst.name,
+                    src_hash,
+                    dst_hash,
                 )
                 return CreatedItem(
                     path=dst,
                     kind="file",
                     status="drift",
-                    message=f"Arquivo difere do upstream (upstream: {src_hash}, local: {dst_hash})"
+                    message=f"Arquivo difere do upstream (upstream: {src_hash}, local: {dst_hash})",
                 )
             else:
                 # Opção 1: backup antes de sobrescrever
@@ -3233,6 +3323,7 @@ def _copy_file(src: Path, dst: Path, force: bool = False) -> CreatedItem:
 # Constitution — geração do arquivo .specify/memory/constitution.md
 # ---------------------------------------------------------------------------
 
+
 def generate_constitution(config: ProjectConfig) -> CreatedItem:
     """
     Gera .specify/memory/constitution.md no projeto destino.
@@ -3257,12 +3348,9 @@ def generate_constitution(config: ProjectConfig) -> CreatedItem:
         template_content = src.read_text(encoding="utf-8")
 
         # Substitui os marcadores de template do SpecKit
-        content = template_content.replace(
-            "[PROJECT_NAME]", config.project_title)
-        content = content.replace(
-            "[RATIFICATION_DATE]", config.created_at[:10])
-        content = content.replace(
-            "[LAST_AMENDED_DATE]", config.created_at[:10])
+        content = template_content.replace("[PROJECT_NAME]", config.project_title)
+        content = content.replace("[RATIFICATION_DATE]", config.created_at[:10])
+        content = content.replace("[LAST_AMENDED_DATE]", config.created_at[:10])
         content = content.replace("[CONSTITUTION_VERSION]", "1.0.0")
 
         # Cabeçalho com metadados do scaffold
@@ -3286,15 +3374,16 @@ def generate_constitution(config: ProjectConfig) -> CreatedItem:
 # ---------------------------------------------------------------------------
 
 _MCP_ENV_VARS_BY_DOMAIN: dict[str, list[str]] = {
-    "programming":    ["GITHUB_PERSONAL_ACCESS_TOKEN"],
+    "programming": ["GITHUB_PERSONAL_ACCESS_TOKEN"],
     "infrastructure": ["GITHUB_PERSONAL_ACCESS_TOKEN"],
-    "analysis":       ["BRAVE_API_KEY"],
+    "analysis": ["BRAVE_API_KEY"],
 }
 
 
 # ---------------------------------------------------------------------------
 # load-mcp.sh — geração dinâmica por domínio
 # ---------------------------------------------------------------------------
+
 
 def generate_load_mcp(config: ProjectConfig) -> CreatedItem:
     """
@@ -3309,20 +3398,25 @@ def generate_load_mcp(config: ProjectConfig) -> CreatedItem:
     """
     dest = config.project_path / "scripts" / "load-mcp.sh"
     if dest.exists():
-        return CreatedItem(path=dest, kind="file", status="skipped", message="já existe")
+        return CreatedItem(
+            path=dest, kind="file", status="skipped", message="já existe"
+        )
 
     required_vars = _MCP_ENV_VARS_BY_DOMAIN.get(config.domain, [])
 
     # Bloco de exemplo para .secrets/.env
-    example_lines = "\n".join(
-        f"   {var}=your-value-here" for var in required_vars
-    ) or "   (nenhuma variável requerida para este domínio)"
+    example_lines = (
+        "\n".join(f"   {var}=your-value-here" for var in required_vars)
+        or "   (nenhuma variável requerida para este domínio)"
+    )
 
     # Bloco de validação de variáveis
-    validation_lines = "\n".join(
-        f'  [[ -z "${{{var}:-}}" ]] && MISSING+=("{var}")'
-        for var in required_vars
-    ) or "  # nenhuma variável requerida para este domínio"
+    validation_lines = (
+        "\n".join(
+            f'  [[ -z "${{{var}:-}}" ]] && MISSING+=("{var}")' for var in required_vars
+        )
+        or "  # nenhuma variável requerida para este domínio"
+    )
 
     script = (
         "#!/usr/bin/env bash\n"
@@ -3344,15 +3438,14 @@ def generate_load_mcp(config: ProjectConfig) -> CreatedItem:
         '  echo "   # .secrets/.env"\n'
         f'  echo "{example_lines}"\n'
         '  echo ""\n'
-        '  exit 1\n'
+        "  exit 1\n"
         "fi\n"
         "\n"
         "# Carrega sem poluir o histórico do shell\n"
-        "set -a; source \"$SECRETS_ENV\"; set +a\n"
+        'set -a; source "$SECRETS_ENV"; set +a\n'
         "\n"
         "# Valida variáveis obrigatórias\n"
-        "MISSING=()\n"
-        + validation_lines + "\n"
+        "MISSING=()\n" + validation_lines + "\n"
         "\n"
         "if [[ ${#MISSING[@]} -gt 0 ]]; then\n"
         '  echo "❌ Variáveis obrigatórias ausentes em $SECRETS_ENV:"\n'
@@ -3378,8 +3471,8 @@ def generate_load_mcp(config: ProjectConfig) -> CreatedItem:
     try:
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(script, encoding="utf-8")
-        # Torna executável: rwxr-xr-x (0o755)
-        os.chmod(dest, 0o755)
+        # Torna executável: rwxr-xr-x (0o755) — script de shell precisa de +x
+        os.chmod(dest, 0o755)  # noqa: S103  # nosec B103
         log.info("✅ load-mcp.sh gerado: %s", dest)
         return CreatedItem(path=dest, kind="file", status="created")
     except OSError as exc:
@@ -3390,6 +3483,7 @@ def generate_load_mcp(config: ProjectConfig) -> CreatedItem:
 # ---------------------------------------------------------------------------
 # Secrets Security Setup (IMP-60)
 # ---------------------------------------------------------------------------
+
 
 def setup_secrets_security(config: ProjectConfig) -> list[CreatedItem]:
     """
@@ -3426,28 +3520,34 @@ def setup_secrets_security(config: ProjectConfig) -> list[CreatedItem]:
         if current_perms != 0o700:
             secrets_dir.chmod(0o700)
             log.info("🔒 .secrets/ protegido: chmod 700 aplicado")
-            results.append(CreatedItem(
-                path=secrets_dir,
-                kind="dir",
-                status="secured",
-                message="chmod 700 aplicado"
-            ))
+            results.append(
+                CreatedItem(
+                    path=secrets_dir,
+                    kind="dir",
+                    status="secured",
+                    message="chmod 700 aplicado",
+                )
+            )
         else:
             log.info("✅ .secrets/ já tem permissão 700")
-            results.append(CreatedItem(
-                path=secrets_dir,
-                kind="dir",
-                status="skipped",
-                message="permissões já corretas (700)"
-            ))
+            results.append(
+                CreatedItem(
+                    path=secrets_dir,
+                    kind="dir",
+                    status="skipped",
+                    message="permissões já corretas (700)",
+                )
+            )
     except OSError as exc:
         log.warning("⚠️  erro ao aplicar chmod 700: %s", exc)
-        results.append(CreatedItem(
-            path=secrets_dir,
-            kind="dir",
-            status="error",
-            message=f"chmod falhou: {exc}"
-        ))
+        results.append(
+            CreatedItem(
+                path=secrets_dir,
+                kind="dir",
+                status="error",
+                message=f"chmod falhou: {exc}",
+            )
+        )
 
     # 3. Validar .gitignore contém .secrets/
     gitignore = base / ".gitignore"
@@ -3455,20 +3555,24 @@ def setup_secrets_security(config: ProjectConfig) -> list[CreatedItem]:
         content = gitignore.read_text(encoding="utf-8")
         if ".secrets/" in content:
             log.info("✅ .gitignore contém .secrets/")
-            results.append(CreatedItem(
-                path=gitignore,
-                kind="validation",
-                status="ok",
-                message=".secrets/ está ignorado no git"
-            ))
+            results.append(
+                CreatedItem(
+                    path=gitignore,
+                    kind="validation",
+                    status="ok",
+                    message=".secrets/ está ignorado no git",
+                )
+            )
         else:
             log.warning("⚠️  .secrets/ NÃO está em .gitignore!")
-            results.append(CreatedItem(
-                path=gitignore,
-                kind="validation",
-                status="warning",
-                message=".secrets/ ausente no .gitignore"
-            ))
+            results.append(
+                CreatedItem(
+                    path=gitignore,
+                    kind="validation",
+                    status="warning",
+                    message=".secrets/ ausente no .gitignore",
+                )
+            )
 
     # 4. Ativar pre-commit hook automaticamente (BUG-#4 fix)
     hook_template = base / ".git-hooks" / "pre-commit.secrets"
@@ -3479,34 +3583,39 @@ def setup_secrets_security(config: ProjectConfig) -> list[CreatedItem]:
             # Verificar se .git/hooks/ existe
             hooks_dir = base / ".git" / "hooks"
             if not hooks_dir.exists():
-                log.warning(
-                    "⚠️  .git/hooks/ não existe — pulando ativação de hook")
-                results.append(CreatedItem(
-                    path=hook_template,
-                    kind="file",
-                    status="available",
-                    message="hook disponível (sem .git/hooks/ para instalar)"
-                ))
+                log.warning("⚠️  .git/hooks/ não existe — pulando ativação de hook")
+                results.append(
+                    CreatedItem(
+                        path=hook_template,
+                        kind="file",
+                        status="available",
+                        message="hook disponível (sem .git/hooks/ para instalar)",
+                    )
+                )
             else:
                 # Copiar hook template para .git/hooks/pre-commit
                 shutil.copy2(hook_template, hook_target)
                 hook_target.chmod(0o755)  # rwxr-xr-x
 
                 log.info("✅ Pre-commit hook ativado automaticamente")
-                results.append(CreatedItem(
-                    path=hook_target,
-                    kind="file",
-                    status="activated",
-                    message="pre-commit hook instalado em .git/hooks/"
-                ))
+                results.append(
+                    CreatedItem(
+                        path=hook_target,
+                        kind="file",
+                        status="activated",
+                        message="pre-commit hook instalado em .git/hooks/",
+                    )
+                )
         except Exception as e:
             log.warning("⚠️  Falha ao ativar pre-commit hook: %s", e)
-            results.append(CreatedItem(
-                path=hook_template,
-                kind="file",
-                status="available",
-                message=f"hook disponível (ativação manual necessária): {e}"
-            ))
+            results.append(
+                CreatedItem(
+                    path=hook_template,
+                    kind="file",
+                    status="available",
+                    message=f"hook disponível (ativação manual necessária): {e}",
+                )
+            )
 
     return results
 
@@ -3515,7 +3624,10 @@ def setup_secrets_security(config: ProjectConfig) -> list[CreatedItem]:
 # GitHub Security Files (BUG-06)
 # ---------------------------------------------------------------------------
 
-def generate_github_security_files(config: ProjectConfig, force: bool = False) -> list[CreatedItem]:
+
+def generate_github_security_files(
+    config: ProjectConfig, force: bool = False
+) -> list[CreatedItem]:
     """
     Gera arquivos de segurança GitHub no projeto.
 
@@ -3571,7 +3683,9 @@ def generate_github_security_files(config: ProjectConfig, force: bool = False) -
 
     # Arquivo 5: .github/workflows/dependency-review.yml
     dependency_review = base / ".github" / "workflows" / "dependency-review.yml"
-    results.append(_write_managed_file(dependency_review, _DEPENDENCY_REVIEW_YML, force=force))
+    results.append(
+        _write_managed_file(dependency_review, _DEPENDENCY_REVIEW_YML, force=force)
+    )
 
     return results
 
@@ -3612,8 +3726,7 @@ def generate_project_creation_summary(config: ProjectConfig) -> CreatedItem:
     if config.extra_profiles:
         if isinstance(config.extra_profiles, str):
             # Se for string, fazer split por vírgula
-            extra = [p.strip()
-                     for p in config.extra_profiles.split(",") if p.strip()]
+            extra = [p.strip() for p in config.extra_profiles.split(",") if p.strip()]
             profiles.extend(extra)
         elif isinstance(config.extra_profiles, list):
             profiles.extend(config.extra_profiles)
@@ -3745,7 +3858,7 @@ def write_scaffold_state(
 
     IMP-65 Fase 1: Agora também armazena template_versions para tracking de drift.
     """
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     state_path = config.project_path / _STATE_FILENAME
 
@@ -3755,16 +3868,18 @@ def write_scaffold_state(
     if state_path.exists():
         try:
             import yaml
+
             with state_path.open(encoding="utf-8") as f:
                 old = yaml.safe_load(f) or {}
             existing_profiles = old.get("profiles_applied", [])
             original_created_at = old.get("created_at", config.created_at)
-        except Exception:
-            pass
+        except Exception as exc:
+            # State ilegível: recomeça do zero (comportamento anterior), mas registra
+            log.debug("scaffold state anterior ignorado (%s): %s", state_path, exc)
 
     # Merge: adiciona novos perfis sem duplicar
     merged_profiles = list(existing_profiles)
-    for p in (profiles_applied or []):
+    for p in profiles_applied or []:
         if p not in merged_profiles:
             merged_profiles.append(p)
 
@@ -3776,11 +3891,9 @@ def write_scaffold_state(
     if template_dir.exists():
         try:
             from . import template_version
+
             templates = template_version.scan_templates(template_dir)
-            template_versions = {
-                name: info.version
-                for name, info in templates.items()
-            }
+            template_versions = {name: info.version for name, info in templates.items()}
 
             # Collect base content for three-way merge support
             for name, info in templates.items():
@@ -3795,14 +3908,14 @@ def write_scaffold_state(
     state: dict = {
         "scaffold_version": "1.0.0",
         "created_at": original_created_at,
-        "updated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "updated_at": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "project": {
-            "name":         config.project_name,
-            "title":        config.project_title,
-            "description":  config.description,
-            "domain":       config.domain,
-            "language":     config.language,
-            "github_repo":  config.github_repo or "",
+            "name": config.project_name,
+            "title": config.project_title,
+            "description": config.description,
+            "domain": config.domain,
+            "language": config.language,
+            "github_repo": config.github_repo or "",
             "ai_assistant": config.ai_assistant,
         },
         "paths": {
@@ -3811,22 +3924,26 @@ def write_scaffold_state(
         },
         "profiles_applied": merged_profiles,
         "template_versions": template_versions,  # IMP-65 Fase 1
-        "template_bases": template_bases,        # BUG-03 FIX: IMP-65 Phase 3
+        "template_bases": template_bases,  # BUG-03 FIX: IMP-65 Phase 3
     }
 
     try:
         import yaml
+
         state_path.parent.mkdir(parents=True, exist_ok=True)
         state_path.write_text(
-            yaml.dump(state, allow_unicode=True,
-                      default_flow_style=False, sort_keys=False),
+            yaml.dump(
+                state, allow_unicode=True, default_flow_style=False, sort_keys=False
+            ),
             encoding="utf-8",
         )
         log.info("✅ scaffold state gravado: %s", state_path)
         return CreatedItem(path=state_path, kind="file", status="created")
     except Exception as exc:
         log.warning("⚠️  erro ao gravar scaffold state: %s", exc)
-        return CreatedItem(path=state_path, kind="file", status="error", message=str(exc))
+        return CreatedItem(
+            path=state_path, kind="file", status="error", message=str(exc)
+        )
 
 
 def read_scaffold_state(target_dir: Path) -> dict | None:
@@ -3839,6 +3956,7 @@ def read_scaffold_state(target_dir: Path) -> dict | None:
         return None
     try:
         import yaml
+
         with state_path.open(encoding="utf-8") as f:
             data = yaml.safe_load(f)
         return data if isinstance(data, dict) else None
@@ -3847,7 +3965,9 @@ def read_scaffold_state(target_dir: Path) -> dict | None:
         return None
 
 
-def config_from_state(state: dict, override_target: Path | None = None) -> ProjectConfig:
+def config_from_state(
+    state: dict, override_target: Path | None = None
+) -> ProjectConfig:
     """
     Reconstrói um ProjectConfig a partir do estado salvo.
 
@@ -3856,7 +3976,7 @@ def config_from_state(state: dict, override_target: Path | None = None) -> Proje
         override_target: se fornecido, sobrescreve paths.target_dir do state
                         No modo upgrade, override_target é o próprio projeto.
     """
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     proj = state.get("project", {})
     paths = state.get("paths", {})
@@ -3883,9 +4003,11 @@ def config_from_state(state: dict, override_target: Path | None = None) -> Proje
         # Modo normal: usa target_dir do state
         target = Path(paths.get("target_dir", "."))
 
-    shared = Path(paths.get("shared_dir", str(
-        Path.home() / "Documentos" / "DevOps" / ".copilot-shared"
-    )))
+    shared = Path(
+        paths.get(
+            "shared_dir", str(Path.home() / "Documentos" / "DevOps" / ".copilot-shared")
+        )
+    )
 
     return ProjectConfig(
         project_name=project_name,
@@ -3896,8 +4018,9 @@ def config_from_state(state: dict, override_target: Path | None = None) -> Proje
         github_repo=proj.get("github_repo") or None,
         shared_dir=shared,
         target_dir=target,
-        created_at=state.get("created_at", datetime.now(
-            timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")),
+        created_at=state.get(
+            "created_at", datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+        ),
         extra_profiles=state.get("profiles_applied", []),
         ai_assistant=proj.get("ai_assistant", "both"),
     )

@@ -8,11 +8,11 @@ from __future__ import annotations
 
 import os
 import re
-import yaml
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+import yaml
 from rich import box
 from rich.console import Console
 from rich.panel import Panel
@@ -25,7 +25,6 @@ from .config import (
     DOMAIN_DEFAULT_PROFILES,
     SCAFFOLD_VERSION,
     SPECKIT_TRANSVERSAL_PROFILES,
-    VALID_AI_ASSISTANTS,
     VALID_DOMAINS,
     VALID_LANGUAGES,
     AiAssistantType,
@@ -47,6 +46,7 @@ _NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 # Utilitários internos
 # ---------------------------------------------------------------------------
 
+
 def _to_title(name: str) -> str:
     """Converte kebab-case para Title Case. Ex: my-api-v2 → My Api V2."""
     return " ".join(word.capitalize() for word in name.split("-"))
@@ -56,7 +56,9 @@ def _validate_name(name: str) -> bool:
     return bool(_NAME_RE.match(name))
 
 
-def _validate_directory_conflict(project_name: str, target_dir: Path) -> tuple[bool, str]:
+def _validate_directory_conflict(
+    project_name: str, target_dir: Path
+) -> tuple[bool, str]:
     """
     Valida se há potencial conflito entre nome do projeto e diretório alvo.
     Com a nova lógica de project_path (config.py), se target_dir.name == project_name,o scaffold usa target_dir diretamente (sem criar subdiretório duplicado).
@@ -92,18 +94,18 @@ def _validate_directory_conflict(project_name: str, target_dir: Path) -> tuple[b
 
 def _iso_now(now: datetime | None = None) -> str:
     """Timestamp ISO 8601 com offset em America/Sao_Paulo (ex.: ``-03:00``)."""
-    return _local(now or datetime.now(timezone.utc)).isoformat(timespec="seconds")
+    return _local(now or datetime.now(UTC)).isoformat(timespec="seconds")
 
 
 # ---------------------------------------------------------------------------
 # Funções públicas
 # ---------------------------------------------------------------------------
 
+
 def show_banner() -> None:
     """Exibe banner Rich com nome do projeto e versão."""
     panel = Panel(
-        Text(
-            f"🚀  Enterprise Project Scaffold  v{SCAFFOLD_VERSION}", justify="center"),
+        Text(f"🚀  Enterprise Project Scaffold  v{SCAFFOLD_VERSION}", justify="center"),
         style="bold blue",
         border_style="blue",
     )
@@ -119,16 +121,14 @@ def show_menu() -> str:
     """
     while True:
         console.print("  [bold cyan][1][/bold cyan]  Novo Projeto")
-        console.print(
-            "  [bold cyan][2][/bold cyan]  Verificar Links (.copilot-*)")
-        console.print(
-            "  [bold cyan][3][/bold cyan]  Gerar .copilot-rules-[projeto].md")
-        console.print(
-            "  [bold cyan][5][/bold cyan]  Upgrade (re-aplicar template)")
+        console.print("  [bold cyan][2][/bold cyan]  Verificar Links (.copilot-*)")
+        console.print("  [bold cyan][3][/bold cyan]  Gerar .copilot-rules-[projeto].md")
+        console.print("  [bold cyan][5][/bold cyan]  Upgrade (re-aplicar template)")
         console.print("  [bold cyan][4][/bold cyan]  Sair")
         console.print()
-        choice = Prompt.ask("  Escolha", choices=[
-                            "1", "2", "3", "4", "5"], show_choices=False)
+        choice = Prompt.ask(
+            "  Escolha", choices=["1", "2", "3", "4", "5"], show_choices=False
+        )
         return choice
 
 
@@ -169,11 +169,11 @@ def _collect_ci(overrides: dict) -> ProjectConfig:
     domain = overrides["domain"]
     language = overrides["language"]
     if domain not in VALID_DOMAINS:
-        raise ValueError(
-            f"--domain inválido: '{domain}'. Válidos: {VALID_DOMAINS}")
+        raise ValueError(f"--domain inválido: '{domain}'. Válidos: {VALID_DOMAINS}")
     if language not in VALID_LANGUAGES:
         raise ValueError(
-            f"--language inválido: '{language}'. Válidos: {VALID_LANGUAGES}")
+            f"--language inválido: '{language}'. Válidos: {VALID_LANGUAGES}"
+        )
 
     name = overrides["name"]
     if not _validate_name(name):
@@ -182,22 +182,28 @@ def _collect_ci(overrides: dict) -> ProjectConfig:
         )
 
     # BUG-02 fix: resolve() garante caminho absoluto independente do CWD
-    target_dir = Path(overrides["target_dir"]).expanduser().resolve(
-    ) if overrides.get("target_dir") else get_default_target_dir().resolve()
+    target_dir = (
+        Path(overrides["target_dir"]).expanduser().resolve()
+        if overrides.get("target_dir")
+        else get_default_target_dir().resolve()
+    )
 
     # Validar conflito de diretório (BUG-01)
     is_valid, error_msg = _validate_directory_conflict(name, target_dir)
     if not is_valid:
         raise ValueError(
-            f"Conflito de diretório: {name} == {target_dir.name}. {error_msg}")
+            f"Conflito de diretório: {name} == {target_dir.name}. {error_msg}"
+        )
 
     # Validar ai_assistant via registry de plugins
-    from .ai import resolve_plugins, get_valid_values
+    from .ai import get_valid_values, resolve_plugins
+
     ai_assistant_raw = overrides.get("ai_assistant") or "both"
     valid = get_valid_values()
     if ai_assistant_raw not in valid:
         raise ValueError(
-            f"--ai-assistant inválido: '{ai_assistant_raw}'. Válidos: {valid}")
+            f"--ai-assistant inválido: '{ai_assistant_raw}'. Válidos: {valid}"
+        )
 
     # Coleta defaults de configuração de cada plugin ativo (ex: shared_dir do Copilot)
     plugin_config: dict = {}
@@ -222,8 +228,9 @@ def _collect_ci(overrides: dict) -> ProjectConfig:
         shared_dir=shared_dir,
         target_dir=target_dir,
         created_at=_iso_now(),
-        extra_profiles=_parse_extra_profiles(overrides.get(
-            "extra_profiles") or "domain-only", domain),
+        extra_profiles=_parse_extra_profiles(
+            overrides.get("extra_profiles") or "domain-only", domain
+        ),
         ai_assistant=ai_assistant_raw,
     )
 
@@ -257,14 +264,12 @@ def _select_domain(default: str) -> str:
 
     # Mapear escolha para domínio
     choices = [str(i) for i in range(1, len(VALID_DOMAINS) + 1)]
-    default_idx = str(VALID_DOMAINS.index(default) +
-                      1) if default in VALID_DOMAINS else "1"
+    default_idx = (
+        str(VALID_DOMAINS.index(default) + 1) if default in VALID_DOMAINS else "1"
+    )
 
     choice = Prompt.ask(
-        "      Escolha",
-        choices=choices,
-        default=default_idx,
-        show_choices=False
+        "      Escolha", choices=choices, default=default_idx, show_choices=False
     )
 
     return VALID_DOMAINS[int(choice) - 1]
@@ -300,14 +305,12 @@ def _select_language(default: str) -> str:
 
     # Mapear escolha para linguagem
     choices = [str(i) for i in range(1, len(VALID_LANGUAGES) + 1)]
-    default_idx = str(VALID_LANGUAGES.index(default) +
-                      1) if default in VALID_LANGUAGES else "1"
+    default_idx = (
+        str(VALID_LANGUAGES.index(default) + 1) if default in VALID_LANGUAGES else "1"
+    )
 
     choice = Prompt.ask(
-        "      Escolha",
-        choices=choices,
-        default=default_idx,
-        show_choices=False
+        "      Escolha", choices=choices, default=default_idx, show_choices=False
     )
 
     return VALID_LANGUAGES[int(choice) - 1]
@@ -339,7 +342,9 @@ def _select_ai_assistant(default: AiAssistantType) -> AiAssistantType:
     console.print()
 
     choices = [str(i) for i in range(1, len(options) + 1)]
-    default_idx = str(next((i for i, (k, _) in enumerate(options, 1) if k == default), 1))
+    default_idx = str(
+        next((i for i, (k, _) in enumerate(options, 1) if k == default), 1)
+    )
 
     choice = Prompt.ask(
         "      Escolha",
@@ -389,13 +394,17 @@ def _collect_interactive(defaults: dict) -> ProjectConfig:
     # ai_assistant - menu dinâmico via registry de plugins
     ai_assistant = _select_ai_assistant(defaults.get("ai_assistant") or "both")
 
-    github_repo = Prompt.ask(
-        "  [cyan]Repositório GitHub[/cyan] [dim](URL ou Enter para pular)[/dim]",
-        default=defaults.get("repo") or "",
-    ).strip() or None
+    github_repo = (
+        Prompt.ask(
+            "  [cyan]Repositório GitHub[/cyan] [dim](URL ou Enter para pular)[/dim]",
+            default=defaults.get("repo") or "",
+        ).strip()
+        or None
+    )
 
     # Coleta configuração específica de cada plugin ativo (ex: shared_dir do Copilot)
     from .ai import resolve_plugins
+
     plugin_config: dict = {}
     for plugin in resolve_plugins(ai_assistant):
         plugin_config.update(plugin.collect_config(defaults))
@@ -491,9 +500,7 @@ def _get_compatible_layer2_profiles(domain: str, language: str) -> list[str]:
         (ex: ["python-fastapi", "terraform-aws", "k8s-helm"])
     """
     profiles = []
-    descriptors_dir = (
-        Path(__file__).parent.parent.parent / "scaffold" / "profiles"
-    )
+    descriptors_dir = Path(__file__).parent.parent.parent / "scaffold" / "profiles"
 
     if not descriptors_dir.exists():
         return []
@@ -521,18 +528,12 @@ def _get_compatible_layer2_profiles(domain: str, language: str) -> list[str]:
             if "requires" in data:
                 requires = data.get("requires", [])
                 # Verificar se tem o formato antigo
-                has_domain_check = any(
-                    "domain ==" in req for req in requires
-                )
-                has_language_check = any(
-                    "language ==" in req for req in requires
-                )
+                has_domain_check = any("domain ==" in req for req in requires)
+                has_language_check = any("language ==" in req for req in requires)
 
                 if has_domain_check or has_language_check:
                     # Formato antigo detectado
-                    domain_ok = any(
-                        f"domain == {domain}" in req for req in requires
-                    )
+                    domain_ok = any(f"domain == {domain}" in req for req in requires)
                     language_ok = any(
                         f"language == {language}" in req for req in requires
                     )
@@ -550,9 +551,7 @@ def _get_compatible_layer2_profiles(domain: str, language: str) -> list[str]:
                 # Mapear aliases comuns
                 elif meta_lang == "hcl" and language in ["terraform", "other"]:
                     language_ok = True
-                elif meta_lang == "yaml" and language in [
-                    "kubernetes", "other"
-                ]:
+                elif meta_lang == "yaml" and language in ["kubernetes", "other"]:
                     language_ok = True
 
                 # Inferir domain a partir de tags ou context
@@ -565,8 +564,12 @@ def _get_compatible_layer2_profiles(domain: str, language: str) -> list[str]:
                         domain_ok = True
                 elif domain == "infrastructure":
                     infra_tags = [
-                        "iac", "cloud", "k8s", "terraform",
-                        "kubernetes", "infrastructure"
+                        "iac",
+                        "cloud",
+                        "k8s",
+                        "terraform",
+                        "kubernetes",
+                        "infrastructure",
                     ]
                     if any(t in tags for t in infra_tags):
                         domain_ok = True
@@ -605,9 +608,7 @@ def _select_layer2_profile(domain: str, language: str) -> str | None:
         # Sem perfis Layer 2 disponíveis para esta combinação
         return None
 
-    console.print(
-        "\n  [cyan][9] Adicionar perfil de código específico?[/cyan]"
-    )
+    console.print("\n  [cyan][9] Adicionar perfil de código específico?[/cyan]")
     console.print(
         "      [bold cyan][1][/bold cyan]  Não, apenas estrutura base  "
         "[dim](default)[/dim]"
@@ -616,18 +617,13 @@ def _select_layer2_profile(domain: str, language: str) -> str | None:
     for idx, profile in enumerate(available, start=2):
         desc = _get_profile_description(profile)
         desc_str = f" [dim]({desc})[/dim]" if desc else ""
-        console.print(
-            f"      [bold cyan][{idx}][/bold cyan]  {profile}{desc_str}"
-        )
+        console.print(f"      [bold cyan][{idx}][/bold cyan]  {profile}{desc_str}")
 
     console.print()
 
     choices = ["1"] + [str(i) for i in range(2, len(available) + 2)]
     choice = Prompt.ask(
-        "      Escolha",
-        choices=choices,
-        default="1",
-        show_choices=False
+        "      Escolha", choices=choices, default="1", show_choices=False
     )
 
     if choice == "1":
@@ -660,33 +656,25 @@ def _collect_extra_profiles(domain: str, language: str) -> list[str]:
     """
     domain_profile = DOMAIN_DEFAULT_PROFILES.get(domain, f"devops-{domain}")
     # Perfis extras (excluindo o do domínio atual)
-    available_extras = [
-        p for p in ALL_SELECTABLE_PROFILES if p != domain_profile
-    ]
+    available_extras = [p for p in ALL_SELECTABLE_PROFILES if p != domain_profile]
 
     console.print(
         f"\n  [cyan][8] Perfis adicionais além de "
         f"[bold]{domain_profile}[/bold]?[/cyan]"
     )
     console.print(
-        "      [dim]devops-security incluído sempre — "
-        "não aparece aqui[/dim]"
+        "      [dim]devops-security incluído sempre — " "não aparece aqui[/dim]"
     )
     console.print(
         f"      [bold cyan][1][/bold cyan]  "
         f"Apenas meu domínio ({domain_profile})  [dim](default)[/dim]"
     )
     console.print("      [bold cyan][2][/bold cyan]  Todos disponíveis")
-    console.print(
-        "      [bold cyan][3][/bold cyan]  Selecionar individualmente"
-    )
+    console.print("      [bold cyan][3][/bold cyan]  Selecionar individualmente")
     console.print()
 
     mode = Prompt.ask(
-        "      Escolha",
-        choices=["1", "2", "3"],
-        default="1",
-        show_choices=False
+        "      Escolha", choices=["1", "2", "3"], default="1", show_choices=False
     )
 
     layer1_profiles: list[str] = []
@@ -737,8 +725,7 @@ def _parse_extra_profiles(value: str, domain: str) -> list[str]:
       "profile1,profile2" → lista explícita
     """
     domain_profile = DOMAIN_DEFAULT_PROFILES.get(domain, f"devops-{domain}")
-    available_extras = [
-        p for p in ALL_SELECTABLE_PROFILES if p != domain_profile]
+    available_extras = [p for p in ALL_SELECTABLE_PROFILES if p != domain_profile]
 
     if value in ("domain-only", "none", ""):
         return []
@@ -770,14 +757,14 @@ def confirm_summary(config: ProjectConfig) -> bool:
     table.add_row("Descrição", config.description or "[dim](vazia)[/dim]")
     table.add_row("Domínio", config.domain)
     table.add_row("Linguagem", config.language)
-    table.add_row(
-        "Repositório", config.github_repo or "[dim](não informado)[/dim]")
+    table.add_row("Repositório", config.github_repo or "[dim](não informado)[/dim]")
     table.add_row("Shared dir", str(config.shared_dir))
     table.add_row("Target dir", str(config.target_dir))
     table.add_row("Project path", str(config.project_path))
 
     domain_profile = DOMAIN_DEFAULT_PROFILES.get(
-        config.domain, f"devops-{config.domain}")
+        config.domain, f"devops-{config.domain}"
+    )
     extras = config.extra_profiles or []
     all_profiles = [domain_profile] + extras + SPECKIT_TRANSVERSAL_PROFILES
     table.add_row("Perfis SpecKit", ", ".join(all_profiles))
@@ -785,7 +772,6 @@ def confirm_summary(config: ProjectConfig) -> bool:
     console.print(table)
     console.print()
     return Confirm.ask("  Confirmar e criar projeto?", default=True)
-
 
 
 # Diretório de logs da ferramenta scaffold (scaffold-project/logs/).
@@ -799,6 +785,8 @@ def _scaffold_logs_dir() -> Path:
     """Diretório de logs da ferramenta: ``$SCAFFOLD_LOGS_DIR`` ou ``<scaffold-project>/logs``."""
     override = os.environ.get(_SCAFFOLD_LOGS_ENV, "").strip()
     return Path(override) if override else _SCAFFOLD_LOGS_DIR
+
+
 _LOG_TZ = ZoneInfo("America/Sao_Paulo")
 
 
@@ -849,12 +837,20 @@ def _write_log_to_dir(
 
             # Mesmas seções de atenção exibidas no final do stdout
             for status, title in (("drift", "Drift"), ("error", "Errors")):
-                flagged = [i for i in items if isinstance(i, CreatedItem) and i.status == status]
+                flagged = [
+                    i
+                    for i in items
+                    if isinstance(i, CreatedItem) and i.status == status
+                ]
                 if flagged:
                     f.write(f"\n## {title} ({len(flagged)})\n")
                     for item in flagged:
                         line = f"- {_relative(item.path, project_path)}"
-                        f.write(f"{line} | {item.message}\n" if item.message else f"{line}\n")
+                        f.write(
+                            f"{line} | {item.message}\n"
+                            if item.message
+                            else f"{line}\n"
+                        )
             f.write("\n## Detailed Items\n\n")
 
             for item in items:
@@ -865,14 +861,24 @@ def _write_log_to_dir(
                     f.write("\n")
                 else:
                     target_str = str(item.target) if item.target else "(no target)"
-                    f.write(f"[{item.status.upper()}] symlink | {item.name} -> {target_str}\n")
+                    f.write(
+                        f"[{item.status.upper()}] symlink | {item.name} -> {target_str}\n"
+                    )
         return log_file
     except Exception as e:
-        console.print(f"[yellow]⚠️  Não foi possível salvar log em {logs_dir}: {e}[/yellow]")
+        console.print(
+            f"[yellow]⚠️  Não foi possível salvar log em {logs_dir}: {e}[/yellow]"
+        )
         return None
 
 
-def save_operation_log(items: list[CreatedItem | LinkStatus], project_path: Path, operation: str = "scaffold", log_dir: Path | None = None, now: datetime | None = None) -> Path | None:
+def save_operation_log(
+    items: list[CreatedItem | LinkStatus],
+    project_path: Path,
+    operation: str = "scaffold",
+    log_dir: Path | None = None,
+    now: datetime | None = None,
+) -> Path | None:
     """
     Salva log detalhado da operação em até três locais:
     1. Sempre em <projeto-criado>/logs/ (primary — retornado).
@@ -890,11 +896,13 @@ def save_operation_log(items: list[CreatedItem | LinkStatus], project_path: Path
     Returns:
         Path do arquivo de log em <projeto-criado>/logs/, ou None se falhar
     """
-    timestamp = now or datetime.now(timezone.utc)
+    timestamp = now or datetime.now(UTC)
 
     # 1. Log sempre no projeto criado (project_path/logs/)
     project_logs_dir = project_path / "logs"
-    primary_log = _write_log_to_dir(project_logs_dir, items, project_path, operation, timestamp)
+    primary_log = _write_log_to_dir(
+        project_logs_dir, items, project_path, operation, timestamp
+    )
 
     # 2. Log na ferramenta scaffold (_scaffold_logs_dir()), se diferente do projeto
     tool_logs_dir = _scaffold_logs_dir()
@@ -904,14 +912,21 @@ def save_operation_log(items: list[CreatedItem | LinkStatus], project_path: Path
     # 3. Log em --log-dir customizado, se diferente dos anteriores
     if log_dir:
         custom_dir = Path(log_dir)
-        if (custom_dir.resolve() != project_logs_dir.resolve()
-                and custom_dir.resolve() != tool_logs_dir.resolve()):
+        if (
+            custom_dir.resolve() != project_logs_dir.resolve()
+            and custom_dir.resolve() != tool_logs_dir.resolve()
+        ):
             _write_log_to_dir(custom_dir, items, project_path, operation, timestamp)
 
     return primary_log
 
 
-def print_final_summary(items: list[CreatedItem | LinkStatus], project_path: Path | None = None, save_log: bool = True, log_dir: Path | None = None) -> None:
+def print_final_summary(
+    items: list[CreatedItem | LinkStatus],
+    project_path: Path | None = None,
+    save_log: bool = True,
+    log_dir: Path | None = None,
+) -> None:
     """
     Exibe tabela Rich agrupada por pasta com status de cada item.
 
@@ -925,14 +940,15 @@ def print_final_summary(items: list[CreatedItem | LinkStatus], project_path: Pat
 
     # Agrupar itens por pasta
     from collections import defaultdict
+
     folders: dict[str, list[tuple[str, str, str, str]]] = defaultdict(list)
 
     status_styles = {
         "created": "[green]created[/green]",
         "skipped": "[yellow]skipped[/yellow]",
-        "error":   "[red]error[/red]",
-        "ok":      "[green]ok[/green]",
-        "broken":  "[red]broken[/red]",
+        "error": "[red]error[/red]",
+        "ok": "[green]ok[/green]",
+        "broken": "[red]broken[/red]",
         "missing": "[yellow]missing[/yellow]",
     }
 
@@ -955,20 +971,24 @@ def print_final_summary(items: list[CreatedItem | LinkStatus], project_path: Pat
                 folder = "(root)"  # Arquivo na raiz
 
             # Adicionar à lista da pasta
-            folders[folder].append((
-                item.kind,        # Tipo: "file", "dir", etc.
-                str(path),        # Path relativo completo ou nome do arquivo
-                status_styles.get(item.status, item.status),
-                item.message or ""
-            ))
+            folders[folder].append(
+                (
+                    item.kind,  # Tipo: "file", "dir", etc.
+                    str(path),  # Path relativo completo ou nome do arquivo
+                    status_styles.get(item.status, item.status),
+                    item.message or "",
+                )
+            )
         else:  # LinkStatus
             target_str = str(item.target) if item.target else ""
-            folders["(symlinks)"].append((
-                "symlink",
-                item.name,
-                status_styles.get(item.status, item.status),
-                target_str
-            ))
+            folders["(symlinks)"].append(
+                (
+                    "symlink",
+                    item.name,
+                    status_styles.get(item.status, item.status),
+                    target_str,
+                )
+            )
 
     # Criar tabela agrupada
     table = Table(
@@ -995,16 +1015,16 @@ def print_final_summary(items: list[CreatedItem | LinkStatus], project_path: Pat
     for folder in sorted_folders:
         files = folders[folder]
         # Adicionar header da pasta
-        table.add_row(f"[bold blue]📁 {folder}[/bold blue]", "", "", f"[dim]{len(files)} arquivo(s)[/dim]")
+        table.add_row(
+            f"[bold blue]📁 {folder}[/bold blue]",
+            "",
+            "",
+            f"[dim]{len(files)} arquivo(s)[/dim]",
+        )
 
         # Adicionar arquivos
         for kind, filename, status, message in files:
-            table.add_row(
-                f"  {kind}",
-                filename,
-                status,
-                message
-            )
+            table.add_row(f"  {kind}", filename, status, message)
 
     console.print(table)
 

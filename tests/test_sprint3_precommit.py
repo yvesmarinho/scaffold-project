@@ -13,8 +13,6 @@ Tests:
 
 import tempfile
 from pathlib import Path
-import subprocess
-import pytest
 
 
 def test_pre_commit_hook_content_in_constant():
@@ -25,22 +23,24 @@ def test_pre_commit_hook_content_in_constant():
     from scripts.lib import project
 
     # Verificar que constante existe
-    assert hasattr(project, '_PRE_COMMIT_SECRETS_HOOK'), \
-        "Constante _PRE_COMMIT_SECRETS_HOOK deve existir em project.py"
+    assert hasattr(
+        project, "_PRE_COMMIT_SECRETS_HOOK"
+    ), "Constante _PRE_COMMIT_SECRETS_HOOK deve existir em project.py"
 
     content = project._PRE_COMMIT_SECRETS_HOOK
 
     # Verificar conteúdo básico
-    assert "#!/usr/bin/env bash" in content or "#!/bin/bash" in content, \
-        "Hook deve ser um script bash"
-    assert ".secrets/" in content, \
-        "Hook deve mencionar .secrets/ directory"
+    assert (
+        "#!/usr/bin/env bash" in content or "#!/bin/bash" in content
+    ), "Hook deve ser um script bash"
+    assert ".secrets/" in content, "Hook deve mencionar .secrets/ directory"
 
     # Verificar padrões críticos
     critical_patterns = [".secrets/", ".env"]
     found_patterns = sum(1 for pattern in critical_patterns if pattern in content)
-    assert found_patterns >= 1, \
-        f"Hook deve validar pelo menos 1 padrão crítico, encontrou {found_patterns}"
+    assert (
+        found_patterns >= 1
+    ), f"Hook deve validar pelo menos 1 padrão crítico, encontrou {found_patterns}"
 
 
 def test_setup_secrets_security_activates_hook():
@@ -50,9 +50,10 @@ def test_setup_secrets_security_activates_hook():
 
     Bug fix: BUG-#4 (P2 - hook nunca ativado)
     """
-    from scripts.lib.project import setup_secrets_security
-    from scripts.lib.config import ProjectConfig
     from datetime import datetime
+
+    from scripts.lib.config import ProjectConfig
+    from scripts.lib.project import setup_secrets_security
 
     with tempfile.TemporaryDirectory() as tmpdir:
         target_dir = Path(tmpdir)
@@ -100,14 +101,18 @@ def test_setup_secrets_security_activates_hook():
         # Verificações
         hook_target = project_path / ".git" / "hooks" / "pre-commit"
 
-        assert hook_target.exists(), "Hook deveria estar instalado em .git/hooks/pre-commit"
+        assert (
+            hook_target.exists()
+        ), "Hook deveria estar instalado em .git/hooks/pre-commit"
 
         # Verificar permissões (deve ser executável)
         perms = hook_target.stat().st_mode & 0o777
         assert perms == 0o755, f"Hook deve ter permissão 755, tem {oct(perms)}"
 
         # Verificar que results contém ativação
-        hook_results = [r for r in results if hasattr(r, 'status') and r.status == 'activated']
+        hook_results = [
+            r for r in results if hasattr(r, "status") and r.status == "activated"
+        ]
         assert len(hook_results) == 1, "Deve haver 1 resultado de hook ativado"
         assert "instalado" in hook_results[0].message.lower()
 
@@ -119,9 +124,10 @@ def test_hook_activation_without_git_hooks_dir():
 
     Edge case: projeto sem repositório git inicializado.
     """
-    from scripts.lib.project import setup_secrets_security
-    from scripts.lib.config import ProjectConfig
     from datetime import datetime
+
+    from scripts.lib.config import ProjectConfig
+    from scripts.lib.project import setup_secrets_security
 
     with tempfile.TemporaryDirectory() as tmpdir:
         target_dir = Path(tmpdir)
@@ -159,9 +165,16 @@ def test_hook_activation_without_git_hooks_dir():
         results = setup_secrets_security(cfg)
 
         # Verificar que aviso foi gerado
-        hook_results = [r for r in results if r.path == hook_template and r.status == 'available']
-        assert len(hook_results) == 1, "Deve haver 1 resultado de hook disponível (mas não ativado)"
-        assert ".git/hooks/" in hook_results[0].message or "sem .git/hooks/" in hook_results[0].message
+        hook_results = [
+            r for r in results if r.path == hook_template and r.status == "available"
+        ]
+        assert (
+            len(hook_results) == 1
+        ), "Deve haver 1 resultado de hook disponível (mas não ativado)"
+        assert (
+            ".git/hooks/" in hook_results[0].message
+            or "sem .git/hooks/" in hook_results[0].message
+        )
 
 
 def test_hook_activation_handles_copy_error():
@@ -171,9 +184,10 @@ def test_hook_activation_handles_copy_error():
 
     Robustez: scaffold não deve falhar se hook não puder ser ativado.
     """
-    from scripts.lib.project import setup_secrets_security
-    from scripts.lib.config import ProjectConfig
     from datetime import datetime
+
+    from scripts.lib.config import ProjectConfig
+    from scripts.lib.project import setup_secrets_security
 
     with tempfile.TemporaryDirectory() as tmpdir:
         target_dir = Path(tmpdir)
@@ -221,6 +235,10 @@ def test_hook_activation_handles_copy_error():
         # Verificar que hook foi marcado como 'available' (não 'activated')
         hook_results = [r for r in results if r.path == hook_template]
         assert len(hook_results) == 1, "Deve haver 1 resultado relacionado ao hook"
-        assert hook_results[0].status == 'available', \
-            f"Hook deveria estar marcado como 'available', está como '{hook_results[0].status}'"
-        assert "ativação manual necessária" in hook_results[0].message or "Permission denied" in hook_results[0].message
+        assert (
+            hook_results[0].status == "available"
+        ), f"Hook deveria estar marcado como 'available', está como '{hook_results[0].status}'"
+        assert (
+            "ativação manual necessária" in hook_results[0].message
+            or "Permission denied" in hook_results[0].message
+        )

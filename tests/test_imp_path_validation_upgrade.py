@@ -16,10 +16,10 @@ Implementação: scripts/lib/flows/upgrade.py::_validate_and_fix_paths()
 from __future__ import annotations
 
 import sys
-import yaml
 from pathlib import Path
 
 import pytest
+import yaml
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 
@@ -29,6 +29,7 @@ from lib.flows.upgrade import _validate_and_fix_paths  # noqa: E402
 def _write_state_yaml(project_path: Path, state: dict) -> None:
     """Helper: escreve .scaffold-state.yaml diretamente (sem ProjectConfig)."""
     import yaml
+
     state_file = project_path / ".scaffold-state.yaml"
     state_file.parent.mkdir(parents=True, exist_ok=True)
     with state_file.open("w", encoding="utf-8") as f:

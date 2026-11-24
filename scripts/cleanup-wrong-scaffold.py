@@ -4,9 +4,10 @@ Limpa arquivos criados pelo scaffold no diretório errado.
 Usa .scaffold-state.yaml como referência do que foi criado.
 """
 
-import shutil
 import logging
+import shutil
 from pathlib import Path
+
 import yaml
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
@@ -54,6 +55,7 @@ SCAFFOLD_FILES = [
     ".git",  # diretório git
 ]
 
+
 def cleanup_scaffold_files(target_dir: Path, project_name: str, dry_run: bool = False):
     """Remove arquivos e pastas criados pelo scaffold."""
 
@@ -74,11 +76,11 @@ def cleanup_scaffold_files(target_dir: Path, project_name: str, dry_run: bool = 
     else:
         print(f"⚠️  Arquivo .scaffold-state.yaml não encontrado em {target_dir}")
         response = input("\nContinuar mesmo assim? [y/N]: ")
-        if response.lower() != 'y':
+        if response.lower() != "y":
             print("❌ Operação cancelada.")
             return
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
 
     # 1. Remove arquivos
     print("\n📄 Arquivos a remover:")
@@ -127,13 +129,13 @@ def cleanup_scaffold_files(target_dir: Path, project_name: str, dry_run: bool = 
             except Exception as e:
                 log.error(f"Erro ao remover {dir_path}: {e}")
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
 
     if dry_run:
         print("\n✅ DRY RUN completo (nenhum arquivo foi removido)")
         print("\n   Execute novamente com --execute para remover os arquivos.")
     else:
-        print(f"\n✅ Limpeza completa!")
+        print("\n✅ Limpeza completa!")
         print(f"   • {removed_files} arquivos removidos")
         print(f"   • {removed_dirs} diretórios removidos")
 
@@ -149,9 +151,9 @@ if __name__ == "__main__":
     dry_run = "--execute" not in sys.argv
 
     if dry_run:
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("🔍 MODO DRY-RUN (simulação)")
-        print("="*60)
+        print("=" * 60)
         print("\nNenhum arquivo será removido. Para executar de verdade, use:")
         print(f"\n   python3 {Path(__file__).name} --execute\n")
 

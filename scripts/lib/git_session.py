@@ -4,11 +4,15 @@ lib/git_session.py — Operações Git para o workflow de sessão.
 
 from __future__ import annotations
 
+import shutil
 import subprocess
 import tempfile
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
+
+# Caminho absoluto do git (S607/B607); "git" como fallback fora do PATH.
+_GIT = shutil.which("git") or "git"
 
 
 def _run_git(
@@ -17,7 +21,7 @@ def _run_git(
     check: bool = False,
 ) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        ["git", *args],
+        [_GIT, *args],
         cwd=root,
         capture_output=True,
         text=True,
@@ -108,7 +112,9 @@ def commit_all(
         return {"ok": False, "status": "skipped", "reason": "não é repositório git"}
 
     _run_git(root_path, "add", "-A", check=True)
-    message = title.strip() + "\n\n" + "\n".join(line.rstrip() for line in body_lines) + "\n"
+    message = (
+        title.strip() + "\n\n" + "\n".join(line.rstrip() for line in body_lines) + "\n"
+    )
 
     message_path: str | None = None
     try:

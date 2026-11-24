@@ -18,11 +18,14 @@ Etapas executadas em ordem:
 from __future__ import annotations
 
 import re
+import shutil
 import subprocess
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
-from typing import Optional
+
+# Caminho absoluto do git (S607/B607); "git" como fallback fora do PATH.
+_GIT = shutil.which("git") or "git"
 
 # --------------------------------------------------------------------------
 # Constantes
@@ -48,7 +51,7 @@ class ReleaseResult:
     success: bool
     steps_done: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
-    tarball: Optional[Path] = None
+    tarball: Path | None = None
     tag_created: bool = False
 
     @property
@@ -97,7 +100,7 @@ def close_unreleased(changelog_path: Path, version: str, release_date: str) -> s
     start = match_unreleased.end()
     next_section = _VERSIONED_HEADER_RE.search(text, start)
     if next_section:
-        block_body = text[start:next_section.start()]
+        block_body = text[start : next_section.start()]
     else:
         block_body = text[start:]
 
@@ -114,15 +117,15 @@ def close_unreleased(changelog_path: Path, version: str, release_date: str) -> s
 
     if next_section:
         new_text = (
-            text[:match_unreleased.start()]
+            text[: match_unreleased.start()]
             + "## [Unreleased]\n\n---\n\n"
             + new_version_header
             + block_body
-            + text[next_section.start():]
+            + text[next_section.start() :]
         )
     else:
         new_text = (
-            text[:match_unreleased.start()]
+            text[: match_unreleased.start()]
             + "## [Unreleased]\n\n---\n\n"
             + new_version_header
             + block_body
@@ -147,11 +150,9 @@ def bump_scaffold_version(config_path: Path, new_version: str) -> str:
     pattern = re.compile(r'(SCAFFOLD_VERSION\s*=\s*")[^"]*(")')
     match = pattern.search(text)
     if not match:
-        raise ValueError(
-            f"SCAFFOLD_VERSION não encontrado em {config_path}"
-        )
-    old_version = text[match.start():match.end()].split('"')[1]
-    new_text = pattern.sub(rf'\g<1>{new_version}\g<2>', text)
+        raise ValueError(f"SCAFFOLD_VERSION não encontrado em {config_path}")
+    old_version = text[match.start() : match.end()].split('"')[1]
+    new_text = pattern.sub(rf"\g<1>{new_version}\g<2>", text)
     config_path.write_text(new_text, encoding="utf-8")
     return old_version
 
@@ -168,7 +169,7 @@ def create_git_tag(version: str, tag_message: str, project_root: Path) -> None:
     """
     tag_name = f"v{version}"
     subprocess.run(
-        ["git", "tag", "-a", tag_name, "-m", tag_message],
+        [_GIT, "tag", "-a", tag_name, "-m", tag_message],
         cwd=str(project_root),
         check=True,
         capture_output=True,
@@ -180,7 +181,7 @@ def git_tag_exists(version: str, project_root: Path) -> bool:
     """Retorna True se a tag vX.Y.Z já existe."""
     tag_name = f"v{version}"
     result = subprocess.run(
-        ["git", "tag", "-l", tag_name],
+        [_GIT, "tag", "-l", tag_name],
         cwd=str(project_root),
         capture_output=True,
         text=True,
@@ -196,7 +197,7 @@ def git_tag_exists(version: str, project_root: Path) -> bool:
 def run_release(
     version: str,
     project_root: Path,
-    output_dir: Optional[Path] = None,
+    output_dir: Path | None = None,
     dry_run: bool = False,
 ) -> ReleaseResult:
     """
@@ -256,7 +257,7 @@ def run_release(
         m = _UNRELEASED_HEADER_RE.search(text)
         start = m.end()
         nxt = _VERSIONED_HEADER_RE.search(text, start)
-        block_body = text[start:nxt.start()] if nxt else text[start:]
+        block_body = text[start : nxt.start()] if nxt else text[start:]
         if not block_body.strip():
             result.errors.append(
                 "Seção [Unreleased] está vazia — não há o que fechar como release."
@@ -308,7 +309,10 @@ def run_release(
     # Etapa 5 — Gerar tarball (publish)
     # ------------------------------------------------------------------
     if dry_run:
-        tarball_path = output_dir / f"enterprise-template-v{version}-{release_date.replace('-','')}.tar.gz"
+        tarball_path = (
+            output_dir
+            / f"enterprise-template-v{version}-{release_date.replace('-','')}.tar.gz"
+        )
         result.steps_done.append(
             f"[dry-run] publish: tarball seria gerado em {tarball_path}"
         )
@@ -318,15 +322,14 @@ def run_release(
             from scripts.lib.publish import publish_template  # type: ignore
         except ImportError:
             import sys
+
             sys.path.insert(0, str(project_root / "scripts"))
             from lib.publish import publish_template  # type: ignore
 
         output_dir.mkdir(parents=True, exist_ok=True)
         publish_result = publish_template(output_dir, project_root, version=version)
         result.tarball = publish_result.tarball_path
-        result.steps_done.append(
-            f"publish: tarball gerado em {result.tarball}"
-        )
+        result.steps_done.append(f"publish: tarball gerado em {result.tarball}")
 
     # ------------------------------------------------------------------
     # Etapa 6 — git tag vX.Y.Z

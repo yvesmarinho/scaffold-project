@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import argparse
 import re
-import sys
 from datetime import date
 from pathlib import Path
 
 from ..ui import console
 
-_PROFILE_DESCRIPTORS_DIR = Path(__file__).parent.parent.parent.parent / "scaffold" / "profiles"
+_PROFILE_DESCRIPTORS_DIR = (
+    Path(__file__).parent.parent.parent.parent / "scaffold" / "profiles"
+)
 _KEBAB_RE = re.compile(r"^[a-z][a-z0-9-]*$")
 
 # ---------------------------------------------------------------------------
@@ -187,14 +188,23 @@ TODO: decisões de design, referências, links úteis.
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _prompt_layer() -> str:
     """Interativamente pede a camada do perfil."""
     console.print()
     console.print("  [bold]Camada do perfil[/bold]")
-    console.print("  [dim]1 — core       (fundação: devops-programming, devops-security)[/dim]")
-    console.print("  [dim]2 — layer2     (framework-specific: python-fastapi, typescript-next)[/dim]")
-    console.print("  [dim]3 — layer3     (integração: data-pipeline-airflow, k8s-helm)[/dim]")
-    console.print("  [dim]4 — layer4     (compliance: soc2-baseline, lgpd-baseline)[/dim]")
+    console.print(
+        "  [dim]1 — core       (fundação: devops-programming, devops-security)[/dim]"
+    )
+    console.print(
+        "  [dim]2 — layer2     (framework-specific: python-fastapi, typescript-next)[/dim]"
+    )
+    console.print(
+        "  [dim]3 — layer3     (integração: data-pipeline-airflow, k8s-helm)[/dim]"
+    )
+    console.print(
+        "  [dim]4 — layer4     (compliance: soc2-baseline, lgpd-baseline)[/dim]"
+    )
     console.print("  [dim]t — transversal (aplica a todos: devops-security)[/dim]")
     console.print()
     valid = {"1": "1", "2": "layer2", "3": "layer3", "4": "layer4", "t": "transversal"}
@@ -209,15 +219,20 @@ def _prompt_name() -> str:
     """Interativamente pede o nome do perfil."""
     console.print()
     while True:
-        name = input("  Nome do perfil (kebab-case, ex: my-framework): ").strip().lower()
+        name = (
+            input("  Nome do perfil (kebab-case, ex: my-framework): ").strip().lower()
+        )
         if _KEBAB_RE.match(name):
             return name
-        console.print("  [red]Nome inválido. Use apenas letras minúsculas, números e hífens.[/red]")
+        console.print(
+            "  [red]Nome inválido. Use apenas letras minúsculas, números e hífens.[/red]"
+        )
 
 
 # ---------------------------------------------------------------------------
 # Flow principal
 # ---------------------------------------------------------------------------
+
 
 def flow_new_profile(args: argparse.Namespace) -> int:
     """Gera profile-descriptor YAML + MD a partir de defaults e executa --validate."""
@@ -230,7 +245,9 @@ def flow_new_profile(args: argparse.Namespace) -> int:
     # --- Nome ------------------------------------------------------------------
     if not profile_name:
         if ci_mode:
-            _emit_error("--new-profile requer um nome (ex: --new-profile my-profile)", use_json)
+            _emit_error(
+                "--new-profile requer um nome (ex: --new-profile my-profile)", use_json
+            )
             return 1
         profile_name = _prompt_name()
 
@@ -283,11 +300,15 @@ def flow_new_profile(args: argparse.Namespace) -> int:
 
     if not use_json:
         console.print()
-        console.print(f"  [green]✅ Criado:[/green] {yaml_path.relative_to(Path.cwd())}")
+        console.print(
+            f"  [green]✅ Criado:[/green] {yaml_path.relative_to(Path.cwd())}"
+        )
         console.print(f"  [green]✅ Criado:[/green] {md_path.relative_to(Path.cwd())}")
         console.print()
         console.print("  [bold]Próximos passos:[/bold]")
-        console.print(f"  1. Edite [cyan]scaffold/profiles/{profile_name}.yaml[/cyan] — preencha os TODOs")
+        console.print(
+            f"  1. Edite [cyan]scaffold/profiles/{profile_name}.yaml[/cyan] — preencha os TODOs"
+        )
         console.print("  2. Execute [cyan]python scripts/scaffold.py --validate[/cyan]")
         console.print()
 
@@ -297,25 +318,33 @@ def flow_new_profile(args: argparse.Namespace) -> int:
         import json as _json
 
         from .. import validate as _validate_module
+
         report = _validate_module.validate_descriptors(_PROFILE_DESCRIPTORS_DIR)
         # Re-emite JSON enriquecido com informação de validação
-        print(_json.dumps({
-            "success": True,
-            "name": profile_name,
-            "layer": layer,
-            "yaml": str(yaml_path),
-            "md": str(md_path),
-            "validate": {
-                "valid": report.valid,
-                "profiles_checked": report.profiles_checked,
-                "errors": report.total_errors,
-                "warnings": report.total_warnings,
-            },
-        }, indent=2, ensure_ascii=False))
+        print(
+            _json.dumps(
+                {
+                    "success": True,
+                    "name": profile_name,
+                    "layer": layer,
+                    "yaml": str(yaml_path),
+                    "md": str(md_path),
+                    "validate": {
+                        "valid": report.valid,
+                        "profiles_checked": report.profiles_checked,
+                        "errors": report.total_errors,
+                        "warnings": report.total_warnings,
+                    },
+                },
+                indent=2,
+                ensure_ascii=False,
+            )
+        )
         return 0
 
     console.print("  [dim]Executando --validate...[/dim]")
     from .validate import flow_validate
+
     validate_args = argparse.Namespace(json_output=False)
     rc = flow_validate(validate_args)
 
@@ -335,6 +364,7 @@ def flow_new_profile(args: argparse.Namespace) -> int:
 def _emit_error(msg: str, use_json: bool) -> None:
     if use_json:
         import json as _json
+
         print(_json.dumps({"success": False, "error": msg}, ensure_ascii=False))
     else:
         console.print(f"\n  [bold red]❌ Erro:[/bold red] {msg}\n")

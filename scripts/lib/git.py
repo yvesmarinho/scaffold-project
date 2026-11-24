@@ -14,12 +14,16 @@ from rich.console import Console
 
 from .config import CreatedItem, ProjectConfig
 
+# Caminho absoluto do git (S607/B607); "git" como fallback fora do PATH.
+_GIT = shutil.which("git") or "git"
+
 console = Console()
 
 
 # ---------------------------------------------------------------------------
 # Funções públicas
 # ---------------------------------------------------------------------------
+
 
 def is_git_repo(path: Path) -> bool:
     """Retorna True se path já contém um repositório git (.git/ existe)."""
@@ -38,7 +42,9 @@ def init_repository(config: ProjectConfig) -> CreatedItem:
     target = config.project_path
 
     if not shutil.which("git"):
-        console.print("  [yellow]⚠️  git não encontrado no PATH — etapa Git ignorada.[/yellow]")
+        console.print(
+            "  [yellow]⚠️  git não encontrado no PATH — etapa Git ignorada.[/yellow]"
+        )
         return CreatedItem(
             path=target / ".git",
             kind="git",
@@ -59,7 +65,7 @@ def init_repository(config: ProjectConfig) -> CreatedItem:
 
     try:
         subprocess.run(
-            ["git", "init", "-b", "main"],
+            [_GIT, "init", "-b", "main"],
             cwd=target,
             check=True,
             capture_output=True,
@@ -88,6 +94,7 @@ def init_repository(config: ProjectConfig) -> CreatedItem:
 # Auxiliar interno
 # ---------------------------------------------------------------------------
 
+
 def create_initial_commit(config: ProjectConfig) -> CreatedItem:
     """
     Cria commit inicial no repositório com todos os arquivos do scaffold.
@@ -109,7 +116,7 @@ def create_initial_commit(config: ProjectConfig) -> CreatedItem:
     try:
         # git add -A
         subprocess.run(
-            ["git", "add", "-A"],
+            [_GIT, "add", "-A"],
             cwd=target,
             check=True,
             capture_output=True,
@@ -119,7 +126,7 @@ def create_initial_commit(config: ProjectConfig) -> CreatedItem:
         # Commit inicial
         commit_msg = f"chore: scaffold inicial do projeto {config.project_name}\n\nGerado pelo Enterprise Scaffold Project Template v1.0.0"
         subprocess.run(
-            ["git", "commit", "-m", commit_msg],
+            [_GIT, "commit", "-m", commit_msg],
             cwd=target,
             check=True,
             capture_output=True,
@@ -176,7 +183,7 @@ def tag_scaffold(config: ProjectConfig, version: str = "1.0.0") -> CreatedItem:
         # Tag anotada com mensagem
         tag_msg = f"Projeto criado com Enterprise Scaffold Project Template v{version}"
         subprocess.run(
-            ["git", "tag", "-a", tag_name, "-m", tag_msg],
+            [_GIT, "tag", "-a", tag_name, "-m", tag_msg],
             cwd=target,
             check=True,
             capture_output=True,
@@ -210,11 +217,12 @@ def tag_scaffold(config: ProjectConfig, version: str = "1.0.0") -> CreatedItem:
 # Auxiliar interno
 # ---------------------------------------------------------------------------
 
+
 def _ensure_remote(target: Path, repo_url: str) -> None:
     """Adiciona remote 'origin' se não existir ainda. Silente em caso de erro."""
     try:
         result = subprocess.run(
-            ["git", "remote"],
+            [_GIT, "remote"],
             cwd=target,
             check=True,
             capture_output=True,
@@ -223,7 +231,7 @@ def _ensure_remote(target: Path, repo_url: str) -> None:
         existing = result.stdout.decode().split()
         if "origin" not in existing:
             subprocess.run(
-                ["git", "remote", "add", "origin", repo_url],
+                [_GIT, "remote", "add", "origin", repo_url],
                 cwd=target,
                 check=True,
                 capture_output=True,
