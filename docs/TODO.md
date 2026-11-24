@@ -1,6 +1,6 @@
 # ✅ TODO - Enterprise Scaffold Project Template
 
-**Last Updated**: 24/11/2026 12:45 — strict checks na main; publish só com versionados
+**Last Updated**: 24/11/2026 13:06 — validação do repo: pre-commit, mypy, cobertura
 **Project**: Enterprise Scaffold Project Template
 **Status**: 🟢 Active Development
 
@@ -10,6 +10,10 @@
 
 - [x] ~~Ativar required status checks na `main` após o CI ficar verde no PR `fix/ci-main` (`Tests`, `CLI Smoke Tests`; `Lint & Validate` só depois da limpeza do ruff)~~: ✅ 24/11 — `Tests` e `CLI Smoke Tests` obrigatórios (strict: false); demais regras de proteção inalteradas — PR #51, `docs/bugs/BUG-ci-desabilitado-e-tracker-quebra-em-ci.md`
 - [x] ~~Avisos de revisão recuperados (24/11)~~: ✅ 24/11/2026 12:45 — (1) required checks agora com `strict: true` (PR precisa estar atualizado com a `main` antes do merge); (2) `--publish` só empacota arquivos versionados em repo git — `docs/bugs/BUG-publish-tarball-incompleto.md`
+- [x] ~~Validação do repo (24/11): pre-commit não instalado; mypy abortava; branches mergeadas sobrando~~: ✅ 24/11/2026 13:06 — `pre-commit install`; `delete_branch_on_merge: true` + 2 branches remotas apagadas; comentário `# type: subject` em `git_validators.py` (lido como type comment) corrigido + teste de regressão
+- [ ] **mypy**: 135 erros reais em 40 arquivos (`cd scripts && mypy -p lib --ignore-missing-imports`): 38 arg-type, 29 no-untyped-def, 21 assignment… Bloqueios antes disso: stubs ausentes (`types-PyYAML`, `tomli`) e `release.py` importando `scripts.lib.publish` e `lib.publish` (módulo duplicado)
+- [ ] **pre-commit desatualizado**: hook do ruff fixado em `v0.1.11` (projeto usa 0.16.5) e bandit `1.7.6` — achados divergem (ex.: linha do S603); rodar `pre-commit autoupdate`
+- [ ] **Cobertura**: 60% (meta 90%) e não medida — `pytest.ini` sobrepõe `[tool.pytest.ini_options]` (`--cov` ignorado); unificar config do pytest e medir no CI
 - [ ] Limpar os 1031 achados pré-existentes do `ruff check .` (678 com autofix) — o job `Lint & Validate` falha até lá; depois, tornar o check obrigatório
 - [ ] Estrutura de branches main / dev / fases **nos projetos gerados** (decisão do usuário 24/11): main + dev, PRs de feature → dev, dev → main só com CI verde, fases = `release/faseN` — ADR + TDD
 - [ ] Separar arquivos de template dos arquivos do projeto (distribuição) — etapa 1: ✅ 24/11 inventário + ADR-003 **Proposto** (PR #53, `docs/analysis/INVENTARIO-templates.md`); aguarda aprovação do usuário
