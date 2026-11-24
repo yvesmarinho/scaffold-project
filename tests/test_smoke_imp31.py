@@ -138,6 +138,13 @@ class TestJobTest:
         text = _workflow_text()
         assert "pytest tests/" in text, "'pytest tests/' ausente nos steps"
 
+    def test_job_test_installs_pinned_specify_cli(self) -> None:
+        """`scaffold new` roda `specify init`; sem o CLI a criação retorna erro."""
+        steps = _load_workflow()["jobs"]["test"]["steps"]
+        runs = " ".join(str(s.get("run", "")) for s in steps)
+        assert "uv tool install specify-cli" in runs
+        assert "github/spec-kit.git@v" in runs, "specify-cli sem versão fixada"
+
     def test_job_test_uses_uv_cache(self) -> None:
         text = _workflow_text()
         assert "enable-cache: true" in text, "Cache do uv ausente"

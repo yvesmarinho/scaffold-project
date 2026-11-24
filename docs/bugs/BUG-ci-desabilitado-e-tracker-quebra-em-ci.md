@@ -21,6 +21,11 @@
    - sem TTY, o `input()` de confirmação estourava `EOFError` com traceback;
    - os testes rodavam o tracker com `cwd` na raiz do repo, então o resultado dependia da **branch real** (falhava também em branch fora da convenção, como `fix-ci-main`).
 
+6. **`scaffold new` falhava no runner** (descoberto no 1º run do PR #51):
+   - o CLI `specify` (SpecKit) não existe no runner;
+   - `specify init --integration claude` aborta ("Agent Detection Error") quando o binário `claude` não está no PATH — afeta também qualquer usuário sem Claude Code.
+7. `astral-sh/setup-uv` não publica tag flutuante de major (`@v10` não resolve).
+
 ## Correção
 
 - `ci-template.yml` reescrito: uv + Python 3.12, `uv sync --locked`, sem filtro de paths, jobs `Tests`, `CLI Smoke Tests` (`--ci`, publish em `$RUNNER_TEMP`) e `Lint & Validate` (inclui `ruff check .` no repo inteiro — decisão do usuário; falha até a limpeza dos achados pré-existentes).
@@ -29,6 +34,8 @@
 - Tracker: detached HEAD → `None` (sem validação de branch); `EOFError` no prompt → recusa limpa ("Sessão não iniciada").
 - Testes do tracker executam com `cwd` fora de repositório git (diretório temporário isolado).
 - Actions reabilitado via `gh api` (autorizado pelo usuário).
+- CI instala `specify-cli` fixado em `v1.4.4`; `setup-uv` fixado em `v10.4.0`.
+- `run_speckit_init`: se o binário do agente (`claude`) não estiver no PATH, passa `--ignore-agent-tools` e registra warning; com o binário presente, comando inalterado (decisão do usuário: "só quando o agente não existir").
 
 ## Testes
 
@@ -38,7 +45,11 @@
 - `test_branch_fora_do_padrao_sem_tty_recusa_sem_traceback`
 - `test_suite_do_tracker_independe_da_branch_real` (roda as suítes do tracker numa cópia do repo em branch `Nome_Ruim`)
 
-Fase vermelha: 5 falhas confirmadas antes da correção.
+`tests/test_run_speckit_init.py`: `test_claude_ausente_usa_ignore_agent_tools_e_avisa`, `test_claude_presente_nao_usa_ignore_agent_tools`, `test_copilot_nunca_usa_ignore_agent_tools`, `test_both_sem_claude_so_marca_a_integracao_claude` (testes existentes passaram a fixar `shutil.which`).
+
+`tests/test_smoke_imp31.py`: contrato do workflow atualizado (main, sem paths, uv, ruff, `specify-cli` fixado).
+
+Fase vermelha: 5 falhas (tracker) + 2 falhas (speckit) confirmadas antes da correção. Suíte completa em ambiente equivalente ao runner (`env -i`, HOME vazio, sem `claude`): 1726 passed.
 
 ## Lições
 

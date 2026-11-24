@@ -42,6 +42,9 @@ jobs:
       - name: Install dependencies
         run: uv sync --locked --extra dev
 
+      - name: Install specify CLI (SpecKit — usado por `scaffold new`)
+        run: uv tool install specify-cli --from "git+https://github.com/github/spec-kit.git@v1.4.4"
+
       - name: Git identity (testes que criam commits em repos temporários)
         run: |
           git config --global user.name "ci"
