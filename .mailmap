@@ -1,0 +1,9 @@
+# Criado em: 24/11/2026 14:34
+# Modificado em: 24/11/2026 14:34
+# Identidade canônica dos autores. Corrige os commits feitos com a identidade de
+# teste que a suíte gravava no ~/.gitconfig real (bug de 20/05 a 24/11/2026 —
+# docs/bugs/BUG-testes-sobrescrevem-gitconfig-global.md).
+Yves Marinho <yvesmarinho@gmail.com> Test User <test@example.com>
+Yves Marinho <yvesmarinho@gmail.com> Test User <yvesmarinho@gmail.com>
+Yves Marinho <yvesmarinho@gmail.com> yvesmarinho <yvesmarinho@gmail.com>
+Yves Marinho <yvesmarinho@gmail.com> Test User <10405978+yvesmarinho@users.noreply.github.com>

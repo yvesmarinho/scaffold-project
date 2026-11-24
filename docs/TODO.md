@@ -1,6 +1,6 @@
 # ✅ TODO - Enterprise Scaffold Project Template
 
-**Last Updated**: 24/11/2026 14:10 — hooks de lint via uv run
+**Last Updated**: 24/11/2026 14:34 — testes não alteram mais o ~/.gitconfig real
 **Project**: Enterprise Scaffold Project Template
 **Status**: 🟢 Active Development
 
@@ -14,6 +14,8 @@
 - [ ] **mypy**: 135 erros reais em 40 arquivos (`cd scripts && mypy -p lib --ignore-missing-imports`): 38 arg-type, 29 no-untyped-def, 21 assignment… Bloqueios antes disso: stubs ausentes (`types-PyYAML`, `tomli`) e `release.py` importando `scripts.lib.publish` e `lib.publish` (módulo duplicado)
 - [x] ~~**pre-commit desatualizado**: hook do ruff fixado em `v0.1.11` (projeto usa 0.16.5) e bandit `1.7.6` — achados divergem (ex.: linha do S603); rodar `pre-commit autoupdate`~~: ✅ 24/11/2026 13:28 — ruff/black/bandit alinhados ao `uv.lock` (0.16.5 / 26.10.1 / 1.9.4) + teste que trava o alinhamento; demais hooks na última versão; 24/11/2026 14:10 — ruff/black/bandit viraram hooks locais `uv run` (versão única no `uv.lock`, sem bloquear PRs do Dependabot)
 - [ ] **Cobertura**: 60% (meta 90%) e não medida — `pytest.ini` sobrepõe `[tool.pytest.ini_options]` (`--cov` ignorado); unificar config do pytest e medir no CI
+- [x] ~~**URGENTE: testes sobrescreviam o `~/.gitconfig` real** (identidade `Test User <test@example.com>` desde 20/05)~~: ✅ 24/11/2026 14:34 — `GIT_CONFIG_GLOBAL` temporário na sessão; `mock_subprocess` restaurado; identidade global restaurada; `.mailmap` — `docs/bugs/BUG-testes-sobrescrevem-gitconfig-global.md`
+- [ ] Revisar **outros repositórios** da máquina: commits entre 20/05 e 24/11/2026 podem ter autor `Test User <test@example.com>` (identidade global estava sobrescrita) — aplicar `.mailmap` onde fizer sentido
 - [ ] Limpeza do ruff em 2 PRs (plano aprovado 24/11): (a) `ruff check --fix` só correções seguras (~677), sem black no repo inteiro; (b) restante manual por regra/diretório, `per-file-ignores` justificado para `scaffold/templates/`; depois tornar `Lint & Validate` obrigatório
 - [ ] Limpar os 1031 achados pré-existentes do `ruff check .` (678 com autofix) — o job `Lint & Validate` falha até lá; depois, tornar o check obrigatório
 - [ ] Estrutura de branches main / dev / fases **nos projetos gerados** (decisão do usuário 24/11): main + dev, PRs de feature → dev, dev → main só com CI verde, fases = `release/faseN` — ADR + TDD
