@@ -6,7 +6,9 @@ arquivos incluídos, contagem e tamanho. Usado pelo flow_publish() em
 scaffold.py via flag --publish.
 
 Arquivos incluídos no release:
-  scripts/scaffold.py + scripts/lib/*.py
+  scripts/*.py, scripts/*.sh, scripts/lib/**/*.py, scripts/bin/*, scripts/git-hooks/*
+  fontes que o gerador copia do repo: .claude/commands, .claude/skills,
+  .github/copilot-instructions.md, .specify/templates, docs/guides/BRANCH_PROTECTION_SETUP.md
   scaffold/profiles/*.yaml + scaffold/profiles/README.md
   scaffold/templates/**/* + .github/prompts/**/*
   .github/workflows/*.yml + .github/ISSUE_TEMPLATE/**/*
@@ -16,6 +18,7 @@ Arquivos incluídos no release:
 
 Arquivos excluídos:
   __pycache__/, .venv/, .git/, node_modules/, .secrets/, dist/
+  caches locais: .ruff_cache/, .mypy_cache/, .pytest_cache/, htmlcov/
   *.pyc, *.pyo
 """
 
@@ -37,8 +40,19 @@ _LOCAL_TZ = ZoneInfo("America/Sao_Paulo")
 # ---------------------------------------------------------------------------
 
 _INCLUDE_PATTERNS: list[str] = [
-    "scripts/scaffold.py",
-    "scripts/lib/*.py",
+    # Gerador completo (scaffold.py importa lib.flows, lib.ai etc.) e os
+    # scripts que ele copia para o projeto gerado. scripts/tmp/ fica de fora.
+    "scripts/*.py",
+    "scripts/*.sh",
+    "scripts/lib/**/*.py",
+    "scripts/bin/*",
+    "scripts/git-hooks/*",
+    # Fontes que o gerador lê do próprio repositório (ver ADR-003)
+    ".claude/commands/**/*",
+    ".claude/skills/**/*",
+    ".github/copilot-instructions.md",
+    ".specify/templates/**/*",
+    "docs/guides/BRANCH_PROTECTION_SETUP.md",
     "scaffold/profiles/*.yaml",
     "scaffold/profiles/README.md",
     "scaffold/templates/**/*",
@@ -64,6 +78,10 @@ _EXCLUDE_NAMES: frozenset[str] = frozenset({
     ".secrets",
     ".git",
     "dist",
+    ".ruff_cache",
+    ".mypy_cache",
+    ".pytest_cache",
+    "htmlcov",
 })
 
 # Extensões de bytecode Python a excluir
