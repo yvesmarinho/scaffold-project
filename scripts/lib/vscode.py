@@ -112,6 +112,12 @@ _SETTINGS_GLOBAL: dict = {
         ".specify/scripts/powershell/": True,
     },
 
+    # Terminal — shell integration (detecção de comandos, decorações de
+    # sucesso/erro, navegação entre comandos). Fallback manual para zsh em
+    # docs/guides/VSCODE_SHELL_INTEGRATION.md.
+    "terminal.integrated.shellIntegration.enabled": True,
+    "terminal.integrated.shellIntegration.decorationsEnabled": "both",
+
     # Configurações gerais do editor
     "editor.tabSize": 4,
     "editor.insertSpaces": True,
