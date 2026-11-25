@@ -163,7 +163,9 @@ def _collect_files(project_root: Path) -> list[Path]:
     Percorre _INCLUDE_PATTERNS sob project_root e retorna lista ordenada
     de arquivos a incluir no tarball, excluindo nomes e extensões banidos.
 
-    Retorna paths absolutos sem duplicatas, ordenados por caminho relativo.
+    Retorna paths absolutos sem duplicatas (pelo caminho **relativo**: um
+    symlink e o seu alvo são entradas distintas — o tar preserva o symlink e o
+    alvo precisa estar no pacote para ele resolver; ADR-003 fatia 4).
     """
     seen: set[Path] = set()
     result: list[Path] = []
@@ -188,9 +190,8 @@ def _collect_files(project_root: Path) -> list[Path]:
             if path.suffix in _EXCLUDE_SUFFIXES:
                 continue
 
-            resolved = path.resolve()
-            if resolved not in seen:
-                seen.add(resolved)
+            if rel not in seen:
+                seen.add(rel)
                 result.append(path)
 
     return result

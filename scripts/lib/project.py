@@ -377,6 +377,45 @@ def _prepare_content(template: str, file_rel: str, config: ProjectConfig) -> str
 # Diretório de templates customizados do SpecKit (separado do projeto DEV)
 _SPECKIT_TEMPLATES = _TEMPLATE_ROOT / "scaffold" / "templates" / "speckit"
 _SKILLS_TEMPLATES = _TEMPLATE_ROOT / "scaffold" / "templates" / "skills"
+
+# Scripts de uso duplo (ADR-003 fatia 4): fonte única em runtime/scripts/,
+# copiados para scripts/ do projeto gerado; o repositório usa symlinks
+# relativos em scripts/ apontando para cá.
+RUNTIME_SCRIPTS_DIR = _TEMPLATE_ROOT / "scaffold" / "templates" / "runtime" / "scripts"
+_RUNTIME_LIBS: tuple[str, ...] = (
+    "lib/__init__.py",
+    "lib/memory.py",
+    "lib/git_validators.py",
+    "lib/sanitize.py",
+    "lib/session_context.py",
+    "lib/session_security.py",
+    "lib/git_session.py",
+    "lib/session_workflow.py",
+)
+_RUNTIME_SESSION_SCRIPTS: tuple[str, ...] = (
+    "session-manager.py",
+    "session-time-tracker.py",
+)
+_RUNTIME_MEMORY_SCRIPTS: tuple[str, ...] = (
+    "create_memory_structure.py",
+    "mem_context.py",
+    "mem_search.py",
+    "mem_save.py",
+    "test_memory_smoke.py",
+)
+_RUNTIME_UTILITY_SCRIPTS: tuple[str, ...] = (
+    "activate-mcp.sh",
+    "git-commit-with-file.sh",
+    "cleanup-tmp.sh",
+    "validate-docs-links.sh",
+)
+RUNTIME_FILES: tuple[str, ...] = (
+    _RUNTIME_LIBS
+    + _RUNTIME_SESSION_SCRIPTS
+    + _RUNTIME_MEMORY_SCRIPTS
+    + _RUNTIME_UTILITY_SCRIPTS
+    + ("git-hooks/commit-msg", "setup-branch-protection.py")
+)
 # Rituais de sessão viram skills no Copilot (Claude usa .claude/commands/)
 _SESSION_SKILLS: tuple[str, ...] = (
     "session-start",
@@ -831,22 +870,13 @@ def copy_session_libs(config: ProjectConfig, force: bool = False) -> list[Create
     """
     results: list[CreatedItem] = []
     base = config.project_path
-    src_lib = _TEMPLATE_ROOT / "scripts" / "lib"
+    src_lib = RUNTIME_SCRIPTS_DIR / "lib"
     dst_lib = base / "scripts" / "lib"
 
     # Criar diretório scripts/lib/ se não existir
     dst_lib.mkdir(parents=True, exist_ok=True)
 
-    libs_to_copy = [
-        "__init__.py",
-        "memory.py",
-        "git_validators.py",
-        "sanitize.py",
-        "session_context.py",
-        "session_security.py",
-        "git_session.py",
-        "session_workflow.py",
-    ]
+    libs_to_copy = [rel.removeprefix("lib/") for rel in _RUNTIME_LIBS]
 
     for lib_name in libs_to_copy:
         src_file = src_lib / lib_name
@@ -885,12 +915,9 @@ def copy_session_scripts(
     """
     results: list[CreatedItem] = []
     base = config.project_path
-    src_root = _TEMPLATE_ROOT / "scripts"
+    src_root = RUNTIME_SCRIPTS_DIR
 
-    scripts_to_copy = [
-        "session-manager.py",
-        "session-time-tracker.py",
-    ]
+    scripts_to_copy = list(_RUNTIME_SESSION_SCRIPTS)
 
     for script_name in scripts_to_copy:
         src_script = src_root / script_name
@@ -929,15 +956,9 @@ def copy_memory_scripts(
     """
     results: list[CreatedItem] = []
     base = config.project_path
-    src_root = _TEMPLATE_ROOT / "scripts"
+    src_root = RUNTIME_SCRIPTS_DIR
 
-    scripts_to_copy = [
-        "create_memory_structure.py",
-        "mem_context.py",
-        "mem_search.py",
-        "mem_save.py",
-        "test_memory_smoke.py",
-    ]
+    scripts_to_copy = list(_RUNTIME_MEMORY_SCRIPTS)
 
     for script_name in scripts_to_copy:
         src_script = src_root / script_name
@@ -974,14 +995,9 @@ def copy_utility_scripts(
     """
     results: list[CreatedItem] = []
     base = config.project_path
-    src_root = _TEMPLATE_ROOT / "scripts"
+    src_root = RUNTIME_SCRIPTS_DIR
 
-    scripts_to_copy = [
-        "activate-mcp.sh",
-        "git-commit-with-file.sh",
-        "cleanup-tmp.sh",
-        "validate-docs-links.sh",
-    ]
+    scripts_to_copy = list(_RUNTIME_UTILITY_SCRIPTS)
 
     for script_name in scripts_to_copy:
         src_script = src_root / script_name
@@ -1201,7 +1217,7 @@ def copy_github_templates(
     results.append(result)
 
     # 7. Git hooks → scripts/git-hooks/
-    src_hook = _TEMPLATE_ROOT / "scripts" / "git-hooks" / "commit-msg"
+    src_hook = RUNTIME_SCRIPTS_DIR / "git-hooks" / "commit-msg"
     dst_hook = base / "scripts" / "git-hooks" / "commit-msg"
     result = _copy_file(src_hook, dst_hook, force=force)
     # Garantir permissões executáveis
@@ -1222,7 +1238,7 @@ def copy_github_templates(
     results.append(result)
 
     # 9. Branch protection script → scripts/
-    src_script = _TEMPLATE_ROOT / "scripts" / "setup-branch-protection.py"
+    src_script = RUNTIME_SCRIPTS_DIR / "setup-branch-protection.py"
     dst_script = base / "scripts" / "setup-branch-protection.py"
     result = _copy_file(src_script, dst_script, force=force)
     # Garantir permissões executáveis
