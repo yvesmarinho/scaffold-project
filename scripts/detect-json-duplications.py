@@ -16,12 +16,13 @@ import logging
 import sys
 from collections import Counter
 from pathlib import Path
+from typing import Any
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 log = logging.getLogger(__name__)
 
 
-def analyze_array_duplicates(arr, path="root"):
+def analyze_array_duplicates(arr: Any, path: str = "root") -> dict[str, Any] | None:
     """
     Analisa duplicações em um array.
 
@@ -58,7 +59,7 @@ def analyze_array_duplicates(arr, path="root"):
     return None
 
 
-def scan_json_structure(data, path="root"):
+def scan_json_structure(data: Any, path: str = "root") -> list[dict[str, Any]]:
     """
     Scan recursivo de duplicações em estrutura JSON.
 
@@ -87,7 +88,7 @@ def scan_json_structure(data, path="root"):
     return issues
 
 
-def scan_file(file_path: Path):
+def scan_file(file_path: Path) -> bool:
     """
     Scan de duplicações em um arquivo JSON.
 
@@ -125,7 +126,7 @@ def scan_file(file_path: Path):
         return False
 
 
-def main():
+def main() -> None:
     """Main: scan de arquivos JSON."""
     # Argumento: arquivo/pasta/projeto
     root = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(".")

@@ -64,7 +64,7 @@ def find_duplicates(directory: Path) -> dict[str, list[Path]]:
     Returns:
         Dict mapping hash → list of file paths with that hash
     """
-    hashes = {}
+    hashes: dict[str, list[Path]] = {}
     for file in directory.rglob("*.md"):
         if file.is_file():
             file_hash = get_file_hash(file)
@@ -76,7 +76,7 @@ def find_duplicates(directory: Path) -> dict[str, list[Path]]:
 
 def find_files_to_clean(directory: Path, patterns: list[str]) -> list[Path]:
     """Find all files matching cleanup patterns."""
-    files_to_clean = []
+    files_to_clean: list[Path] = []
     for pattern in patterns:
         files_to_clean.extend(directory.rglob(pattern))
     return sorted(set(files_to_clean))  # Remove duplicates, sort for consistency
@@ -157,7 +157,7 @@ def cleanup_duplicates(duplicates: dict[str, list[Path]], execute: bool = False)
     return removed_count
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Defensive memory cleanup script (IMP-65 P0)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -233,13 +233,17 @@ Examples:
     log.info("=" * 70)
     log.info(f"Pattern-matched files: {len(files_to_clean)} found")
     if args.find_duplicates:
-        log.info(f"Duplicate groups: {len(duplicates) if 'duplicates' in locals() else 0}")
+        log.info(
+            f"Duplicate groups: {len(duplicates) if 'duplicates' in locals() else 0}"
+        )
 
     if args.execute:
         log.info(f"Files removed: {removed_count + duplicates_removed}")
         log.info("✅ Cleanup completed")
     else:
-        log.info(f"Files that would be removed: {len(files_to_clean) + duplicates_removed}")
+        log.info(
+            f"Files that would be removed: {len(files_to_clean) + duplicates_removed}"
+        )
         log.info("🔍 DRY-RUN completed (no changes made)")
         log.info("   Run with --execute --backup to perform cleanup")
 

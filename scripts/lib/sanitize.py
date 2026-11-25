@@ -162,7 +162,7 @@ def get_security_report(text: str) -> str:
     report = ["⚠️  Security Scan Results:", ""]
 
     # Group by pattern type
-    by_type = {}
+    by_type: dict[str, list[str]] = {}
     for pattern_name, value in findings:
         if pattern_name not in by_type:
             by_type[pattern_name] = []

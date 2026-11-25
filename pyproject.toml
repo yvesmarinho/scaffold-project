@@ -19,6 +19,9 @@ dev = [
     "ruff>=0.1.11",
     "mypy>=1.8.0",
     "pre-commit>=3.6.0",
+    "types-pyyaml>=6.0.12.20261122",
+    "types-jsonschema>=4.26.0.20261006",
+    "types-requests>=2.33.0.20261030",
 ]
 security = [
     "bandit[toml]>=1.7.6",
@@ -116,10 +119,31 @@ warn_unused_ignores = true
 warn_no_return = true
 warn_unreachable = true
 strict_equality = true
+# Alvo padrão (`uv run mypy`). Os módulos de scripts/ se importam como `lib.*`
+# (sys.path com scripts/, igual aos testes e ao scaffold.py), então a base de
+# pacotes é scripts/ — sem isso o mypy aborta com "Source file found twice".
+files = ["scripts"]
+mypy_path = "scripts"
+explicit_package_bases = true
+# scripts/tmp/: descartáveis, já fora do ruff (extend-exclude acima)
+exclude = ["^scripts/tmp/"]
 
 [[tool.mypy.overrides]]
 module = "tests.*"
 disallow_untyped_defs = false
+
+# Alguns arquivos importam o mesmo código como `scripts.lib.*` (alias do
+# `lib.*` acima); seguir esse caminho registraria cada arquivo duas vezes.
+# O código é checado uma vez, como `lib.*`.
+[[tool.mypy.overrides]]
+module = "scripts.*"
+follow_imports = "skip"
+
+# textual: dependência opcional da TUI (scripts/manage.py), não declarada no
+# projeto nem instalada no CI.
+[[tool.mypy.overrides]]
+module = ["textual", "textual.*"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

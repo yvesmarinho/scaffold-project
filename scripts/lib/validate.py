@@ -43,7 +43,7 @@ _VALID_LAYERS: frozenset[str] = frozenset(
 @dataclass
 class ValidationIssue:
     field: str
-    severity: str   # "error" | "warning"
+    severity: str  # "error" | "warning"
     message: str
 
 
@@ -111,7 +111,7 @@ class ValidationReport:
 def _get_field(data: dict, *keys: str) -> object | None:
     """Retorna o primeiro valor não-None encontrado entre as chaves alternativas."""
     for k in keys:
-        v = data.get(k)
+        v: object = data.get(k)
         if v is not None:
             return v
     return None
@@ -156,24 +156,35 @@ def _validate_descriptor(data: dict, yaml_path: Path) -> ProfileResult:
 
     # Regra 1 — name
     if not name_field or not str(name_field).strip():
-        result.issues.append(ValidationIssue("name", "error", "Campo 'name' ausente ou vazio"))
+        result.issues.append(
+            ValidationIssue("name", "error", "Campo 'name' ausente ou vazio")
+        )
 
     # Regra 2 — description
     description = _get_field(data, "description")
     if not description or not str(description).strip():
-        result.issues.append(ValidationIssue("description", "error", "Campo 'description' ausente ou vazio"))
+        result.issues.append(
+            ValidationIssue(
+                "description", "error", "Campo 'description' ausente ou vazio"
+            )
+        )
 
     # Regra 3 — version (aceita 'version' ou 'VERSION')
     version_val = _get_field(data, "version", "VERSION")
     if version_val is None:
-        result.issues.append(ValidationIssue("version", "error", "Campo 'version' (ou 'VERSION') ausente"))
+        result.issues.append(
+            ValidationIssue(
+                "version", "error", "Campo 'version' (ou 'VERSION') ausente"
+            )
+        )
     else:
         version_str = str(version_val).strip().strip('"')
         if not _SEMVER_RE.match(version_str):
             result.issues.append(
                 ValidationIssue(
-                    "version", "error",
-                    f"Versão '{version_str}' não está em formato semver X.Y.Z"
+                    "version",
+                    "error",
+                    f"Versão '{version_str}' não está em formato semver X.Y.Z",
                 )
             )
 
@@ -181,8 +192,11 @@ def _validate_descriptor(data: dict, yaml_path: Path) -> ProfileResult:
     last_tested = _get_field(data, "last_tested", "LAST_TESTED_DATE")
     if not last_tested:
         result.issues.append(
-            ValidationIssue("last_tested", "warning",
-                            "Campo 'last_tested' (ou 'LAST_TESTED_DATE') ausente")
+            ValidationIssue(
+                "last_tested",
+                "warning",
+                "Campo 'last_tested' (ou 'LAST_TESTED_DATE') ausente",
+            )
         )
 
     # Regra 5 — layer
@@ -196,14 +210,17 @@ def _validate_descriptor(data: dict, yaml_path: Path) -> ProfileResult:
         if layer_str not in _VALID_LAYERS:
             result.issues.append(
                 ValidationIssue(
-                    "layer", "error",
+                    "layer",
+                    "error",
                     f"Valor de layer '{layer_val}' não reconhecido. "
-                    f"Aceitos: {', '.join(sorted(_VALID_LAYERS))}"
+                    f"Aceitos: {', '.join(sorted(_VALID_LAYERS))}",
                 )
             )
 
     # Regra 6 — security.enforces (se presente, deve ser lista de objetos estruturados)
-    _REQUIRED_CONTROL_FIELDS = frozenset({"control", "description", "tool", "severity", "automated"})
+    _REQUIRED_CONTROL_FIELDS = frozenset(
+        {"control", "description", "tool", "severity", "automated"}
+    )
     _VALID_SEVERITIES = frozenset({"critical", "high", "medium", "low"})
     security_data = data.get("security") or {}
     enforces = security_data.get("enforces")
@@ -263,8 +280,9 @@ def _cross_validate(
         if r.name in seen:
             r.issues.append(
                 ValidationIssue(
-                    "name", "error",
-                    f"Nome duplicado — também declarado em '{seen[r.name]}'"
+                    "name",
+                    "error",
+                    f"Nome duplicado — também declarado em '{seen[r.name]}'",
                 )
             )
         else:
@@ -279,8 +297,9 @@ def _cross_validate(
                 if ref_name not in known_names:
                     r.issues.append(
                         ValidationIssue(
-                            ref_field, "warning",
-                            f"'{ref_name}' referenciado em '{ref_field}' não existe nos descritores locais"
+                            ref_field,
+                            "warning",
+                            f"'{ref_name}' referenciado em '{ref_field}' não existe nos descritores locais",
                         )
                     )
 

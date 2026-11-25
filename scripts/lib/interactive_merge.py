@@ -188,7 +188,7 @@ def edit_conflict_manually(conflict: ConflictRegion) -> str | None:
     console.print("[dim]Tip: You can combine parts from both LOCAL and UPSTREAM[/dim]")
     console.print()
 
-    lines = []
+    lines: list[str] = []
     while True:
         line = input()
         if not line and lines and lines[-1] == "DONE":

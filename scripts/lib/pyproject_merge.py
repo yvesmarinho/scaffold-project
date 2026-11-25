@@ -20,7 +20,7 @@ from typing import Any
 try:
     import tomllib  # Python 3.11+
 except ImportError:
-    import tomli as tomllib  # Fallback for Python < 3.11
+    import tomli as tomllib  # type: ignore[import-not-found, no-redef]  # fallback Python<3.11 (requires-python>=3.12)
 
 from .config import CreatedItem
 

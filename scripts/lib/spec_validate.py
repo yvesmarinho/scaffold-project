@@ -30,20 +30,22 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
+from typing import cast
 
 try:
     import yaml
 except ImportError:
     logging.warning("PyYAML not installed. Install with: uv pip install pyyaml")
-    yaml = None
+    yaml = None  # type: ignore[assignment]  # dependência opcional
 
 try:
     from jsonschema import Draft7Validator, ValidationError, validate
 except ImportError:
     logging.warning("jsonschema not installed. Install with: uv pip install jsonschema")
-    ValidationError = Exception
-    Draft7Validator = None
-    validate = None
+    # fallbacks de dependência opcional (jsonschema ausente)
+    ValidationError = Exception  # type: ignore[misc, assignment]  # fallback opcional
+    Draft7Validator = None  # type: ignore[misc, assignment]  # fallback opcional
+    validate = None  # type: ignore[assignment]  # fallback opcional
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -105,7 +107,7 @@ class ValidationResult:
     warnings: list[ValidationIssue] = field(default_factory=list)
     infos: list[ValidationIssue] = field(default_factory=list)
 
-    def add_issue(self, issue: ValidationIssue):
+    def add_issue(self, issue: ValidationIssue) -> None:
         """Add validation issue to appropriate list"""
         if issue.severity == Severity.ERROR:
             self.errors.append(issue)
@@ -220,7 +222,7 @@ class SpecValidator:
 
         return result
 
-    def _validate_business_to_product(self, result: ValidationResult):
+    def _validate_business_to_product(self, result: ValidationResult) -> None:
         """
         Validate Layer 1 (Business) → Layer 2 (Product) transition.
 
@@ -250,7 +252,7 @@ class SpecValidator:
 
         # Load and parse YAML
         if yaml is None:
-            result.add_issue(
+            result.add_issue(  # type: ignore[unreachable]  # yaml opcional (fallback None)
                 ValidationIssue(
                     severity=Severity.ERROR,
                     layer=layer,
@@ -294,7 +296,8 @@ class SpecValidator:
             return
 
         # JSON Schema validation
-        if self.objetivo_schema and Draft7Validator:
+        # Draft7Validator vira None quando jsonschema está ausente (fallback acima)
+        if self.objetivo_schema and Draft7Validator:  # type: ignore[truthy-function]  # None sem jsonschema
             try:
                 validate(instance=objetivo_data, schema=self.objetivo_schema)
             except ValidationError as e:
@@ -404,7 +407,7 @@ class SpecValidator:
                 )
             )
 
-    def _validate_product_to_architecture(self, result: ValidationResult):
+    def _validate_product_to_architecture(self, result: ValidationResult) -> None:
         """
         Validate Layer 2 (Product) → Layer 3 (Architecture) transition.
 
@@ -515,7 +518,9 @@ class SpecValidator:
                 )
             )
 
-    def _validate_architecture_to_implementation(self, result: ValidationResult):
+    def _validate_architecture_to_implementation(
+        self, result: ValidationResult
+    ) -> None:
         """
         Validate Layer 3 (Architecture) → Layer 4 (Implementation) transition.
 
@@ -573,7 +578,10 @@ class SpecValidator:
                 r"###?\s+(ADR-\d{3}:.*?)(?=###?\s+ADR-\d{3}:|$)", plan_text, re.DOTALL
             ):
                 adr_content = adr_match.group(1)
-                adr_id = re.search(r"ADR-\d{3}", adr_content).group()
+                # adr_content (grupo 1 do finditer) sempre começa com ADR-NNN
+                adr_id = cast(
+                    re.Match[str], re.search(r"ADR-\d{3}", adr_content)
+                ).group()
 
                 if (
                     "Alternatives Considered" not in adr_content

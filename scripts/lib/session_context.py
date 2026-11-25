@@ -38,7 +38,8 @@ def _load_json_loose(path: Path) -> dict[str, Any] | None:
         line for line in raw_content.splitlines() if not line.lstrip().startswith("//")
     ]
     cleaned = "\n".join(cleaned_lines)
-    return json.loads(cleaned)
+    data: dict[str, Any] = json.loads(cleaned)
+    return data
 
 
 @dataclass(frozen=True)

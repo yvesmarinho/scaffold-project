@@ -3722,13 +3722,15 @@ def generate_project_creation_summary(config: ProjectConfig) -> CreatedItem:
     # Adicionar profiles transversais (aplicados sempre)
     profiles.extend(SPECKIT_TRANSVERSAL_PROFILES)
     # Adicionar profiles extras (se fornecidos)
-    if config.extra_profiles:
-        if isinstance(config.extra_profiles, str):
+    # Estado JSON legado pode trazer string em vez de lista
+    extra_profiles: list[str] | str = config.extra_profiles
+    if extra_profiles:
+        if isinstance(extra_profiles, str):
             # Se for string, fazer split por vírgula
-            extra = [p.strip() for p in config.extra_profiles.split(",") if p.strip()]
+            extra = [p.strip() for p in extra_profiles.split(",") if p.strip()]
             profiles.extend(extra)
-        elif isinstance(config.extra_profiles, list):
-            profiles.extend(config.extra_profiles)
+        elif isinstance(extra_profiles, list):
+            profiles.extend(extra_profiles)
 
     # Remover duplicatas mantendo ordem
     seen = set()

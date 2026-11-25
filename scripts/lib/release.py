@@ -251,10 +251,10 @@ def run_release(
     if dry_run:
         # Apenas verificar a estrutura sem gravar
         text = changelog_path.read_text(encoding="utf-8")
-        if not _UNRELEASED_HEADER_RE.search(text):
+        m = _UNRELEASED_HEADER_RE.search(text)
+        if not m:
             result.errors.append("CHANGELOG.md não tem seção '## [Unreleased]'")
             return result
-        m = _UNRELEASED_HEADER_RE.search(text)
         start = m.end()
         nxt = _VERSIONED_HEADER_RE.search(text, start)
         block_body = text[start : nxt.start()] if nxt else text[start:]
@@ -290,9 +290,10 @@ def run_release(
             # Apenas verificar sem gravar
             text = config_path.read_text(encoding="utf-8")
             pattern = re.compile(r'(SCAFFOLD_VERSION\s*=\s*")[^"]*(")')
-            if not pattern.search(text):
+            m_ver = pattern.search(text)
+            if not m_ver:
                 raise ValueError("SCAFFOLD_VERSION não encontrado")
-            old_ver = pattern.search(text).group(0).split('"')[1]
+            old_ver = m_ver.group(0).split('"')[1]
             result.steps_done.append(
                 f"[dry-run] config.py: SCAFFOLD_VERSION '{old_ver}' → '{version}'"
             )
@@ -319,12 +320,12 @@ def run_release(
         result.tarball = tarball_path
     else:
         try:
-            from scripts.lib.publish import publish_template  # type: ignore
+            from scripts.lib.publish import publish_template
         except ImportError:
             import sys
 
             sys.path.insert(0, str(project_root / "scripts"))
-            from lib.publish import publish_template  # type: ignore
+            from lib.publish import publish_template
 
         output_dir.mkdir(parents=True, exist_ok=True)
         publish_result = publish_template(output_dir, project_root, version=version)

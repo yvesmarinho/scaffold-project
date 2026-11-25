@@ -194,7 +194,7 @@ def flow_upgrade(args: argparse.Namespace) -> int:
         from rich.console import Console as _RichConsole
 
         _stderr_console = _RichConsole(stderr=True, highlight=False)
-        links.console = _stderr_console  # type: ignore[attr-defined]
+        links.console = _stderr_console
 
     # Re-aplica todos os passos de geração (idempotentes por design)
     if not use_json:
@@ -385,9 +385,8 @@ def flow_upgrade(args: argparse.Namespace) -> int:
 
     # Resumo final (com logging automático se não for --no-log)
     save_log = not getattr(args, "no_log", False)
-    log_dir = (
-        Path(getattr(args, "log_dir", None)) if getattr(args, "log_dir", None) else None
-    )
+    log_dir_arg = getattr(args, "log_dir", None)
+    log_dir = Path(log_dir_arg) if log_dir_arg else None
     print_final_summary(
         results, project_path=cfg.project_path, save_log=save_log, log_dir=log_dir
     )

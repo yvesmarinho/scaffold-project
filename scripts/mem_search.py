@@ -34,17 +34,18 @@ import json as json_module
 import logging
 import sys
 from pathlib import Path
+from typing import Any
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from scripts.lib.memory import MemoryStore
+from scripts.lib.memory import MemoryStore, SearchResult
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 log = logging.getLogger(__name__)
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
         description="Search memories in mini-Engram system",
@@ -105,7 +106,9 @@ def parse_args():
     return parser.parse_args()
 
 
-def format_result_text(result, index: int, full_content: bool = False):
+def format_result_text(
+    result: SearchResult, index: int, full_content: bool = False
+) -> str:
     """Format search result as text."""
     output = []
 
@@ -151,7 +154,7 @@ def format_result_text(result, index: int, full_content: bool = False):
     return "\n".join(output)
 
 
-def format_result_json(result):
+def format_result_json(result: SearchResult) -> dict[str, Any]:
     """Format search result as JSON-serializable dict."""
     return {
         "id": result.memory_id,
@@ -165,7 +168,7 @@ def format_result_json(result):
     }
 
 
-def main():
+def main() -> None:
     """Main CLI entry point."""
     args = parse_args()
 
@@ -177,7 +180,7 @@ def main():
     query = args.query if args.query else args.query
     if not query:
         log.error("❌ ERROR: Query is required")
-        log.error("Usage: python scripts/mem_search.py \"search query\"")
+        log.error('Usage: python scripts/mem_search.py "search query"')
         sys.exit(1)
 
     # Parse tags

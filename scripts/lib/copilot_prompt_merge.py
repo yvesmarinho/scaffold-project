@@ -39,7 +39,7 @@ class PromptFrontmatter:
     description: str | None = None
     agent: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Extrai campos comuns do frontmatter."""
         if self.parsed:
             self.mode = self.parsed.get("mode")
@@ -258,7 +258,7 @@ class CopilotPromptMerger:
         sections = {}
         lines = content.splitlines()
         current_heading = None
-        current_content = []
+        current_content: list[str] = []
 
         for line in lines:
             # Detecta heading (## ou ###)
