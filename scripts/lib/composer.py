@@ -166,6 +166,9 @@ def get_template_entries(descriptor: dict) -> list[dict]:
     """
     # ── Schema A: templates_path + templates[] ────────────────────────────────
     if "templates_path" in descriptor and "templates" in descriptor:
+        if descriptor.get("templates_status") == "pendente":
+            # Templates declarados mas ainda não escritos (ADR-003 fatia 2)
+            return []
         tpl_base = descriptor["templates_path"].rstrip("/")
         entries = descriptor.get("templates") or []
         result = []
@@ -173,7 +176,8 @@ def get_template_entries(descriptor: dict) -> list[dict]:
             if not isinstance(e, dict):
                 continue
             rel = e.get("path", "")
-            if not rel:
+            if not rel or e.get("generated") is True:
+                # generated: saída produzida no projeto (ex.: make sbom), não template
                 continue
             result.append(
                 {

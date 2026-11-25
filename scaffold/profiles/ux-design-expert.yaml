@@ -123,6 +123,8 @@ combines_with:
   - devops-analysis
 
 templates_path: "scaffold/templates/project/ux-design-expert"
+# Templates declarados abaixo ainda não foram escritos (ADR-003 fatia 2).
+templates_status: "pendente"
 
 templates:
   - path: "ux/user-persona-template.md"

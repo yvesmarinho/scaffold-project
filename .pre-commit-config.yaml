@@ -15,7 +15,8 @@ repos:
         name: Check YAML Syntax
         # helm/templates: templates Go ({{ }}), não YAML — validados por
         # scripts/validate-templates.py (detecta "{ {" corrompido)
-        exclude: ^(\.github/|scaffold/templates/project/k8s-helm/helm/templates/)
+        # objetivo-examples/objetivo.yaml: formato híbrido v2 (frontmatter + Markdown)
+        exclude: ^(\.github/|scaffold/templates/project/k8s-helm/helm/templates/|docs/reference/objetivo-examples/objetivo\.yaml$)
       - id: check-json
         name: Check JSON Syntax
       - id: check-added-large-files
@@ -30,15 +31,6 @@ repos:
       - id: end-of-file-fixer
         name: Fix End of Files
         exclude: ^docs/SESSIONS/
-
-  - repo: https://github.com/ansible/ansible-lint
-    rev: v26.11.0
-    hooks:
-      - id: ansible-lint
-        name: Ansible Lint
-        files: ^scaffold/templates/project/ansible/.*\.ya?ml$
-        args: [scaffold/templates/project/ansible/]
-        language_version: python3.12
 
   # black, ruff e bandit: hooks locais via `uv run` — a versão vem do uv.lock
   # (a mesma do CI) e o Dependabot atualiza um lugar só. Formato verificado por

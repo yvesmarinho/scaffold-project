@@ -356,6 +356,56 @@ def _check_staleness(
 # ---------------------------------------------------------------------------
 
 
+_VALID_TEMPLATES_STATUS = frozenset({"pendente"})
+
+
+def _check_templates_path(
+    results: list[ProfileResult], all_data: dict[str, dict], repo_root: Path
+) -> None:
+    """
+    Garante que ``templates_path`` aponta para pasta existente, salvo quando o
+    descritor declara ``templates_status: pendente`` (templates ainda não escritos).
+
+    - inexistente sem marca → error;
+    - ``templates_status`` com valor desconhecido → error;
+    - marca ``pendente`` com a pasta já existente → warning (remover a marca).
+    """
+    for result in results:
+        data = all_data.get(result.file) or {}
+        status = data.get("templates_status")
+        if status is not None and status not in _VALID_TEMPLATES_STATUS:
+            result.issues.append(
+                ValidationIssue(
+                    "templates_path",
+                    "error",
+                    f"templates_status='{status}' inválido; aceito: "
+                    f"{sorted(_VALID_TEMPLATES_STATUS)}",
+                )
+            )
+            continue
+        path = data.get("templates_path")
+        if not path:
+            continue
+        exists = (repo_root / str(path)).is_dir()
+        if not exists and status != "pendente":
+            result.issues.append(
+                ValidationIssue(
+                    "templates_path",
+                    "error",
+                    f"templates_path '{path}' não existe — crie os templates ou "
+                    "marque 'templates_status: pendente'",
+                )
+            )
+        elif exists and status == "pendente":
+            result.issues.append(
+                ValidationIssue(
+                    "templates_path",
+                    "warning",
+                    f"templates_path '{path}' existe — remova 'templates_status: pendente'",
+                )
+            )
+
+
 def validate_descriptors(
     descriptors_dir: Path,
     stale_days_threshold: int = 90,
@@ -397,6 +447,11 @@ def validate_descriptors(
     # Cross-profile checks (only over successfully parsed files)
     parsed_results = [r for r in report.results if r.file in all_data]
     _cross_validate(parsed_results, all_data)
+
+    # templates_path: existe ou está marcado como pendente (ADR-003 fatia 2)
+    _check_templates_path(
+        parsed_results, all_data, descriptors_dir.resolve().parents[1]
+    )
 
     # Staleness check (warning-only, non-blocking)
     _check_staleness(parsed_results, all_data, threshold_days=stale_days_threshold)

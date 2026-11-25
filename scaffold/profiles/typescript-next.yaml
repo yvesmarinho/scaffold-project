@@ -70,6 +70,7 @@ templates:
     description: "15 targets: dev, build, lint, format, test, audit, sbom, docker-*, ci, clean"
 
   - path: "sbom.json"
+    generated: true  # criado por 'make sbom' no projeto — não é template a copiar
     description: "Software Bill of Materials em CycloneDX JSON — evidência CC8 SOC 2 Change Management. Gerado via 'make sbom' (pnpm dlx @cyclonedx/cyclonedx-npm)."
 
 security:

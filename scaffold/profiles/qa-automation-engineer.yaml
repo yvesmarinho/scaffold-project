@@ -129,6 +129,8 @@ combines_with:
   - devops-infrastructure
 
 templates_path: "scaffold/templates/project/qa-automation-engineer"
+# Templates declarados abaixo ainda não foram escritos (ADR-003 fatia 2).
+templates_status: "pendente"
 
 templates:
   - path: "qa/test-plan-template.md"

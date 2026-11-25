@@ -37,7 +37,7 @@ Para criar um novo projeto:
 | Arquivo | Tipo | Local | Uso |
 |---------|------|-------|-----|
 | `scaffold/templates/objetivo/objetivo-v2-template.yaml` | Template | Template base (ativo) | Usado por padrão pelo `ObjetivoWizard` (`scripts/lib/objetivo_wizard.py`) |
-| `scaffold/templates/objetivo/examples/*.yaml` | Exemplo | Este diretório | Referência de estrutura completa |
+| `docs/reference/objetivo-examples/*.yaml` | Exemplo | Este diretório | Referência de estrutura completa |
 | `docs/templates/objetivo-init-template.yaml` | Template | Docs (não usado pelo código) | Referência manual/histórica |
 | `docs/templates/objetivo-init-minimal.yaml` | Template | Docs (não usado pelo código) | Referência manual/histórica, enriquecida |
 | `docs/templates/objetivo-manifest-template.yaml` | Template | Docs | Template de manifesto objetivo |

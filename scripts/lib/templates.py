@@ -752,9 +752,13 @@ def _get_guide_file_entries(descriptor: dict) -> list[tuple[str, str]]:
 
     # Schema A: templates_path + templates[]
     if "templates_path" in descriptor and "templates" in descriptor:
+        pendente = descriptor.get("templates_status") == "pendente"
         for e in descriptor.get("templates") or []:
             if isinstance(e, dict) and e.get("path"):
-                entries.append((str(e["path"]), str(e.get("description", ""))))
+                desc = str(e.get("description", ""))
+                if pendente:
+                    desc = f"(pendente — não gerado) {desc}"
+                entries.append((str(e["path"]), desc))
         return entries
 
     # Schema B: generates.files[]

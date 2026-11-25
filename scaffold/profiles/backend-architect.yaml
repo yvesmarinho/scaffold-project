@@ -126,6 +126,8 @@ combines_with:
   - devops-infrastructure
 
 templates_path: "scaffold/templates/project/backend-architect"
+# Templates declarados abaixo ainda não foram escritos (ADR-003 fatia 2).
+templates_status: "pendente"
 
 templates:
   - path: "backend/api-design.yaml"
