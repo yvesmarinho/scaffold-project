@@ -120,6 +120,10 @@ def test_settings_globais_sem_chaves_invalidas():
 
 
 def _generate(tmp_path: Path, ai: str) -> Path:
+    # --shared-dir vazio: reproduz o CI (sem .copilot-shared), onde
+    # .copilot-rules.md é copiado do repositório em vez de virar symlink.
+    shared = tmp_path / "shared-vazio"
+    shared.mkdir(exist_ok=True)
     target = tmp_path / f"proj-{ai}"
     env = {**os.environ, "PATH": os.environ["PATH"]}
     result = subprocess.run(
@@ -137,6 +141,8 @@ def _generate(tmp_path: Path, ai: str) -> Path:
             "python",
             "--ai-assistant",
             ai,
+            "--shared-dir",
+            str(shared),
             "--target-dir",
             str(target),
         ],
@@ -201,10 +207,7 @@ def test_nenhuma_referencia_a_prompts_nos_arquivos_de_ia(projeto_copilot: Path):
     offenders = [
         str(p.relative_to(projeto_copilot))
         for p in candidates
-        # symlink .copilot-rules.md aponta para .copilot-shared externo (P2 #13)
-        if p.is_file()
-        and not p.is_symlink()
-        and ".github/prompts" in p.read_text(encoding="utf-8")
+        if p.is_file() and ".github/prompts" in p.read_text(encoding="utf-8")
     ]
     assert offenders == []
 
