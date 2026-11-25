@@ -1938,7 +1938,7 @@ class EnterpriseAnsibleApp(App[None]):
 
         # Refresh info panel if current item references this file
         if self._current_item and self._current_item.requires_file == rel_path:
-            self._refresh_info(self._current_item)
+            await self._refresh_info(self._current_item)
 
     # ── Inventory helpers ─────────────────────────────────────────────────────
 

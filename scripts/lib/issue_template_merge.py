@@ -153,8 +153,11 @@ class IssueTemplateMerger:
         template_fm, template_body = self._parse_frontmatter(template_content)
 
         # Merge frontmatter (user wins)
+        # Template sem frontmatter válido: o do usuário é mantido (user wins)
         merged_fm = (
-            self._deep_merge(template_fm, existing_fm) if existing_fm else template_fm
+            self._deep_merge(template_fm or {}, existing_fm)
+            if existing_fm
+            else template_fm
         )
 
         # Decidir sobre corpo: se customizado significativamente, preservar
@@ -215,10 +218,13 @@ class IssueTemplateMerger:
             body = match.group(2)
             try:
                 frontmatter = yaml.safe_load(frontmatter_str)
-                return frontmatter, body
             except yaml.YAMLError:
                 # Frontmatter inválido, tratar como corpo
                 return None, content
+            if not isinstance(frontmatter, dict):
+                # Lista/escalar não é frontmatter mesclável: tratar como corpo
+                return None, content
+            return frontmatter, body
         else:
             # Sem frontmatter
             return None, content
