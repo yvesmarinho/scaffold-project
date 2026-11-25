@@ -117,6 +117,8 @@ combines_with:
   - devops-programming
 
 templates_path: "scaffold/templates/project/ui-design-expert"
+# Templates declarados abaixo ainda não foram escritos (ADR-003 fatia 2).
+templates_status: "pendente"
 
 templates:
   - path: "design/design-system.figma"

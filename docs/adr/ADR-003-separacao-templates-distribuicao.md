@@ -1,9 +1,9 @@
 <!-- Criado em: 24/11/2026 11:19 -->
-<!-- Modificado em: 24/11/2026 15:00 -->
+<!-- Modificado em: 25/11/2026 15:30 -->
 
 # ADR-003: Separação dos templates de distribuição dos arquivos do próprio repositório
 
-- **Status**: Proposto
+- **Status**: Aceito (25/11/2026, pelo dono do projeto, sem ajustes)
 - **Data**: 2026-11-24
 - **Decisores**: mantenedor do scaffold-project
 - **Contexto relacionado**: [INVENTARIO-templates.md](../analysis/INVENTARIO-templates.md); item do backlog em `docs/planning/lembrete.md`
@@ -21,7 +21,7 @@ Por isso:
 - o `--publish` empacota por glob fixo e gera um tarball **que não roda** (faltam `scripts/lib/flows/` e `scripts/lib/ai/`);
 - alterar um arquivo de uso do repositório muda sem querer todos os projetos gerados, e o inverso também acontece.
 
-## Decisão (proposta)
+## Decisão
 
 1. **`scaffold/` passa a ser a única fonte do que é distribuído.**
    - `scaffold/profiles/`: descritores.
@@ -64,7 +64,27 @@ Por isso:
 6. Trocar o publish para `git ls-files` sobre `scripts/` e `scaffold/`, e fazer o upgrade reaplicar agents e templates GitHub.
 7. Remover os symlinks de compatibilidade (`.github/templates/*`, `profile-descriptors`) depois de migrar os testes.
 
-## Pontos para decisão do usuário
+## Execução
+
+| Fatia | Status |
+|---|---|
+| 1. Correção do publish | ✅ 24/11/2026 (`git ls-files`, teste "o tarball roda") |
+| 2. Órfãos, constante duplicada, descritores quebrados | ✅ 25/11/2026 (ver abaixo) |
+| 3–7 | pendentes |
+
+Fatia 2:
+- **Constante**: removida a primeira definição de `_SECURITY_MD_WITHOUT_GITHUB`. Era idêntica à segunda, que é a que vale em runtime.
+- **Docs internos e exemplos**: `scaffold/templates/docs/*.md` (4 docs internos) foi para `docs/reference/templates/`, e `objetivo/examples/` foi para `docs/reference/objetivo-examples/`.
+- **Removidos**:
+  - `speckit/specify-templates/`: cópias desatualizadas do `.specify/templates/`;
+  - `project/ansible/` e o hook `ansible-lint`: nenhum perfil os declarava.
+- **9 descritores** sem templates escritos foram marcados com `templates_status: pendente`:
+  - o composer não tenta copiar esses templates;
+  - o guia de perfil os mostra como "pendente";
+  - `--validate` dá erro quando o `templates_path` não existe e a marca está ausente.
+- **`typescript-next`**: saiu a entrada `sbom.json`, porque o arquivo é gerado por `make sbom`.
+
+## Pontos para decisão do usuário (resolvidos em 25/11/2026)
 - Aprovar a estrutura-alvo, em especial `runtime/` e o uso de wrappers no lugar de duplicação.
 - Confirmar `{{NOME}}` como o placeholder único.
 - Confirmar que a fatia 1 (correção do publish) pode ser feita antes da aprovação deste ADR.
