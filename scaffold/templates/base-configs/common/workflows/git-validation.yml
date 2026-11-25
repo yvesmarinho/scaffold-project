@@ -7,7 +7,8 @@ on:
     branches-ignore:
       - main
       - master
-      - develop
+      - dev
+      - 'release/**'
       - staging
       - production
 
@@ -57,13 +58,13 @@ jobs:
 
           branch_name = '$BRANCH_NAME'
 
-          # Pattern: tipo/[NNN-]descricao
-          pattern = r'^(?:feature|fix|hotfix|chore|docs|refactor|test)/(?:\d+-)?[a-z0-9-]+$'
+          # Pattern: dev | release/faseN | tipo/[NNN-]descricao (modelo de branches, ADR-004)
+          pattern = r'^(?:dev|release/fase\d+|(?:feature|fix|hotfix|chore|docs|refactor|test)/(?:\d+-)?[a-z0-9-]+)$'
 
           if not re.match(pattern, branch_name):
               print(f'❌ Branch name inválido: {branch_name}')
               print()
-              print('✅ Padrão esperado: tipo/[NNN-]descricao')
+              print('✅ Padrão esperado: dev | release/faseN | tipo/[NNN-]descricao')
               print('   Tipos aceitos: feature, fix, hotfix, chore, docs, refactor, test')
               print('   Exemplos válidos:')
               print('     - feature/042-user-authentication')
