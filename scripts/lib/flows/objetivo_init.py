@@ -13,8 +13,11 @@ from ..ui import console
 
 
 def _log_objetivo_init(
-    output_path: Path, answers: WizardAnswers, success: bool, error_msg: str = None
-):
+    output_path: Path,
+    answers: WizardAnswers,
+    success: bool,
+    error_msg: str | None = None,
+) -> None:
     """
     Log objetivo-init operation to logs/scaffolds.yaml (BUG-001 Fix #3).
 

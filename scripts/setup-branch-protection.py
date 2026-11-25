@@ -34,7 +34,7 @@ import argparse
 import os
 import sys
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 try:
     import requests
@@ -59,7 +59,7 @@ class BranchProtectionConfig:
     dismiss_stale_reviews: bool = False
     require_code_owner_reviews: bool = False
     require_last_push_approval: bool = False
-    required_status_checks: list[str] = None
+    required_status_checks: list[str] | None = None
     strict_status_checks: bool = True
     enforce_admins: bool = False
     allow_force_pushes: bool = False
@@ -126,7 +126,7 @@ PROTECTION_LEVELS = {
 
 def build_protection_payload(config: BranchProtectionConfig) -> dict[str, Any]:
     """Constrói payload para API do GitHub."""
-    payload = {
+    payload: dict[str, Any] = {
         "required_status_checks": None,
         "enforce_admins": config.enforce_admins,
         "required_pull_request_reviews": None,
@@ -214,7 +214,7 @@ def setup_branch_protection(
         return False
 
 
-def show_protection_summary(config: BranchProtectionConfig):
+def show_protection_summary(config: BranchProtectionConfig) -> None:
     """Exibe resumo da configuração de proteção."""
     table = Table(title=f"Configuração de Proteção - Nível: {config.level.upper()}")
     table.add_column("Configuração", style="cyan")
@@ -250,7 +250,7 @@ def show_protection_summary(config: BranchProtectionConfig):
     console.print(table)
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Setup GitHub Branch Protection",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -312,7 +312,12 @@ def main():
     if not args.dry_run:
         console.print("\n[yellow]⚠️  Aplicando configuração...[/yellow]")
         success = setup_branch_protection(
-            owner, repo, args.branch, config, token, args.dry_run
+            owner,
+            repo,
+            args.branch,
+            config,
+            cast(str, token),  # guard acima garante token fora do dry-run
+            args.dry_run,
         )
         return 0 if success else 1
     else:

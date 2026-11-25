@@ -43,7 +43,7 @@ class ParsedObjetivo:
     file_path: Path
     version: str = field(init=False)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Extract version from frontmatter."""
         self.version = self.frontmatter.get("version", "unknown")
 
@@ -55,12 +55,14 @@ class ParsedObjetivo:
     @property
     def project_name(self) -> str | None:
         """Convenience property to get project name."""
-        return self.frontmatter.get("project", {}).get("name")
+        name: str | None = self.frontmatter.get("project", {}).get("name")
+        return name
 
     @property
     def project_type(self) -> str | None:
         """Convenience property to get project type."""
-        return self.frontmatter.get("project", {}).get("type")
+        project_type: str | None = self.frontmatter.get("project", {}).get("type")
+        return project_type
 
     @property
     def p0_sections(self) -> dict[int, str]:
@@ -101,7 +103,7 @@ class ObjetivoV2Parser:
         r"^##\s+(\d)️⃣\s+(.+?)(?=\n##\s+\d️⃣|\Z)", re.MULTILINE | re.DOTALL
     )
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize parser."""
         pass
 

@@ -37,7 +37,7 @@ class MigrationReport:
     """Results of a template migration operation."""
 
     template_name: str
-    backup_path: Path
+    backup_path: Path | None
     blocks_created: list[str]
     patches_created: list[str]
     custom_sections_found: int
@@ -425,7 +425,7 @@ def list_templates(templates_dir: Path) -> list[Path]:
     return sorted(templates_dir.glob("*.md"))
 
 
-def main():
+def main() -> None:
     """CLI entry point for testing."""
     import sys
 

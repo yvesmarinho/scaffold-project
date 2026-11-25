@@ -24,7 +24,7 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
 
-def test_save():
+def test_save() -> bool:
     """Test saving a memory."""
     log.info("Test 1: Save memory")
 
@@ -64,7 +64,7 @@ Refresh tokens in httpOnly cookies.
     return True
 
 
-def test_search():
+def test_search() -> bool:
     """Test searching memories."""
     log.info("\nTest 2: Search memories")
 
@@ -81,14 +81,16 @@ def test_search():
 
     for i, result in enumerate(results, 1):
         log.info("   %d. %s (score: %.2f)", i, result.title, result.score)
-        log.info("      Category: %s | Tags: %s", result.category, ", ".join(result.tags))
+        log.info(
+            "      Category: %s | Tags: %s", result.category, ", ".join(result.tags)
+        )
         log.info("      Snippet: %s", result.snippet[:80])
 
     store.close()
     return True
 
 
-def test_stats():
+def test_stats() -> bool:
     """Test statistics."""
     log.info("\nTest 3: Statistics")
 
@@ -103,7 +105,7 @@ def test_stats():
     return True
 
 
-def test_rebuild():
+def test_rebuild() -> bool:
     """Test index rebuild."""
     log.info("\nTest 4: Rebuild index")
 
@@ -116,7 +118,7 @@ def test_rebuild():
     return True
 
 
-def main():
+def main() -> int:
     """Run all smoke tests."""
     log.info("=" * 60)
     log.info("Memory System Smoke Test (IMP-59 Phase 1)")
@@ -141,6 +143,7 @@ def main():
         except Exception as e:
             log.error("❌ Test '%s' failed with exception: %s", name, e)
             import traceback
+
             traceback.print_exc()
             failed += 1
 

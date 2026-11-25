@@ -41,7 +41,7 @@ def parse_markdown_sections(content: str) -> dict[str, str]:
     """
     sections = {}
     current_section = None
-    current_content = []
+    current_content: list[str] = []
 
     lines = content.split("\n")
 

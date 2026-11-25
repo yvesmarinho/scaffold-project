@@ -362,7 +362,7 @@ class PreCommitMerger:
         """Converte PreCommitRepo de volta para dict YAML."""
         hooks_list = []
         for hook in repo.hooks:
-            hook_dict = {"id": hook.id}
+            hook_dict: dict[str, Any] = {"id": hook.id}
             if hook.name:
                 hook_dict["name"] = hook.name
             if hook.args:

@@ -52,7 +52,7 @@ What are the implications?
 }
 
 
-def create_structure():
+def create_structure() -> None:
     """Create .memory directory structure."""
     log.info("Creating .memory structure at %s", MEMORY_ROOT)
 

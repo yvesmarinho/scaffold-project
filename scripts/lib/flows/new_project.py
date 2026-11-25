@@ -142,9 +142,8 @@ def flow_new_project(args: argparse.Namespace) -> int:
 
     # Resumo final (com logging automático se não for --no-log)
     save_log = not getattr(args, "no_log", False)
-    log_dir = (
-        Path(getattr(args, "log_dir", None)) if getattr(args, "log_dir", None) else None
-    )
+    log_dir_arg = getattr(args, "log_dir", None)
+    log_dir = Path(log_dir_arg) if log_dir_arg else None
     print_final_summary(
         results, project_path=cfg.project_path, save_log=save_log, log_dir=log_dir
     )
@@ -171,7 +170,7 @@ def flow_new_project(args: argparse.Namespace) -> int:
         logger.log_scaffold(
             project_name=cfg.project_name,
             template_version=get_template_version(),
-            profile=cfg.language or "base",
+            profile=cfg.language or "base",  # type: ignore[unreachable]  # defensivo: valor de runtime pode não respeitar o Literal
             created_by=get_current_user(),
             path=str(cfg.project_path),
             success=True,

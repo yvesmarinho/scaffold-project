@@ -417,7 +417,7 @@ def check_pr_readiness(branch_name: str, current_dir: Path = Path.cwd()) -> dict
         >>> status["checks"]["branch_name_valid"]
         True
     """
-    checks = {}
+    checks: dict[str, bool | int | None] = {}
 
     # 1. Validar nome da branch
     branch_validation = validate_branch_name(branch_name)
@@ -568,11 +568,11 @@ if __name__ == "__main__":
     ]
 
     for commit in test_commits:
-        result = validate_commit_message(commit)
+        commit_result = validate_commit_message(commit)
         print(f"\n{commit}:")
-        print(f"  Válido: {result.is_valid}")
-        print(f"  Breaking: {result.is_breaking}")
-        if result.errors:
-            print(f"  Erros: {result.errors}")
-        if result.warnings:
-            print(f"  Avisos: {result.warnings}")
+        print(f"  Válido: {commit_result.is_valid}")
+        print(f"  Breaking: {commit_result.is_breaking}")
+        if commit_result.errors:
+            print(f"  Erros: {commit_result.errors}")
+        if commit_result.warnings:
+            print(f"  Avisos: {commit_result.warnings}")

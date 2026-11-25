@@ -6,7 +6,7 @@ import argparse
 from datetime import datetime
 from pathlib import Path
 
-from ..objetivo_parser import ObjetivoV2Parser
+from ..objetivo_parser import ObjetivoV2Parser, ParsedObjetivo
 from ..objetivo_validator import ObjetivoValidator
 from ..ui import console
 
@@ -71,7 +71,9 @@ def flow_objetivo_generate(args: argparse.Namespace) -> int:
         return 1
 
 
-def _generate_spec_yaml(parsed, source_file: Path, warnings: list) -> str:
+def _generate_spec_yaml(
+    parsed: ParsedObjetivo, source_file: Path, warnings: list
+) -> str:
     """Gera conteúdo YAML técnico a partir de objetivo.yaml parseado."""
 
     # Extract frontmatter

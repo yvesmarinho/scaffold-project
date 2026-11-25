@@ -32,6 +32,7 @@ import traceback
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
+from types import TracebackType
 from typing import Any
 
 import yaml
@@ -86,7 +87,11 @@ def setup_logging(debug: bool = False) -> logging.Logger:
     root_logger.addHandler(handler)
 
     # Capture unhandled exceptions
-    def _excepthook(exc_type, exc_value, exc_tb):
+    def _excepthook(
+        exc_type: type[BaseException],
+        exc_value: BaseException,
+        exc_tb: TracebackType | None,
+    ) -> None:
         if issubclass(exc_type, KeyboardInterrupt):
             sys.__excepthook__(exc_type, exc_value, exc_tb)
             return
@@ -1002,7 +1007,8 @@ def generate_ssh_users_json(data: dict[str, Any]) -> str:
 
 def generate_vault_pass(data: dict[str, Any]) -> str:
     """Just the password string."""
-    return data.get("password", "")
+    password: str = data.get("password", "")
+    return password
 
 
 FILE_GENERATORS: dict[str, Callable[[dict], str]] = {

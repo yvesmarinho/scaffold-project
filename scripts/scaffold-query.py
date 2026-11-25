@@ -39,7 +39,7 @@ from scaffold_logger import ScaffoldEntry, ScaffoldLogger
 # ---------------------------------------------------------------------------
 
 
-def format_table(entries: list[ScaffoldEntry]):
+def format_table(entries: list[ScaffoldEntry]) -> None:
     """Format entries as a table"""
     if not entries:
         print("No scaffolds found.")
@@ -66,7 +66,7 @@ def format_table(entries: list[ScaffoldEntry]):
     print(f"Total: {len(entries)} scaffold(s)")
 
 
-def format_stats(stats: dict):
+def format_stats(stats: dict) -> None:
     """Format statistics"""
     print("=" * 70)
     print("SCAFFOLD STATISTICS")
@@ -91,7 +91,7 @@ def format_stats(stats: dict):
     print("=" * 70)
 
 
-def format_json_output(entries: list[ScaffoldEntry]):
+def format_json_output(entries: list[ScaffoldEntry]) -> None:
     """Format entries as JSON"""
     data = [
         {
@@ -130,7 +130,7 @@ def parse_time_period(period: str) -> datetime:
         raise ValueError(f"Invalid time period: {period}")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Query scaffold history",
         formatter_class=argparse.RawDescriptionHelpFormatter,

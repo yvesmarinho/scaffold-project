@@ -106,7 +106,7 @@ class ObjetivoMigrator:
         "## 3️⃣",
     ]
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize migrator."""
         pass
 
