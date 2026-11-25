@@ -1,5 +1,5 @@
 <!-- Criado em: 24/11/2026 11:19 -->
-<!-- Modificado em: 25/11/2026 16:03 -->
+<!-- Modificado em: 25/11/2026 16:36 -->
 
 # ADR-003: Separação dos templates de distribuição dos arquivos do próprio repositório
 
@@ -71,7 +71,8 @@ Por isso:
 | 1. Correção do publish | ✅ 24/11/2026 (`git ls-files`, teste "o tarball roda") |
 | 2. Órfãos, constante duplicada, descritores quebrados | ✅ 25/11/2026 (ver abaixo) |
 | 3. Strings de `project.py` → `scaffold/templates/base/*.tmpl` | ✅ 25/11/2026 (ver abaixo) |
-| 4–7 | pendentes |
+| 4. Scripts de uso duplo → `scaffold/templates/runtime/` | ✅ 25/11/2026 (ver abaixo) |
+| 5–7 | pendentes |
 
 Fatia 2:
 - **Constante**: removida a primeira definição de `_SECURITY_MD_WITHOUT_GITHUB`. Era idêntica à segunda, que é a que vale em runtime.
@@ -95,6 +96,18 @@ Fatia 3:
   - As permissões também ficaram idênticas.
 - **Layout**: as pastas espelham o destino, sem o ponto inicial. O `.gitignore` ganhou `!scaffold/templates/base/*/`, porque `secrets/` e `logs/` eram ignorados. Um teste garante que nenhum template fique ignorado.
 - **Hooks**: `trailing-whitespace`/`end-of-file-fixer` ignoram `scaffold/templates/base/`, porque os bytes são contrato (o `Makefile.tmpl` não tem newline final).
+
+Fatia 4:
+- **Movidos com `git mv`**: 21 arquivos de uso duplo agora ficam em `scaffold/templates/runtime/scripts/`:
+  - 8 libs de sessão e memória;
+  - `session-manager`, `session-time-tracker`, `mem_*`, `create_memory_structure`, `test_memory_smoke`;
+  - 4 shell scripts, `git-hooks/commit-msg` e `setup-branch-protection.py`.
+- **Uso pelo repositório**: `scripts/<rel>` virou **symlink relativo** para o arquivo real. Foi escolhido symlink, e não wrapper, porque `__file__` e `BASH_SOURCE` não são resolvidos, então a raiz continua correta.
+- **Conjunto autocontido**: os arquivos só importam libs do próprio conjunto (verificado por AST).
+- **Código**: `project.RUNTIME_SCRIPTS_DIR` e `RUNTIME_FILES` centralizam a lista. As funções de cópia leem do runtime.
+- **Formatação**: black/ruff formataram 4 arquivos que nunca tinham passado pelo hook. O AST ficou idêntico, exceto `f"..."` sem placeholder que virou `"..."`, com a mesma saída.
+- **Verificação**: os projetos gerados ficaram idênticos à linha de base, inclusive tipo e permissão de arquivo, sem nenhum symlink vazado. A exceção são esses 4 arquivos formatados.
+- **Bug no publish**: a eliminação de duplicatas pelo caminho resolvido descartava o alvo dos symlinks. Ver `docs/bugs/BUG-publish-symlink-sem-alvo.md`.
 
 ## Pontos para decisão do usuário (resolvidos em 25/11/2026)
 - Aprovar a estrutura-alvo, em especial `runtime/` e o uso de wrappers no lugar de duplicação.

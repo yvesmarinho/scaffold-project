@@ -108,9 +108,21 @@ class TestCollectFiles:
         assert non_files == [], f"Todos os itens devem ser arquivos: {non_files}"
 
     def test_no_duplicates(self) -> None:
+        # Pelo caminho relativo: symlink (scripts/x) e alvo (scaffold/templates/
+        # runtime/scripts/x) são entradas distintas desde a fatia 4 do ADR-003.
         files = _collect_files(_PROJECT_ROOT)
-        resolved = [f.resolve() for f in files]
-        assert len(resolved) == len(set(resolved)), "Lista contém arquivos duplicados"
+        rels = [f.relative_to(_PROJECT_ROOT) for f in files]
+        assert len(rels) == len(set(rels)), "Lista contém arquivos duplicados"
+
+    def test_symlinks_tem_alvo_no_pacote(self) -> None:
+        files = _collect_files(_PROJECT_ROOT)
+        included = {f.resolve() for f in files if not f.is_symlink()}
+        dangling = [
+            str(f.relative_to(_PROJECT_ROOT))
+            for f in files
+            if f.is_symlink() and f.resolve() not in included
+        ]
+        assert dangling == [], "symlinks sem alvo no tarball"
 
 
 # ===========================================================================

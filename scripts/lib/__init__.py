@@ -1,1 +1,1 @@
-# scripts/lib — módulos do scaffold.py
+../../scaffold/templates/runtime/scripts/lib/__init__.py
