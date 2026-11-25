@@ -68,7 +68,7 @@ STATE_FILE = STATE_DIR / "current.json"
 HISTORY_CSV = STATE_DIR / "history.csv"
 
 
-def _ensure_dirs():
+def _ensure_dirs() -> None:
     """Garante que diretórios necessários existem."""
     STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
 
@@ -123,7 +123,7 @@ def _format_duration(seconds: float) -> str:
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
 
-def _force_finish_orphan(state: dict[str, Any]):
+def _force_finish_orphan(state: dict[str, Any]) -> None:
     """Finaliza sessão órfã automaticamente."""
     # Se houver pausa pendente, finalizá-la primeiro
     if state.get("current_pause"):
@@ -159,7 +159,7 @@ def _force_finish_orphan(state: dict[str, Any]):
     STATE_FILE.unlink()
 
 
-def cmd_start():
+def cmd_start() -> int:
     """Inicia nova sessão de trabalho."""
     _ensure_dirs()
 
@@ -263,7 +263,7 @@ def cmd_start():
     return 0
 
 
-def cmd_pause(reason: str = "break"):
+def cmd_pause(reason: str = "break") -> int:
     """Pausa a sessão atual (café, almoço, etc.)."""
     if not STATE_FILE.exists():
         print("❌ Nenhuma sessão ativa. Use 'start' primeiro.", file=sys.stderr)
@@ -288,7 +288,7 @@ def cmd_pause(reason: str = "break"):
     return 0
 
 
-def cmd_resume():
+def cmd_resume() -> int:
     """Retoma sessão após pausa."""
     if not STATE_FILE.exists():
         print("❌ Nenhuma sessão ativa.", file=sys.stderr)
@@ -323,7 +323,7 @@ def cmd_resume():
     return 0
 
 
-def cmd_stop():
+def cmd_stop() -> int:
     """Finaliza sessão atual e salva no histórico."""
     if not STATE_FILE.exists():
         print("❌ Nenhuma sessão ativa.", file=sys.stderr)
@@ -369,7 +369,7 @@ def cmd_stop():
     return 0
 
 
-def _save_to_csv(state: dict[str, Any]):
+def _save_to_csv(state: dict[str, Any]) -> None:
     """Salva sessão no histórico CSV."""
     _ensure_dirs()
 
@@ -416,7 +416,7 @@ def _save_to_csv(state: dict[str, Any]):
         )
 
 
-def cmd_stats(date: str | None = None):
+def cmd_stats(date: str | None = None) -> int:
     """Exibe estatísticas de sessões."""
     if not HISTORY_CSV.exists():
         print("❌ Nenhum histórico encontrado.", file=sys.stderr)
@@ -444,7 +444,7 @@ def cmd_stats(date: str | None = None):
     return 0
 
 
-def _print_stats_rich(sessions: list[dict], date_filter: str | None):
+def _print_stats_rich(sessions: list[dict], date_filter: str | None) -> None:
     """Exibe estatísticas com Rich."""
     console = Console()
 
@@ -475,7 +475,7 @@ def _print_stats_rich(sessions: list[dict], date_filter: str | None):
     console.print(table)
 
 
-def _print_stats_plain(sessions: list[dict], date_filter: str | None):
+def _print_stats_plain(sessions: list[dict], date_filter: str | None) -> None:
     """Exibe estatísticas em texto simples."""
     header = "📊 Estatísticas de Sessões"
     if date_filter:
@@ -492,7 +492,7 @@ def _print_stats_plain(sessions: list[dict], date_filter: str | None):
         print()
 
 
-def cmd_export(output: str | None = None):
+def cmd_export(output: str | None = None) -> int:
     """Exporta histórico para CSV."""
     if not HISTORY_CSV.exists():
         print("❌ Nenhum histórico encontrado.", file=sys.stderr)
@@ -508,7 +508,7 @@ def cmd_export(output: str | None = None):
     return 0
 
 
-def cmd_status():
+def cmd_status() -> int:
     """Exibe status da sessão atual."""
     if not STATE_FILE.exists():
         print("📊 Status: Nenhuma sessão ativa")
@@ -558,7 +558,7 @@ def cmd_status():
     return 0
 
 
-def cmd_cleanup(force: bool = False):
+def cmd_cleanup(force: bool = False) -> int:
     """Limpa sessão órfã ou corrompida."""
     if not STATE_FILE.exists():
         print("✅ Nenhuma sessão órfã encontrada.")
@@ -589,7 +589,7 @@ def cmd_cleanup(force: bool = False):
     return 0
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Session Time Tracker — Rastreamento de tempo com pausas",
         formatter_class=argparse.RawDescriptionHelpFormatter,

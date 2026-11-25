@@ -211,7 +211,7 @@ class CopilotRulesMerger:
         header = []
         sections = {}
         current_heading = None
-        current_content = []
+        current_content: list[str] = []
         current_priority = None
 
         # Extrair header (até primeira seção ##)

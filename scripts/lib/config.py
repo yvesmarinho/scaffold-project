@@ -49,7 +49,7 @@ def load_user_config() -> dict[str, Any]:
 
     try:
         with open(CONFIG_FILE, encoding="utf-8") as f:
-            config_data = json.load(f)
+            config_data: dict[str, Any] = json.load(f)
             logger.debug("Loaded config from: %s", CONFIG_FILE)
             return config_data
     except json.JSONDecodeError as exc:
@@ -108,9 +108,9 @@ VALID_AI_ASSISTANTS: list[str] = ["claude", "copilot", "both", "none"]
 
 # Perfil principal por domínio (copiado sempre)
 DOMAIN_DEFAULT_PROFILES: dict[str, str] = {
-    "programming":    "devops-programming",
+    "programming": "devops-programming",
     "infrastructure": "devops-infrastructure",
-    "analysis":       "devops-analysis",
+    "analysis": "devops-analysis",
 }
 
 # Todos os perfis selecionáveis (excluindo o transversal de segurança)
@@ -128,19 +128,20 @@ SPECKIT_TRANSVERSAL_PROFILES: list[str] = ["devops-security"]
 # Dataclasses
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ProjectConfig:
     """Configuração completa de um projeto scaffold."""
 
-    project_name: str                   # slug kebab-case, ex: my-api-v2
-    project_title: str                  # legível, ex: My API v2
-    description: str                    # 1 frase
-    domain: DomainType                  # programming | infrastructure | analysis
-    language: LanguageType              # python | typescript | go | other
-    github_repo: str | None             # URL GitHub ou None
-    shared_dir: Path                    # caminho para .copilot-shared
-    target_dir: Path                    # diretório PAI onde criar a pasta do projeto
-    created_at: str                     # ISO8601 timestamp
+    project_name: str  # slug kebab-case, ex: my-api-v2
+    project_title: str  # legível, ex: My API v2
+    description: str  # 1 frase
+    domain: DomainType  # programming | infrastructure | analysis
+    language: LanguageType  # python | typescript | go | other
+    github_repo: str | None  # URL GitHub ou None
+    shared_dir: Path  # caminho para .copilot-shared
+    target_dir: Path  # diretório PAI onde criar a pasta do projeto
+    created_at: str  # ISO8601 timestamp
     # perfis extras além do domínio (D-21)
     extra_profiles: list[str] = field(default_factory=list)
     # assistente(s) de IA ativo(s): claude | copilot | both | none
@@ -174,8 +175,20 @@ class CreatedItem:
     """Resultado de uma operação de criação (pasta, arquivo, symlink, git)."""
 
     path: Path
-    kind: Literal["dir", "file", "symlink", "git"]
-    status: Literal["created", "skipped", "error"]
+    kind: Literal["dir", "file", "symlink", "git", "validation"]
+    status: Literal[
+        "created",
+        "skipped",
+        "error",
+        "updated",
+        "merged",
+        "drift",
+        "secured",
+        "ok",
+        "warning",
+        "available",
+        "activated",
+    ]
     message: str = ""
 
 

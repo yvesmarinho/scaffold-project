@@ -40,10 +40,10 @@ class AgentFrontmatter:
     description: str | None = None
     name: str | None = None
     agent_name: str | None = None
-    handoffs: list[dict[str, Any]] = None
-    tools: list[str] = None
+    handoffs: list[dict[str, Any]] | None = None
+    tools: list[str] | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Extrai campos comuns do frontmatter."""
         if self.parsed:
             self.version = self.parsed.get("version")
@@ -254,7 +254,7 @@ class CopilotAgentMerger:
         sections = {}
         lines = content.splitlines()
         current_heading = None
-        current_content = []
+        current_content: list[str] = []
 
         for line in lines:
             # Detecta heading (## ou ###)

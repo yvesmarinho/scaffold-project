@@ -423,6 +423,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     fields_group.add_argument("--repo", metavar="URL", help="URL do repositório GitHub")
     fields_group.add_argument(
+        "--no-github-setup",
+        action="store_true",
+        dest="no_github_setup",
+        help="com --repo: não publica main/dev nem protege a main via gh",
+    )
+    fields_group.add_argument(
         "--with-code-profile",
         metavar="PROFILE",
         dest="with_code_profile",

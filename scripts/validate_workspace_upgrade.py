@@ -66,7 +66,7 @@ class ValidationResult:
         self.message = message
         self.details = details
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         status = "✅ PASS" if self.passed else "❌ FAIL"
         return f"{status} {self.name}: {self.message}"
 
@@ -78,7 +78,7 @@ class ValidationSuite:
         self.name = name
         self.results: list[ValidationResult] = []
 
-    def add(self, result: ValidationResult):
+    def add(self, result: ValidationResult) -> None:
         self.results.append(result)
 
     @property
@@ -93,7 +93,7 @@ class ValidationSuite:
     def all_passed(self) -> bool:
         return self.failed_count == 0
 
-    def print_summary(self):
+    def print_summary(self) -> None:
         status = "✅" if self.all_passed else "❌"
         print(f"\n{status} {self.name}")
         print("─" * 70)
@@ -900,7 +900,7 @@ def validate_scaffold_logs(workspace: Path, verbose: bool = False) -> Validation
 # ===========================================================================
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Validar scaffold upgrade no test-workspace-fix"
     )

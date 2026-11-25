@@ -37,6 +37,8 @@ import sqlite3
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
+from types import TracebackType
+from typing import Self, cast
 
 # ============================================================================
 # Configuration
@@ -89,7 +91,7 @@ class Memory:
     updated_at: datetime | None = None
     memory_id: int | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and normalize fields."""
         if not self.title:
             raise ValueError("Memory title is required")
@@ -159,7 +161,7 @@ class MemoryStore:
         self._ensure_structure()
         self.conn = self._init_db()
 
-    def _ensure_structure(self):
+    def _ensure_structure(self) -> None:
         """Ensure .memory directory structure exists."""
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         for category in ["project", "team", "sessions"]:
@@ -238,12 +240,15 @@ class MemoryStore:
         Returns:
             int: Memory ID
         """
+        # file_path é sempre preenchido por Memory.__post_init__
+        file_path = cast(Path, memory.file_path)
+
         # Ensure file path directory exists
-        memory.file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Write markdown file (source of truth)
         content_with_frontmatter = memory.to_markdown()
-        memory.file_path.write_text(content_with_frontmatter, encoding="utf-8")
+        file_path.write_text(content_with_frontmatter, encoding="utf-8")
 
         # Prepare database fields
         tags_str = ",".join(memory.tags) if memory.tags else ""
@@ -275,7 +280,8 @@ class MemoryStore:
         )
 
         self.conn.commit()
-        memory_id = cursor.lastrowid
+        # INSERT bem-sucedido sempre define lastrowid
+        memory_id = cast(int, cursor.lastrowid)
         log.info("✅ Memory saved: %s (ID: %d)", memory.title, memory_id)
         return memory_id
 
@@ -311,7 +317,7 @@ class MemoryStore:
             INNER JOIN memories m ON memories_fts.rowid = m.id
             WHERE memories_fts MATCH ?
         """]
-        params = [query]
+        params: list[str | int] = [query]
 
         if category:
             sql_parts.append("AND m.category = ?")
@@ -450,16 +456,21 @@ class MemoryStore:
 
         return stats
 
-    def close(self):
+    def close(self) -> None:
         """Close database connection."""
         if self.conn:
             self.conn.close()
             log.debug("Database connection closed")
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         """Context manager support."""
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Context manager cleanup."""
         self.close()

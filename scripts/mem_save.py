@@ -47,7 +47,7 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 log = logging.getLogger(__name__)
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
         description="Save a memory to mini-Engram system",
@@ -189,6 +189,7 @@ def validate_content(content: str, title: str, allow_sanitize: bool = True) -> s
         elif choice == "2":
             log.info("")
             log.info("🔒 Sanitizing content...")
+            sanitized_content: str
             sanitized_content, warnings = sanitize(content, redact=True)
             for warning in warnings:
                 log.info("   ✓ %s", warning)
@@ -206,7 +207,7 @@ def validate_content(content: str, title: str, allow_sanitize: bool = True) -> s
     return content
 
 
-def main():
+def main() -> None:
     """Main CLI entry point."""
     args = parse_args()
 

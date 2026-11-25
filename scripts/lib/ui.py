@@ -8,8 +8,10 @@ from __future__ import annotations
 
 import os
 import re
+from collections.abc import Sequence
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any, cast
 from zoneinfo import ZoneInfo
 
 import yaml
@@ -29,6 +31,8 @@ from .config import (
     VALID_LANGUAGES,
     AiAssistantType,
     CreatedItem,
+    DomainType,
+    LanguageType,
     LinkStatus,
     ProjectConfig,
     get_default_shared_dir,
@@ -132,7 +136,7 @@ def show_menu() -> str:
         return choice
 
 
-def collect_project_info(ci_mode: bool = False, **overrides) -> ProjectConfig:
+def collect_project_info(ci_mode: bool = False, **overrides: Any) -> ProjectConfig:
     """
     Coleta informações do projeto via prompts interativos ou via overrides (CI).
 
@@ -231,7 +235,8 @@ def _collect_ci(overrides: dict) -> ProjectConfig:
         extra_profiles=_parse_extra_profiles(
             overrides.get("extra_profiles") or "domain-only", domain
         ),
-        ai_assistant=ai_assistant_raw,
+        # validado contra get_valid_values() acima
+        ai_assistant=cast(AiAssistantType, ai_assistant_raw),
     )
 
 
@@ -352,7 +357,8 @@ def _select_ai_assistant(default: AiAssistantType) -> AiAssistantType:
         default=default_idx,
         show_choices=False,
     )
-    return options[int(choice) - 1][0]
+    # chave vem do menu de plugins (valores válidos de AiAssistantType)
+    return cast(AiAssistantType, options[int(choice) - 1][0])
 
 
 def _collect_interactive(defaults: dict) -> ProjectConfig:
@@ -431,8 +437,9 @@ def _collect_interactive(defaults: dict) -> ProjectConfig:
         project_name=name,
         project_title=title,
         description=description,
-        domain=domain,
-        language=language,
+        # escolhidos de VALID_DOMAINS / VALID_LANGUAGES nos menus
+        domain=cast(DomainType, domain),
+        language=cast(LanguageType, language),
         github_repo=github_repo,
         shared_dir=Path(shared_dir_str).expanduser().resolve(),
         target_dir=target_dir,
@@ -810,7 +817,7 @@ def _relative(path: Path, project_path: Path) -> str:
 
 def _write_log_to_dir(
     logs_dir: Path,
-    items: list[CreatedItem | LinkStatus],
+    items: Sequence[CreatedItem | LinkStatus],
     project_path: Path,
     operation: str,
     now: datetime,
@@ -827,7 +834,7 @@ def _write_log_to_dir(
 
             stats: dict[str, int] = {}
             for item in items:
-                s = item.status if isinstance(item, CreatedItem) else item.status
+                s: str = item.status if isinstance(item, CreatedItem) else item.status
                 stats[s] = stats.get(s, 0) + 1
 
             f.write("## Statistics\n")
@@ -873,7 +880,7 @@ def _write_log_to_dir(
 
 
 def save_operation_log(
-    items: list[CreatedItem | LinkStatus],
+    items: Sequence[CreatedItem | LinkStatus],
     project_path: Path,
     operation: str = "scaffold",
     log_dir: Path | None = None,
@@ -922,7 +929,7 @@ def save_operation_log(
 
 
 def print_final_summary(
-    items: list[CreatedItem | LinkStatus],
+    items: Sequence[CreatedItem | LinkStatus],
     project_path: Path | None = None,
     save_log: bool = True,
     log_dir: Path | None = None,

@@ -1,13 +1,46 @@
+<!-- Criado em: 17/05/2026 14:46 -->
+<!-- Modificado em: 25/11/2026 14:28 -->
+
 # Configuração de Branch Protection - GitHub
 
 Este guia explica como configurar proteções de branch no GitHub para garantir qualidade e segurança do código.
 
 ## 📋 Índice
 
+- [Modelo de Branches](#modelo-de-branches)
 - [Visão Geral](#visão-geral)
 - [Configuração Passo a Passo](#configuração-passo-a-passo)
 - [Níveis de Proteção](#níveis-de-proteção)
 - [Troubleshooting](#troubleshooting)
+
+---
+
+## 🌿 Modelo de Branches
+
+| Branch | Papel | Como recebe código |
+|---|---|---|
+| `main` | produção / estável | só por PR vindo de `dev` ou `release/faseN`, com CI verde |
+| `dev` | integração (branch default) | PRs de `feature/*`, `fix/*`, `docs/*`... |
+| `release/faseN` | fase do projeto (ex.: `release/fase1`) | criada a partir de `dev` ao fechar a fase |
+
+O scaffold cria `dev` a partir da `main` e deixa o checkout em `dev`. Com `--repo`
+(GitHub) e `gh` autenticado, ele também publica `main`/`dev`/tags, define `dev` como
+default e protege a `main` (PR obrigatório + checks `Validation Summary` e `ci`, quando
+existirem, com branch atualizada). Para pular essa etapa: `--no-github-setup`.
+
+Se a etapa automática foi pulada ou falhou (aparece como `skipped` no resumo):
+
+1. Na raiz do projeto, publicar as branches:
+   ```bash
+   git push -u origin main dev --tags
+   ```
+2. Definir `dev` como default (troque `OWNER/REPO`):
+   ```bash
+   gh repo edit OWNER/REPO --default-branch dev
+   ```
+   Verificar: `gh repo view OWNER/REPO --json defaultBranchRef` mostra `dev`.
+3. Proteger a `main` seguindo a [Configuração Passo a Passo](#configuração-passo-a-passo).
+   Os checks obrigatórios só aparecem para seleção depois da primeira execução do CI.
 
 ---
 

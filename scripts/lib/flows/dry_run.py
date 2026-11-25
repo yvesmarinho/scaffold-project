@@ -5,11 +5,11 @@ from __future__ import annotations
 import argparse
 import json as _json
 
-from ..config import DOMAIN_DEFAULT_PROFILES
+from ..config import DOMAIN_DEFAULT_PROFILES, ProjectConfig
 from ..ui import collect_project_info, console
 
 
-def _build_manifest(cfg) -> list[dict]:
+def _build_manifest(cfg: ProjectConfig) -> list[dict]:
     """Retorna a sequência de operações que flow_new_project executaria."""
     domain_profile = DOMAIN_DEFAULT_PROFILES.get(cfg.domain, cfg.domain)
 

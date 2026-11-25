@@ -24,7 +24,9 @@ from .config import CreatedItem, ProjectConfig
 def _write(path: Path, content: str) -> CreatedItem:
     """Escreve um arquivo se ainda não existir; retorna CreatedItem."""
     if path.exists():
-        return CreatedItem(path=path, kind="file", status="skipped", message="já existe")
+        return CreatedItem(
+            path=path, kind="file", status="skipped", message="já existe"
+        )
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
     return CreatedItem(path=path, kind="file", status="created")
@@ -39,9 +41,9 @@ name: CI
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, dev, 'release/**']
   pull_request:
-    branches: [main, master]
+    branches: [main, master, dev, 'release/**']
 
 jobs:
   ci:
@@ -78,9 +80,9 @@ name: CI
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, dev, 'release/**']
   pull_request:
-    branches: [main, master]
+    branches: [main, master, dev, 'release/**']
 
 jobs:
   ci:
@@ -118,9 +120,9 @@ name: CI
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, dev, 'release/**']
   pull_request:
-    branches: [main, master]
+    branches: [main, master, dev, 'release/**']
 
 jobs:
   ci:
@@ -147,10 +149,10 @@ jobs:
 """
 
 _CI_TEMPLATES: dict[str, str] = {
-    "python":     _CI_PYTHON,
+    "python": _CI_PYTHON,
     "typescript": _CI_TYPESCRIPT,
-    "go":         _CI_GO,
-    "other":      _CI_PYTHON,  # fallback
+    "go": _CI_GO,
+    "other": _CI_PYTHON,  # fallback
 }
 
 
@@ -268,10 +270,10 @@ ENTRYPOINT ["/server"]
 """
 
 _DOCKERFILE_TEMPLATES: dict[str, str] = {
-    "python":     _DOCKERFILE_PYTHON,
+    "python": _DOCKERFILE_PYTHON,
     "typescript": _DOCKERFILE_NODE,
-    "go":         _DOCKERFILE_GO,
-    "other":      _DOCKERFILE_NODE,  # fallback
+    "go": _DOCKERFILE_GO,
+    "other": _DOCKERFILE_NODE,  # fallback
 }
 
 

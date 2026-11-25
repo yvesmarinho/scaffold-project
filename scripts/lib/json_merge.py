@@ -165,7 +165,7 @@ def _is_mcp_schema_change(base: dict, overlay: dict, path: list[str]) -> bool:
 
 
 def _merge_user_wins_recursive(
-    base: dict, overlay: dict, path: list[str] = None
+    base: dict, overlay: dict, path: list[str] | None = None
 ) -> dict:
     """
     Implementação do merge user-wins recursivo com detecção de schema change.
@@ -245,7 +245,8 @@ def load_json_safe(file_path: Path) -> dict[str, Any]:
     """
     try:
         content = file_path.read_text(encoding="utf-8")
-        return json.loads(content)
+        data: dict[str, Any] = json.loads(content)
+        return data
     except json.JSONDecodeError as e:
         log.error(f"❌ JSON inválido em {file_path.name}: {e}")
         raise ValueError(f"JSON inválido: {e}") from e
@@ -254,7 +255,7 @@ def load_json_safe(file_path: Path) -> dict[str, Any]:
         raise
 
 
-def _detect_duplications(data, path="root"):
+def _detect_duplications(data: Any, path: str = "root") -> list[dict[str, Any]]:
     """
     Detecta duplicações em estrutura JSON (versão simplificada).
 
@@ -265,7 +266,7 @@ def _detect_duplications(data, path="root"):
     Returns:
         Lista de issues com duplicações
     """
-    issues = []
+    issues: list[dict[str, Any]] = []
 
     if isinstance(data, dict):
         for key, value in data.items():
@@ -526,7 +527,7 @@ class WorkspaceMerger:
         Returns:
             Dados mergeados
         """
-        merged = {}
+        merged: dict[str, Any] = {}
 
         # 1. Merge folders (união, sem duplicatas)
         base_folders = base.get("folders", [])

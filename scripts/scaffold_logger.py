@@ -79,7 +79,7 @@ class ScaffoldLogger:
         self.log_file = log_file or _default_log_file()
         self._ensure_log_file()
 
-    def _ensure_log_file(self):
+    def _ensure_log_file(self) -> None:
         """Create log file if it doesn't exist"""
         if not self.log_file.exists():
             self.log_file.parent.mkdir(parents=True, exist_ok=True)
@@ -95,7 +95,7 @@ class ScaffoldLogger:
             print(f"Warning: Failed to load {self.log_file}: {e}")
             return {"scaffolds": []}
 
-    def _save_data(self, data: dict[str, Any]):
+    def _save_data(self, data: dict[str, Any]) -> None:
         """Save scaffold log data"""
         with self.log_file.open("w", encoding="utf-8") as f:
             yaml.dump(data, f, default_flow_style=False, sort_keys=False)
@@ -105,7 +105,8 @@ class ScaffoldLogger:
         scaffolds = data.get("scaffolds", [])
         if not scaffolds:
             return 1
-        return max(s["id"] for s in scaffolds) + 1
+        last_id: int = max(s["id"] for s in scaffolds)
+        return last_id + 1
 
     def log_scaffold(
         self,
@@ -240,13 +241,13 @@ class ScaffoldLogger:
             }
 
         # Count by profile
-        by_profile = {}
+        by_profile: dict[str, int] = {}
         for s in scaffolds:
             profile = s["profile"]
             by_profile[profile] = by_profile.get(profile, 0) + 1
 
         # Count by user
-        by_user = {}
+        by_user: dict[str, int] = {}
         for s in scaffolds:
             user = s["created_by"]
             by_user[user] = by_user.get(user, 0) + 1
@@ -275,7 +276,7 @@ class ScaffoldLogger:
             "recent_activity": recent,
         }
 
-    def export_csv(self, output_file: Path):
+    def export_csv(self, output_file: Path) -> None:
         """Export scaffold history to CSV"""
         import csv
 

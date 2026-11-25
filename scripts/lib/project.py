@@ -1214,7 +1214,7 @@ _PROJECT_CREATION_SUMMARY = """\
 ✅ **Repositório Git criado**
 - Commit inicial: `chore: scaffold inicial do projeto {{PROJECT_NAME}}`
 - Tag: `scaffold-v1.0.0` (marca versão do template)
-- Branch: `main`{git_remote_section}
+- Branch: `main` + `dev` (checkout em `dev`; fases em `release/faseN`){git_remote_section}
 
 ---
 
@@ -1265,13 +1265,10 @@ make test
 ### 5. GitHub (se aplicável)
 
 ```bash
-# Push inicial para GitHub
-git push -u origin main --tags
-
-# Configurar branch protection rules no GitHub:
-# - Settings → Branches → Add rule
-# - Require pull request reviews
-# - Require status checks
+# Com --repo e gh autenticado o scaffold já fez isto; caso contrário:
+git push -u origin main dev --tags
+gh repo edit --default-branch dev
+# Proteção da main (PR + CI verde): docs/BRANCH_PROTECTION_SETUP.md
 ```
 
 ---
@@ -1295,14 +1292,16 @@ make clean          # Limpar arquivos gerados
 ### Git Workflow
 
 ```bash
-# Criar nova feature
-git checkout -b NNN-nome-da-feature
+# Criar nova feature a partir de dev
+git checkout dev && git pull
+git checkout -b feature/NNN-nome-da-feature
 
 # Commit com arquivo de mensagem
 ./scripts/git-commit-with-file.sh /tmp/commit.txt
 
-# Push e criar PR
-git push -u origin NNN-nome-da-feature
+# Push e PR para dev (dev → main só com CI verde)
+git push -u origin feature/NNN-nome-da-feature
+gh pr create --base dev
 ```
 
 ### Documentação de Sessões
@@ -1750,9 +1749,9 @@ name: Security Scan
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [ main, master, dev, 'release/**' ]
   pull_request:
-    branches: [ main, master, develop ]
+    branches: [ main, master, dev, 'release/**' ]
   schedule:
     - cron: '0 6 * * 1'  # Weekly on Mondays at 6 AM UTC
 
@@ -1811,7 +1810,7 @@ name: Dependency Review
 
 on:
   pull_request:
-    branches: [ main, master, develop ]
+    branches: [ main, master, dev, 'release/**' ]
 
 permissions:
   contents: read
@@ -3740,13 +3739,15 @@ def generate_project_creation_summary(config: ProjectConfig) -> CreatedItem:
     # Adicionar profiles transversais (aplicados sempre)
     profiles.extend(SPECKIT_TRANSVERSAL_PROFILES)
     # Adicionar profiles extras (se fornecidos)
-    if config.extra_profiles:
-        if isinstance(config.extra_profiles, str):
+    # Estado JSON legado pode trazer string em vez de lista
+    extra_profiles: list[str] | str = config.extra_profiles
+    if extra_profiles:
+        if isinstance(extra_profiles, str):
             # Se for string, fazer split por vírgula
-            extra = [p.strip() for p in config.extra_profiles.split(",") if p.strip()]
+            extra = [p.strip() for p in extra_profiles.split(",") if p.strip()]
             profiles.extend(extra)
-        elif isinstance(config.extra_profiles, list):
-            profiles.extend(config.extra_profiles)
+        elif isinstance(extra_profiles, list):
+            profiles.extend(extra_profiles)
 
     # Remover duplicatas mantendo ordem
     seen = set()

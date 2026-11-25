@@ -704,7 +704,7 @@ make lint && make format
 
 def _layer_order_int(raw_layer: object) -> int:
     """Maps a raw layer value (str or int) to sort order integer."""
-    order = _LAYER_SORT_ORDER.get(raw_layer)  # type: ignore[call-overload]
+    order: int | None = _LAYER_SORT_ORDER.get(raw_layer)
     if order is None:
         order = _LAYER_SORT_ORDER.get(str(raw_layer).lower(), 1)
     return order
@@ -851,7 +851,7 @@ def generate_profile_guide(
                     "| Controle | Ferramenta | Severidade | Auto | Descrição |\n"
                     "|----------|-----------|-----------|------|-----------|"
                 )
-                rows = []
+                table_rows: list[str] = []
                 for ctrl in enforces:
                     c = ctrl.get("control", "")
                     t = ctrl.get("tool", "")
@@ -860,8 +860,8 @@ def generate_profile_guide(
                     d = str(ctrl.get("description", "")).replace("\n", " ")
                     if len(d) > 70:
                         d = d[:67] + "..."
-                    rows.append(f"| `{c}` | `{t}` | {s} | {a} | {d} |")
-                table = header + "\n" + "\n".join(rows)
+                    table_rows.append(f"| `{c}` | `{t}` | {s} | {a} | {d} |")
+                table = header + "\n" + "\n".join(table_rows)
                 security_parts.append(f"### `{name}`\n\n{table}")
             else:
                 # Legacy string list fallback

@@ -14,6 +14,7 @@ import argparse
 import json
 import logging
 from pathlib import Path
+from typing import Any
 
 from ..template_version import (
     detect_drift,
@@ -61,7 +62,7 @@ def flow_check_templates(args: argparse.Namespace) -> int:
     if not upstream_dir.exists():
         msg = f"Upstream templates not found: {upstream_dir}"
         if json_output:
-            result = {
+            result: dict[str, Any] = {
                 "error": msg,
                 "upstream_dir": str(upstream_dir),
             }

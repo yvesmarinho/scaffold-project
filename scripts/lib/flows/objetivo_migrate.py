@@ -37,8 +37,8 @@ def flow_objetivo_migrate(args: argparse.Namespace) -> int:
         migrator = ObjetivoMigrator()
         result = migrator.migrate(file_path)
 
-        # Check if migration succeeded
-        if not result.success:
+        # Check if migration succeeded (success=True sempre traz preview_file)
+        if not result.success or result.preview_file is None:
             console.print("\n  [bold red]❌ Erro na migração:[/bold red]\n")
             for err in result.errors:
                 console.print(f"  • {err}")

@@ -27,6 +27,7 @@ Example:
 import re
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -53,7 +54,7 @@ class BlockMetadata:
     compatible_with: list[str]
     dependencies: list[dict[str, str]]
     breaking_changes: bool
-    changelog: list[dict[str, any]]
+    changelog: list[dict[str, Any]]
 
     @classmethod
     def from_dict(cls, data: dict) -> "BlockMetadata":
@@ -103,7 +104,7 @@ class BlockMetadata:
 
         return errors
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Block({self.block_name} v{self.block_version})"
 
 
@@ -154,7 +155,7 @@ class TemplateMetadata:
 
         return errors
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Template(v{self.template_version}, {len(self.blocks)} blocks)"
 
 
@@ -343,7 +344,7 @@ def compose_template(
 
     # Compose by replacing @include directives
     composed = body
-    loaded_blocks = {}
+    loaded_blocks: dict[str, tuple[BlockMetadata, str]] = {}
 
     for include_file in includes:
         block_path = blocks_dir / include_file

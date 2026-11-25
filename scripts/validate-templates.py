@@ -174,7 +174,7 @@ class TemplateValidator:
 
         return self.result
 
-    def _validate_file(self, file_path: Path):
+    def _validate_file(self, file_path: Path) -> None:
         """Validate single template file"""
         try:
             content = file_path.read_text(encoding="utf-8")
@@ -207,7 +207,7 @@ class TemplateValidator:
         elif file_path.suffix == ".md":
             self._validate_markdown(file_path, content)
 
-    def _validate_yaml(self, file_path: Path, content: str):
+    def _validate_yaml(self, file_path: Path, content: str) -> None:
         """Validate YAML file syntax (multi-document; Go templates skipped)"""
         corrompido = BROKEN_GO_TEMPLATE_PATTERN.search(content)
         if corrompido:
@@ -242,12 +242,12 @@ class TemplateValidator:
                 ValidationIssue(
                     severity="error",
                     file=str(file_path),
-                    line=getattr(e, "problem_mark", None) and e.problem_mark.line + 1,
+                    line=(mark := getattr(e, "problem_mark", None)) and mark.line + 1,
                     message=f"YAML syntax error: {e}",
                 )
             )
 
-    def _validate_json(self, file_path: Path, content: str):
+    def _validate_json(self, file_path: Path, content: str) -> None:
         """Validate JSON file syntax"""
         try:
             json.loads(content)
@@ -261,7 +261,7 @@ class TemplateValidator:
                 )
             )
 
-    def _validate_markdown(self, file_path: Path, content: str):
+    def _validate_markdown(self, file_path: Path, content: str) -> None:
         """Validate Markdown template"""
         # Extract frontmatter
         frontmatter = self._extract_frontmatter(content)
@@ -292,7 +292,7 @@ class TemplateValidator:
         if not lines or lines[0].strip() != "---":
             return None
 
-        frontmatter_lines = []
+        frontmatter_lines: list[str] = []
         for _i, line in enumerate(lines[1:], start=1):
             if line.strip() == "---":
                 frontmatter_text = "\n".join(frontmatter_lines)
@@ -304,7 +304,9 @@ class TemplateValidator:
 
         return None
 
-    def _validate_frontmatter(self, file_path: Path, frontmatter: dict[str, Any]):
+    def _validate_frontmatter(
+        self, file_path: Path, frontmatter: dict[str, Any]
+    ) -> None:
         """Validate frontmatter required fields"""
         # Check required fields
         for campo in self.required_frontmatter:
@@ -347,7 +349,7 @@ class TemplateValidator:
                     )
                 )
 
-    def _validate_markdown_links(self, file_path: Path, content: str):
+    def _validate_markdown_links(self, file_path: Path, content: str) -> None:
         """Validate Markdown links"""
         for match in MARKDOWN_LINK_PATTERN.finditer(content):
             link_text = match.group(1)
@@ -376,7 +378,7 @@ class TemplateValidator:
                         )
                     )
 
-    def _validate_variables(self, file_path: Path, content: str):
+    def _validate_variables(self, file_path: Path, content: str) -> None:
         """Validate variable substitution placeholders"""
         # Extract all variables
         variables = set()
@@ -495,7 +497,7 @@ def format_json(result: ValidationResult) -> str:
 # ---------------------------------------------------------------------------
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Validate scaffold templates (default: scaffold/templates/)",
         formatter_class=argparse.RawDescriptionHelpFormatter,

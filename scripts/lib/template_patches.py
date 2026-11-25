@@ -128,7 +128,7 @@ class PatchMetadata:
 
         return errors
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"Patch({self.patch_name} v{self.patch_version} → {self.target_template})"
         )
@@ -150,7 +150,7 @@ class PatchOperation:
     content: str
     line_offset: int = 0
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"PatchOp({self.operation_type.value} @ '{self.anchor[:30]}...')"
 
 
@@ -168,7 +168,7 @@ class Patch:
     operations: list[PatchOperation]
     source_file: Path
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Patch({self.metadata.patch_name}, {len(self.operations)} ops)"
 
 
@@ -424,7 +424,9 @@ def apply_patch(content: str, patch: Patch) -> str:
     return result
 
 
-def apply_patches(content: str, patches_dir: Path, template_name: str = None) -> str:
+def apply_patches(
+    content: str, patches_dir: Path, template_name: str | None = None
+) -> str:
     """Apply all patches from a directory to content.
 
     Patches are applied in filename order (001-..., 002-..., etc.).
@@ -488,7 +490,7 @@ def validate_patch_file(patch_path: Path) -> tuple[bool, list[str]]:
         return False, [f"Unexpected error: {e}"]
 
 
-def list_patches(patches_dir: Path, template_name: str = None) -> list[Patch]:
+def list_patches(patches_dir: Path, template_name: str | None = None) -> list[Patch]:
     """List all patches for a template.
 
     Args:

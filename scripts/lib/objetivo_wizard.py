@@ -14,6 +14,7 @@ Tasks: T025-T036
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -117,7 +118,7 @@ class WizardQuestion:
     placeholder: str
     multiline: bool = False
     required: bool = True
-    validation: callable | None = None
+    validation: Callable[[str], Any] | None = None
 
 
 @dataclass
@@ -753,7 +754,7 @@ class ObjetivoWizard:
         except Exception as e:
             self._print(f"\n  [red]❌ Erro ao salvar draft:[/red] {e}")
 
-    def _print(self, message: str, **kwargs) -> None:
+    def _print(self, message: str, **kwargs: Any) -> None:
         """Print message with Rich if available, otherwise plain print().
 
         Args:

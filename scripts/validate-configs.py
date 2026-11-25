@@ -111,7 +111,7 @@ def validate_pyproject_toml() -> bool:
     except ImportError:
         # Python < 3.11
         try:
-            import tomli as tomllib
+            import tomli as tomllib  # type: ignore[import-not-found, no-redef]  # fallback Python<3.11 (requires-python>=3.12)
         except ImportError:
             log.warning(
                 "⚠️  toml library not available (skipping pyproject.toml check)"
@@ -198,7 +198,7 @@ def validate_copilot_rules() -> bool:
     return True
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Configuration validation script (IMP-65 P0)",
         formatter_class=argparse.RawDescriptionHelpFormatter,

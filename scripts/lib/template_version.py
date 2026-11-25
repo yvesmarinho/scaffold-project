@@ -15,6 +15,7 @@ import logging
 import re
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -123,7 +124,7 @@ def parse_version_tuple(version_str: str) -> tuple[int, int, int] | None:
     match = re.match(r"^(\d+)\.(\d+)\.(\d+)$", version_str)
     if not match:
         return None
-    return tuple(map(int, match.groups()))
+    return (int(match.group(1)), int(match.group(2)), int(match.group(3)))
 
 
 def compare_versions(v1: str, v2: str) -> int:
@@ -170,7 +171,7 @@ def scan_templates(template_dir: Path) -> dict[str, TemplateVersion]:
     Returns:
         Dictionary mapping template name to TemplateVersion
     """
-    templates = {}
+    templates: dict[str, TemplateVersion] = {}
 
     if not template_dir.exists():
         log.warning("Template directory not found: %s", template_dir)
@@ -345,7 +346,7 @@ def save_template_base(
     state_path = project_dir / ".scaffold-state.yaml"
 
     # Load existing state
-    state = {}
+    state: dict[str, Any] = {}
     if state_path.exists():
         try:
             with state_path.open(encoding="utf-8") as f:

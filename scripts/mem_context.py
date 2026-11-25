@@ -201,7 +201,10 @@ def extract_keywords(text: str) -> list[str]:
 
 
 def analyze_context(
-    branch: str = None, commits: list[str] = None, query: str = None, task: str = None
+    branch: str | None = None,
+    commits: list[str] | None = None,
+    query: str | None = None,
+    task: str | None = None,
 ) -> list[ContextSource]:
     """Analyze current context and extract keywords.
 
@@ -246,7 +249,7 @@ def analyze_context(
         keywords = extract_keywords(combined_commits)
         if keywords:
             # Take top 10 most frequent keywords
-            keyword_freq = {}
+            keyword_freq: dict[str, int] = {}
             for kw in keywords:
                 keyword_freq[kw] = keyword_freq.get(kw, 0) + 1
             top_keywords = sorted(
@@ -454,7 +457,7 @@ def format_output(
     return "\n".join(lines)
 
 
-def main():
+def main() -> None:
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Suggest relevant memories based on current context",
@@ -532,6 +535,7 @@ def main():
         suggestions = search_with_context(sources, limit=args.limit)
 
         # Output
+        output: dict[str, object] | str
         if args.json:
             output = {
                 "success": True,

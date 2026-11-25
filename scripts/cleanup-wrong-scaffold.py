@@ -56,7 +56,9 @@ SCAFFOLD_FILES = [
 ]
 
 
-def cleanup_scaffold_files(target_dir: Path, project_name: str, dry_run: bool = False):
+def cleanup_scaffold_files(
+    target_dir: Path, project_name: str, dry_run: bool = False
+) -> None:
     """Remove arquivos e pastas criados pelo scaffold."""
 
     print(f"\n{'🔍 DRY RUN' if dry_run else '🗑️  LIMPEZA'}: {target_dir}")
