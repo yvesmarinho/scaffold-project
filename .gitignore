@@ -139,3 +139,7 @@ docs/_build/
 # graphify (grafo de conhecimento gerado)
 graphify-out/
 
+
+# Templates base (ADR-003 fatia 3): pastas espelham o destino no projeto
+# gerado (secrets/, logs/...) e não podem ser ignoradas pelas regras acima.
+!scaffold/templates/base/*/

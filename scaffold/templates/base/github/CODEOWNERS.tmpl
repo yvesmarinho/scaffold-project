@@ -1,0 +1,28 @@
+# Code Owners
+#
+# Lines starting with '#' are comments.
+# Each line is a file pattern followed by one or more owners.
+# Owners can be @username, @org/team-name, or email addresses.
+#
+# Docs: https://docs.github.com/articles/about-code-owners
+
+# Default owners for everything in the repo
+* {{OWNER}}
+
+# Security-related files require security team review
+/.github/workflows/security-*.yml {{OWNER}}
+/.github/dependabot.yml {{OWNER}}
+/SECURITY.md {{OWNER}}
+
+# Infrastructure and deployment
+/deploy/ {{OWNER}}
+/terraform/ {{OWNER}}
+/ansible/ {{OWNER}}
+/.github/workflows/ {{OWNER}}
+
+# CI/CD pipelines
+/.github/workflows/*.yml {{OWNER}}
+
+# Documentation
+/docs/ {{OWNER}}
+/*.md {{OWNER}}
