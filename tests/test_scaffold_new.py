@@ -354,7 +354,7 @@ def test_scaffold_new_git_initialized(scaffold_script: Path, temp_workspace: Pat
     Verifica:
     - .git/ existe
     - Initial commit criado
-    - Branch main existe (independe do init.defaultBranch da máquina)
+    - Branch main existe (independe do init.defaultBranch da máquina) e checkout em dev
     """
     # Executar scaffold new
     result = subprocess.run(
@@ -402,12 +402,20 @@ def test_scaffold_new_git_initialized(scaffold_script: Path, temp_workspace: Pat
     )
     assert git_branch.returncode == 0, "git branch failed"
     current_branch = git_branch.stdout.strip()
-    assert current_branch == "main", f"Branch incorreta: {current_branch}"
+    # Spec 067 / ADR-004: main existe e o checkout fica em dev (destino dos PRs)
+    assert current_branch == "dev", f"Branch incorreta: {current_branch}"
+    main_ref = subprocess.run(
+        ["git", "rev-parse", "--verify", "--quiet", "refs/heads/main"],
+        cwd=temp_workspace,
+        capture_output=True,
+        text=True,
+    )
+    assert main_ref.returncode == 0, "Branch main não existe"
 
     summary = temp_workspace / "docs" / "PROJECT_CREATION_SUMMARY.md"
     if summary.exists():
         summary_text = summary.read_text(encoding="utf-8")
-        assert "Branch: `main`" in summary_text
+        assert "Branch: `main` + `dev`" in summary_text
         assert "push -u origin master" not in summary_text
 
 
