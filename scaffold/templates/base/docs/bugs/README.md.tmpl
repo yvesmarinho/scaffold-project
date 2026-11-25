@@ -1,0 +1,33 @@
+# docs/bugs/ — Relatórios de Bugs e Correções
+
+Um arquivo por bug/erro relevante: o que falhou, por quê e como foi corrigido.
+
+## 📝 Nome do arquivo
+
+`BUG-<descricao-curta>.md` (ex.: `BUG-log-em-utc.md`)
+
+## 📋 Estrutura mínima
+
+```markdown
+# BUG — <título>
+
+**Status**: 🔴 Aberto | ✅ Corrigido em DD/MM/AAAA (branch/PR)
+
+## Sintoma
+O que se observa (mensagem de erro, comportamento).
+
+## Causa
+Raiz técnica.
+
+## Correção
+O que mudou.
+
+## Testes
+Teste que reproduz a falha (vermelho) e passa após a correção (verde).
+```
+
+## ✅ Boas práticas
+
+- Escrever o teste que reproduz o bug **antes** da correção
+- Nunca incluir tokens, senhas ou IPs internos
+- Linkar o PR/commit da correção

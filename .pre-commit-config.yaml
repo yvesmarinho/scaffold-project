@@ -25,12 +25,14 @@ repos:
       - id: detect-private-key
         name: Detect Private Keys
         exclude: ^\.secrets/
+      # scaffold/templates/base: bytes dos .tmpl são contrato (saída idêntica
+      # à das antigas strings de project.py — ADR-003 fatia 3)
       - id: trailing-whitespace
         name: Trim Trailing Whitespace
-        exclude: ^docs/SESSIONS/
+        exclude: ^(docs/SESSIONS/|scaffold/templates/base/)
       - id: end-of-file-fixer
         name: Fix End of Files
-        exclude: ^docs/SESSIONS/
+        exclude: ^(docs/SESSIONS/|scaffold/templates/base/)
 
   # black, ruff e bandit: hooks locais via `uv run` — a versão vem do uv.lock
   # (a mesma do CI) e o Dependabot atualiza um lugar só. Formato verificado por

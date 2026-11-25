@@ -1,5 +1,5 @@
 <!-- Criado em: 24/11/2026 11:19 -->
-<!-- Modificado em: 25/11/2026 15:30 -->
+<!-- Modificado em: 25/11/2026 16:03 -->
 
 # ADR-003: Separação dos templates de distribuição dos arquivos do próprio repositório
 
@@ -70,7 +70,8 @@ Por isso:
 |---|---|
 | 1. Correção do publish | ✅ 24/11/2026 (`git ls-files`, teste "o tarball roda") |
 | 2. Órfãos, constante duplicada, descritores quebrados | ✅ 25/11/2026 (ver abaixo) |
-| 3–7 | pendentes |
+| 3. Strings de `project.py` → `scaffold/templates/base/*.tmpl` | ✅ 25/11/2026 (ver abaixo) |
+| 4–7 | pendentes |
 
 Fatia 2:
 - **Constante**: removida a primeira definição de `_SECURITY_MD_WITHOUT_GITHUB`. Era idêntica à segunda, que é a que vale em runtime.
@@ -83,6 +84,17 @@ Fatia 2:
   - o guia de perfil os mostra como "pendente";
   - `--validate` dá erro quando o `templates_path` não existe e a marca está ausente.
 - **`typescript-next`**: saiu a entrada `sbom.json`, porque o arquivo é gerado por `make sbom`.
+
+Fatia 3:
+- **Extração**: 30 constantes de `project.py` (cerca de 1.670 linhas) viraram `scaffold/templates/base/**/*.tmpl`, carregadas por `lib/base_templates.py` (`load_base_template`).
+  - Erros nomeados: `TemplateNotFoundError` (template ausente) e `InvalidTemplateNameError` (nome inválido).
+  - Os nomes das constantes em `project.py` continuam os mesmos.
+- **Placeholder único**: o estilo `{{NOME}}` é renderizado por `render()` em uma só passada. `@OWNER`/`OWNER` e `{profiles_section}`/`{git_remote_section}` foram convertidos.
+- **Verificação byte a byte**: 3 projetos foram gerados antes e depois da mudança (programming/python/copilot com `--repo`, infrastructure/go/claude, analysis/other/both com `--repo`).
+  - Os 441 arquivos ficaram idênticos, fora timestamps e `target_dir`.
+  - As permissões também ficaram idênticas.
+- **Layout**: as pastas espelham o destino, sem o ponto inicial. O `.gitignore` ganhou `!scaffold/templates/base/*/`, porque `secrets/` e `logs/` eram ignorados. Um teste garante que nenhum template fique ignorado.
+- **Hooks**: `trailing-whitespace`/`end-of-file-fixer` ignoram `scaffold/templates/base/`, porque os bytes são contrato (o `Makefile.tmpl` não tem newline final).
 
 ## Pontos para decisão do usuário (resolvidos em 25/11/2026)
 - Aprovar a estrutura-alvo, em especial `runtime/` e o uso de wrappers no lugar de duplicação.

@@ -349,9 +349,10 @@ def test_ci_infra_dispara_em_main_dev_e_release(language, make_project_config):
 
 
 def test_workflows_de_seguranca_disparam_em_dev_e_release():
-    from scripts.lib import project
+    # Desde a fatia 3 do ADR-003 os workflows vivem em scaffold/templates/base/
+    from scripts.lib.project import _DEPENDENCY_REVIEW_YML, _SECURITY_SCAN_YML
 
-    src = Path(project.__file__).read_text(encoding="utf-8")
+    src = _SECURITY_SCAN_YML + _DEPENDENCY_REVIEW_YML
     assert "develop ]" not in src
     assert src.count("branches: [ main, master, dev, 'release/**' ]") >= 3
 
