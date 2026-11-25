@@ -118,8 +118,8 @@ generates:
       required: false
       when: "make sbom"
 
-    - path: ".github/prompts/domain/python-flask.prompt.md"
-      source: "scaffold/templates/speckit/prompts/domain/python-flask.prompt.md"
+    - path: ".github/skills/python-flask/SKILL.md"
+      source: "scaffold/templates/skills/python-flask/SKILL.md"
       description: "Domain profile: convenções Flask, blueprints, CSRF, security
         headers, testes"
       required: true

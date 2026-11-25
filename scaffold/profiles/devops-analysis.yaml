@@ -32,8 +32,8 @@ requires:
   # ------------------------------------------------------------------
 generates:
   files:
-    - path: ".github/prompts/domain/devops-analysis.prompt.md"
-      source: ".copilot-shared/.github/prompts/domain/devops-analysis.prompt.md"
+    - path: ".github/skills/devops-analysis/SKILL.md"
+      source: "scaffold/templates/skills/devops-analysis/SKILL.md"
       description: >
         Domain profile analysis: comportamento do Copilot para projetos de
         dados, ML, engenharia de dados, Jupyter, dbt e Airflow.

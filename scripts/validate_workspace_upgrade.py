@@ -385,7 +385,7 @@ def validate_bug17_timetracker(
 
     # Check 2: wrapper de início de sessão existe e usa o CLI canônico
     candidates = [
-        workspace / ".github" / "prompts" / "session-start.prompt.md",
+        workspace / ".github" / "skills" / "session-start" / "SKILL.md",
         workspace / ".claude" / "commands" / "session-start..md",
     ]
     prompt = next((candidate for candidate in candidates if candidate.exists()), None)

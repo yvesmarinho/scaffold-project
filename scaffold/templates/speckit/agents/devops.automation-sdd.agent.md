@@ -1,12 +1,5 @@
 ---
 description: Orchestrate objective.yaml -> mcp-questions.yaml -> MCP workflow with SDD governance and traceability.
-handoffs:
-  - label: Clarify Spec Gaps
-    agent: speckit.clarify
-    prompt: Identify missing specification details before execution
-  - label: Analyze Cross-Artifact Consistency
-    agent: speckit.analyze
-    prompt: Analyze consistency across spec, plan, and tasks artifacts
 ---
 
 ## User Input

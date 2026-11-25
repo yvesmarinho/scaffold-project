@@ -1,12 +1,5 @@
 ---
 description: Define and run functional, regression, and performance validation strategy for n8n upgrade.
-handoffs:
-  - label: Build Test Plan
-    agent: speckit.plan
-    prompt: Generate test strategy and validation gates for upgrade quality
-  - label: Create Test Tasks
-    agent: speckit.tasks
-    prompt: Generate tasks for pre-upgrade baseline and post-upgrade validation
 ---
 
 ## User Input

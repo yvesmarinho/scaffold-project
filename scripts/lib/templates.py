@@ -13,9 +13,9 @@ from .config import SCAFFOLD_VERSION, CreatedItem, ProjectConfig
 # ---------------------------------------------------------------------------
 
 DOMAIN_MAP: dict[str, str] = {
-    "programming":    "devops-programming",
+    "programming": "devops-programming",
     "infrastructure": "devops-infrastructure",
-    "analysis":       "devops-analysis",
+    "analysis": "devops-analysis",
 }
 
 # ---------------------------------------------------------------------------
@@ -29,14 +29,12 @@ _DOMAIN_P0_RULES: dict[str, str] = {
 - **P0**: Imports organizados: stdlib → third-party → interno (isort/ruff)
 - **P1**: Docstrings obrigatórias em funções públicas e classes
 - **P1**: Nenhum `TODO` ou `FIXME` deve ir para `main`/`master` sem issue registrada""",
-
     "infrastructure": """\
 - **P0**: IaC declarativo — nunca modificar estado de infraestrutura fora do código versionado
 - **P0**: Toda operação destrutiva (`destroy`, `delete`, `drop`) requer confirmação explícita do usuário
 - **P0**: Scripts de infra devem ser idempotentes — executar N vezes = mesmo resultado
 - **P1**: Secrets nunca em código IaC — usar Vault, SSM Parameter Store ou `.secrets/`
 - **P1**: Nenhuma alteração em produção sem `plan`/`dry-run` revisado primeiro""",
-
     "analysis": """\
 - **P0**: Dados brutos nunca commitados — apenas em `.data/` (gitignored) ou bucket externo
 - **P0**: Notebooks devem ter saídas limpas antes do commit (`jupyter nbconvert --clear-output`)
@@ -63,7 +61,6 @@ _LANGUAGE_CONVENTIONS: dict[str, str] = {
 | Virtual env | `.venv/` na raiz (gitignored) — criado com `uv venv` |
 | Dependências | `pyproject.toml` (PEP 621) — lock em `uv.lock` (commitar) |
 | Scripts | Executar via `uv run <script>` — não ativar `.venv` manualmente |""",
-
     "typescript": """\
 | Aspecto | Convenção |
 |---------|-----------|
@@ -75,7 +72,6 @@ _LANGUAGE_CONVENTIONS: dict[str, str] = {
 | Testes | Jest ou Vitest — cobertura mínima 80% |
 | Módulos | ESM (`"module": "ESNext"`) — sem `require()` |
 | Build | `dist/` gerado, nunca commitado |""",
-
     "go": """\
 | Aspecto | Convenção |
 |---------|-----------|
@@ -87,7 +83,6 @@ _LANGUAGE_CONVENTIONS: dict[str, str] = {
 | Testes | `go test ./...` — cobertura mínima 80% |
 | Módulos | `go.mod` na raiz — versão Go fixada |
 | Contexto | `context.Context` como primeiro arg em funções que fazem I/O |""",
-
     "other": """\
 | Aspecto | Convenção |
 |---------|-----------|
@@ -119,7 +114,6 @@ _FOLDER_STRUCTURE: dict[str, dict[str, str]] = {
 ├── .venv/                 # Virtual env (gitignored)
 ├── pyproject.toml
 └── .vscode/""",
-
         "typescript": """\
 {project_name}/
 ├── src/                    # Código TypeScript
@@ -136,7 +130,6 @@ _FOLDER_STRUCTURE: dict[str, dict[str, str]] = {
 ├── package.json
 ├── tsconfig.json
 └── .vscode/""",
-
         "go": """\
 {project_name}/
 ├── cmd/                    # Entry points (main packages)
@@ -151,7 +144,6 @@ _FOLDER_STRUCTURE: dict[str, dict[str, str]] = {
 │   └── TODO.md
 ├── go.mod
 └── .vscode/""",
-
         "other": """\
 {project_name}/
 ├── src/
@@ -162,7 +154,6 @@ _FOLDER_STRUCTURE: dict[str, dict[str, str]] = {
 ├── scripts/
 └── .vscode/""",
     },
-
     "infrastructure": {
         "_default": """\
 {project_name}/
@@ -189,7 +180,6 @@ _FOLDER_STRUCTURE: dict[str, dict[str, str]] = {
 │   └── RUNBOOK.md         # Procedures operacionais
 └── .vscode/""",
     },
-
     "analysis": {
         "_default": """\
 {project_name}/
@@ -241,8 +231,8 @@ _COPILOT_RULES_TEMPLATE = """\
 
 | Perfil | Arquivo | Tipo |
 |--------|---------|------|
-| **Principal** | `.github/prompts/domain/{domain_profile}.prompt.md` | Domínio padrão |
-| **Segurança** | `.github/prompts/domain/devops-security.prompt.md` | Transversal |
+| **Principal** | `.github/skills/{domain_profile}/SKILL.md` | Domínio padrão |
+| **Segurança** | `.github/skills/devops-security/SKILL.md` | Transversal |
 {extra_profiles_rows}
 
 Para declarar o modo ativo no início de cada sessão:
@@ -302,7 +292,7 @@ Ritual canônico: `python scripts/session-manager.py --json start`
 - [docs/INDEX.md](docs/INDEX.md)
 - [docs/TODO.md](docs/TODO.md)
 - [.copilot-rules.md](.copilot-rules.md) ← regras genéricas compartilhadas
-- [.github/prompts/domain/{domain_profile}.prompt.md](.github/prompts/domain/{domain_profile}.prompt.md)
+- [.github/skills/{domain_profile}/SKILL.md](.github/skills/{domain_profile}/SKILL.md)
 
 ---
 
@@ -325,7 +315,7 @@ applyTo: "**"
 **Domínio**: {domain} | **Linguagem**: {language}
 **Regras completas**: `.copilot-rules-{project_name}.md`
 **Rituais de sessão**: `python scripts/session-manager.py --json start` | `python scripts/session-manager.py --json end`
-**Domain Profile ativo**: `.github/prompts/domain/{domain_profile}.prompt.md`
+**Domain Profile ativo**: `.github/skills/{domain_profile}/SKILL.md`
 
 ---
 
@@ -446,6 +436,7 @@ Correto: [alternativa válida]
 # Funções públicas
 # ---------------------------------------------------------------------------
 
+
 def generate_copilot_instructions(config: ProjectConfig) -> CreatedItem:
     """
     Gera `.github/copilot-instructions.md` no projeto filho.
@@ -526,20 +517,27 @@ def generate_copilot_rules(config: ProjectConfig) -> CreatedItem:
     for profile in config.extra_profiles:
         label = profile.replace("devops-", "").capitalize()
         extra_profiles_rows += (
-            f"| **{label}** | `.github/prompts/domain/{profile}.prompt.md` | Extra |\n"
+            f"| **{label}** | `.github/skills/{profile}/SKILL.md` | Extra |\n"
         )
 
     # Estrutura de pastas: tenta domínio+linguagem, fallback para _default
     lang = config.language
     domain_folders = _FOLDER_STRUCTURE.get(config.domain, {})
-    raw_structure = domain_folders.get(lang) or domain_folders.get("_default") or (
-        f"{config.project_name}/\n├── src/\n├── tests/\n├── docs/\n└── .vscode/"
+    raw_structure = (
+        domain_folders.get(lang)
+        or domain_folders.get("_default")
+        or (f"{config.project_name}/\n├── src/\n├── tests/\n├── docs/\n└── .vscode/")
     )
     folder_structure = raw_structure.format(project_name=config.project_name)
 
     # Regras de domínio e convenções de linguagem
-    domain_rules = _DOMAIN_P0_RULES.get(config.domain, "- **P0**: [Adicionar regra crítica aqui]\n- **P1**: [Adicionar regra importante aqui]")
-    language_conventions = _LANGUAGE_CONVENTIONS.get(lang, _LANGUAGE_CONVENTIONS["other"])
+    domain_rules = _DOMAIN_P0_RULES.get(
+        config.domain,
+        "- **P0**: [Adicionar regra crítica aqui]\n- **P1**: [Adicionar regra importante aqui]",
+    )
+    language_conventions = _LANGUAGE_CONVENTIONS.get(
+        lang, _LANGUAGE_CONVENTIONS["other"]
+    )
 
     content = _COPILOT_RULES_TEMPLATE.format(
         project_name=config.project_name,
@@ -581,40 +579,64 @@ def generate_copilot_rules(config: ProjectConfig) -> CreatedItem:
 
 # Mapeamento de ordem de camada → display (espelha composer._LAYER_ORDER)
 _LAYER_SORT_ORDER: dict = {
-    "core":        0, 0:  0,
-    "layer2":      1, 1:  1, 2:  1,
-    "layer3":      2, 3:  2,
-    "layer4":      3, 4:  3,
+    "core": 0,
+    0: 0,
+    "layer2": 1,
+    1: 1,
+    2: 1,
+    "layer3": 2,
+    3: 2,
+    "layer4": 3,
+    4: 3,
     "transversal": 99,
 }
 
 _LAYER_DISPLAY: dict[int, str] = {
-    0:  "Core / Layer 1",
-    1:  "Layer 2 (Framework)",
-    2:  "Layer 3 (Platform)",
-    3:  "Layer 4 (Compliance)",
+    0: "Core / Layer 1",
+    1: "Layer 2 (Framework)",
+    2: "Layer 3 (Platform)",
+    3: "Layer 4 (Compliance)",
     99: "Transversal",
 }
 
 _TAG_REFERENCES: dict[str, list[str]] = {
-    "python":     ["[Python 3 Docs](https://docs.python.org/3)", "[uv Docs](https://docs.astral.sh/uv)"],
-    "fastapi":    ["[FastAPI Docs](https://fastapi.tiangolo.com)", "[pydantic-settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)"],
-    "flask":      ["[Flask Docs](https://flask.palletsprojects.com)", "[Flask-WTF](https://flask-wtf.readthedocs.io)"],
+    "python": [
+        "[Python 3 Docs](https://docs.python.org/3)",
+        "[uv Docs](https://docs.astral.sh/uv)",
+    ],
+    "fastapi": [
+        "[FastAPI Docs](https://fastapi.tiangolo.com)",
+        "[pydantic-settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)",
+    ],
+    "flask": [
+        "[Flask Docs](https://flask.palletsprojects.com)",
+        "[Flask-WTF](https://flask-wtf.readthedocs.io)",
+    ],
     "typescript": ["[TypeScript Handbook](https://www.typescriptlang.org/docs)"],
-    "next":       ["[Next.js Docs](https://nextjs.org/docs)"],
-    "docker":     ["[Docker Docs](https://docs.docker.com)"],
-    "k8s":        ["[Kubernetes Docs](https://kubernetes.io/docs/home/)"],
-    "helm":       ["[Helm Docs](https://helm.sh/docs)"],
-    "terraform":  ["[Terraform Docs](https://developer.hashicorp.com/terraform/docs)", "[AWS Provider Docs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)"],
-    "aws":        ["[AWS SDK Boto3](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html)"],
-    "airflow":    ["[Apache Airflow Docs](https://airflow.apache.org/docs)"],
-    "dbt":        ["[dbt Docs](https://docs.getdbt.com)"],
-    "lgpd":       ["[Lei 13.709/2018 — LGPD](https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm)", "[ANPD](https://www.gov.br/anpd/pt-br)"],
-    "soc2":       ["[SOC 2 — AICPA](https://www.aicpa.org/resources/landing/system-and-organization-controls-soc-suite-of-services)"],
-    "async":      ["[Python asyncio](https://docs.python.org/3/library/asyncio.html)"],
-    "go":         ["[Go Docs](https://go.dev/doc)"],
-    "uv":         ["[uv Docs](https://docs.astral.sh/uv)"],
-    "api":        ["[REST API Best Practices](https://restfulapi.net)"],
+    "next": ["[Next.js Docs](https://nextjs.org/docs)"],
+    "docker": ["[Docker Docs](https://docs.docker.com)"],
+    "k8s": ["[Kubernetes Docs](https://kubernetes.io/docs/home/)"],
+    "helm": ["[Helm Docs](https://helm.sh/docs)"],
+    "terraform": [
+        "[Terraform Docs](https://developer.hashicorp.com/terraform/docs)",
+        "[AWS Provider Docs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)",
+    ],
+    "aws": [
+        "[AWS SDK Boto3](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html)"
+    ],
+    "airflow": ["[Apache Airflow Docs](https://airflow.apache.org/docs)"],
+    "dbt": ["[dbt Docs](https://docs.getdbt.com)"],
+    "lgpd": [
+        "[Lei 13.709/2018 — LGPD](https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm)",
+        "[ANPD](https://www.gov.br/anpd/pt-br)",
+    ],
+    "soc2": [
+        "[SOC 2 — AICPA](https://www.aicpa.org/resources/landing/system-and-organization-controls-soc-suite-of-services)"
+    ],
+    "async": ["[Python asyncio](https://docs.python.org/3/library/asyncio.html)"],
+    "go": ["[Go Docs](https://go.dev/doc)"],
+    "uv": ["[uv Docs](https://docs.astral.sh/uv)"],
+    "api": ["[REST API Best Practices](https://restfulapi.net)"],
 }
 
 _PROFILE_GUIDE_TEMPLATE = """\
@@ -693,7 +715,9 @@ def _layer_display_name(raw_layer: object) -> str:
     return _LAYER_DISPLAY.get(_layer_order_int(raw_layer), str(raw_layer))
 
 
-def _compute_combo_slug(profiles_applied: list[str], descriptors: dict[str, dict]) -> str:
+def _compute_combo_slug(
+    profiles_applied: list[str], descriptors: dict[str, dict]
+) -> str:
     """
     Computes a filesystem-safe slug for the profile combination.
 
@@ -728,7 +752,7 @@ def _get_guide_file_entries(descriptor: dict) -> list[tuple[str, str]]:
 
     # Schema A: templates_path + templates[]
     if "templates_path" in descriptor and "templates" in descriptor:
-        for e in (descriptor.get("templates") or []):
+        for e in descriptor.get("templates") or []:
             if isinstance(e, dict) and e.get("path"):
                 entries.append((str(e["path"]), str(e.get("description", ""))))
         return entries
@@ -736,7 +760,7 @@ def _get_guide_file_entries(descriptor: dict) -> list[tuple[str, str]]:
     # Schema B: generates.files[]
     generates = descriptor.get("generates")
     if isinstance(generates, dict):
-        for f in (generates.get("files") or []):
+        for f in generates.get("files") or []:
             if isinstance(f, dict) and f.get("path"):
                 entries.append((str(f["path"]), str(f.get("description", ""))))
     return entries
@@ -854,18 +878,20 @@ def generate_profile_guide(
     seen_req: set[str] = set()
     for name in profiles_applied:
         desc = descriptors.get(name, {})
-        for req in (desc.get("requires") or []):
+        for req in desc.get("requires") or []:
             req_str = str(req).strip()
             if req_str and req_str not in seen_req:
                 seen_req.add(req_str)
                 all_requires.append(f"- `{req_str}`")
-    requires_section = "\n".join(all_requires) if all_requires else "*(sem pré-requisitos declarados)*"
+    requires_section = (
+        "\n".join(all_requires) if all_requires else "*(sem pré-requisitos declarados)*"
+    )
 
     # -- References section (from tags, deduplicated)
     all_tags: list[str] = []
     for name in profiles_applied:
         desc = descriptors.get(name, {})
-        for tag in (desc.get("tags") or []):
+        for tag in desc.get("tags") or []:
             tag_str = str(tag)
             if tag_str not in all_tags:
                 all_tags.append(tag_str)
@@ -873,7 +899,7 @@ def generate_profile_guide(
     ref_links: list[str] = []
     seen_refs: set[str] = set()
     for tag in all_tags:
-        for ref in (_TAG_REFERENCES.get(tag) or []):
+        for ref in _TAG_REFERENCES.get(tag) or []:
             if ref not in seen_refs:
                 seen_refs.add(ref)
                 ref_links.append(f"- {ref}")
