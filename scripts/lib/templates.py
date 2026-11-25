@@ -231,8 +231,8 @@ _COPILOT_RULES_TEMPLATE = """\
 
 | Perfil | Arquivo | Tipo |
 |--------|---------|------|
-| **Principal** | `.github/prompts/domain/{domain_profile}.prompt.md` | Domínio padrão |
-| **Segurança** | `.github/prompts/domain/devops-security.prompt.md` | Transversal |
+| **Principal** | `.github/skills/{domain_profile}/SKILL.md` | Domínio padrão |
+| **Segurança** | `.github/skills/devops-security/SKILL.md` | Transversal |
 {extra_profiles_rows}
 
 Para declarar o modo ativo no início de cada sessão:
@@ -292,7 +292,7 @@ Ritual canônico: `python scripts/session-manager.py --json start`
 - [docs/INDEX.md](docs/INDEX.md)
 - [docs/TODO.md](docs/TODO.md)
 - [.copilot-rules.md](.copilot-rules.md) ← regras genéricas compartilhadas
-- [.github/prompts/domain/{domain_profile}.prompt.md](.github/prompts/domain/{domain_profile}.prompt.md)
+- [.github/skills/{domain_profile}/SKILL.md](.github/skills/{domain_profile}/SKILL.md)
 
 ---
 
@@ -315,7 +315,7 @@ applyTo: "**"
 **Domínio**: {domain} | **Linguagem**: {language}
 **Regras completas**: `.copilot-rules-{project_name}.md`
 **Rituais de sessão**: `python scripts/session-manager.py --json start` | `python scripts/session-manager.py --json end`
-**Domain Profile ativo**: `.github/prompts/domain/{domain_profile}.prompt.md`
+**Domain Profile ativo**: `.github/skills/{domain_profile}/SKILL.md`
 
 ---
 
@@ -517,7 +517,7 @@ def generate_copilot_rules(config: ProjectConfig) -> CreatedItem:
     for profile in config.extra_profiles:
         label = profile.replace("devops-", "").capitalize()
         extra_profiles_rows += (
-            f"| **{label}** | `.github/prompts/domain/{profile}.prompt.md` | Extra |\n"
+            f"| **{label}** | `.github/skills/{profile}/SKILL.md` | Extra |\n"
         )
 
     # Estrutura de pastas: tenta domínio+linguagem, fallback para _default

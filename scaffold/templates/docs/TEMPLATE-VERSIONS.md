@@ -38,7 +38,7 @@
 **Layer**: core
 **Status**: ✅ stable
 **Descriptor**: [`scaffold/profiles/devops-programming.yaml`](../scaffold/profiles/devops-programming.yaml)
-**Prompt**: [`.github/prompts/domain/devops-programming.prompt.md`](../.github/prompts/domain/devops-programming.prompt.md)
+**Skill**: [`.github/skills/devops-programming/SKILL.md`](../.github/skills/devops-programming/SKILL.md)
 
 | Versão | Data | O que mudou |
 |--------|------|-------------|
@@ -55,7 +55,7 @@
 **Layer**: core
 **Status**: 🔵 stub (descriptor para resolver referências cruzadas)
 **Descriptor**: [`scaffold/profiles/devops-infrastructure.yaml`](../scaffold/profiles/devops-infrastructure.yaml)
-**Prompt**: `.github/prompts/domain/devops-infrastructure.prompt.md` _(pendente)_
+**Skill**: `.github/skills/devops-infrastructure/SKILL.md` _(pendente)_
 
 | Versão | Data | O que mudou |
 |--------|------|-------------|
@@ -72,7 +72,7 @@
 **Layer**: core
 **Status**: 🔵 stub (descriptor para resolver referências cruzadas)
 **Descriptor**: [`scaffold/profiles/devops-analysis.yaml`](../scaffold/profiles/devops-analysis.yaml)
-**Prompt**: `.github/prompts/domain/devops-analysis.prompt.md` _(pendente)_
+**Skill**: `.github/skills/devops-analysis/SKILL.md` _(pendente)_
 
 | Versão | Data | O que mudou |
 |--------|------|-------------|
@@ -89,7 +89,7 @@
 **Layer**: transversal
 **Status**: ✅ stable
 **Descriptor**: [`scaffold/profiles/devops-security.yaml`](../scaffold/profiles/devops-security.yaml)
-**Prompt**: [`.github/prompts/domain/devops-security.prompt.md`](../.github/prompts/domain/devops-security.prompt.md)
+**Skill**: [`.github/skills/devops-security/SKILL.md`](../.github/skills/devops-security/SKILL.md)
 
 | Versão | Data | O que mudou |
 |--------|------|-------------|
@@ -184,7 +184,7 @@
 **Status**: ✅ stable
 **Descriptor**: [`scaffold/profiles/python-fastapi.yaml`](../scaffold/profiles/python-fastapi.yaml)
 **Templates**: [`scaffold/templates/project/python-fastapi/`](../scaffold/templates/project/python-fastapi/)
-**Prompt**: [`.github/prompts/domain/python-fastapi.prompt.md`](../.github/prompts/domain/python-fastapi.prompt.md)
+**Skill**: [`.github/skills/python-fastapi/SKILL.md`](../.github/skills/python-fastapi/SKILL.md)
 
 | Versão | Data | O que mudou |
 |--------|------|-------------|
@@ -202,7 +202,7 @@
 **Status**: ✅ stable
 **Descriptor**: [`scaffold/profiles/python-flask.yaml`](../scaffold/profiles/python-flask.yaml)
 **Templates**: [`scaffold/templates/project/python-flask/`](../scaffold/templates/project/python-flask/)
-**Prompt**: [`.github/prompts/domain/python-flask.prompt.md`](../.github/prompts/domain/python-flask.prompt.md)
+**Skill**: [`.github/skills/python-flask/SKILL.md`](../.github/skills/python-flask/SKILL.md)
 
 | Versão | Data | O que mudou |
 |--------|------|-------------|
@@ -220,7 +220,7 @@
 **Status**: ✅ stable
 **Descriptor**: [`scaffold/profiles/typescript-next.yaml`](../scaffold/profiles/typescript-next.yaml)
 **Templates**: [`scaffold/templates/project/typescript-next/`](../scaffold/templates/project/typescript-next/)
-**Prompt**: [`.github/prompts/domain/layer2-typescript-next.prompt.md`](../.github/prompts/domain/layer2-typescript-next.prompt.md)
+**Skill**: [`.github/skills/typescript-next/SKILL.md`](../.github/skills/typescript-next/SKILL.md)
 
 | Versão | Data | O que mudou |
 |--------|------|-------------|

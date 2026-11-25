@@ -1,12 +1,5 @@
 ---
 description: Design and execute idempotent Python and Ansible automation with Specification-Driven Development (SDD).
-handoffs:
-  - label: Create Implementation Plan
-    agent: speckit.plan
-    prompt: Plan SDD-based automation for pre-check, upgrade, and post-check
-  - label: Create Execution Tasks
-    agent: speckit.tasks
-    prompt: Generate dependency-ordered DevOps tasks for automated upgrade
 ---
 
 ## User Input

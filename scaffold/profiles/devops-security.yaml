@@ -34,8 +34,8 @@ requires:
   # ------------------------------------------------------------------
 generates:
   files:
-    - path: ".github/prompts/domain/devops-security.prompt.md"
-      source: ".copilot-shared/.github/prompts/domain/devops-security.prompt.md"
+    - path: ".github/skills/devops-security/SKILL.md"
+      source: "scaffold/templates/skills/devops-security/SKILL.md"
       description: >
         Domain profile transversal: comportamento do Copilot para revisões de
         segurança, IaC hardening, gestão de segredos, threat modeling e

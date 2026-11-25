@@ -97,15 +97,9 @@ _SETTINGS_GLOBAL: dict = {
     # Idioma e regionalização
     "locale.language": "pt-br",
     # GitHub Copilot e MCP
-    "chat.mcp.autostart": True,
-    "github.copilot.chat.enableMcp": True,
-    "chat.promptFilesRecommendations": {
-        "speckit.constitution": True,
-        "speckit.specify": True,
-        "speckit.plan": True,
-        "speckit.tasks": True,
-        "speckit.implement": True,
-    },
+    # Enum documentado: never | onlyNew | newAndOutdated (default do VS Code).
+    # github.copilot.chat.enableMcp não existe mais; prompt files não são gerados.
+    "chat.mcp.autostart": "newAndOutdated",
     "chat.tools.terminal.autoApprove": {
         ".specify/scripts/bash/": True,
         ".specify/scripts/powershell/": True,

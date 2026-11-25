@@ -8,7 +8,7 @@ applyTo: "**"
 **Domínio**: programming | **Linguagem**: python
 **Regras completas**: `.copilot-rules-test-project.md`
 **Rituais de sessão**: `python scripts/session-manager.py --json start` | `python scripts/session-manager.py --json end`
-**Domain Profile ativo**: `.github/prompts/domain/devops-programming.prompt.md`
+**Domain Profile ativo**: `.github/skills/devops-programming/SKILL.md`
 
 ---
 

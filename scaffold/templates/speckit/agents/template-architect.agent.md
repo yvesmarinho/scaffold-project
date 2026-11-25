@@ -6,19 +6,6 @@ description: >
   Specialist (backend/data/cloud) e Release Maintainer. Use para analisar o estado
   do template, debater melhorias, gerar planos de implementação e garantir que o
   core permaneça agnóstico enquanto os perfis crescem.
-handoffs:
-  - label: Gerar Spec da Funcionalidade
-    agent: speckit.specify
-    prompt: Gere a spec para a funcionalidade identificada neste debate
-  - label: Gerar Plano Técnico
-    agent: speckit.plan
-    prompt: Gere o plano técnico para as melhorias identificadas
-  - label: Gerar Tarefas
-    agent: speckit.tasks
-    prompt: Gere a lista de tarefas para execução das melhorias
-  - label: Executar Implementação
-    agent: speckit.implement
-    prompt: Execute a implementação conforme o plano gerado
 ---
 
 # 🏛️ Template Architect Agent
@@ -145,10 +132,10 @@ Avaliar por perfil gerado:
 #### Perfis Existentes
 | Perfil | Arquivo | Status |
 |--------|---------|--------|
-| `devops-programming` | `.github/prompts/domain/devops-programming.prompt.md` | ✅ |
-| `devops-infrastructure` | `.github/prompts/domain/devops-infrastructure.prompt.md` | ✅ |
-| `devops-analysis` | `.github/prompts/domain/devops-analysis.prompt.md` | ✅ |
-| `devops-security` | `.github/prompts/domain/devops-security.prompt.md` | ✅ |
+| `devops-programming` | `.github/skills/devops-programming/SKILL.md` | ✅ |
+| `devops-infrastructure` | `.github/skills/devops-infrastructure/SKILL.md` | ✅ |
+| `devops-analysis` | `.github/skills/devops-analysis/SKILL.md` | ✅ |
+| `devops-security` | `.github/skills/devops-security/SKILL.md` | ✅ |
 
 #### Perfis Faltando (por camada)
 ```

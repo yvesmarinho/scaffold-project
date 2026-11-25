@@ -107,25 +107,25 @@ def _build_manifest(cfg: ProjectConfig) -> list[dict]:
         {
             "step": "copy_speckit",
             "op": "copy",
-            "path": f".github/prompts/domain/{domain_profile}.prompt.md",
-            "desc": "Domain profile prompt",
+            "path": f".github/skills/{domain_profile}/SKILL.md",
+            "desc": "Domain profile (skill)",
         },
         {
             "step": "copy_speckit",
             "op": "copy",
-            "path": ".github/prompts/domain/devops-security.prompt.md",
+            "path": ".github/skills/devops-security/SKILL.md",
             "desc": "Security profile (transversal)",
         },
         {
             "step": "copy_speckit",
             "op": "copy",
-            "path": ".github/prompts/session-start.prompt.md",
+            "path": ".github/skills/session-start/SKILL.md",
             "desc": "Ritual de início de sessão",
         },
         {
             "step": "copy_speckit",
             "op": "copy",
-            "path": ".github/prompts/session-end.prompt.md",
+            "path": ".github/skills/session-end/SKILL.md",
             "desc": "Ritual de encerramento",
         },
         {

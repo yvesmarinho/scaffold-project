@@ -2086,8 +2086,7 @@ DIRS_BASE = [
     "docs/templates",
     ".github",
     ".github/agents",
-    ".github/prompts",
-    ".github/prompts/domain",
+    ".github/skills",
     ".git-hooks",
     ".secrets",
     ".vscode",
@@ -2303,6 +2302,13 @@ def _prepare_content(template: str, file_rel: str, config: ProjectConfig) -> str
 
 # Diretório de templates customizados do SpecKit (separado do projeto DEV)
 _SPECKIT_TEMPLATES = _TEMPLATE_ROOT / "scaffold" / "templates" / "speckit"
+_SKILLS_TEMPLATES = _TEMPLATE_ROOT / "scaffold" / "templates" / "skills"
+# Rituais de sessão viram skills no Copilot (Claude usa .claude/commands/)
+_SESSION_SKILLS: tuple[str, ...] = (
+    "session-start",
+    "session-end",
+    "session-start-first",
+)
 
 # Mapeamento ai_assistant → integração(ões) do specify CLI
 _AI_TO_SPECIFY: dict[str, list[str]] = {
@@ -2400,9 +2406,9 @@ def copy_speckit(config: ProjectConfig, force: bool = False) -> list[CreatedItem
     via `specify init --here --force --integration <IA>`. Esta função NÃO copia
     nenhum asset do SpecKit — apenas os perfis de domínio do scaffold próprio.
 
-    Perfis de domínio vão para .github/prompts/domain/ e são usados por TODAS as IAs:
-      - Claude: session-start referencia .github/prompts/domain/ diretamente
-      - Copilot: referenciados via .github/prompts/
+    Perfis de domínio vão para .github/skills/<perfil>/SKILL.md e são usados por TODAS as IAs:
+      - Claude: session-start referencia .github/skills/<perfil>/SKILL.md diretamente
+      - Copilot: carregados como agent skills
 
     Compõe perfis (de scaffold/profiles/):
       - Perfil de domínio principal (DOMAIN_DEFAULT_PROFILES[cfg.domain])
@@ -2454,7 +2460,7 @@ def copy_speckit(config: ProjectConfig, force: bool = False) -> list[CreatedItem
 
 def copy_custom_agents(config: ProjectConfig, force: bool = False) -> list[CreatedItem]:
     """
-    Copia agents customizados do scaffold para o projeto gerado, conforme a IA selecionada.
+    Copia agents customizados (e, no Copilot, as skills de sessão) para o projeto gerado.
 
     Esta etapa é independente do SpecKit:
       - Agents `speckit.*` são gerenciados pelo `specify init` e NÃO são copiados aqui.
@@ -2493,6 +2499,17 @@ def copy_custom_agents(config: ProjectConfig, force: bool = False) -> list[Creat
         if result.status == "error":
             errors.append(str(src_file))
         results.append(result)
+
+    # Rituais de sessão como agent skills (Copilot P0, harness só Copilot).
+    # Claude já os recebe em .claude/commands/ via copy_claude_config().
+    if config.ai_assistant in ("copilot", "both"):
+        for skill_name in _SESSION_SKILLS:
+            src_file = _SKILLS_TEMPLATES / skill_name / "SKILL.md"
+            dst_file = base / ".github" / "skills" / skill_name / "SKILL.md"
+            result = _copy_file(src_file, dst_file, force=force)
+            if result.status == "error":
+                errors.append(str(src_file))
+            results.append(result)
 
     if errors:
         log.warning(
@@ -3204,9 +3221,9 @@ def _copy_domain_profile(
     errors: list[str],
     force: bool = False,
 ) -> CreatedItem:
-    """Copia um perfil de domínio individual de scaffold/templates/speckit/prompts/domain/."""
-    src_file = _SPECKIT_TEMPLATES / "prompts" / "domain" / f"{profile_name}.prompt.md"
-    dst_file = base / ".github" / "prompts" / "domain" / f"{profile_name}.prompt.md"
+    """Copia um perfil de domínio (skill) de scaffold/templates/skills/<perfil>/."""
+    src_file = _SKILLS_TEMPLATES / profile_name / "SKILL.md"
+    dst_file = base / ".github" / "skills" / profile_name / "SKILL.md"
     result = _copy_file(src_file, dst_file, force=force)
     if result.status == "error":
         errors.append(str(src_file))

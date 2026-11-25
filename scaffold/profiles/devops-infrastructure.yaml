@@ -33,8 +33,8 @@ requires:
 # ------------------------------------------------------------------
 generates:
   files:
-    - path: ".github/prompts/domain/devops-infrastructure.prompt.md"
-      source: ".copilot-shared/.github/prompts/domain/devops-infrastructure.prompt.md"
+    - path: ".github/skills/devops-infrastructure/SKILL.md"
+      source: "scaffold/templates/skills/devops-infrastructure/SKILL.md"
       description: >
         Domain profile infrastructure: comportamento do Copilot para IaC,
         Kubernetes, Helm, Terraform e hardening de pipelines de infra.

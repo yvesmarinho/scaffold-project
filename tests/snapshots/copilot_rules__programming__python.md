@@ -23,8 +23,8 @@
 
 | Perfil | Arquivo | Tipo |
 |--------|---------|------|
-| **Principal** | `.github/prompts/domain/devops-programming.prompt.md` | Domínio padrão |
-| **Segurança** | `.github/prompts/domain/devops-security.prompt.md` | Transversal |
+| **Principal** | `.github/skills/devops-programming/SKILL.md` | Domínio padrão |
+| **Segurança** | `.github/skills/devops-security/SKILL.md` | Transversal |
 
 
 Para declarar o modo ativo no início de cada sessão:
@@ -113,7 +113,7 @@ test-project/
 - [docs/INDEX.md](docs/INDEX.md)
 - [docs/TODO.md](docs/TODO.md)
 - [.copilot-rules.md](.copilot-rules.md) ← regras genéricas compartilhadas
-- [.github/prompts/domain/devops-programming.prompt.md](.github/prompts/domain/devops-programming.prompt.md)
+- [.github/skills/devops-programming/SKILL.md](.github/skills/devops-programming/SKILL.md)
 
 ---
 

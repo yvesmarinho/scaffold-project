@@ -27,7 +27,7 @@
 - [x] ~~**Bug `--publish`**: tarball sem `scripts/lib/flows/` e `scripts/lib/ai/` (glob não recursivo) → pacote distribuído não roda — fatia 1 do ADR-003~~: ✅ 24/11 — gerador completo no tarball (407 → 489 arquivos), caches excluídos; teste de aceitação compara projeto gerado pelo tarball vs. repo — `docs/bugs/BUG-publish-tarball-incompleto.md`
 - [x] ~~Shell integration VS Code (zsh)~~: ✅ 24/11 — `terminal.integrated.shellIntegration.*` no settings.json gerado + guia de fallback (PR #52)
 - [x] ~~Analisar docs VS Code Copilot (instructions, skills, custom agents, MCP)~~: ✅ 24/11 — `docs/analysis/ANALISE-vscode-copilot-customization.md` (PR #53)
-- [ ] Copilot P0 (da análise): remover handoffs para `speckit.*` inexistentes; limpar `chat.promptFilesRecommendations`; migrar prompts de sessão/perfis para `.github/skills/` — depende das decisões pendentes listadas na análise
+- [x] ~~Copilot P0 (da análise): remover handoffs para `speckit.*` inexistentes; limpar `chat.promptFilesRecommendations`; migrar prompts de sessão/perfis para `.github/skills/` — depende das decisões pendentes listadas na análise~~: ✅ 25/11 — decisão "só Copilot": skills em `scaffold/templates/skills/`, agents `speckit.*` e handoffs removidos, `chat.mcp.autostart: newAndOutdated` — `docs/adr/ADR-005-copilot-somente-skills.md`
 
 ---
 

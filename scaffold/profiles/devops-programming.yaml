@@ -53,26 +53,26 @@ generates:
       required: true
       when: null
 
-    - path: ".github/prompts/session-start.prompt.md"
-      source: ".copilot-shared/.github/prompts/session-start.prompt.md"
+    - path: ".github/skills/session-start/SKILL.md"
+      source: "scaffold/templates/skills/session-start/SKILL.md"
       description: "Ritual de início de sessão: carrega contexto, verifica .secrets/, abre TODOs"
       required: true
       when: null
 
-    - path: ".github/prompts/session-end.prompt.md"
-      source: ".copilot-shared/.github/prompts/session-end.prompt.md"
+    - path: ".github/skills/session-end/SKILL.md"
+      source: "scaffold/templates/skills/session-end/SKILL.md"
       description: "Ritual de encerramento: gera relatório, atualiza TODO/INDEX, comita docs"
       required: true
       when: null
 
-    - path: ".github/prompts/domain/devops-programming.prompt.md"
-      source: ".copilot-shared/.github/prompts/domain/devops-programming.prompt.md"
+    - path: ".github/skills/devops-programming/SKILL.md"
+      source: "scaffold/templates/skills/devops-programming/SKILL.md"
       description: "Domain profile: comportamento do Copilot no modo PROGRAMMING"
       required: true
       when: null
 
-    - path: ".github/prompts/domain/devops-security.prompt.md"
-      source: ".copilot-shared/.github/prompts/domain/devops-security.prompt.md"
+    - path: ".github/skills/devops-security/SKILL.md"
+      source: "scaffold/templates/skills/devops-security/SKILL.md"
       description: "Domain profile transversal: controles de segurança (aplicado sempre)"
       required: true
       when: null

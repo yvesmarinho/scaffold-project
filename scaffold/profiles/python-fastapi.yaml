@@ -116,8 +116,8 @@ generates:
       required: false
       when: "make sbom"
 
-    - path: ".github/prompts/domain/python-fastapi.prompt.md"
-      source: "scaffold/templates/speckit/prompts/domain/python-fastapi.prompt.md"
+    - path: ".github/skills/python-fastapi/SKILL.md"
+      source: "scaffold/templates/skills/python-fastapi/SKILL.md"
       description: "Domain profile: convenções FastAPI, padrões de teste, segurança"
       required: true
       when: null

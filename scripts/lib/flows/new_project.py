@@ -65,7 +65,7 @@ def flow_new_project(args: argparse.Namespace) -> int:
     console.print("  [blue]🤖 Inicializando SpecKit via specify CLI...[/blue]")
     results.extend(project.run_speckit_init(cfg))
 
-    # 5a. Perfis de domínio (scaffold) para Copilot — .github/prompts/domain/
+    # 5a. Perfis de domínio (scaffold) como skills — .github/skills/<perfil>/
     console.print("  [blue]🤖 Compondo perfis de domínio...[/blue]")
     results.extend(project.copy_speckit(cfg))
 
