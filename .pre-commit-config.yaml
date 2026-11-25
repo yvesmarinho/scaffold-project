@@ -66,3 +66,13 @@ repos:
         types: [python]
         exclude: ^tests/
         require_serial: true
+
+      # Tipagem: alvo e regras em [tool.mypy] (pyproject.toml). Checa o
+      # projeto inteiro (pass_filenames: false) — erro de tipo é cross-file.
+      - id: mypy
+        name: Mypy Type Checker
+        entry: uv run mypy
+        language: system
+        types: [python]
+        pass_filenames: false
+        require_serial: true

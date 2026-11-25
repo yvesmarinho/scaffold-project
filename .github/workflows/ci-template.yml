@@ -117,6 +117,9 @@ jobs:
       - name: Compile scaffold.py (syntax check)
         run: uv run python -m py_compile scripts/scaffold.py && echo "scaffold.py OK"
 
+      - name: Type check (mypy)
+        run: uv run mypy
+
       - name: Validate scaffold templates (YAML/JSON, Go templates, objetivo v2)
         run: uv run python scripts/validate-templates.py
 
