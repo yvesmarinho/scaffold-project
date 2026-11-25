@@ -213,6 +213,61 @@ def tag_scaffold(config: ProjectConfig, version: str = "1.0.0") -> CreatedItem:
         )
 
 
+def create_dev_branch(config: ProjectConfig) -> CreatedItem:
+    """
+    Cria a branch ``dev`` a partir da ``main`` e faz checkout nela (spec 067).
+
+    Modelo dos projetos gerados: PRs de feature → ``dev``; ``dev`` → ``main``
+    só com CI verde; fases em ``release/faseN``.
+
+    - Sem repositório ou sem commit na ``main``: ``skipped``.
+    - ``dev`` já existente: ``skipped`` (idempotente).
+    """
+    target = config.project_path
+    if not is_git_repo(target):
+        return CreatedItem(
+            path=target / ".git",
+            kind="git",
+            status="skipped",
+            message="repositório não inicializado",
+        )
+
+    def _git(*args: str) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            [_GIT, *args], cwd=target, capture_output=True, timeout=10, check=False
+        )
+
+    if _git("rev-parse", "--verify", "--quiet", "refs/heads/main").returncode != 0:
+        return CreatedItem(
+            path=target / ".git",
+            kind="git",
+            status="skipped",
+            message="branch dev não criada: main sem commit",
+        )
+    if _git("rev-parse", "--verify", "--quiet", "refs/heads/dev").returncode == 0:
+        return CreatedItem(
+            path=target / ".git",
+            kind="git",
+            status="skipped",
+            message="branch dev já existe",
+        )
+
+    result = _git("checkout", "-b", "dev", "main")
+    if result.returncode != 0:
+        return CreatedItem(
+            path=target / ".git",
+            kind="git",
+            status="error",
+            message=result.stderr.decode(errors="replace").strip(),
+        )
+    return CreatedItem(
+        path=target / ".git",
+        kind="git",
+        status="created",
+        message="branch dev criada a partir da main (checkout em dev)",
+    )
+
+
 # ---------------------------------------------------------------------------
 # Auxiliar interno
 # ---------------------------------------------------------------------------

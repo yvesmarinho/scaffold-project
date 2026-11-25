@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from .. import git, project, vscode
+from .. import git, github_setup, project, vscode
 from ..ai import resolve_plugins
 from ..config import DOMAIN_DEFAULT_PROFILES, SPECKIT_TRANSVERSAL_PROFILES
 from ..project import write_scaffold_state
@@ -139,6 +139,13 @@ def flow_new_project(args: argparse.Namespace) -> int:
     # 11. Tag scaffold-v* (IMP-62)
     console.print("  [blue]🏷️  Criando tag de versão scaffold...[/blue]")
     results.append(git.tag_scaffold(cfg, version="1.0.0"))
+
+    # 12. Branches main/dev/release (spec 067, ADR-004): dev local + GitHub opcional
+    console.print("  [blue]🌿 Criando branch dev...[/blue]")
+    results.append(git.create_dev_branch(cfg))
+    if cfg.github_repo and not getattr(args, "no_github_setup", False):
+        console.print("  [blue]🛡️  Configurando branches no GitHub (gh)...[/blue]")
+        results.append(github_setup.configure_github_branches(cfg))
 
     # Resumo final (com logging automático se não for --no-log)
     save_log = not getattr(args, "no_log", False)
