@@ -7,12 +7,11 @@ scaffold.py via flag --publish.
 
 Arquivos incluídos no release:
   scripts/*.py, scripts/*.sh, scripts/lib/**/*.py, scripts/bin/*, scripts/git-hooks/*
-  fontes que o gerador copia do repo: .claude/commands, .claude/skills,
-  .github/copilot-instructions.md, .specify/templates, docs/guides/BRANCH_PROTECTION_SETUP.md
   scaffold/profiles/*.yaml + scaffold/profiles/README.md
   scaffold/templates/**/* + .github/prompts/**/*
-  .github/workflows/*.yml + .github/ISSUE_TEMPLATE/**/*
-  .copilot-rules.md (se existir)
+  .github/workflows/*.yml
+  (configs do repo como .claude/ e .specify/ não entram: as versões de
+  distribuição ficam em scaffold/templates/ — ADR-003 fatia 5)
   Makefile, README.md, CHANGELOG.md, pyproject.toml, pytest.ini
   tests/*.py + tests/snapshots/*.md
 
@@ -54,19 +53,11 @@ _INCLUDE_PATTERNS: list[str] = [
     "scripts/lib/**/*.py",
     "scripts/bin/*",
     "scripts/git-hooks/*",
-    # Fontes que o gerador lê do próprio repositório (ver ADR-003)
-    ".claude/commands/**/*",
-    ".claude/skills/**/*",
-    ".github/copilot-instructions.md",
-    ".specify/templates/**/*",
-    "docs/guides/BRANCH_PROTECTION_SETUP.md",
     "scaffold/profiles/*.yaml",
     "scaffold/profiles/README.md",
     "scaffold/templates/**/*",
     ".github/prompts/**/*",
     ".github/workflows/*.yml",
-    ".github/ISSUE_TEMPLATE/**/*",
-    ".copilot-rules.md",
     "Makefile",
     "README.md",
     "CHANGELOG.md",

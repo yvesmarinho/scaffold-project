@@ -3,7 +3,7 @@
 NOME: test_publish_somente_versionados.py
 TITULO: --publish empacota só arquivos versionados quando a raiz é um repo git
 DATA: 24/11/2026 12:42
-MODIFICADO: 24/11/2026 15:00
+MODIFICADO: 26/11/2026 11:38
 VERSÃO: 1.0.0
 DEPEND: pytest, git
 STATUS: DEV
@@ -48,8 +48,8 @@ def _arvore(root: Path) -> Path:
     for rel in (
         "scripts/scaffold.py",
         "scripts/lib/flows/x.py",
-        ".claude/skills/oficial/SKILL.md",
-        ".claude/skills/rascunho/SKILL.md",
+        "scaffold/templates/claude/skills/oficial/SKILL.md",
+        "scaffold/templates/claude/skills/rascunho/SKILL.md",
         "scripts/lib/segredo_local.py",
     ):
         (root / rel).parent.mkdir(parents=True, exist_ok=True)
@@ -70,7 +70,7 @@ def repo(tmp_path: Path) -> Path:
         "add",
         "scripts/scaffold.py",
         "scripts/lib/flows/x.py",
-        ".claude/skills/oficial/SKILL.md",
+        "scaffold/templates/claude/skills/oficial/SKILL.md",
     )
     _git(root, "commit", "-q", "-m", "init")
     return root
@@ -81,13 +81,13 @@ def test_repo_git_inclui_versionados(repo: Path) -> None:
     assert {
         "scripts/scaffold.py",
         "scripts/lib/flows/x.py",
-        ".claude/skills/oficial/SKILL.md",
+        "scaffold/templates/claude/skills/oficial/SKILL.md",
     } <= rel
 
 
 def test_repo_git_exclui_nao_versionados(repo: Path) -> None:
     rel = _rel(repo)
-    assert ".claude/skills/rascunho/SKILL.md" not in rel
+    assert "scaffold/templates/claude/skills/rascunho/SKILL.md" not in rel
     assert "scripts/lib/segredo_local.py" not in rel
 
 
@@ -99,9 +99,9 @@ def test_staged_mas_nao_commitado_entra(repo: Path) -> None:
 
 def test_fora_de_repo_git_mantem_glob(tmp_path: Path) -> None:
     root = _arvore(tmp_path / "extraido")
-    assert ".claude/skills/rascunho/SKILL.md" in _rel(root)
+    assert "scaffold/templates/claude/skills/rascunho/SKILL.md" in _rel(root)
 
 
 def test_git_indisponivel_mantem_glob(repo: Path) -> None:
     with patch.object(publish.subprocess, "run", side_effect=FileNotFoundError("git")):
-        assert ".claude/skills/rascunho/SKILL.md" in _rel(repo)
+        assert "scaffold/templates/claude/skills/rascunho/SKILL.md" in _rel(repo)

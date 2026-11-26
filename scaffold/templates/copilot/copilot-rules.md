@@ -1,0 +1,320 @@
+# GitHub Copilot — Regras Comportamentais
+
+> Este arquivo é genérico — compartilhado via `.copilot-shared/`. Para regras específicas do projeto ativo, ver `.copilot-rules-[projeto].md`.
+
+**Status:** ATIVO — Aplicar em todas as sessões
+**Última atualização:** 2026-11-25
+
+> **Rituais de sessão**: `python scripts/session-manager.py start --json` (início) | `python scripts/session-manager.py start-first --json` (1ª vez) | `python scripts/session-manager.py end --json` (encerramento)
+> **Domain Profiles** (skills): `.github/skills/devops-programming/SKILL.md` | `.github/skills/devops-infrastructure/SKILL.md` | `.github/skills/devops-analysis/SKILL.md`
+
+---
+
+## 1. Ferramentas de Arquivo (P0 — CRÍTICO)
+
+### ❌ PROIBIDO — Nunca criar ou editar arquivos via terminal:
+
+```bash
+cat > arquivo.txt << 'EOF'   # ❌ heredoc
+conteúdo
+EOF
+echo "conteúdo" >> arquivo.txt    # ❌ echo redirect
+echo "texto" | tee arquivo.txt    # ❌ echo pipe
+```
+
+### ✅ OBRIGATÓRIO — Use as ferramentas nativas:
+
+| Operação | Ferramenta |
+|----------|------------|
+| Criar arquivo novo | `create_file` |
+| Editar arquivo existente | `replace_string_in_file` |
+| Múltiplas edições | `multi_replace_string_in_file` |
+
+**Regra de contexto**: em `replace_string_in_file`, incluir no mínimo 3 linhas antes e depois do trecho editado para identificação única.
+
+---
+
+## 2. Ferramentas Nativas VS Code — Nunca CLI (P0 — CRÍTICO)
+
+### ❌ PROIBIDO — Nunca usar terminal para ler, buscar ou listar arquivos:
+
+| Operação | ❌ CLI Proibido | ✅ Ferramenta Correta |
+|----------|----------------|----------------------|
+| Ler conteúdo de arquivo | `cat arquivo` | `read_file` |
+| Buscar texto/padrão | `grep -rn "padrão"` | `grep_search` |
+| Encontrar arquivos por nome | `find . -name "*.py"` | `file_search` |
+| Busca semântica no workspace | `grep -r "conceito"` | `semantic_search` |
+| Listar diretório | `ls -la pasta/` | `list_dir` |
+| Verificar erros de código | `python -m py_compile` | `get_errors` |
+
+`run_in_terminal` é permitido **apenas** para: `git`, `make`, `pytest`, `pip install`, `docker`, `systemctl` — nunca para operações sobre arquivos.
+
+---
+
+## 3. Operações de Arquivo — Python stdlib (P0)
+
+**Regra universal — sem exceções de quantidade**:
+> Qualquer operação sobre arquivos ou diretórios (mover, copiar, renomear, verificar, excluir) deve usar **Python com bibliotecas embutidas** (`shutil`, `pathlib`, `logging`) — nunca CLI (`mv`, `cp`, `rm`, `mkdir`), mesmo para 1 arquivo.
+
+### ❌ PROIBIDO — Nunca operações de arquivo via terminal:
+
+```bash
+mv arquivo.md destino/      # ❌ mv
+cp -r src/ dst/             # ❌ cp
+rm arquivo.txt              # ❌ rm
+mkdir -p pasta/sub          # ❌ mkdir
+```
+
+### ✅ OBRIGATÓRIO — Python stdlib com log por operação:
+
+**Padrão mínimo** (qualquer operação):
+```python
+import shutil, logging
+from pathlib import Path
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+log = logging.getLogger(__name__)
+
+src = Path("/projeto/origem/arquivo.md")
+dst = Path("/projeto/destino/arquivo.md")
+dst.parent.mkdir(parents=True, exist_ok=True)
+
+if src.exists():
+    shutil.move(src, dst)          # mover
+    # shutil.copy2(src, dst)       # copiar (preserva metadados)
+    log.info("✅ %s → %s", src, dst)
+else:
+    log.warning("⚠️  não encontrado: %s", src)
+```
+
+**Padrão para múltiplos arquivos** — manifesto JSON + loop:
+
+Passo 1 — Criar manifesto via `create_file`:
+```json
+[
+  { "name": "arquivo.md", "from": "origem/", "to": "destino/" }
+]
+```
+
+Passo 2 — Executar via `mcp_pylance_mcp_s_pylanceRunCodeSnippet` (sem shell, sem arquivos temp):
+```python
+import shutil, logging
+from pathlib import Path
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+log = logging.getLogger(__name__)
+
+root = Path("/caminho/do/projeto")
+ops  = [{"name": "arquivo.md", "from": "origem/", "to": "destino/"}]
+erros = []
+
+for op in ops:
+    src = root / op["from"] / op["name"]
+    dst = root / op["to"]  / op["name"]
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    if src.exists():
+        shutil.move(src, dst)
+        log.info("✅ %s  %s → %s", op['name'], op['from'], op['to'])
+    else:
+        log.warning("⚠️  não encontrado: %s", src)
+        erros.append(str(src))
+
+if erros:
+    log.error("❌ %d erro(s): %s", len(erros), erros)
+else:
+    log.info("🟢 Todas as operações concluídas sem erros.")
+```
+
+**Bibliotecas stdlib permitidas**: `shutil`, `pathlib`, `logging`, `json`, `os`, `stat`, `hashlib`, `datetime`
+**Bibliotecas externas**: apenas se já são dependências declaradas do projeto (ex: `rich` no scaffold).
+
+---
+
+## 4. Git Workflow (P0 — CRÍTICO)
+
+### ❌ PROIBIDO:
+```bash
+git commit -m "mensagem"         # ❌ nunca direto
+cat << EOF > /tmp/commit.txt     # ❌ heredoc
+```
+
+### ✅ OBRIGATÓRIO — Criar arquivo de mensagem + usar script:
+
+**Regra de tamanho**:
+- Mensagem ≤ 5 linhas → pode usar `echo` ou `python3 -c` no terminal
+- Mensagem ≥ 6 linhas → **OBRIGATÓRIO** usar `create_file`
+
+**Mensagem curta (≤ 5 linhas)**:
+```bash
+echo "fix: Corrigir typo em README" > /tmp/commit.txt
+./scripts/git-commit-with-file.sh /tmp/commit.txt
+```
+
+**Mensagem longa (≥ 6 linhas)**:
+```python
+# usar create_file tool
+create_file("/tmp/commit.txt", """feat(escopo): Descrição curta
+
+- Detalhe 1
+- Detalhe 2
+- Detalhe 3
+
+Related: docs/arquivo.md
+""")
+```
+
+### Conventional Commits — Tipos
+
+| Tipo | Uso |
+|------|-----|
+| `feat` | Nova funcionalidade |
+| `fix` | Correção de bug |
+| `docs` | Documentação |
+| `refactor` | Refatoração sem mudança de comportamento |
+| `test` | Testes |
+| `chore` | Manutenção, dependências |
+| `perf` | Performance |
+| `style` | Formatação |
+| `ci` | CI/CD |
+
+### Formato padrão:
+```
+<tipo>(<escopo>): <descrição curta>
+
+<corpo: o que mudou e por quê>
+
+<footer: Related, Fixes #N>
+```
+
+---
+
+## 5. Organização de Pastas (P1)
+
+| Tipo de arquivo | Localização |
+|-----------------|-------------|
+| Registro de sessão | vault Obsidian `claude_memory` → `projects/<projeto>/sessions/YYYY-MM-DD.md` (via MCP `obsidian-rest`) |
+| Documentação técnica | `docs/` |
+| Código fonte Python | `src/` |
+| Scripts Python/Shell | `scripts/` |
+| Testes | `tests/` |
+| Índice do projeto | `INDEX.md` (raiz) |
+| Configurações | raiz (`.gitignore`, `pyproject.toml`, etc.) |
+
+### ❌ NUNCA:
+- Criar arquivos de sessão/documentação na raiz do projeto
+- Criar arquivos em `.specify/` — **uso exclusivo do SpecKit, nunca modificar manualmente**
+- Criar documentação fora de `docs/`
+
+> **Nota**: registros de sessão **não** ficam no repositório — nunca criar `docs/SESSIONS/`.
+
+### 📄 Documentos Incrementais — Nunca Substituir (P1)
+
+Os arquivos abaixo são **registros históricos acumulativos**. Sempre **acrescentar** informações novas preservando o conteúdo anterior. Nunca sobrescrever nem truncar.
+
+| Arquivo | Comportamento |
+|---------|---------------|
+| `README.md` | Atualizar seções existentes; nunca apagar seções anteriores |
+| `docs/INDEX.md` | Adicionar entradas novas; manter histórico de sessões |
+| `docs/TODO.md` | Marcar itens como `[x]`; adicionar novos itens; nunca remover itens concluídos |
+| Vault `projects/<projeto>/sessions/YYYY-MM-DD.md` | Append de blocos `---` por atividade via `obsidian_append_content`; nunca reescrever do zero |
+| Vault `projects/<projeto>.md` | Edição pontual via `obsidian_patch_content`; nunca sobrescrever a nota inteira |
+
+**Regra prática**: ao editar com `replace_string_in_file`, sempre substituir um trecho **específico e localizado** — nunca o documento inteiro. Ao adicionar conteúdo novo, usar append no final da seção correspondente.
+
+---
+
+## 6. Nomenclatura (P1)
+
+| Tipo | Padrão | Exemplo |
+|------|--------|---------|
+| Arquivos Python | `snake_case.py` | `project_config.py` |
+| Arquivos Markdown | `SCREAMING_SNAKE.md` ou `kebab-case.md` | `CONTRIBUTING.md` |
+| Arquivos JSON | `kebab-case.json` | `mcp-config.json` |
+| Arquivos Shell | `kebab-case.sh` | `git-commit-with-file.sh` |
+| Branches feat | `NNN-nome-da-feature` | `001-scaffold-py` |
+| Branches fix | `fix-descricao` | `fix-symlink-broken` |
+| Branches docs | `docs-descricao` | `docs-readme-update` |
+
+---
+
+## 7. Session Documentation (P1)
+
+### 🎯 Objetivo
+
+Registrar atividades significativas da sessão de forma incremental, estruturada e segura
+no **vault Obsidian `claude_memory`**, usando **exclusivamente o MCP `obsidian-rest`**.
+Nada de documentação de sessão dentro do repositório.
+
+### ✅ OBRIGATÓRIO — Documentar Atividades Significativas
+
+Ao completar uma tarefa significativa (≥ 10 linhas de código, decisão técnica ou mudança
+arquitetural), acrescentar um bloco à nota da sessão. Os caminhos vêm do campo `vault`
+de `python scripts/session-manager.py --json start|status|end`:
+
+| Campo | Exemplo | Uso |
+|-------|---------|-----|
+| `vault.project_note` | `projects/<projeto>.md` | fatos duráveis (decisões, pendências) — `obsidian_patch_content` |
+| `vault.sessions_dir` | `projects/<projeto>/sessions/` | histórico — `obsidian_list_files_in_dir` |
+| `vault.session_note` | `projects/<projeto>/sessions/YYYY-MM-DD.md` | log do dia — `obsidian_append_content` |
+
+### 📋 Formato do Bloco
+
+```markdown
+---
+
+### [Título da Atividade] ([TODO-ID])
+
+**Horário**: DD/MM/AAAA HH:MM (America/Sao_Paulo) | **Status**: ✅ | 🔄 | ❌
+
+**Objetivo**: ...
+**Contexto**: ...
+**Passos**: ...
+**Resultado**: ...
+**Decisões**: ...
+**Arquivos modificados**: ...
+**Commits**: `<hash>` <mensagem>
+```
+
+Na criação da nota do dia, incluir frontmatter YAML (`tags: [session, <projeto>]`,
+`created`, `updated`).
+
+### ❌ NÃO Documentar (Skip)
+
+- Chores triviais, typos, formatação
+- Mudanças < 10 linhas sem decisão técnica
+
+### 🔐 Sanitização Obrigatória (antes de gravar no vault)
+
+- Nenhum token, senha, chave de API ou conteúdo de `.secrets/`
+- Nenhum IP interno, hostname interno ou endpoint com credenciais
+- Usar placeholders: `<TOKEN>`, `<API_KEY>`, `<PRIVATE_IP>`
+
+### 🛡️ Regras do Vault
+
+- Nunca sobrescrever uma nota inteira (`obsidian_put_content`) sem confirmar com o usuário
+- Um fato por linha; não duplicar fatos já registrados — editar a linha existente
+- Se o MCP `obsidian-rest` estiver indisponível: reportar e **não** criar arquivos de
+  sessão no projeto como alternativa
+
+### 📚 Referências
+
+- Rituais: `.claude/commands/session-start..md`, `.claude/commands/session-end..md`
+- CLI: `python scripts/session-manager.py --json start|status|recover|security-scan|end`
+
+---
+
+## 8. Enforcement
+
+Se uma ação viola estas regras, recusar e exibir:
+
+```
+❌ REGRA [N] violada: [nome da regra]
+Motivo: [explicação]
+Correto: [alternativa válida]
+```
+
+Nunca executar a ação proibida mesmo que o usuário insista. Mostrar a alternativa correta.
+
+---
+
+*Última atualização: 2026-03-05 | Seção 3 ampliada: todas as operações de arquivo via Python stdlib (sem limiar de quantidade) | Seção 5: bloco de Documentos Incrementais adicionado*
