@@ -1040,13 +1040,13 @@ def copy_copilot_instructions(
     """
     Copia arquivos de instruções customizadas do Copilot para o novo projeto.
 
-    Arquivos copiados:
-      1. copilot-instructions.md → .github/copilot-instructions.md
-      2. .copilot-rules.md → .copilot-rules.md (raiz)
+    Arquivo copiado:
+      - copilot-rules.md → .copilot-rules.md (raiz): regras críticas P0/P1
 
-    Esses arquivos são necessários para:
-      - Persistir instruções customizadas do Copilot (copilot-instructions.md)
-      - Definir regras críticas P0/P1 do projeto (.copilot-rules.md)
+    O .github/copilot-instructions.md **não** é copiado: é gerado para o
+    projeto por templates.generate_copilot_instructions. A antiga cópia
+    estática (as instruções do próprio scaffold) sobrescrevia o arquivo gerado
+    no upgrade com --force (ADR-003 fatia 6).
 
     Args:
         config: Configuração do projeto
@@ -1057,12 +1057,6 @@ def copy_copilot_instructions(
     results: list[CreatedItem] = []
     base = config.project_path
     src_root = _COPILOT_TEMPLATES
-
-    # Copiar copilot-instructions.md para .github/
-    src_instructions = src_root / "copilot-instructions.md"
-    dst_instructions = base / ".github" / "copilot-instructions.md"
-    result = _copy_file(src_instructions, dst_instructions, force=force)
-    results.append(result)
 
     # Copiar copilot-rules.md para .copilot-rules.md na raiz do projeto
     src_rules = src_root / "copilot-rules.md"

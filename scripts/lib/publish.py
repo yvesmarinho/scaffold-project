@@ -5,15 +5,12 @@ Gera um tarball versionado (.tar.gz) e um manifesto JSON com a lista de
 arquivos incluídos, contagem e tamanho. Usado pelo flow_publish() em
 scaffold.py via flag --publish.
 
-Arquivos incluídos no release:
-  scripts/*.py, scripts/*.sh, scripts/lib/**/*.py, scripts/bin/*, scripts/git-hooks/*
-  scaffold/profiles/*.yaml + scaffold/profiles/README.md
-  scaffold/templates/**/* + .github/prompts/**/*
-  .github/workflows/*.yml
-  (configs do repo como .claude/ e .specify/ não entram: as versões de
-  distribuição ficam em scaffold/templates/ — ADR-003 fatia 5)
-  Makefile, README.md, CHANGELOG.md, pyproject.toml, pytest.ini
-  tests/*.py + tests/snapshots/*.md
+Arquivos incluídos no release (ADR-003 fatia 6):
+  scripts/**  — o gerador, recursivo (menos scripts/tmp/)
+  scaffold/** — perfis e templates de distribuição
+  pyproject.toml, uv.lock, README.md — para instalar as dependências com uv
+  O que é só do desenvolvimento do scaffold (tests, Makefile, pytest.ini,
+  CHANGELOG, .github/, configs do repo) não entra.
 
 Arquivos excluídos:
   __pycache__/, .venv/, .git/, node_modules/, .secrets/, dist/
@@ -46,26 +43,17 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 _INCLUDE_PATTERNS: list[str] = [
-    # Gerador completo (scaffold.py importa lib.flows, lib.ai etc.) e os
-    # scripts que ele copia para o projeto gerado. scripts/tmp/ fica de fora.
-    "scripts/*.py",
-    "scripts/*.sh",
-    "scripts/lib/**/*.py",
-    "scripts/bin/*",
-    "scripts/git-hooks/*",
-    "scaffold/profiles/*.yaml",
-    "scaffold/profiles/README.md",
-    "scaffold/templates/**/*",
-    ".github/prompts/**/*",
-    ".github/workflows/*.yml",
-    "Makefile",
-    "README.md",
-    "CHANGELOG.md",
+    # Gerador completo e as fontes de distribuição (ADR-003 fatia 6)
+    "scripts/**/*",
+    "scaffold/**/*",
+    # Declaração de dependências (rich, pyyaml) para `uv run` no pacote extraído
     "pyproject.toml",
-    "pytest.ini",
-    "tests/*.py",
-    "tests/snapshots/*.md",
+    "uv.lock",
+    "README.md",
 ]
+
+# Prefixos (relativos, posix) que nunca entram: rascunhos versionados
+_EXCLUDE_PREFIXES: tuple[str, ...] = ("scripts/tmp/",)
 
 # Nomes de diretório/arquivo a excluir (qualquer nível do path)
 _EXCLUDE_NAMES: frozenset[str] = frozenset(
@@ -170,6 +158,8 @@ def _collect_files(project_root: Path) -> list[Path]:
 
             rel = path.relative_to(project_root)
             if tracked is not None and rel.as_posix() not in tracked:
+                continue
+            if rel.as_posix().startswith(_EXCLUDE_PREFIXES):
                 continue
             rel_parts = rel.parts
 

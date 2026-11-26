@@ -269,6 +269,11 @@ def flow_upgrade(args: argparse.Namespace) -> int:
     # Aplicar copy_speckit com force (se especificado)
     results.extend(project.copy_speckit(cfg, force=force))
 
+    # Agents customizados do scaffold (ADR-003 fatia 6: antes só na criação)
+    if not use_json:
+        console.print("  [blue]🤖 Verificando agents customizados...[/blue]")
+    results.extend(project.copy_custom_agents(cfg, force=force))
+
     # BUG-16: Consolidação automática de .copilot-rules antes de copiar template
     if not use_json:
         console.print("  [blue]🔀 Consolidando arquivos .copilot-rules...[/blue]")
@@ -306,6 +311,12 @@ def flow_upgrade(args: argparse.Namespace) -> int:
     if not use_json:
         console.print("  [blue]🔧 Verificando scripts utilitários...[/blue]")
     results.extend(project.copy_utility_scripts(cfg, force=force))
+
+    # Templates GitHub: CONTRIBUTING, PR/issue templates, CODEOWNERS, workflows
+    # (ADR-003 fatia 6: antes só na criação)
+    if not use_json:
+        console.print("  [blue]🐙 Verificando templates GitHub...[/blue]")
+    results.extend(project.copy_github_templates(cfg, force=force))
 
     # BUG-09: Templates de documentação
     if not use_json:
