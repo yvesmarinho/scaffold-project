@@ -1,5 +1,5 @@
 <!-- Criado em: 24/11/2026 11:19 -->
-<!-- Modificado em: 26/11/2026 11:58 -->
+<!-- Modificado em: 26/11/2026 12:18 -->
 
 # ADR-003: Separação dos templates de distribuição dos arquivos do próprio repositório
 
@@ -73,7 +73,8 @@ Por isso:
 | 3. Strings de `project.py` → `scaffold/templates/base/*.tmpl` | ✅ 25/11/2026 (ver abaixo) |
 | 4. Scripts de uso duplo → `scaffold/templates/runtime/` | ✅ 25/11/2026 (ver abaixo) |
 | 5. Configs do repositório → versões de distribuição | ✅ 26/11/2026 (ver abaixo) |
-| 6–7 | pendentes |
+| 6. Publish restrito + upgrade reaplica agents/templates GitHub | ✅ 26/11/2026 (ver abaixo) |
+| 7 | pendente |
 
 Fatia 2:
 - **Constante**: removida a primeira definição de `_SECURITY_MD_WITHOUT_GITHUB`. Era idêntica à segunda, que é a que vale em runtime.
@@ -141,6 +142,19 @@ Fatia 5:
   - em `claude/commands/` ficam só os rituais `session-*`;
   - saiu `SPECKIT_UPSTREAM_TEMPLATES`;
   - a exclusão dos hooks voltou a valer só para `base/`.
+
+Fatia 6:
+- **Escopo do publish (ajuste à decisão 5, aprovado pelo dono do projeto em 26/11/2026)**: o tarball leva os arquivos versionados de `scripts/` e `scaffold/`, de forma recursiva, mais `pyproject.toml`, `uv.lock` e `README.md`.
+  - Sem a declaração de dependências, quem extrai o pacote não tem como instalar `rich` e `pyyaml`. Com ela, `uv run --frozen scripts/scaffold.py` funciona direto no pacote extraído (verificado).
+  - Saem tests, Makefile, pytest.ini, CHANGELOG, `.github/` (workflows e os prompts `speckit.*` obsoletos pelo ADR-005) e `scripts/tmp/`.
+  - Entra `scaffold/setup/`, que fica sob `scaffold/`.
+- **Upgrade**: passa a chamar `copy_custom_agents` e `copy_github_templates`, na mesma ordem da criação.
+  - Arquivo ausente é recriado.
+  - Arquivo editado não é tocado sem `--force`.
+  - Nos agents vale o merge do BUG-16: as seções padrão são atualizadas e as seções customizadas são preservadas.
+- **Bug corrigido**: no upgrade com `--force`, a cópia estática do `copilot-instructions.md` (as instruções do próprio scaffold) sobrescrevia o arquivo gerado para o projeto. A cópia e o template `copilot/copilot-instructions.md` foram removidos. Ver `docs/bugs/BUG-upgrade-force-sobrescreve-copilot-instructions.md`.
+- **Testes novos**: `tests/test_publish_conteudo.py` e `tests/test_upgrade_reaplica_agents_github.py`. Os testes do IMP-30 que exigiam Makefile e prompts no tarball foram trocados por "inclui `uv.lock`" e "não inclui Makefile nem `.github/`".
+- **Verificação**: os projetos gerados não mudaram (os 3 de referência ficaram idênticos à versão anterior). 2052 passed.
 
 ## Pontos para decisão do usuário (resolvidos em 25/11/2026)
 - Aprovar a estrutura-alvo, em especial `runtime/` e o uso de wrappers no lugar de duplicação.

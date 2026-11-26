@@ -6,8 +6,8 @@ Cobertura:
     - inclui scripts/scaffold.py
     - inclui pelo menos um profile descriptor YAML
     - inclui README.md
-    - inclui Makefile
-    - inclui pelo menos um arquivo em .github/prompts/
+    - inclui uv.lock (dependências; ADR-003 fatia 6)
+    - não inclui Makefile nem .github/ (só desenvolvimento do scaffold)
     - exclui arquivos __pycache__
     - exclui extensões .pyc
 
@@ -80,16 +80,17 @@ class TestCollectFiles:
         rel = [str(f.relative_to(_PROJECT_ROOT)) for f in files]
         assert "README.md" in rel
 
-    def test_includes_makefile(self) -> None:
+    def test_includes_uv_lock(self) -> None:
         files = _collect_files(_PROJECT_ROOT)
         rel = [str(f.relative_to(_PROJECT_ROOT)) for f in files]
-        assert "Makefile" in rel
+        assert "uv.lock" in rel
 
-    def test_includes_at_least_one_prompt(self) -> None:
+    def test_excludes_dev_only_files(self) -> None:
+        """ADR-003 fatia 6: Makefile e .github/ são do desenvolvimento do scaffold."""
         files = _collect_files(_PROJECT_ROOT)
         rel = [str(f.relative_to(_PROJECT_ROOT)) for f in files]
-        prompts = [r for r in rel if r.startswith(".github/prompts/")]
-        assert len(prompts) >= 1, "Nenhum prompt encontrado"
+        assert "Makefile" not in rel
+        assert not [r for r in rel if r.startswith(".github/")]
 
     def test_excludes_pycache_files(self) -> None:
         files = _collect_files(_PROJECT_ROOT)
