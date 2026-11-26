@@ -7,7 +7,7 @@ import json as _json
 from pathlib import Path
 
 from .. import composer as _composer_module
-from .. import links, project, templates, vscode
+from .. import git, legacy_migrations, links, project, templates, vscode
 from ..ai import resolve_plugins
 from ..copilot_rules_consolidate import consolidate_copilot_rules
 from ..project import config_from_state, read_scaffold_state, write_scaffold_state
@@ -317,6 +317,14 @@ def flow_upgrade(args: argparse.Namespace) -> int:
     if not use_json:
         console.print("  [blue]🐙 Verificando templates GitHub...[/blue]")
     results.extend(project.copy_github_templates(cfg, force=force))
+
+    # Projetos antigos (ADR-004/005): prompt files viraram skills; dev local
+    if not use_json:
+        console.print("  [blue]🗄️  Verificando .github/prompts/ legado...[/blue]")
+    results.append(legacy_migrations.archive_legacy_prompts(cfg))
+    if not use_json:
+        console.print("  [blue]🌿 Verificando branch dev...[/blue]")
+    results.append(git.ensure_dev_branch(cfg))
 
     # BUG-09: Templates de documentação
     if not use_json:

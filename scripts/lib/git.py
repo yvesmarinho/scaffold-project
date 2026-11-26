@@ -268,6 +268,91 @@ def create_dev_branch(config: ProjectConfig) -> CreatedItem:
     )
 
 
+_PUBLICAR_DEV = (
+    "para publicar: git push -u origin dev && "
+    "gh repo edit <owner/repo> --default-branch dev "
+    "(proteção da main: docs/BRANCH_PROTECTION_SETUP.md)"
+)
+
+
+def ensure_dev_branch(config: ProjectConfig) -> CreatedItem:
+    """
+    Garante a branch ``dev`` em projeto já existente (``--upgrade``, ADR-004).
+
+    Diferente de :func:`create_dev_branch`, **não faz checkout**: o usuário
+    continua na branch em que estava. Também não mexe no remoto; a mensagem
+    explica como publicar.
+
+    - Base: ``main``; sem ``main``, ``master``; sem nenhuma, ``skipped``.
+    - ``dev`` já existente: ``skipped`` (idempotente, ref intocada).
+    - Falha do git (código != 0, timeout, executável ausente): ``error``.
+
+    :param config: Configuração do projeto (usa ``project_path``).
+    :type config: ProjectConfig
+    :return: Resultado da operação para o resumo do upgrade.
+    :rtype: CreatedItem
+    """
+    target = config.project_path
+    git_dir = target / ".git"
+    if not is_git_repo(target):
+        return CreatedItem(
+            path=git_dir,
+            kind="git",
+            status="skipped",
+            message="branch dev: repositório não inicializado",
+        )
+
+    def _git(*args: str) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            [_GIT, *args], cwd=target, capture_output=True, timeout=10, check=False
+        )
+
+    def _existe(ref: str) -> bool:
+        return (
+            _git("rev-parse", "--verify", "--quiet", f"refs/heads/{ref}").returncode
+            == 0
+        )
+
+    try:
+        if _existe("dev"):
+            return CreatedItem(
+                path=git_dir,
+                kind="git",
+                status="skipped",
+                message="branch dev já existe",
+            )
+        base = next((b for b in ("main", "master") if _existe(b)), None)
+        if base is None:
+            return CreatedItem(
+                path=git_dir,
+                kind="git",
+                status="skipped",
+                message="branch dev não criada: sem main/master com commit",
+            )
+        result = _git("branch", "dev", base)
+    except (subprocess.TimeoutExpired, OSError) as error:
+        return CreatedItem(
+            path=git_dir,
+            kind="git",
+            status="error",
+            message=f"branch dev: falha ao executar git: {error}",
+        )
+    if result.returncode != 0:
+        return CreatedItem(
+            path=git_dir,
+            kind="git",
+            status="error",
+            message="branch dev: " + result.stderr.decode(errors="replace").strip(),
+        )
+    return CreatedItem(
+        path=git_dir,
+        kind="git",
+        status="created",
+        message=f"branch dev criada a partir da {base} (sem checkout); "
+        + _PUBLICAR_DEV,
+    )
+
+
 # ---------------------------------------------------------------------------
 # Auxiliar interno
 # ---------------------------------------------------------------------------

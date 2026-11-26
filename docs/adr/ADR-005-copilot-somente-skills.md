@@ -1,5 +1,5 @@
 <!-- Criado em: 25/11/2026 14:42 -->
-<!-- Modificado em: 25/11/2026 14:42 -->
+<!-- Modificado em: 26/11/2026 16:24 -->
 
 # ADR-005: Projetos gerados miram só o Copilot — skills no lugar de prompt files e handoffs
 
@@ -41,6 +41,7 @@ prática, os projetos gerados tinham estes problemas:
 ### Negativas
 - Quem usa o harness Local perde os prompts.
 - Projetos já gerados mantêm `.github/prompts/` antigos; o upgrade cria as skills, mas não apaga os prompts.
+  - **Revisão 26/11/2026**: o `--upgrade` passou a mover `.github/prompts/` inteiro para `.github/prompts.bak-<AAAAMMDD-HHMMSS>/` (`legacy_migrations.archive_legacy_prompts`). Nada é apagado nem comparado, inclusive os prompts criados pelo usuário, que ficam no backup.
 - O symlink `.copilot-rules.md` para `.copilot-shared` externo ainda cita `.github/prompts`; isso fica para a recomendação P2 #13.
 
 ## Alternativas consideradas
