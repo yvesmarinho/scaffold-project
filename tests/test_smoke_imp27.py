@@ -38,9 +38,9 @@ from lib.composer import (  # noqa: E402
 )
 
 _PROJECT_ROOT = Path(__file__).parent.parent
-_DESCRIPTORS_DIR = _PROJECT_ROOT / "profile-descriptors"
-_LGPD_TPLDIR = _PROJECT_ROOT / ".github" / "templates" / "lgpd-baseline"
-_SOC2_TPLDIR = _PROJECT_ROOT / ".github" / "templates" / "soc2-baseline"
+_DESCRIPTORS_DIR = _PROJECT_ROOT / "scaffold" / "profiles"
+_LGPD_TPLDIR = _PROJECT_ROOT / "scaffold" / "templates" / "project" / "lgpd-baseline"
+_SOC2_TPLDIR = _PROJECT_ROOT / "scaffold" / "templates" / "project" / "soc2-baseline"
 
 
 # ===========================================================================
@@ -99,7 +99,7 @@ class TestLgpdBaselineDescriptor:
 class TestLgpdBaselineTemplates:
 
     def test_all_declared_templates_exist_on_disk(self) -> None:
-        """Todos os templates declarados existem em .github/templates/lgpd-baseline/."""
+        """Todos os templates declarados existem em scaffold/templates/project/lgpd-baseline/."""
         descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
         entries = get_template_entries(descriptors["lgpd-baseline"])
 
@@ -330,7 +330,7 @@ class TestSoc2BaselineDescriptor:
 class TestSoc2BaselineTemplates:
 
     def test_all_declared_templates_exist_on_disk(self) -> None:
-        """Todos os templates declarados existem em .github/templates/soc2-baseline/."""
+        """Todos os templates declarados existem em scaffold/templates/project/soc2-baseline/."""
         descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
         entries = get_template_entries(descriptors["soc2-baseline"])
 

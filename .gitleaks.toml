@@ -13,6 +13,7 @@ paths = [
     '''(^|/)conftest\.py$''',
     '''^tests/''',
     '''_test\.py$''',
+    # caminho antigo dos templates (symlinks removidos no ADR-003 fatia 7; só no histórico)
     '''^\.github/templates/''',
     '''^docs/templates/''',
     '''CHANGELOG.md''',

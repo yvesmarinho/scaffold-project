@@ -29,7 +29,7 @@ from lib.composer import (  # noqa: E402
 # ---------------------------------------------------------------------------
 _PROJECT_ROOT = Path(__file__).parent.parent
 _DESCRIPTORS_DIR = _PROJECT_ROOT / "scaffold" / "profiles"
-_TEMPLATES_DIR = _PROJECT_ROOT / ".github" / "templates"
+_TEMPLATES_DIR = _PROJECT_ROOT / "scaffold" / "templates" / "project"
 
 
 # ---------------------------------------------------------------------------
@@ -166,7 +166,7 @@ def test_compose_typescript_next_creates_files(make_project_config) -> None:
 
     assert result.success, f"Composição falhou: {result.errors}"
     assert "typescript-next" in result.applied
-    # Algum arquivo deve ter sido criado (templates existem em .github/templates/)
+    # Algum arquivo deve ter sido criado (templates existem em scaffold/templates/project/)
     assert result.created_count > 0, "Nenhum arquivo foi criado"
 
 

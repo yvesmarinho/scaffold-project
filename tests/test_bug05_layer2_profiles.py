@@ -78,7 +78,7 @@ class TestGetCompatibleLayer2Profiles:
         assert "devops-security" not in profiles
 
     def test_returns_empty_list_if_no_descriptors_dir(self, tmp_path: Path) -> None:
-        """Se profile-descriptors/ não existir, retorna lista vazia."""
+        """Se scaffold/profiles/ não existir, retorna lista vazia."""
         # Mockar o diretório para apontar para um não existente
         with patch("scripts.lib.ui.Path") as mock_path:
             mock_path.return_value.__truediv__.return_value.exists.return_value = False
@@ -87,7 +87,7 @@ class TestGetCompatibleLayer2Profiles:
 
     def test_ignores_invalid_yaml_files(self, tmp_path: Path) -> None:
         """Ignora arquivos YAML inválidos sem crashar."""
-        # A função _get_compatible_layer2_profiles lê de profile-descriptors/
+        # A função _get_compatible_layer2_profiles lê de scaffold/profiles/
         # que é resolvido relativamente ao arquivo ui.py
         # Como é difícil mockar Path completamente, este teste valida
         # que a função não crasha ao encontrar YAMLs inválidos no diretório real
@@ -100,7 +100,7 @@ class TestGetCompatibleLayer2Profiles:
         """Perfis com meta.language: any aparecem para qualquer linguagem."""
         # Este teste valida o comportamento geral da função
         # Para testar com arquivos temporários, precisaríamos de um mock mais elaborado
-        # ou um teste de integração que modifica profile-descriptors/
+        # ou um teste de integração que modifica scaffold/profiles/
 
         # Teste simplificado: verificar que a função executa sem erros
         # e retorna lista válida para diferentes linguagens

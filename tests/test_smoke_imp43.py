@@ -3,8 +3,8 @@ tests/test_smoke_imp43.py — IMP-43: scaffold.py --new-profile NOME
 
 Cobertura:
   flow_new_profile (unitário):
-    - gera YAML em profile-descriptors/{name}.yaml
-    - gera MD em profile-descriptors/{name}.md
+    - gera YAML em scaffold/profiles/{name}.yaml
+    - gera MD em scaffold/profiles/{name}.md
     - YAML gerado é parsável e tem campo 'name' correto
     - YAML gerado tem campo 'layer' conforme solicitado
     - YAML gerado tem 'version', 'last_tested', 'status', 'schema_version'
@@ -44,7 +44,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 from lib.flows.new_profile import flow_new_profile  # noqa: E402
 
 _PROJECT_ROOT = Path(__file__).parent.parent
-_DESCRIPTORS_DIR = _PROJECT_ROOT / "profile-descriptors"
+_DESCRIPTORS_DIR = _PROJECT_ROOT / "scaffold" / "profiles"
 _PYTHON = sys.executable
 _SCAFFOLD = [_PYTHON, str(_PROJECT_ROOT / "scripts" / "scaffold.py")]
 

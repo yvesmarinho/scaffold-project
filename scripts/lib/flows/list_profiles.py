@@ -8,13 +8,16 @@ from pathlib import Path
 
 from ..ui import console
 
-_PROFILE_DESCRIPTORS_DIR = Path(__file__).parent.parent.parent.parent / "scaffold" / "profiles"
+_PROFILE_DESCRIPTORS_DIR = (
+    Path(__file__).parent.parent.parent.parent / "scaffold" / "profiles"
+)
 
 
 def _load_descriptor(yaml_path: Path) -> dict:
     """Carrega um profile descriptor YAML retornando um dict com os campos."""
     try:
         import yaml  # pyyaml
+
         with yaml_path.open(encoding="utf-8") as f:
             return yaml.safe_load(f) or {}
     except ImportError:
@@ -34,7 +37,7 @@ def _load_descriptor(yaml_path: Path) -> dict:
 
 
 def flow_list_profiles(args: argparse.Namespace) -> int:
-    """Lista perfis disponíveis lendo os descriptors YAML em profile-descriptors/."""
+    """Lista perfis disponíveis lendo os descriptors YAML em scaffold/profiles/."""
     use_json: bool = getattr(args, "json_output", False)
     profiles: list[dict] = []
 
@@ -43,14 +46,22 @@ def flow_list_profiles(args: argparse.Namespace) -> int:
             try:
                 data = _load_descriptor(yaml_file)
                 desc = (data.get("description") or "").strip().replace("\n", " ")
-                profiles.append({
-                    "name":        str(data.get("name", yaml_file.stem)),
-                    "description": desc,
-                    "layer":       str(data.get("layer", "—")),
-                    "version":     str(data.get("VERSION") or data.get("version") or "—"),
-                    "last_tested": str(data.get("LAST_TESTED_DATE") or data.get("last_tested") or "—"),
-                    "tags":        data.get("tags") or [],
-                })
+                profiles.append(
+                    {
+                        "name": str(data.get("name", yaml_file.stem)),
+                        "description": desc,
+                        "layer": str(data.get("layer", "—")),
+                        "version": str(
+                            data.get("VERSION") or data.get("version") or "—"
+                        ),
+                        "last_tested": str(
+                            data.get("LAST_TESTED_DATE")
+                            or data.get("last_tested")
+                            or "—"
+                        ),
+                        "tags": data.get("tags") or [],
+                    }
+                )
             except Exception as exc:
                 console.print(f"  [red]⚠ Erro ao ler {yaml_file.name}: {exc}[/red]")
     else:
@@ -67,10 +78,12 @@ def flow_list_profiles(args: argparse.Namespace) -> int:
 
     from rich.table import Table
 
-    table = Table(title="[bold]Perfis disponíveis[/bold]", show_lines=True, expand=False)
-    table.add_column("Nome",             style="cyan",   no_wrap=True)
-    table.add_column("Layer",            style="yellow", no_wrap=True)
-    table.add_column("Versão",           no_wrap=True)
+    table = Table(
+        title="[bold]Perfis disponíveis[/bold]", show_lines=True, expand=False
+    )
+    table.add_column("Nome", style="cyan", no_wrap=True)
+    table.add_column("Layer", style="yellow", no_wrap=True)
+    table.add_column("Versão", no_wrap=True)
     table.add_column("Última validação", no_wrap=True)
     table.add_column("Descrição")
 
@@ -82,5 +95,7 @@ def flow_list_profiles(args: argparse.Namespace) -> int:
 
     console.print()
     console.print(table)
-    console.print(f"\n  [dim]{len(profiles)} perfil(s) em {_PROFILE_DESCRIPTORS_DIR}[/dim]\n")
+    console.print(
+        f"\n  [dim]{len(profiles)} perfil(s) em {_PROFILE_DESCRIPTORS_DIR}[/dim]\n"
+    )
     return 0

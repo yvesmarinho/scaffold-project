@@ -5,7 +5,7 @@ Cobertura:
   - Descriptor carregado com campos obrigatórios
   - Layer 3 corretamente declarada
   - combines_with contém perfis Layer 2 esperados
-  - Todos os arquivos de template existem em .github/templates/k8s-helm/
+  - Todos os arquivos de template existem em scaffold/templates/project/k8s-helm/
   - Sem conflitos com perfis Layer 2 compatíveis
   - Composição cria arquivos no projeto alvo
   - Chart.yaml contém apiVersion v2
@@ -30,8 +30,8 @@ from lib.composer import (  # noqa: E402
 )
 
 _PROJECT_ROOT = Path(__file__).parent.parent
-_DESCRIPTORS_DIR = _PROJECT_ROOT / "profile-descriptors"
-_TEMPLATES_DIR = _PROJECT_ROOT / ".github" / "templates" / "k8s-helm"
+_DESCRIPTORS_DIR = _PROJECT_ROOT / "scaffold" / "profiles"
+_TEMPLATES_DIR = _PROJECT_ROOT / "scaffold" / "templates" / "project" / "k8s-helm"
 
 
 # ---------------------------------------------------------------------------
@@ -86,7 +86,7 @@ def test_k8s_helm_combines_with_typescript_next() -> None:
 
 
 def test_k8s_helm_templates_exist_on_disk() -> None:
-    """Todos os arquivos de template declarados no descriptor existem em .github/templates/k8s-helm/."""
+    """Todos os arquivos de template declarados no descriptor existem em scaffold/templates/project/k8s-helm/."""
     descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
     entries = get_template_entries(descriptors["k8s-helm"])
 

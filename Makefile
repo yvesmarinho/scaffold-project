@@ -106,7 +106,7 @@ format:
 lint-yaml:
 	@echo "$(BLUE)🔍 Validating YAML configuration files...$(NC)"
 	@if command -v yamllint >/dev/null 2>&1; then \
-		yamllint .github/workflows/ profile-descriptors/ .scaffold-state.yaml 2>/dev/null || true; \
+		yamllint .github/workflows/ scaffold/profiles/ .scaffold-state.yaml 2>/dev/null || true; \
 		echo "$(GREEN)✅ YAML files validated$(NC)"; \
 	else \
 		echo "$(YELLOW)⚠ yamllint not installed. Install with: uv add --dev yamllint$(NC)"; \

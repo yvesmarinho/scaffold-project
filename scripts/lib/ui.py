@@ -491,7 +491,7 @@ def _get_compatible_layer2_profiles(domain: str, language: str) -> list[str]:
     """
     Retorna perfis de tecnologia compatíveis (Layer 2/3) com domain + language.
 
-    Lê profile-descriptors/*.yaml e filtra por compatibilidade.
+    Lê scaffold/profiles/*.yaml e filtra por compatibilidade.
     Exclui perfis Layer 1 (já em ALL_SELECTABLE_PROFILES) e transversais.
 
     Suporta dois formatos de descriptor:

@@ -44,8 +44,8 @@ import pytest
 import yaml
 
 _PROJECT_ROOT = Path(__file__).parent.parent
-_TEMPLATES = _PROJECT_ROOT / ".github" / "templates"
-_DESCRIPTORS = _PROJECT_ROOT / "profile-descriptors"
+_TEMPLATES = _PROJECT_ROOT / "scaffold" / "templates" / "project"
+_DESCRIPTORS = _PROJECT_ROOT / "scaffold" / "profiles"
 _CI_TEMPLATE = _PROJECT_ROOT / ".github" / "workflows" / "ci-template.yml"
 
 

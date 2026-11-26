@@ -67,7 +67,7 @@ from lib.validate import (  # noqa: E402
 )
 
 _PROJECT_ROOT = Path(__file__).parent.parent
-_DESCRIPTORS_DIR = _PROJECT_ROOT / "profile-descriptors"
+_DESCRIPTORS_DIR = _PROJECT_ROOT / "scaffold" / "profiles"
 _SCRIPTS_DIR = _PROJECT_ROOT / "scripts"
 _PYTHON = sys.executable
 

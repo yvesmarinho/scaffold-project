@@ -30,8 +30,8 @@ from lib.composer import (  # noqa: E402
 )
 
 _PROJECT_ROOT = Path(__file__).parent.parent
-_DESCRIPTORS_DIR = _PROJECT_ROOT / "profile-descriptors"
-_TEMPLATES_DIR = _PROJECT_ROOT / ".github" / "templates" / "terraform-aws"
+_DESCRIPTORS_DIR = _PROJECT_ROOT / "scaffold" / "profiles"
+_TEMPLATES_DIR = _PROJECT_ROOT / "scaffold" / "templates" / "project" / "terraform-aws"
 
 
 # ---------------------------------------------------------------------------
@@ -82,7 +82,7 @@ def test_terraform_aws_combines_with_typescript_next() -> None:
 
 
 def test_terraform_aws_templates_exist_on_disk() -> None:
-    """Todos os templates declarados no descriptor existem em .github/templates/terraform-aws/."""
+    """Todos os templates declarados no descriptor existem em scaffold/templates/project/terraform-aws/."""
     descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
     entries = get_template_entries(descriptors["terraform-aws"])
 

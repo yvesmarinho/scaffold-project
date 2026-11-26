@@ -18,7 +18,7 @@ updates:
   # npm — template typescript-next
   # ─────────────────────────────────────────────────────────────
   - package-ecosystem: "npm"
-    directory: "/.github/templates/typescript-next"
+    directory: "/scaffold/templates/project/typescript-next"
     schedule:
       interval: "monthly"
     open-pull-requests-limit: 3

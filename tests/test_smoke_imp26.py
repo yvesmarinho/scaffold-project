@@ -34,9 +34,13 @@ from lib.composer import (  # noqa: E402
 )
 
 _PROJECT_ROOT = Path(__file__).parent.parent
-_DESCRIPTORS_DIR = _PROJECT_ROOT / "profile-descriptors"
-_AIRFLOW_TPLDIR = _PROJECT_ROOT / ".github" / "templates" / "data-pipeline-airflow"
-_DBT_TPLDIR = _PROJECT_ROOT / ".github" / "templates" / "data-warehouse-dbt"
+_DESCRIPTORS_DIR = _PROJECT_ROOT / "scaffold" / "profiles"
+_AIRFLOW_TPLDIR = (
+    _PROJECT_ROOT / "scaffold" / "templates" / "project" / "data-pipeline-airflow"
+)
+_DBT_TPLDIR = (
+    _PROJECT_ROOT / "scaffold" / "templates" / "project" / "data-warehouse-dbt"
+)
 
 
 # ===========================================================================
@@ -84,7 +88,7 @@ class TestDataPipelineAirflowDescriptor:
 class TestDataPipelineAirflowTemplates:
 
     def test_all_declared_templates_exist_on_disk(self) -> None:
-        """Todos os templates declarados existem em .github/templates/data-pipeline-airflow/."""
+        """Todos os templates declarados existem em scaffold/templates/project/data-pipeline-airflow/."""
         descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
         entries = get_template_entries(descriptors["data-pipeline-airflow"])
 
@@ -258,7 +262,7 @@ class TestDataWarehouseDbtDescriptor:
 class TestDataWarehouseDbtTemplates:
 
     def test_all_declared_templates_exist_on_disk(self) -> None:
-        """Todos os templates declarados existem em .github/templates/data-warehouse-dbt/."""
+        """Todos os templates declarados existem em scaffold/templates/project/data-warehouse-dbt/."""
         descriptors = load_all_descriptors(_DESCRIPTORS_DIR)
         entries = get_template_entries(descriptors["data-warehouse-dbt"])
 

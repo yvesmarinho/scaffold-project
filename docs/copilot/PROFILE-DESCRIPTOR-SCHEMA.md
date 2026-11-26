@@ -1,3 +1,6 @@
+<!-- Criado em: 07/03/2026 18:31 -->
+<!-- Modificado em: 26/11/2026 13:24 -->
+
 # Profile Descriptor Schema — Contrato Formal de Perfis
 
 > **Versão do schema**: 1.1.0
@@ -159,7 +162,7 @@ O `scaffold.py` atual **não lê** os descriptors ainda — eles servem como con
 ## Localização dos Descriptors
 
 ```
-profile-descriptors/
+scaffold/profiles/
 ├── devops-programming.yaml      ← perfil de referência (core)
 ├── devops-infrastructure.yaml
 ├── devops-analysis.yaml
@@ -175,4 +178,4 @@ profile-descriptors/
 
 - [IMP-19 Debate](../SESSIONS/2026-03-07/IMP-19-DEBATE.md) — origem desta proposta
 - [docs/TODO.md](../TODO.md) — roadmap de implementação
-- Descriptor de referência: [profile-descriptors/devops-programming.yaml](../../profile-descriptors/devops-programming.yaml)
+- Descriptor de referência: [scaffold/profiles/devops-programming.yaml](../../scaffold/profiles/devops-programming.yaml)
