@@ -9,8 +9,8 @@ import logging
 from pathlib import Path
 
 from .. import template_diff, template_version
-from ..project import SPECKIT_UPSTREAM_TEMPLATES
 from ..ui import console
+from .check_templates import SPECKIT_GERENCIADO_PELO_SPECIFY
 
 log = logging.getLogger(__name__)
 
@@ -64,28 +64,16 @@ def flow_diff_template(args: argparse.Namespace) -> int:
         local_path = target_dir / template_name
         upstream_path = scaffold_root / template_name
     else:
-        # Só o nome: upstream é a versão de distribuição (ADR-003 fatia 5)
-        upstream_dir = SPECKIT_UPSTREAM_TEMPLATES
-        local_dir = target_dir / ".specify" / "templates"
-
-        if not upstream_dir.exists():
-            console.print(f"[red]❌ Upstream templates not found: {upstream_dir}[/red]")
-            return 2
-
-        if not local_dir.exists():
-            console.print(f"[red]❌ Local templates not found: {local_dir}[/red]")
-            console.print("Are you in a project directory created with scaffold.py?")
-            return 1
-
-        local_path = local_dir / template_name
-        upstream_path = upstream_dir / template_name
+        # Só o nome: templates SpecKit vêm do instalador oficial, sem upstream
+        console.print(f"[red]❌ {SPECKIT_GERENCIADO_PELO_SPECIFY}[/red]")
+        return 2
 
     # Validate template exists
 
     if not local_path.exists():
         console.print(f"[red]❌ Local template not found: {local_path}[/red]")
         console.print("\nAvailable local templates:")
-        for tmpl in sorted(local_dir.glob("*.md")):
+        for tmpl in sorted(local_path.parent.glob("*.md")):
             console.print(f"  - {tmpl.name}")
         return 1
 

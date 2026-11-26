@@ -380,10 +380,10 @@ _SKILLS_TEMPLATES = _TEMPLATE_ROOT / "scaffold" / "templates" / "skills"
 
 # Versões de distribuição das configs do repositório (ADR-003 fatia 5): o
 # gerador não lê mais .claude/, .github/copilot-instructions.md,
-# .copilot-rules.md nem .specify/templates/ do próprio repositório.
+# .copilot-rules.md nem .specify/templates/ do próprio repositório. Os arquivos
+# do SpecKit vêm só do instalador oficial (run_speckit_init).
 _CLAUDE_TEMPLATES = _TEMPLATE_ROOT / "scaffold" / "templates" / "claude"
 _COPILOT_TEMPLATES = _TEMPLATE_ROOT / "scaffold" / "templates" / "copilot"
-SPECKIT_UPSTREAM_TEMPLATES = _SPECKIT_TEMPLATES / "templates"
 
 # Scripts de uso duplo (ADR-003 fatia 4): fonte única em runtime/scripts/,
 # copiados para scripts/ do projeto gerado; o repositório usa symlinks
@@ -435,7 +435,13 @@ _AI_TO_SPECIFY: dict[str, list[str]] = {
     "claude": ["claude"],
     "copilot": ["copilot"],
     "both": ["claude", "copilot"],
-    "none": [],
+    # Sem IA: integração genérica, só .specify/ (templates, scripts, comandos)
+    "none": ["generic"],
+}
+
+# Opções extras por integração (a generic exige um diretório de comandos)
+_SPECIFY_INTEGRATION_OPTIONS: dict[str, list[str]] = {
+    "generic": ["--integration-options=--commands-dir .specify/commands/"],
 }
 
 # Integração do specify → binário do agente que o `specify init` exige no PATH.
@@ -451,8 +457,11 @@ def run_speckit_init(config: ProjectConfig) -> list[CreatedItem]:
     Executa `specify init --here --force --integration <name>` no diretório do
     projeto para instalar os assets oficiais e versionados do SpecKit.
 
-    Substitui a cópia manual de agents/prompts/specify do projeto DEV. Para
-    cada integração mapeada ao ai_assistant do projeto, roda specify uma vez.
+    É a única fonte dos arquivos do SpecKit no projeto gerado: não há cópia
+    estática em scaffold/templates/. Para cada integração mapeada ao
+    ai_assistant do projeto, roda specify uma vez (``none`` → ``generic``).
+    Usado na criação e no upgrade: o ``--force`` do specify repõe templates,
+    scripts e comandos, mas preserva .specify/memory/ e specs/.
 
     Args:
         config: Configuração do projeto (usa project_path e ai_assistant)
@@ -466,6 +475,7 @@ def run_speckit_init(config: ProjectConfig) -> list[CreatedItem]:
 
     for integration in integrations:
         cmd = ["specify", "init", "--here", "--force", "--integration", integration]
+        cmd.extend(_SPECIFY_INTEGRATION_OPTIONS.get(integration, []))
         agent_binary = _SPECIFY_AGENT_BINARY.get(integration)
         if agent_binary and shutil.which(agent_binary) is None:
             cmd.append("--ignore-agent-tools")
@@ -1068,8 +1078,10 @@ def copy_claude_config(config: ProjectConfig, force: bool = False) -> list[Creat
     Copia configuração do Claude Code para o novo projeto.
 
     Arquivos copiados:
-      1. .claude/commands/*.md → .claude/commands/ (todos os slash commands)
-      2. .claude/skills/*/SKILL.md → .claude/skills/*/ (todos os skills)
+      1. scaffold/templates/claude/commands/*.md → .claude/commands/
+         (slash commands do próprio scaffold, ex.: rituais session-*)
+
+    Skills e comandos ``speckit*`` não são copiados: vêm do ``specify init``.
 
     Nota: .claude/settings.json e CLAUDE.md são gerados via FILES_TO_CREATE
     em create_structure() com placeholders substituídos automaticamente.
@@ -1098,20 +1110,6 @@ def copy_claude_config(config: ProjectConfig, force: bool = False) -> list[Creat
             results.append(result)
     else:
         log.warning("⚠️  commands/ não encontrado em %s", src_claude)
-
-    # 2. skills/ — copiar cada subdiretório (skill_name/SKILL.md e arquivos extras)
-    src_skills = src_claude / "skills"
-    if src_skills.is_dir():
-        for skill_dir in sorted(src_skills.iterdir()):
-            if skill_dir.is_dir():
-                for src_file in sorted(skill_dir.rglob("*")):
-                    if src_file.is_file():
-                        rel = src_file.relative_to(src_claude)
-                        dst_file = base / ".claude" / rel
-                        result = _copy_file(src_file, dst_file, force=force)
-                        results.append(result)
-    else:
-        log.warning("⚠️  skills/ não encontrado em %s", src_claude)
 
     return results
 
@@ -1441,24 +1439,34 @@ def generate_constitution(config: ProjectConfig) -> CreatedItem:
     """
     Gera .specify/memory/constitution.md no projeto destino.
 
-    Copia o constitution-template.md do template, resolve os placeholders
-    padrão e adiciona metadados do projeto no cabeçalho.
-    Se o arquivo já existir no destino, salta (idempotente).
+    Lê o constitution-template.md **instalado no projeto** pelo
+    ``specify init``, resolve os placeholders padrão e adiciona metadados do
+    projeto no cabeçalho.
+
+    O ``specify init`` já cria a constitution como cópia crua do template; ela
+    é preenchida enquanto continuar idêntica ao template (status ``updated``).
+    Constitution editada pelo usuário nunca é tocada (``skipped``).
     """
-    src = SPECKIT_UPSTREAM_TEMPLATES / "constitution-template.md"
+    src = config.project_path / ".specify" / "templates" / "constitution-template.md"
     dst = config.project_path / ".specify" / "memory" / "constitution.md"
 
-    if dst.exists():
-        log.info("⏭️  skipped (já existe): %s", dst)
-        return CreatedItem(path=dst, kind="file", status="skipped")
-
     if not src.exists():
-        msg = f"constitution-template.md não encontrado em {src}"
+        if dst.exists():
+            log.info("⏭️  skipped (já existe): %s", dst)
+            return CreatedItem(path=dst, kind="file", status="skipped")
+        msg = (
+            f"constitution-template.md não encontrado em {src} "
+            "(o specify init não rodou ou falhou)"
+        )
         log.warning("⚠️  %s", msg)
         return CreatedItem(path=dst, kind="file", status="error", message=msg)
 
     try:
         template_content = src.read_text(encoding="utf-8")
+        existente = dst.exists()
+        if existente and dst.read_text(encoding="utf-8") != template_content:
+            log.info("⏭️  skipped (já existe): %s", dst)
+            return CreatedItem(path=dst, kind="file", status="skipped")
 
         # Substitui os marcadores de template do SpecKit
         content = template_content.replace("[PROJECT_NAME]", config.project_title)
@@ -1476,7 +1484,9 @@ def generate_constitution(config: ProjectConfig) -> CreatedItem:
         dst.parent.mkdir(parents=True, exist_ok=True)
         dst.write_text(content, encoding="utf-8")
         log.info("✅ constitution.md gerado: %s", dst)
-        return CreatedItem(path=dst, kind="file", status="created")
+        return CreatedItem(
+            path=dst, kind="file", status="updated" if existente else "created"
+        )
     except OSError as exc:
         log.warning("⚠️  erro ao gerar constitution.md: %s", exc)
         return CreatedItem(path=dst, kind="file", status="error", message=str(exc))

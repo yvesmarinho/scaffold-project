@@ -1,5 +1,5 @@
 <!-- Criado em: 24/11/2026 11:19 -->
-<!-- Modificado em: 26/11/2026 11:39 -->
+<!-- Modificado em: 26/11/2026 11:58 -->
 
 # ADR-003: Separação dos templates de distribuição dos arquivos do próprio repositório
 
@@ -135,6 +135,12 @@ Fatia 5:
   - No upgrade com `--force`, a cópia sobrescreve o arquivo recém-gerado com a versão estática.
 
   Isso não foi alterado nesta fatia. Fica para avaliar na fatia 6, que trata do upgrade.
+- **Revisão em 26/11/2026 ([ADR-006](ADR-006-speckit-somente-via-instalador.md))**: a parte do SpecKit
+  desta fatia foi substituída. Os arquivos do SpecKit agora vêm só do `specify init`, e por isso:
+  - foram removidos `claude/skills/`, `claude/commands/speckit.*` e `speckit/templates/`;
+  - em `claude/commands/` ficam só os rituais `session-*`;
+  - saiu `SPECKIT_UPSTREAM_TEMPLATES`;
+  - a exclusão dos hooks voltou a valer só para `base/`.
 
 ## Pontos para decisão do usuário (resolvidos em 25/11/2026)
 - Aprovar a estrutura-alvo, em especial `runtime/` e o uso de wrappers no lugar de duplicação.
