@@ -1,5 +1,5 @@
 <!-- Criado em: 25/11/2026 14:28 -->
-<!-- Modificado em: 25/11/2026 14:28 -->
+<!-- Modificado em: 26/11/2026 16:24 -->
 
 # ADR-004: Modelo de branches main / dev / release nos projetos gerados
 
@@ -39,6 +39,7 @@ A proteção de branch era só documentada (`docs/BRANCH_PROTECTION_SETUP.md`).
 - Com `--repo`, a geração passa a enviar código ao GitHub. Use `--no-github-setup` para evitar.
 - A proteção exige 0 aprovações, pensando em quem trabalha sozinho. Times devem subir esse número no GitHub.
 - Projetos já gerados não recebem `dev` pelo upgrade; a migração é manual, pelo guia.
+  - **Revisão 26/11/2026**: o `--upgrade` passou a criar `dev` localmente (`git.ensure_dev_branch`), a partir da `main` ou da `master`, **sem checkout** e sem tocar no GitHub. O resumo mostra os comandos para publicar a `dev` e defini-la como default. A proteção da `main` continua pelo guia.
 
 ## Alternativas consideradas
 1. **Só local + CI**: sem chamadas ao `gh`; a proteção ficaria manual. Descartada pelo usuário.
