@@ -218,6 +218,10 @@ def flow_upgrade(args: argparse.Namespace) -> int:
     if not use_json:
         console.print("  [blue]🤖 Verificando assets SpecKit...[/blue]")
 
+    # SpecKit oficial: reaplica o instalador para a IA do projeto. O --force do
+    # specify repõe templates/scripts/comandos e preserva .specify/memory e specs/.
+    results.extend(project.run_speckit_init(cfg))
+
     # Opção 3: Detectar drift antes de aplicar force
     if force:
         # Primeiro, detectar drift sem force

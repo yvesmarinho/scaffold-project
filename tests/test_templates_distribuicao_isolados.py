@@ -48,8 +48,6 @@ _VOLATEIS = ("logs/", ".git/")
 # Arquivos do projeto gerado cujas fontes eram configs do repositório.
 _MIGRADOS = [
     ".claude/commands/session-start..md",
-    ".claude/commands/speckit.plan..md",
-    ".claude/skills/speckit-plan/SKILL.md",
     ".github/copilot-instructions.md",
     ".copilot-rules.md",
     ".github/ISSUE_TEMPLATE/bug_report.md",

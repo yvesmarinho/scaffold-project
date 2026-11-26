@@ -9,7 +9,7 @@ Cobertura (subprocess mockado — sem rede):
   - claude  → 1 chamada `specify init --here --force --integration claude`
   - copilot → 1 chamada com integração copilot
   - both    → 2 chamadas (claude + copilot), na ordem
-  - none    → nenhuma chamada, lista vazia
+  - none    → integração generic (comandos em .specify/commands/)
   - returncode != 0 → CreatedItem com status "error"
   - specify ausente (FileNotFoundError) → CreatedItem com status "error"
   - binário do agente ausente (ex.: `claude` fora do PATH) → `--ignore-agent-tools`
@@ -48,8 +48,10 @@ def _ok_proc() -> MagicMock:
 @pytest.mark.parametrize("assistant", ["claude", "copilot"])
 def test_single_integration_calls_specify_once(make_project_config, assistant) -> None:
     cfg = _make_cfg(make_project_config, assistant)
-    with patch.object(project.subprocess, "run", return_value=_ok_proc()) as mock_run, \
-            patch.object(project.shutil, "which", return_value="/usr/bin/agent"):
+    with (
+        patch.object(project.subprocess, "run", return_value=_ok_proc()) as mock_run,
+        patch.object(project.shutil, "which", return_value="/usr/bin/agent"),
+    ):
         results = project.run_speckit_init(cfg)
 
     assert mock_run.call_count == 1
@@ -62,8 +64,10 @@ def test_single_integration_calls_specify_once(make_project_config, assistant) -
 
 def test_both_runs_claude_then_copilot(make_project_config) -> None:
     cfg = _make_cfg(make_project_config, "both")
-    with patch.object(project.subprocess, "run", return_value=_ok_proc()) as mock_run, \
-            patch.object(project.shutil, "which", return_value="/usr/bin/agent"):
+    with (
+        patch.object(project.subprocess, "run", return_value=_ok_proc()) as mock_run,
+        patch.object(project.shutil, "which", return_value="/usr/bin/agent"),
+    ):
         results = project.run_speckit_init(cfg)
 
     assert mock_run.call_count == 2
@@ -72,13 +76,18 @@ def test_both_runs_claude_then_copilot(make_project_config) -> None:
     assert [r.status for r in results] == ["created", "created"]
 
 
-def test_none_skips_specify(make_project_config) -> None:
+def test_none_usa_integracao_generic(make_project_config) -> None:
+    """Desde 26/11/2026: none instala o SpecKit pela integração generic."""
     cfg = _make_cfg(make_project_config, "none")
-    with patch.object(project.subprocess, "run") as mock_run:
+    with patch.object(project.subprocess, "run", return_value=_ok_proc()) as mock_run:
         results = project.run_speckit_init(cfg)
 
-    mock_run.assert_not_called()
-    assert results == []
+    mock_run.assert_called_once()
+    assert mock_run.call_args[0][0][-2:] == [
+        "generic",
+        "--integration-options=--commands-dir .specify/commands/",
+    ]
+    assert [r.status for r in results] == ["created"]
 
 
 def test_nonzero_returncode_reports_error(make_project_config) -> None:
@@ -97,7 +106,9 @@ def test_nonzero_returncode_reports_error(make_project_config) -> None:
 
 def test_specify_missing_reports_error(make_project_config) -> None:
     cfg = _make_cfg(make_project_config, "claude")
-    with patch.object(project.subprocess, "run", side_effect=FileNotFoundError("specify")):
+    with patch.object(
+        project.subprocess, "run", side_effect=FileNotFoundError("specify")
+    ):
         results = project.run_speckit_init(cfg)
 
     assert len(results) == 1
@@ -124,25 +135,37 @@ def test_claude_ausente_usa_ignore_agent_tools_e_avisa(
     make_project_config, caplog: pytest.LogCaptureFixture
 ) -> None:
     cfg = _make_cfg(make_project_config, "claude")
-    with patch.object(project.subprocess, "run", return_value=_ok_proc()) as mock_run, \
-            patch.object(project.shutil, "which", return_value=None), \
-            caplog.at_level("WARNING"):
+    with (
+        patch.object(project.subprocess, "run", return_value=_ok_proc()) as mock_run,
+        patch.object(project.shutil, "which", return_value=None),
+        caplog.at_level("WARNING"),
+    ):
         results = project.run_speckit_init(cfg)
 
     cmd = mock_run.call_args[0][0]
     assert cmd == [
-        "specify", "init", "--here", "--force", "--integration", "claude",
+        "specify",
+        "init",
+        "--here",
+        "--force",
+        "--integration",
+        "claude",
         "--ignore-agent-tools",
     ]
     assert results[0].status == "created"
-    assert any("claude" in r.message and "--ignore-agent-tools" in r.message
-               for r in caplog.records if r.levelname == "WARNING")
+    assert any(
+        "claude" in r.message and "--ignore-agent-tools" in r.message
+        for r in caplog.records
+        if r.levelname == "WARNING"
+    )
 
 
 def test_claude_presente_nao_usa_ignore_agent_tools(make_project_config) -> None:
     cfg = _make_cfg(make_project_config, "claude")
-    with patch.object(project.subprocess, "run", return_value=_ok_proc()) as mock_run, \
-            patch.object(project.shutil, "which", return_value="/usr/bin/claude"):
+    with (
+        patch.object(project.subprocess, "run", return_value=_ok_proc()) as mock_run,
+        patch.object(project.shutil, "which", return_value="/usr/bin/claude"),
+    ):
         project.run_speckit_init(cfg)
 
     assert "--ignore-agent-tools" not in mock_run.call_args[0][0]
@@ -150,8 +173,10 @@ def test_claude_presente_nao_usa_ignore_agent_tools(make_project_config) -> None
 
 def test_copilot_nunca_usa_ignore_agent_tools(make_project_config) -> None:
     cfg = _make_cfg(make_project_config, "copilot")
-    with patch.object(project.subprocess, "run", return_value=_ok_proc()) as mock_run, \
-            patch.object(project.shutil, "which", return_value=None):
+    with (
+        patch.object(project.subprocess, "run", return_value=_ok_proc()) as mock_run,
+        patch.object(project.shutil, "which", return_value=None),
+    ):
         project.run_speckit_init(cfg)
 
     assert "--ignore-agent-tools" not in mock_run.call_args[0][0]
@@ -159,8 +184,10 @@ def test_copilot_nunca_usa_ignore_agent_tools(make_project_config) -> None:
 
 def test_both_sem_claude_so_marca_a_integracao_claude(make_project_config) -> None:
     cfg = _make_cfg(make_project_config, "both")
-    with patch.object(project.subprocess, "run", return_value=_ok_proc()) as mock_run, \
-            patch.object(project.shutil, "which", return_value=None):
+    with (
+        patch.object(project.subprocess, "run", return_value=_ok_proc()) as mock_run,
+        patch.object(project.shutil, "which", return_value=None),
+    ):
         project.run_speckit_init(cfg)
 
     cmds = [call.args[0] for call in mock_run.call_args_list]
