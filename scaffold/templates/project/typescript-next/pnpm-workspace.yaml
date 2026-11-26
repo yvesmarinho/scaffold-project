@@ -1,0 +1,5 @@
+# Overrides de segurança (pnpm >= 10 lê daqui; o campo "pnpm" do package.json é ignorado)
+overrides:
+  cross-spawn: ">=7.0.5"
+  nth-check: ">=2.0.1"
+  micromatch: ">=4.0.8"

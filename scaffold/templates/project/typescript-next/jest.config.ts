@@ -6,7 +6,7 @@ const createJestConfig = nextJest({ dir: "./" })
 const config: Config = {
     coverageProvider: "v8",
     testEnvironment: "jsdom",
-    setupFilesAfterEach: ["<rootDir>/tests/setup.ts"],
+    setupFilesAfterEnv: ["<rootDir>/tests/setup.ts"],
     collectCoverageFrom: [
         "app/**/*.{ts,tsx}",
         "components/**/*.{ts,tsx}",
@@ -14,7 +14,7 @@ const config: Config = {
         "!**/*.d.ts",
         "!**/node_modules/**",
     ],
-    coverageThresholds: {
+    coverageThreshold: {
         global: { branches: 80, functions: 80, lines: 80, statements: 80 },
     },
     moduleNameMapper: {

@@ -64,7 +64,8 @@ Você está no modo **Next.js TypeScript**. O trabalho envolve construir aplica�
 ├── next.config.ts
 ├── tsconfig.json               # strict mode
 ├── package.json
-├── .eslintrc.json
+├── eslint.config.mjs           # ESLint 9 flat config (pnpm lint = eslint . + tsc)
+├── pnpm-workspace.yaml         # overrides de segurança do pnpm
 ├── prettier.config.ts
 ├── jest.config.ts
 ├── Dockerfile
@@ -147,7 +148,7 @@ const createJestConfig = nextJest({ dir: "./" })
 const config: Config = {
   coverageProvider: "v8",
   testEnvironment: "jsdom",
-  setupFilesAfterEach: ["<rootDir>/tests/setup.ts"],
+  setupFilesAfterEnv: ["<rootDir>/tests/setup.ts"],
   collectCoverageFrom: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "lib/**/*.ts"],
 }
 
@@ -157,7 +158,10 @@ export default createJestConfig(config)
 ### Smoke test API route
 
 ```ts
-// tests/unit/health.test.ts
+/**
+ * @jest-environment node
+ */
+// tests/unit/health.test.ts — route handlers usam Request/Response: ambiente node, não jsdom
 import { GET } from "@/app/api/health/route"
 
 describe("GET /api/health", () => {
@@ -229,11 +233,11 @@ make dev                   # pnpm dev
     "@types/react": "^19.0.0",
     "@types/node": "^22.0.0",
     "eslint": "^9.0.0",
-    "eslint-config-next": "^15.0.0",
+    "eslint-config-next": "^16.4.6",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "prettier": "^3.3.0",
-    "jest": "^29.0.0",
-    "jest-environment-jsdom": "^29.0.0",
+    "jest": "^30.3.0",
+    "jest-environment-jsdom": "^30.5.2",
     "@testing-library/react": "^16.0.0",
     "@testing-library/jest-dom": "^6.4.0"
   }
