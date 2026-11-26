@@ -242,3 +242,47 @@ def test_no_false_positives_common_words():
     # (these are descriptive text, not actual secrets)
     # Our patterns require '=' or ':' for assignment
     assert len(findings) == 0
+
+
+# --- get_security_report não pode vazar valores (BUG-sanitize-report-vaza-secrets) ---
+# Fixtures montados por concatenação para não disparar hooks de detecção de secrets.
+
+_SENHA_CURTA = "s3nh4" + "Curta"
+_TOKEN_LONGO = "tok" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456"
+_EMAIL = "fulano" + "@example.com"
+_IP = "10.20" + ".30.40"
+
+
+def test_security_report_nao_exibe_senha_curta_inteira():
+    """Senha com menos de 20 chars era exibida inteira no relatório."""
+    report = get_security_report(f'password = "{_SENHA_CURTA}"')
+    assert _SENHA_CURTA not in report
+
+
+def test_security_report_nao_exibe_prefixo_de_token_longo():
+    """Os 20 primeiros chars de um token longo eram exibidos."""
+    report = get_security_report(f"token = {_TOKEN_LONGO}")
+    for i in range(0, len(_TOKEN_LONGO) - 6):
+        assert _TOKEN_LONGO[i : i + 6] not in report
+
+
+def test_security_report_nao_exibe_email_nem_ip():
+    """PII (email, IP) também não pode aparecer no relatório."""
+    report = get_security_report(f"contato {_EMAIL} host {_IP}")
+    assert _EMAIL not in report
+    assert "fulano" not in report
+    assert _IP not in report
+
+
+def test_security_report_mantem_tipo_e_contagem():
+    """Sem valores, o relatório continua informando tipo e quantidade."""
+    report = get_security_report(
+        f'password = "{_SENHA_CURTA}"\npassword = "{_SENHA_CURTA}x"\n{_EMAIL}'
+    )
+    assert "password: 2 found" in report
+    assert "email: 1 found" in report
+
+
+def test_security_report_texto_limpo():
+    """Texto sem secrets mantém a mensagem de OK."""
+    assert get_security_report("texto comum sem nada sensível").startswith("✅")
