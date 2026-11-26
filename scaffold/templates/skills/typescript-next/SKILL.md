@@ -246,5 +246,5 @@ make dev                   # pnpm dev
 
 - [Perfil base](../devops-programming/SKILL.md) — regras genéricas de programação
 - [Segurança](../devops-security/SKILL.md) — controles transversais
-- [Profile Descriptor](../../profile-descriptors/typescript-next.yaml)
+- Profile Descriptor: `scaffold/profiles/typescript-next.yaml` (no scaffold-project)
 - Next.js docs: https://nextjs.org/docs

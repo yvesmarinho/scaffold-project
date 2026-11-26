@@ -1,3 +1,6 @@
+<!-- Criado em: 27/01/2026 15:13 -->
+<!-- Modificado em: 26/11/2026 13:24 -->
+
 # 🚀 Enterprise Scaffold Project Template
 
 A production-ready, scalable project template designed to accelerate development of enterprise applications across multiple programming languages, incorporating industry best practices, design patterns, and modern development tools.
@@ -713,7 +716,7 @@ yamllint --version
 ```bash
 # Validate specific directories
 yamllint .github/workflows/
-yamllint profile-descriptors/
+yamllint scaffold/profiles/
 
 # Validate with custom config
 yamllint -c .yamllint.yml .
@@ -800,7 +803,7 @@ Add these targets to your `Makefile`:
 ## Validate YAML files
 lint-yaml:
 	@echo "🔍 Validating YAML configuratio files..."
-	@yamllint .github/workflows/ profile-descriptors/ .scaffold-state.yaml
+	@yamllint .github/workflows/ scaffold/profiles/ .scaffold-state.yaml
 
 ## Validate JSON files
 lint-json:
@@ -956,16 +959,16 @@ npm run test:coverage
 - [GitHub Best Practices Integration](docs/guides/GITHUB_BEST_PRACTICES_INTEGRATION.md) - Como as práticas foram integradas no template
 
 **Templates P1** (copiados automaticamente):
-- [CONTRIBUTING.md](.github/templates/common/CONTRIBUTING.md) - Guia de contribuição
-- [PULL_REQUEST_TEMPLATE.md](.github/templates/common/PULL_REQUEST_TEMPLATE.md) - Template de PR
-- [CODEOWNERS](.github/templates/common/CODEOWNERS) - Definição de responsáveis
+- [CONTRIBUTING.md](scaffold/templates/base-configs/common/CONTRIBUTING.md) - Guia de contribuição
+- [PULL_REQUEST_TEMPLATE.md](scaffold/templates/base-configs/common/PULL_REQUEST_TEMPLATE.md) - Template de PR
+- [CODEOWNERS](scaffold/templates/base-configs/common/CODEOWNERS) - Definição de responsáveis
 
 **Templates P2** (copiados automaticamente):
-- Issue Templates: [bug_report](.github/templates/common/ISSUE_TEMPLATE/bug_report.yml), [feature_request](.github/templates/common/ISSUE_TEMPLATE/feature_request.yml), [documentation](.github/templates/common/ISSUE_TEMPLATE/documentation.yml), [question](.github/templates/common/ISSUE_TEMPLATE/question.yml)
-- [GitHub Actions Workflow](.github/templates/common/workflows/git-validation.yml) - Validação automática de branches/commits/PRs
+- Issue Templates: [bug_report](scaffold/templates/base-configs/common/ISSUE_TEMPLATE/bug_report.yml), [feature_request](scaffold/templates/base-configs/common/ISSUE_TEMPLATE/feature_request.yml), [documentation](scaffold/templates/base-configs/common/ISSUE_TEMPLATE/documentation.yml), [question](scaffold/templates/base-configs/common/ISSUE_TEMPLATE/question.yml)
+- [GitHub Actions Workflow](scaffold/templates/base-configs/common/workflows/git-validation.yml) - Validação automática de branches/commits/PRs
 - [Pre-commit Hook](scripts/git-hooks/commit-msg) - Validação local de commits
 - [Branch Protection Script](scripts/setup-branch-protection.py) - Automação via GitHub API
-- [Badges Guide](.github/templates/common/BADGES.md) - Guia completo de badges
+- [Badges Guide](scaffold/templates/base-configs/common/BADGES.md) - Guia completo de badges
 
 **Implementação**:
 - `scripts/lib/project.py`: Função `copy_github_templates()` (P1 + P2 integrados)

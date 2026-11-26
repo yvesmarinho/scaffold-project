@@ -1,9 +1,9 @@
 <!-- Criado em: 24/11/2026 11:19 -->
-<!-- Modificado em: 26/11/2026 12:18 -->
+<!-- Modificado em: 26/11/2026 13:24 -->
 
 # ADR-003: Separação dos templates de distribuição dos arquivos do próprio repositório
 
-- **Status**: Aceito (25/11/2026, pelo dono do projeto, sem ajustes)
+- **Status**: Aceito (25/11/2026, pelo dono do projeto, sem ajustes); implementado por completo em 26/11/2026 (fatias 1–7)
 - **Data**: 2026-11-24
 - **Decisores**: mantenedor do scaffold-project
 - **Contexto relacionado**: [INVENTARIO-templates.md](../analysis/INVENTARIO-templates.md); item do backlog em `docs/planning/lembrete.md`
@@ -74,7 +74,7 @@ Por isso:
 | 4. Scripts de uso duplo → `scaffold/templates/runtime/` | ✅ 25/11/2026 (ver abaixo) |
 | 5. Configs do repositório → versões de distribuição | ✅ 26/11/2026 (ver abaixo) |
 | 6. Publish restrito + upgrade reaplica agents/templates GitHub | ✅ 26/11/2026 (ver abaixo) |
-| 7 | pendente |
+| 7. Remoção dos symlinks de compatibilidade | ✅ 26/11/2026 (ver abaixo) |
 
 Fatia 2:
 - **Constante**: removida a primeira definição de `_SECURITY_MD_WITHOUT_GITHUB`. Era idêntica à segunda, que é a que vale em runtime.
@@ -155,6 +155,18 @@ Fatia 6:
 - **Bug corrigido**: no upgrade com `--force`, a cópia estática do `copilot-instructions.md` (as instruções do próprio scaffold) sobrescrevia o arquivo gerado para o projeto. A cópia e o template `copilot/copilot-instructions.md` foram removidos. Ver `docs/bugs/BUG-upgrade-force-sobrescreve-copilot-instructions.md`.
 - **Testes novos**: `tests/test_publish_conteudo.py` e `tests/test_upgrade_reaplica_agents_github.py`. Os testes do IMP-30 que exigiam Makefile e prompts no tarball foram trocados por "inclui `uv.lock`" e "não inclui Makefile nem `.github/`".
 - **Verificação**: os projetos gerados não mudaram (os 3 de referência ficaram idênticos à versão anterior). 2052 passed.
+
+Fatia 7:
+- **Removidos** os 11 symlinks de compatibilidade: `.github/templates/{common,<10 perfis>}` e `profile-descriptors`. O código de produção já lia `scaffold/profiles` e `scaffold/templates/project`; só testes, CI e docs usavam os caminhos antigos.
+- **Migrados para os caminhos reais**:
+  - 17 arquivos de teste e `tests/helpers/fake_project.py`: `scaffold/profiles`, `scaffold/templates/project/<perfil>` e `scaffold/templates/base-configs/common`;
+  - `ci-template.yml` (validação dos descritores e checagem de SBOM), `Makefile` (`lint-yaml`) e `dependabot.yml` (npm do `typescript-next`);
+  - docstrings de `composer.py`, `ui.py` e `list_profiles.py`; `README.md`, `QUICKSTART.md`, `PROFILE-DESCRIPTOR-SCHEMA.md`;
+  - chaves `paths.*` de `.scaffold-config*.json`, que nenhum código lê, mas documentam o layout.
+- **SKILL.md** de `python-fastapi`, `python-flask` e `typescript-next`: o link `../../profile-descriptors/<perfil>.yaml` estava quebrado tanto no repo quanto no projeto gerado (`.github/skills/<perfil>/`). Virou a referência em texto `scaffold/profiles/<perfil>.yaml`. É a única mudança na saída, e só nesses três perfis da camada 2.
+- **Mantido**: a entrada `^\.github/templates/` da allowlist do `.gitleaks.toml`, porque a varredura do histórico (`make secrets-scan`) ainda passa por commits em que os templates moravam lá.
+- **Teste novo** (`tests/test_sem_symlinks_compat.py`): os caminhos antigos não existem e nenhum arquivo ativo os cita. Documentos históricos (CHANGELOG, TODO, bugs, debates, ADRs) ficam fora da checagem.
+- **Verificação**: os 3 projetos de referência ficaram idênticos à saída da fatia 6. 2055 passed.
 
 ## Pontos para decisão do usuário (resolvidos em 25/11/2026)
 - Aprovar a estrutura-alvo, em especial `runtime/` e o uso de wrappers no lugar de duplicação.

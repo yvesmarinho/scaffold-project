@@ -26,7 +26,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 from lib import project  # noqa: E402
 
 _PROJECT_ROOT = Path(__file__).parent.parent
-_TEMPLATES_DIR = _PROJECT_ROOT / ".github" / "templates" / "common"
+_TEMPLATES_DIR = _PROJECT_ROOT / "scaffold" / "templates" / "base-configs" / "common"
 
 
 # ---------------------------------------------------------------------------

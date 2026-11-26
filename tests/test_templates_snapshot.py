@@ -173,19 +173,19 @@ def test_copilot_rules_snapshot_with_extra_profiles(
 # IMP-39: Snapshots de arquivos representativos por perfil
 # ---------------------------------------------------------------------------
 
-_TEMPLATES_BASE = Path(__file__).parent.parent / ".github" / "templates"
+_TEMPLATES_BASE = Path(__file__).parent.parent / "scaffold" / "templates" / "project"
 
 # (profile_name, rel_path_dentro_do_template) — 1 arquivo por perfil Layer 2/3
 _PROFILE_FILE_SNAPSHOTS: list[tuple[str, str]] = [
-    ("python-fastapi",        "src/main.py"),
-    ("python-flask",          "src/app.py"),
-    ("typescript-next",       "app/layout.tsx"),
-    ("k8s-helm",              "helm/Chart.yaml"),
-    ("terraform-aws",         "terraform/main.tf"),
-    ("lgpd-baseline",         "docs/lgpd/DATA-MAPPING.md"),
-    ("soc2-baseline",         "docs/soc2/SECURITY-POLICY.md"),
+    ("python-fastapi", "src/main.py"),
+    ("python-flask", "src/app.py"),
+    ("typescript-next", "app/layout.tsx"),
+    ("k8s-helm", "helm/Chart.yaml"),
+    ("terraform-aws", "terraform/main.tf"),
+    ("lgpd-baseline", "docs/lgpd/DATA-MAPPING.md"),
+    ("soc2-baseline", "docs/soc2/SECURITY-POLICY.md"),
     ("data-pipeline-airflow", "airflow/dags/example_pipeline.py"),
-    ("data-warehouse-dbt",    "dbt/dbt_project.yml"),
+    ("data-warehouse-dbt", "dbt/dbt_project.yml"),
 ]
 
 

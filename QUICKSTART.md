@@ -1,3 +1,6 @@
+<!-- Criado em: 14/03/2026 11:40 -->
+<!-- Modificado em: 26/11/2026 13:24 -->
+
 # QUICKSTART — Enterprise Scaffold Project Template
 
 > **3 minutos para o seu primeiro projeto.**
@@ -126,7 +129,7 @@ Saída esperada (12 perfis):
 │ soc2-baseline            │ 4              │ 1.0.0  │ 2026-03-07       │ Layer 4 c
 └──────────────────────────┴────────────────┴────────┴──────────────────┴──────────
 
-  12 perfil(s) em profile-descriptors/
+  12 perfil(s) em scaffold/profiles/
 ```
 
 Para output em JSON (útil em pipelines CI):
@@ -349,5 +352,5 @@ python /caminho/para/scaffold-project/scripts/scaffold.py --upgrade --force
 | [docs/TEMPLATE_USAGE.md](docs/TEMPLATE_USAGE.md) | Guia completo de uso do template |
 | [docs/TEMPLATE-VERSIONS.md](docs/TEMPLATE-VERSIONS.md) | Versionamento e status de cada perfil |
 | [docs/COMPATIBILITY-MATRIX.md](docs/COMPATIBILITY-MATRIX.md) | Matriz de compatibilidade entre perfis |
-| [profile-descriptors/](profile-descriptors/) | Descritores YAML de cada perfil |
+| [scaffold/profiles/](scaffold/profiles/) | Descritores YAML de cada perfil |
 | [docs/copilot/](docs/copilot/) | Estratégia e decisões de domain profiles |

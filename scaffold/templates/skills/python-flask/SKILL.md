@@ -257,5 +257,5 @@ dev = [
 
 - [Perfil base](../devops-programming/SKILL.md) — regras genéricas de programação
 - [Segurança](../devops-security/SKILL.md) — controles transversais
-- [Profile Descriptor](../../profile-descriptors/python-flask.yaml)
+- Profile Descriptor: `scaffold/profiles/python-flask.yaml` (no scaffold-project)
 - Flask docs: https://flask.palletsprojects.com

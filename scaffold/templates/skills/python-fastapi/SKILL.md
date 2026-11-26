@@ -249,5 +249,5 @@ dev = [
 
 - [Perfil base](../devops-programming/SKILL.md) — regras genéricas de programação
 - [Segurança](../devops-security/SKILL.md) — controles transversais
-- [Profile Descriptor](../../profile-descriptors/python-fastapi.yaml)
+- Profile Descriptor: `scaffold/profiles/python-fastapi.yaml` (no scaffold-project)
 - FastAPI docs: https://fastapi.tiangolo.com

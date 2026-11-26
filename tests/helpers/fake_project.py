@@ -1,7 +1,7 @@
 """
 tests/helpers/fake_project.py — Utilitários para testes de integração de templates.
 
-Copia um template físico (.github/templates/<perfil>/) para um tmpdir,
+Copia um template físico (scaffold/templates/project/<perfil>/) para um tmpdir,
 expande os placeholders {curly-brace} e devolve um FakeProject com
 helpers de asserção.
 
@@ -27,7 +27,7 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-TEMPLATES_DIR = _REPO_ROOT / ".github" / "templates"
+TEMPLATES_DIR = _REPO_ROOT / "scaffold" / "templates" / "project"
 
 # ---------------------------------------------------------------------------
 # Valores fixos usados na expansão (não importa serem "reais")
@@ -241,7 +241,7 @@ def expand_template(
     vars: dict[str, str] | None = None,
 ) -> FakeProject:
     """
-    Copia `.github/templates/<profile>/` para `dest/`, expandindo placeholders.
+    Copia `scaffold/templates/project/<profile>/` para `dest/`, expandindo placeholders.
 
     Args:
         profile: Nome do perfil (ex: "python-fastapi", "typescript-next").

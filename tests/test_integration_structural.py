@@ -10,7 +10,7 @@ Cobertura: 9 templates × asserções específicas por layer
   - Layer 4  : lgpd-baseline, soc2-baseline
 
 Para cada template são verificados:
-  1. Template existe em .github/templates/
+  1. Template existe em scaffold/templates/project/
   2. Arquivos obrigatórios presentes
   3. Nenhum placeholder {curly-brace} não substituído no conteúdo de texto
   4. Makefile/equivalente contém os targets principais do descriptor

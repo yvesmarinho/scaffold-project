@@ -2,10 +2,10 @@
 lib/composer.py — Motor de Composição de Perfis.
 
 Responsabilidades:
-  1. Carregar descritores YAML de profile-descriptors/
+  1. Carregar descritores YAML de scaffold/profiles/
   2. Verificar conflitos via campo `excludes_with`
   3. Ordenar perfis por camada (core → layer2 → layer3 → transversal)
-  4. Aplicar perfis copiando arquivos de .github/templates/{perfil}/
+  4. Aplicar perfis copiando arquivos de scaffold/templates/project/{perfil}/
   5. Fazer rollback (apagar arquivos criados) em caso de erro parcial
 
 Uso:

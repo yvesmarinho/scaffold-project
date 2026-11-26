@@ -33,6 +33,7 @@ import pytest
 
 try:
     import yaml
+
     _HAS_YAML = True
 except ImportError:
     _HAS_YAML = False
@@ -44,6 +45,7 @@ _WORKFLOW_PATH = _PROJECT_ROOT / ".github" / "workflows" / "ci-template.yml"
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _load_workflow() -> dict:
     """Carrega o workflow YAML — pula o teste se pyyaml não estiver instalado."""
@@ -198,7 +200,7 @@ class TestJobLint:
 
     def test_lint_validates_profile_descriptors_yaml(self) -> None:
         text = _workflow_text()
-        assert "profile-descriptors" in text and "yaml" in text.lower()
+        assert "scaffold/profiles" in text and "yaml" in text.lower()
 
     def test_lint_runs_ruff_on_whole_repo(self) -> None:
         text = _workflow_text()
