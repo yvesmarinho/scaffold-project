@@ -148,6 +148,9 @@ def validate_safe(
 def get_security_report(text: str) -> str:
     """Generate a human-readable security report for text.
 
+    The report lists only pattern types and counts — never the detected
+    values (nor prefixes of them), since it is written to logs.
+
     Args:
         text: Input text to analyze
 
@@ -161,19 +164,12 @@ def get_security_report(text: str) -> str:
 
     report = ["⚠️  Security Scan Results:", ""]
 
-    # Group by pattern type
-    by_type: dict[str, list[str]] = {}
-    for pattern_name, value in findings:
-        if pattern_name not in by_type:
-            by_type[pattern_name] = []
-        by_type[pattern_name].append(value)
+    # Count by pattern type (values are deliberately discarded)
+    counts: dict[str, int] = {}
+    for pattern_name, _value in findings:
+        counts[pattern_name] = counts.get(pattern_name, 0) + 1
 
-    for pattern_name, values in sorted(by_type.items()):
-        report.append(f"  {pattern_name}: {len(values)} found")
-        for value in values[:3]:  # Show max 3 examples
-            preview = value[:20] + "..." if len(value) > 20 else value
-            report.append(f"    - {preview}")
-        if len(values) > 3:
-            report.append(f"    ... and {len(values) - 3} more")
+    for pattern_name, count in sorted(counts.items()):
+        report.append(f"  {pattern_name}: {count} found")
 
     return "\n".join(report)
