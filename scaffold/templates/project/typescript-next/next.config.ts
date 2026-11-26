@@ -12,6 +12,9 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+    // Lint roda pelo ESLint CLI (pnpm lint); o lint interno do next build
+    // usa opções removidas no ESLint 10.
+    eslint: { ignoreDuringBuilds: true },
     async headers() {
         return [
             {

@@ -6,8 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint && tsc --noEmit",
-    "lint:fix": "next lint --fix",
+    "lint": "eslint . && tsc --noEmit",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "jest --passWithNoTests",
@@ -26,13 +26,13 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@types/node": "^22.0.0",
-    "eslint": "^10.1.0",
-    "eslint-config-next": "^15.0.0",
+    "eslint": "^9.39.0",
+    "eslint-config-next": "^16.4.6",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "prettier": "^3.3.0",
     "jest": "^30.3.0",
-    "jest-environment-jsdom": "^29.0.0",
+    "jest-environment-jsdom": "^30.5.2",
     "@testing-library/react": "^16.0.0",
     "@testing-library/jest-dom": "^6.4.0",
     "@types/jest": "^30.0.0"
@@ -41,12 +41,5 @@
     "cross-spawn": ">=7.0.5",
     "nth-check": ">=2.0.1",
     "micromatch": ">=4.0.8"
-  },
-  "pnpm": {
-    "overrides": {
-      "cross-spawn": ">=7.0.5",
-      "nth-check": ">=2.0.1",
-      "micromatch": ">=4.0.8"
-    }
   }
 }
