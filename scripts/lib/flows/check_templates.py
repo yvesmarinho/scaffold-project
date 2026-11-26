@@ -16,6 +16,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from ..project import SPECKIT_UPSTREAM_TEMPLATES
 from ..template_version import (
     detect_drift,
     generate_drift_json,
@@ -48,10 +49,8 @@ def flow_check_templates(args: argparse.Namespace) -> int:
     else:
         target_dir = Path.cwd().resolve()
 
-    # Diretório upstream (scaffold-project)
-    # scaffold.py está em scaffold-project/scripts/
-    scaffold_root = Path(__file__).parent.parent.parent.parent
-    upstream_dir = scaffold_root / ".specify" / "templates"
+    # Diretório upstream: versão de distribuição em scaffold/templates/ (ADR-003 fatia 5)
+    upstream_dir = SPECKIT_UPSTREAM_TEMPLATES
 
     # Diretório local (projeto)
     local_dir = target_dir / ".specify" / "templates"

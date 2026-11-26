@@ -26,13 +26,14 @@ repos:
         name: Detect Private Keys
         exclude: ^\.secrets/
       # scaffold/templates/base: bytes dos .tmpl são contrato (saída idêntica
-      # à das antigas strings de project.py — ADR-003 fatia 3)
+      # à das antigas strings de project.py — ADR-003 fatia 3); o mesmo vale
+      # para claude/ e speckit/templates/, cópias fiéis das configs do repo (fatia 5)
       - id: trailing-whitespace
         name: Trim Trailing Whitespace
-        exclude: ^(docs/SESSIONS/|scaffold/templates/base/)
+        exclude: ^(docs/SESSIONS/|scaffold/templates/(base|claude|speckit/templates)/)
       - id: end-of-file-fixer
         name: Fix End of Files
-        exclude: ^(docs/SESSIONS/|scaffold/templates/base/)
+        exclude: ^(docs/SESSIONS/|scaffold/templates/(base|claude|speckit/templates)/)
 
   # black, ruff e bandit: hooks locais via `uv run` — a versão vem do uv.lock
   # (a mesma do CI) e o Dependabot atualiza um lugar só. Formato verificado por

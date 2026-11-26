@@ -9,6 +9,7 @@ import logging
 from pathlib import Path
 
 from .. import template_diff, template_version
+from ..project import SPECKIT_UPSTREAM_TEMPLATES
 from ..ui import console
 
 log = logging.getLogger(__name__)
@@ -63,8 +64,8 @@ def flow_diff_template(args: argparse.Namespace) -> int:
         local_path = target_dir / template_name
         upstream_path = scaffold_root / template_name
     else:
-        # Just a template name - assume .specify/templates/
-        upstream_dir = scaffold_root / ".specify" / "templates"
+        # Só o nome: upstream é a versão de distribuição (ADR-003 fatia 5)
+        upstream_dir = SPECKIT_UPSTREAM_TEMPLATES
         local_dir = target_dir / ".specify" / "templates"
 
         if not upstream_dir.exists():

@@ -378,6 +378,13 @@ def _prepare_content(template: str, file_rel: str, config: ProjectConfig) -> str
 _SPECKIT_TEMPLATES = _TEMPLATE_ROOT / "scaffold" / "templates" / "speckit"
 _SKILLS_TEMPLATES = _TEMPLATE_ROOT / "scaffold" / "templates" / "skills"
 
+# Versões de distribuição das configs do repositório (ADR-003 fatia 5): o
+# gerador não lê mais .claude/, .github/copilot-instructions.md,
+# .copilot-rules.md nem .specify/templates/ do próprio repositório.
+_CLAUDE_TEMPLATES = _TEMPLATE_ROOT / "scaffold" / "templates" / "claude"
+_COPILOT_TEMPLATES = _TEMPLATE_ROOT / "scaffold" / "templates" / "copilot"
+SPECKIT_UPSTREAM_TEMPLATES = _SPECKIT_TEMPLATES / "templates"
+
 # Scripts de uso duplo (ADR-003 fatia 4): fonte única em runtime/scripts/,
 # copiados para scripts/ do projeto gerado; o repositório usa symlinks
 # relativos em scripts/ apontando para cá.
@@ -1039,16 +1046,16 @@ def copy_copilot_instructions(
     """
     results: list[CreatedItem] = []
     base = config.project_path
-    src_root = _TEMPLATE_ROOT
+    src_root = _COPILOT_TEMPLATES
 
     # Copiar copilot-instructions.md para .github/
-    src_instructions = src_root / ".github" / "copilot-instructions.md"
+    src_instructions = src_root / "copilot-instructions.md"
     dst_instructions = base / ".github" / "copilot-instructions.md"
     result = _copy_file(src_instructions, dst_instructions, force=force)
     results.append(result)
 
-    # Copiar .copilot-rules.md para raiz do projeto
-    src_rules = src_root / ".copilot-rules.md"
+    # Copiar copilot-rules.md para .copilot-rules.md na raiz do projeto
+    src_rules = src_root / "copilot-rules.md"
     dst_rules = base / ".copilot-rules.md"
     result = _copy_file(src_rules, dst_rules, force=force)
     results.append(result)
@@ -1076,10 +1083,10 @@ def copy_claude_config(config: ProjectConfig, force: bool = False) -> list[Creat
     """
     results: list[CreatedItem] = []
     base = config.project_path
-    src_claude = _TEMPLATE_ROOT / ".claude"
+    src_claude = _CLAUDE_TEMPLATES
 
     if not src_claude.is_dir():
-        log.warning("⚠️  Diretório .claude/ não encontrado em %s", _TEMPLATE_ROOT)
+        log.warning("⚠️  Templates do Claude não encontrados em %s", src_claude)
         return results
 
     # 1. commands/ — copiar todos os .md (slash commands)
@@ -1090,7 +1097,7 @@ def copy_claude_config(config: ProjectConfig, force: bool = False) -> list[Creat
             result = _copy_file(src_file, dst_file, force=force)
             results.append(result)
     else:
-        log.warning("⚠️  .claude/commands/ não encontrado em %s", _TEMPLATE_ROOT)
+        log.warning("⚠️  commands/ não encontrado em %s", src_claude)
 
     # 2. skills/ — copiar cada subdiretório (skill_name/SKILL.md e arquivos extras)
     src_skills = src_claude / "skills"
@@ -1104,7 +1111,7 @@ def copy_claude_config(config: ProjectConfig, force: bool = False) -> list[Creat
                         result = _copy_file(src_file, dst_file, force=force)
                         results.append(result)
     else:
-        log.warning("⚠️  .claude/skills/ não encontrado em %s", _TEMPLATE_ROOT)
+        log.warning("⚠️  skills/ não encontrado em %s", src_claude)
 
     return results
 
@@ -1181,14 +1188,14 @@ def copy_github_templates(
     results.append(result)
 
     # 4. BRANCH_PROTECTION_SETUP.md → docs/
-    src_guide = _TEMPLATE_ROOT / "docs" / "guides" / "BRANCH_PROTECTION_SETUP.md"
+    src_guide = src_root / "BRANCH_PROTECTION_SETUP.md"
     dst_guide = base / "docs" / "BRANCH_PROTECTION_SETUP.md"
     result = _copy_file_with_vars(src_guide, dst_guide, template_vars, force=force)
     results.append(result)
 
     # === P2 Templates ===
 
-    # 5. Issue templates → .github/ISSUE_TEMPLATE/ (.yml da base-configs + .md do template root)
+    # 5. Issue templates → .github/ISSUE_TEMPLATE/ (.yml e .md da base-configs)
     issue_templates_yml = [
         "bug_report.yml",
         "feature_request.yml",
@@ -1201,7 +1208,7 @@ def copy_github_templates(
         dst_issue = base / ".github" / "ISSUE_TEMPLATE" / template_name
         result = _copy_file_with_vars(src_issue, dst_issue, template_vars, force=force)
         results.append(result)
-    src_issue_md = _TEMPLATE_ROOT / ".github" / "ISSUE_TEMPLATE"
+    src_issue_md = src_root / "ISSUE_TEMPLATE"
     if src_issue_md.is_dir():
         for src_file in sorted(src_issue_md.glob("*.md")):
             dst_file = base / ".github" / "ISSUE_TEMPLATE" / src_file.name
@@ -1438,7 +1445,7 @@ def generate_constitution(config: ProjectConfig) -> CreatedItem:
     padrão e adiciona metadados do projeto no cabeçalho.
     Se o arquivo já existir no destino, salta (idempotente).
     """
-    src = _TEMPLATE_ROOT / ".specify" / "templates" / "constitution-template.md"
+    src = SPECKIT_UPSTREAM_TEMPLATES / "constitution-template.md"
     dst = config.project_path / ".specify" / "memory" / "constitution.md"
 
     if dst.exists():
