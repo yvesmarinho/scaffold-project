@@ -23,9 +23,9 @@
 
 ```
 {{PROJECT_NAME}}/
-├── .github/                    # GitHub config (workflows, agents, prompts)
+├── .github/                    # GitHub config (workflows, agents, skills)
 │   ├── agents/                 # SpecKit agents (11 agents)
-│   ├── prompts/                # Prompt templates (9 prompts)
+│   ├── skills/                 # Skills: perfis de domínio e rituais de sessão
 │   ├── ISSUE_TEMPLATE/         # Issue forms (3 templates)
 │   ├── copilot-instructions.md # Instruções projeto-específicas
 │   ├── CODEOWNERS              # Code review assignments
@@ -202,7 +202,7 @@ python scripts/session-manager.py --json start
 ### Agentes & Automação
 
 - [.github/agents/](../.github/agents/) — Agentes customizados (SpecKit)
-- [.github/prompts/](../.github/prompts/) — Prompts de sessão
+- [.github/skills/](../.github/skills/) — Skills (perfis de domínio e rituais de sessão)
 
 ### Segurança
 
@@ -251,9 +251,9 @@ chmod +x .git/hooks/pre-commit
 | `@speckit.taskstoissues` | Converter tasks em GitHub issues |
 | `@template-architect` | Análise e evolução do template |
 
-### Prompts de Sessão
+### Rituais de Sessão
 
-| Prompt | Quando usar |
+| Comando | Quando usar |
 |--------|-------------|
 | `/session-start-first` | Primeira sessão do projeto |
 | `/session-start` | Iniciar nova sessão |
@@ -296,7 +296,7 @@ Seu projeto foi criado com sucesso usando o **Enterprise Scaffold Project Templa
 
 **Características principais:**
 - ✅ Estrutura completa de diretórios
-- ✅ SpecKit configurado (11 agentes + 9 prompts)
+- ✅ SpecKit configurado (via `specify init`)
 - ✅ Segurança avançada (secrets protegidos)
 - ✅ Git inicializado (commit + tag)
 - ✅ VS Code configurado (MCP, tasks, debug)
